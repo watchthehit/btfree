@@ -2,44 +2,79 @@ import SwiftUI
 
 public enum BFDesignSystem {
     public enum Colors {
-        public static let primary = Color.blue
-        public static let secondary = Color.purple
-        public static let accent = Color.orange
-        public static let success = Color.green
-        public static let info = Color.blue
-        public static let warning = Color.yellow
-        public static let error = Color.red
+        // Primary Brand Colors
+        public static let primary = Color(hex: "4A90E2")  // Trustworthy Blue
+        public static let secondary = Color(hex: "9B6B9D")  // Calming Purple
+        public static let accent = Color(hex: "F5A623")  // Motivational Orange
         
-        public static let textPrimary = Color.primary
-        public static let textSecondary = Color.secondary
-        public static let separator = Color.gray.opacity(0.2)
+        // Semantic Colors
+        public static let success = Color(hex: "7ED321")  // Positive Green
+        public static let info = Color(hex: "50E3C2")  // Informative Teal
+        public static let warning = Color(hex: "F5A623")  // Cautionary Orange
+        public static let error = Color(hex: "D0021B")  // Alert Red
         
-        public static let cardBackground = Color.white
-        public static let background = Color.gray.opacity(0.1)
+        // Text Colors
+        public static let textPrimary = Color(hex: "2C3E50")  // Deep Blue-Gray
+        public static let textSecondary = Color(hex: "8492A6")  // Muted Gray
+        public static let textTertiary = Color(hex: "C0CCDA")  // Light Gray
         
+        // Background Colors
+        public static let cardBackground = Color(hex: "FFFFFF")  // Pure White
+        public static let background = Color(hex: "F8FAFC")  // Off-White
+        public static let separator = Color(hex: "E5E9F2").opacity(0.6)  // Light Border
+        
+        // Gradients
         public static let calmingGradient = LinearGradient(
-            colors: [primary, accent],
+            colors: [
+                Color(hex: "4A90E2"),  // Trustworthy Blue
+                Color(hex: "50E3C2")   // Calming Teal
+            ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
         
         public static let warmGradient = LinearGradient(
-            colors: [warning, error],
+            colors: [
+                Color(hex: "F5A623"),  // Warm Orange
+                Color(hex: "F8E71C")   // Energetic Yellow
+            ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
         
         public static let mindfulGradient = LinearGradient(
-            colors: [info, success],
+            colors: [
+                Color(hex: "7ED321"),  // Fresh Green
+                Color(hex: "50E3C2")   // Calming Teal
+            ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
         
         public static let primaryGradient = LinearGradient(
-            colors: [primary, primary.opacity(0.8)],
+            colors: [
+                Color(hex: "4A90E2"),  // Trustworthy Blue
+                Color(hex: "357ABD")   // Deeper Blue
+            ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
+        
+        // Progress Gradients
+        public static let progressGradient = LinearGradient(
+            colors: [
+                Color(hex: "7ED321"),  // Success Green
+                Color(hex: "50E3C2")   // Calming Teal
+            ],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+        
+        // Dark Mode Colors
+        public static let darkBackground = Color(hex: "1A1F36")
+        public static let darkCardBackground = Color(hex: "252D4A")
+        public static let darkTextPrimary = Color(hex: "F8FAFC")
+        public static let darkTextSecondary = Color(hex: "C0CCDA")
     }
     
     public enum Typography {
@@ -111,5 +146,33 @@ public struct ViewShadow {
 public extension View {
     func withShadow(_ shadow: ViewShadow) -> some View {
         self.shadow(radius: shadow.radius, y: shadow.y)
+    }
+}
+
+// Color Hex Extension
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3: // RGB (12-bit)
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: // RGB (24-bit)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: // ARGB (32-bit)
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (1, 1, 1, 0)
+        }
+
+        self.init(
+            .sRGB,
+            red: Double(r) / 255,
+            green: Double(g) / 255,
+            blue:  Double(b) / 255,
+            opacity: Double(a) / 255
+        )
     }
 } 
