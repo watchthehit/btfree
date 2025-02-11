@@ -101,6 +101,10 @@ public struct OnboardingView: View {
             
             // Paywall
             if viewModel.showPaywall {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                
                 PaywallView(
                     isPresented: $viewModel.showPaywall,
                     onSubscribe: viewModel.completeOnboarding
@@ -150,6 +154,7 @@ struct OnboardingProgressHeader: View {
 struct OnboardingStepView: View {
     let step: OnboardingStep
     @ObservedObject var viewModel: OnboardingViewModel
+    @State private var isAnimating = false
     
     var body: some View {
         VStack(spacing: BFDesignSystem.Layout.Spacing.xxLarge) {
@@ -162,7 +167,18 @@ struct OnboardingStepView: View {
                 Image(systemName: step.image)
                     .font(.system(size: BFDesignSystem.Layout.Size.iconLarge, weight: .medium))
                     .foregroundColor(step.imageColor)
-                    .symbolEffect(.bounce, value: viewModel.currentStep)
+                    .scaleEffect(isAnimating ? 1.1 : 1.0)
+                    .animation(
+                        Animation.easeInOut(duration: 1.5)
+                            .repeatForever(autoreverses: true),
+                        value: isAnimating
+                    )
+            }
+            .onAppear {
+                isAnimating = true
+            }
+            .onChange(of: viewModel.currentStep) { _ in
+                isAnimating = true
             }
             
             // Title & Subtitle
