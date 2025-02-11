@@ -1,13 +1,6 @@
 import SwiftUI
 import UIKit
 
-// Import components
-@_exported import struct BetFree.BFPaywallView
-@_exported import struct BetFree.BFSelectableCard
-@_exported import struct BetFree.BFInputField
-@_exported import struct BetFree.BFStatCard
-@_exported import struct BetFree.BFTestimonialCard
-
 // MARK: - Models
 public struct OnboardingStep: Identifiable {
     public let id = UUID()
@@ -392,11 +385,16 @@ struct OnboardingNavigation: View {
 }
 
 // MARK: - Supporting Views
-struct BFStatCard: View {
+public struct BFStatCard: View {
     let value: String
     let label: String
     
-    var body: some View {
+    public init(value: String, label: String) {
+        self.value = value
+        self.label = label
+    }
+    
+    public var body: some View {
         VStack(spacing: BFDesignSystem.Layout.Spacing.xxSmall) {
             Text(value)
                 .font(BFDesignSystem.Typography.titleLarge)
@@ -412,11 +410,16 @@ struct BFStatCard: View {
     }
 }
 
-struct BFTestimonialCard: View {
+public struct BFTestimonialCard: View {
     let quote: String
     let author: String
     
-    var body: some View {
+    public init(quote: String, author: String) {
+        self.quote = quote
+        self.author = author
+    }
+    
+    public var body: some View {
         VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
             Text("\u{201C}") // Using Unicode for opening quote
                 .font(.system(size: 48))
@@ -437,12 +440,18 @@ struct BFTestimonialCard: View {
     }
 }
 
-struct BFSelectableCard: View {
+public struct BFSelectableCard: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void
     
-    var body: some View {
+    public init(title: String, isSelected: Bool, action: @escaping () -> Void) {
+        self.title = title
+        self.isSelected = isSelected
+        self.action = action
+    }
+    
+    public var body: some View {
         Button(action: action) {
             HStack {
                 Text(title)
@@ -462,14 +471,22 @@ struct BFSelectableCard: View {
     }
 }
 
-struct BFInputField: View {
+public struct BFInputField: View {
     let title: String
     @Binding var text: String
     let placeholder: String
     let prefix: String?
     let keyboardType: UIKeyboardType
     
-    var body: some View {
+    public init(title: String, text: Binding<String>, placeholder: String, prefix: String?, keyboardType: UIKeyboardType) {
+        self.title = title
+        self._text = text
+        self.placeholder = placeholder
+        self.prefix = prefix
+        self.keyboardType = keyboardType
+    }
+    
+    public var body: some View {
         VStack(alignment: .leading, spacing: BFDesignSystem.Layout.Spacing.small) {
             Text(title)
                 .font(BFDesignSystem.Typography.bodyMedium)
