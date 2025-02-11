@@ -1,11 +1,17 @@
 import SwiftUI
 import BetFree
+import ComposableArchitecture
 
 @main
 struct BetFreeApp: App {
     var body: some Scene {
         WindowGroup {
-            BetFreeRootView()
+            BetFreeRootView(
+                appState: AppState.shared,
+                store: Store(initialState: AppFeature.State()) {
+                    AppFeature()
+                }
+            )
         }
     }
 }
