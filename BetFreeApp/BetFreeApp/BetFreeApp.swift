@@ -4,6 +4,11 @@ import ComposableArchitecture
 
 @main
 struct BetFreeApp: App {
+    init() {
+        // Force onboarding for testing
+        UserDefaults.standard.set(false, forKey: "isOnboarded")
+    }
+    
     var body: some Scene {
         WindowGroup {
             BetFreeRootView(

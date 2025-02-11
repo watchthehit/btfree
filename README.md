@@ -16,42 +16,69 @@ A comprehensive iOS application focused on gambling addiction recovery through p
 - Swift 5.9+
 - macOS 13.0+ (for development)
 
-## Project Structure
-
-- `BetFreeApp/` - iOS application
-- `Sources/BetFree/` - Main package with all features
-- `docs/` - Documentation
-  - `TECHNICAL.md` - Technical documentation
-  - `PRD.md` - Product Requirements Document
-
 ## Features
 
-- Personalized onboarding
+### Core Features
+- Personalized onboarding with free trial
 - Progress tracking dashboard
 - Professional resources
 - Profile management
 
+### Onboarding Experience
+- Multi-step feature introduction
+- Profile personalization
+- Goal setting
+- 7-day free trial
+- Subscription management
+
+### Dashboard Features
+- Emergency help access
+- Progress visualization
+- Daily goals tracking
+- Quick action grid
+- Motivational messages
+
 ## Development
 
 See [Technical Documentation](docs/TECHNICAL.md) for detailed development information.
+
+### Testing Onboarding
+To force the onboarding flow for testing:
+```swift
+UserDefaults.standard.set(false, forKey: "isOnboarded")
+```
 
 ## Current Status
 
 ✅ Working Features:
 - Project structure
 - Package dependencies
-- Basic navigation
+- Enhanced onboarding flow
+- Dashboard UI
 - Design system
 
 🚧 In Progress:
-- Feature implementations
-- UI refinements
-- Testing
+- Subscription integration
+- Resource content
+- Profile features
 
 ## Version History
 
-### v0.1.0 (Current)
+### v0.1.3 (Current)
+- Enhanced onboarding with feature showcase
+- Added free trial and subscription flow
+- Improved dashboard UI/UX
+
+### v0.1.2
+- Enhanced Dashboard UI with progress tracking
+- Added emergency help button
+- Implemented quick actions
+
+### v0.1.1
+- Fixed navigation and state initialization
+- Improved app architecture
+
+### v0.1.0
 - Initial project setup
-- Working build configuration
 - Basic navigation structure
 - Design system implementation 

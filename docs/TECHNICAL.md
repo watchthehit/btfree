@@ -159,11 +159,20 @@ The application uses a unified design system (`BFDesignSystem`) that provides:
 ### Feature Modules
 
 #### Onboarding
-- Multi-step flow
-- Progress tracking
-- Data collection
-- Privacy settings
-- Notification setup
+- Multi-step flow with progress tracking
+- Feature introduction:
+  1. Welcome & Overview
+  2. Progress Tracking
+  3. 24/7 Support
+  4. Personalization
+- Profile setup:
+  - Username collection
+  - Daily limit setting
+- Paywall integration:
+  - 7-day free trial
+  - Monthly subscription
+  - Feature highlights
+  - Purchase restoration
 
 #### Dashboard
 - Progress overview
@@ -350,4 +359,29 @@ struct ErrorView: View {
 - Developer documentation
 - User documentation
 - Support channels
-- Feedback system 
+- Feedback system
+
+### State Management
+```swift
+// Force onboarding for testing
+UserDefaults.standard.set(false, forKey: "isOnboarded")
+
+// Check onboarding status
+if !appState.isOnboarded {
+    OnboardingView()
+} else {
+    MainTabView()
+}
+```
+
+### UI Components
+
+#### Progress Tracking
+- Circular progress indicators
+- Progress bars for onboarding
+- Achievement badges (planned)
+
+#### Navigation
+- Tab-based main navigation
+- Linear onboarding flow
+- Modal paywall presentation 

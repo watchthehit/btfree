@@ -49,13 +49,13 @@ public struct AppFeature: Reducer {
 
 #Preview("Onboarding Flow") {
     let appState = AppState()
-    appState.isOnboarded = false
+    appState.isOnboarded = false  // Force onboarding
     return BetFreeRootView(appState: appState)
 }
 
 #Preview("Main App") {
     let appState = AppState()
-    appState.isOnboarded = true
+    appState.isOnboarded = true  // Force main app
     appState.updateUsername("John")
     appState.updateDailyLimit(100)
     appState.updateStreak(7)
