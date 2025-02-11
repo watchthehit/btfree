@@ -1,11 +1,17 @@
 import SwiftUI
 
-struct SelectableCard: View {
+public struct BFSelectableCard: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void
     
-    var body: some View {
+    public init(title: String, isSelected: Bool, action: @escaping () -> Void) {
+        self.title = title
+        self.isSelected = isSelected
+        self.action = action
+    }
+    
+    public var body: some View {
         Button(action: action) {
             HStack {
                 Text(title)

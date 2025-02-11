@@ -1,10 +1,15 @@
 import SwiftUI
 
-struct StatCard: View {
+public struct BFStatCard: View {
     let value: String
     let label: String
     
-    var body: some View {
+    public init(value: String, label: String) {
+        self.value = value
+        self.label = label
+    }
+    
+    public var body: some View {
         VStack(spacing: BFDesignSystem.Layout.Spacing.xxSmall) {
             Text(value)
                 .font(BFDesignSystem.Typography.titleLarge)

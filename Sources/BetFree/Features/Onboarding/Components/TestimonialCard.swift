@@ -1,10 +1,15 @@
 import SwiftUI
 
-struct TestimonialCard: View {
+public struct BFTestimonialCard: View {
     let quote: String
     let author: String
     
-    var body: some View {
+    public init(quote: String, author: String) {
+        self.quote = quote
+        self.author = author
+    }
+    
+    public var body: some View {
         VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
             Text("\u{201C}") // Using Unicode for opening quote
                 .font(.system(size: 48))

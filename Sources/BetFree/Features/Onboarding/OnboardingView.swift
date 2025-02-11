@@ -105,7 +105,7 @@ public struct OnboardingView: View {
                     .ignoresSafeArea()
                     .transition(.opacity)
                 
-                PaywallView(
+                BFPaywallView(
                     isPresented: $viewModel.showPaywall,
                     onSubscribe: viewModel.completeOnboarding
                 )
@@ -234,12 +234,12 @@ struct WelcomeStepContent: View {
         VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
             // Success Stats
             HStack(spacing: BFDesignSystem.Layout.Spacing.large) {
-                StatCard(value: "10K+", label: "Members")
-                StatCard(value: "87%", label: "Success Rate")
+                BFStatCard(value: "10K+", label: "Members")
+                BFStatCard(value: "87%", label: "Success Rate")
             }
             
             // Testimonial
-            TestimonialCard(
+            BFTestimonialCard(
                 quote: "This app changed my life. I'm 6 months free and counting!",
                 author: "John D."
             )
@@ -254,7 +254,7 @@ struct GoalSelectionContent: View {
     var body: some View {
         VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
             ForEach(options, id: \.self) { option in
-                SelectableCard(
+                BFSelectableCard(
                     title: option,
                     isSelected: selectedGoal == option,
                     action: { selectedGoal = option }
@@ -271,7 +271,7 @@ struct SituationInputContent: View {
     var body: some View {
         VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
             ForEach(fields, id: \.title) { field in
-                InputField(
+                BFInputField(
                     title: field.title,
                     text: Binding(
                         get: { inputs[field.title] ?? "" },
@@ -293,7 +293,7 @@ struct SupportSelectionContent: View {
     var body: some View {
         VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
             ForEach(options, id: \.self) { option in
-                SelectableCard(
+                BFSelectableCard(
                     title: option,
                     isSelected: selectedSupports.contains(option),
                     action: {
@@ -385,7 +385,7 @@ struct OnboardingNavigation: View {
 }
 
 // MARK: - Supporting Views
-struct StatCard: View {
+struct BFStatCard: View {
     let value: String
     let label: String
     
@@ -405,7 +405,7 @@ struct StatCard: View {
     }
 }
 
-struct TestimonialCard: View {
+struct BFTestimonialCard: View {
     let quote: String
     let author: String
     
@@ -430,7 +430,7 @@ struct TestimonialCard: View {
     }
 }
 
-struct SelectableCard: View {
+struct BFSelectableCard: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void
@@ -455,7 +455,7 @@ struct SelectableCard: View {
     }
 }
 
-struct InputField: View {
+struct BFInputField: View {
     let title: String
     @Binding var text: String
     let placeholder: String
