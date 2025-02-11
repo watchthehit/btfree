@@ -7,10 +7,6 @@ public struct DashboardView: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: BFDesignSystem.Spacing.large) {
-                // Emergency Help Button
-                EmergencyHelpButton()
-                    .padding(.horizontal)
-                
                 // Main Progress Card
                 ProgressCard(
                     streak: appState.currentStreak,
@@ -40,36 +36,6 @@ public struct DashboardView: View {
     }
     
     public init() {}
-}
-
-// MARK: - Emergency Help Button
-struct EmergencyHelpButton: View {
-    var body: some View {
-        Button(action: {
-            // TODO: Implement emergency help action
-        }) {
-            HStack {
-                Image(systemName: "phone.fill")
-                    .font(.title3)
-                Text("Need immediate help?")
-                    .font(BFDesignSystem.Typography.headlineMedium)
-                Spacer()
-                Text("Tap to call")
-                    .font(BFDesignSystem.Typography.bodyMedium)
-                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
-            }
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: BFDesignSystem.CornerRadius.medium)
-                    .fill(BFDesignSystem.Colors.cardBackground)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: BFDesignSystem.CornerRadius.medium)
-                            .stroke(BFDesignSystem.Colors.error.opacity(0.3), lineWidth: 1)
-                    )
-            )
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
 }
 
 // MARK: - Progress Card
@@ -192,27 +158,27 @@ struct QuickActionsGrid: View {
                 GridItem(.flexible())
             ], spacing: BFDesignSystem.Spacing.medium) {
                 QuickActionButton(
-                    title: "Log Urge",
-                    systemImage: "exclamationmark.triangle.fill",
-                    color: BFDesignSystem.Colors.error
+                    title: "Log Progress",
+                    systemImage: "chart.bar.fill",
+                    color: BFDesignSystem.Colors.primary
                 )
                 
                 QuickActionButton(
                     title: "Breathing Exercise",
                     systemImage: "lungs.fill",
-                    color: BFDesignSystem.Colors.primary
-                )
-                
-                QuickActionButton(
-                    title: "Call Sponsor",
-                    systemImage: "phone.fill",
                     color: BFDesignSystem.Colors.secondary
                 )
                 
                 QuickActionButton(
-                    title: "View Progress",
-                    systemImage: "chart.line.uptrend.xyaxis",
+                    title: "Set Goals",
+                    systemImage: "target",
                     color: BFDesignSystem.Colors.success
+                )
+                
+                QuickActionButton(
+                    title: "View Stats",
+                    systemImage: "chart.line.uptrend.xyaxis",
+                    color: BFDesignSystem.Colors.primary
                 )
             }
         }
