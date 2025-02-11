@@ -4,16 +4,16 @@ import PackageDescription
 let package = Package(
     name: "BetFree",
     platforms: [
-        .iOS(.v16),
-        .macOS(.v13)
+        .iOS(.v16)
     ],
     products: [
         .library(
             name: "BetFree",
-            targets: ["BetFree"])
+            targets: ["BetFree"]
+        )
     ],
     dependencies: [
-        .package(url: "https://github.com/pointfreeco/swift-composable-architecture", exact: "1.7.0")
+        .package(url: "https://github.com/pointfreeco/swift-composable-architecture", exact: "1.5.5")
     ],
     targets: [
         .target(
@@ -24,6 +24,7 @@ let package = Package(
             path: "Sources/BetFree",
             resources: [
                 .process("Resources")
-            ])
+            ]
+        )
     ]
 ) 

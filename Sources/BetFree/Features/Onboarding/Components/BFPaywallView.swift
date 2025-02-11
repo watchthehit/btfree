@@ -66,9 +66,11 @@ public struct BFPaywallView: View {
         }
         .padding()
         .background(BFDesignSystem.Colors.background)
+        .cornerRadius(BFDesignSystem.Layout.CornerRadius.large)
     }
 }
 
+// MARK: - Feature Row
 public struct BFFeatureRow: View {
     let icon: String
     let text: String
@@ -90,4 +92,11 @@ public struct BFFeatureRow: View {
             Spacer()
         }
     }
+}
+
+#Preview {
+    BFPaywallView(
+        isPresented: .constant(true),
+        onSubscribe: {}
+    )
 } 

@@ -1,6 +1,13 @@
 import SwiftUI
 import UIKit
 
+// Import components
+@_exported import struct BetFree.BFPaywallView
+@_exported import struct BetFree.BFSelectableCard
+@_exported import struct BetFree.BFInputField
+@_exported import struct BetFree.BFStatCard
+@_exported import struct BetFree.BFTestimonialCard
+
 // MARK: - Models
 public struct OnboardingStep: Identifiable {
     public let id = UUID()
