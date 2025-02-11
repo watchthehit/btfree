@@ -4,15 +4,15 @@ import UIKit
 public enum BFDesignSystem {
     public enum Colors {
         // MARK: - Brand Colors
-        public static let primary = Color(hex: "007AFF")
-        public static let secondary = Color(hex: "5856D6")
-        public static let accent = Color(hex: "FF2D55")
+        public static let primary = Color(hex: "4A90E2")  // Calming blue
+        public static let secondary = Color(hex: "9B6EF3") // Soft purple
+        public static let accent = Color(hex: "FFB547")    // Warm orange
         
         // MARK: - Semantic Colors
-        public static let success = Color(hex: "34C759")
-        public static let warning = Color(hex: "FF9500")
-        public static let error = Color(hex: "FF3B30")
-        public static let info = Color(hex: "5856D6")
+        public static let success = Color(hex: "4CAF50")   // Growth green
+        public static let warning = Color(hex: "FF9F43")   // Mindful orange
+        public static let error = Color(hex: "FF5252")     // Gentle red
+        public static let info = Color(hex: "2196F3")      // Clear blue
         
         // MARK: - Neutral Colors
         #if os(iOS)
@@ -50,6 +50,24 @@ public enum BFDesignSystem {
             colors: [success, success.opacity(0.8)],
             startPoint: .top,
             endPoint: .bottom
+        )
+        
+        public static let calmingGradient = LinearGradient(
+            colors: [Color(hex: "4A90E2"), Color(hex: "50C9C3")],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+        
+        public static let warmGradient = LinearGradient(
+            colors: [Color(hex: "FFB547"), Color(hex: "FF7676")],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+        
+        public static let mindfulGradient = LinearGradient(
+            colors: [Color(hex: "9B6EF3"), Color(hex: "4A90E2")],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
         )
         
         // MARK: - Semantic Mapping

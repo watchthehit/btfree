@@ -537,7 +537,14 @@ public struct BFSelectableCard: View {
                     .foregroundColor(isSelected ? .white : BFDesignSystem.Colors.textSecondary)
             }
             .padding()
-            .background(isSelected ? BFDesignSystem.Colors.primary : BFDesignSystem.Colors.cardBackground)
+            .background(
+                RoundedRectangle(cornerRadius: BFDesignSystem.Layout.CornerRadius.medium)
+                    .fill(isSelected ? BFDesignSystem.Colors.calmingGradient : LinearGradient(
+                        colors: [BFDesignSystem.Colors.cardBackground, BFDesignSystem.Colors.cardBackground],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ))
+            )
             .cornerRadius(BFDesignSystem.Layout.CornerRadius.medium)
             .animation(.spring(), value: isSelected)
         }
@@ -580,6 +587,95 @@ public struct BFInputField: View {
     }
 }
 
+// MARK: - Paywall Components
+private struct PaywallHeaderView: View {
+    let isAnimating: Bool
+    
+    var body: some View {
+        VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
+            Text("Transform Your Life")
+                .font(BFDesignSystem.Typography.display)
+                .foregroundStyle(BFDesignSystem.Colors.calmingGradient)
+                .multilineTextAlignment(.center)
+                .scaleEffect(isAnimating ? 1 : 0.8)
+                .opacity(isAnimating ? 1 : 0)
+            
+            Text("Join thousands who have reclaimed control")
+                .font(BFDesignSystem.Typography.titleSmall)
+                .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                .multilineTextAlignment(.center)
+                .scaleEffect(isAnimating ? 1 : 0.8)
+                .opacity(isAnimating ? 1 : 0)
+        }
+        .padding(.top, BFDesignSystem.Layout.Spacing.xxLarge)
+    }
+}
+
+private struct PaywallSocialProofView: View {
+    let showFeatures: Bool
+    
+    var body: some View {
+        HStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+            StatItem(value: "10K+", label: "Members", gradient: BFDesignSystem.Colors.calmingGradient)
+            StatItem(value: "87%", label: "Success Rate", gradient: BFDesignSystem.Colors.warmGradient)
+            StatItem(value: "4.9★", label: "App Rating", gradient: BFDesignSystem.Colors.mindfulGradient)
+        }
+        .opacity(showFeatures ? 1 : 0)
+        .offset(y: showFeatures ? 0 : 20)
+    }
+    
+    private struct StatItem: View {
+        let value: String
+        let label: String
+        let gradient: LinearGradient
+        
+        var body: some View {
+            VStack {
+                Text(value)
+                    .font(BFDesignSystem.Typography.titleLarge)
+                    .foregroundStyle(gradient)
+                Text(label)
+                    .font(BFDesignSystem.Typography.caption)
+                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
+            }
+        }
+    }
+}
+
+private struct PaywallPlanView: View {
+    let plan: (name: String, price: String, period: String, savings: String)
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        VStack {
+            Text(plan.name)
+                .font(BFDesignSystem.Typography.bodyLargeMedium)
+            Text(plan.price)
+                .font(BFDesignSystem.Typography.titleLarge)
+            Text("per \(plan.period)")
+                .font(BFDesignSystem.Typography.caption)
+            if !plan.savings.isEmpty {
+                Text(plan.savings)
+                    .font(BFDesignSystem.Typography.caption)
+                    .foregroundColor(BFDesignSystem.Colors.success)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: BFDesignSystem.Layout.CornerRadius.medium)
+                .fill(isSelected ? BFDesignSystem.Colors.calmingGradient : LinearGradient(
+                    colors: [BFDesignSystem.Colors.cardBackground, BFDesignSystem.Colors.cardBackground],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ))
+        )
+        .foregroundColor(isSelected ? .white : BFDesignSystem.Colors.textPrimary)
+        .onTapGesture(perform: action)
+    }
+}
+
 // MARK: - Paywall View
 private struct PaywallView: View {
     @Binding var isPresented: Bool
@@ -587,26 +683,17 @@ private struct PaywallView: View {
     @State private var isAnimating = false
     @State private var showFeatures = false
     @State private var showButtons = false
+    @State private var selectedPlan = 1 // 0: Monthly, 1: Annual
+    
+    let plans = [
+        (name: "Monthly", price: "$9.99", period: "month", savings: ""),
+        (name: "Annual", price: "$79.99", period: "year", savings: "Save 33%")
+    ]
     
     var body: some View {
         VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
-            // Header
-            VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
-                Text("Unlock Full Access")
-                    .font(BFDesignSystem.Typography.display)
-                    .foregroundStyle(BFDesignSystem.Colors.primaryGradient)
-                    .multilineTextAlignment(.center)
-                    .scaleEffect(isAnimating ? 1 : 0.8)
-                    .opacity(isAnimating ? 1 : 0)
-                
-                Text("Start your journey to a better life today")
-                    .font(BFDesignSystem.Typography.titleSmall)
-                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .scaleEffect(isAnimating ? 1 : 0.8)
-                    .opacity(isAnimating ? 1 : 0)
-            }
-            .padding(.top, BFDesignSystem.Layout.Spacing.xxLarge)
+            PaywallHeaderView(isAnimating: isAnimating)
+            PaywallSocialProofView(showFeatures: showFeatures)
             
             // Features
             VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
@@ -623,48 +710,76 @@ private struct PaywallView: View {
                     .offset(x: showFeatures ? 0 : -50)
                     .opacity(showFeatures ? 1 : 0)
                     .animation(
-                        BFDesignSystem.Layout.Animation.springWithDelay(Double(index) * 0.1),
+                        Animation.spring(response: 0.5, dampingFraction: 0.7)
+                            .delay(Double(index) * 0.1),
                         value: showFeatures
                     )
                 }
             }
             .padding(.vertical, BFDesignSystem.Layout.Spacing.large)
             
-            // Subscription Button
-            Button(action: {
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
-                    onSubscribe()
+            // Plan Selection
+            HStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
+                ForEach(0..<2) { index in
+                    PaywallPlanView(
+                        plan: plans[index],
+                        isSelected: selectedPlan == index
+                    ) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                            selectedPlan = index
+                        }
+                    }
                 }
-            }) {
-                Text("Start Free Trial")
-                    .font(BFDesignSystem.Typography.button)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: BFDesignSystem.Layout.Size.buttonHeight)
-                    .background(BFDesignSystem.Colors.primaryGradient)
-                    .cornerRadius(BFDesignSystem.Layout.CornerRadius.button)
-                    .withShadow(BFDesignSystem.Layout.Shadow.button)
             }
-            .scaleEffect(showButtons ? 1 : 0.8)
             .opacity(showButtons ? 1 : 0)
             
-            // Terms
-            Text("7-day free trial, then $9.99/month. Cancel anytime.")
-                .font(BFDesignSystem.Typography.caption)
-                .foregroundColor(BFDesignSystem.Colors.textSecondary)
-                .multilineTextAlignment(.center)
+            // Action Buttons
+            VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
+                Button(action: {
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+                        onSubscribe()
+                    }
+                }) {
+                    Text("Start Free Trial")
+                        .font(BFDesignSystem.Typography.button)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: BFDesignSystem.Layout.Size.buttonHeight)
+                        .background(BFDesignSystem.Colors.calmingGradient)
+                        .cornerRadius(BFDesignSystem.Layout.CornerRadius.button)
+                        .withShadow(BFDesignSystem.Layout.Shadow.button)
+                }
+                .scaleEffect(showButtons ? 1 : 0.8)
                 .opacity(showButtons ? 1 : 0)
-            
-            // Dismiss Button
-            Button("Maybe Later") {
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
-                    isPresented = false
+                
+                // Money Back Guarantee
+                HStack(spacing: BFDesignSystem.Layout.Spacing.small) {
+                    Image(systemName: "checkmark.shield.fill")
+                        .foregroundColor(BFDesignSystem.Colors.success)
+                    Text("30-day money-back guarantee")
+                        .font(BFDesignSystem.Typography.caption)
+                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
                 }
+                .opacity(showButtons ? 1 : 0)
+                
+                // Terms
+                Text("7-day free trial, then \(plans[selectedPlan].price)/\(plans[selectedPlan].period). Cancel anytime.")
+                    .font(BFDesignSystem.Typography.caption)
+                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .opacity(showButtons ? 1 : 0)
+                
+                // Dismiss Button
+                Button("Maybe Later") {
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+                        isPresented = false
+                    }
+                }
+                .font(BFDesignSystem.Typography.button)
+                .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                .opacity(showButtons ? 1 : 0)
+                .padding(.top, BFDesignSystem.Layout.Spacing.medium)
             }
-            .font(BFDesignSystem.Typography.button)
-            .foregroundColor(BFDesignSystem.Colors.textSecondary)
-            .opacity(showButtons ? 1 : 0)
-            .padding(.top, BFDesignSystem.Layout.Spacing.medium)
         }
         .padding(BFDesignSystem.Layout.Spacing.xxLarge)
         .background(BFDesignSystem.Colors.cardBackground)
@@ -680,7 +795,7 @@ private struct PaywallView: View {
                 showFeatures = true
             }
             
-            withAnimation(BFDesignSystem.Layout.Animation.springWithDelay(0.6)) {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.7).delay(0.6)) {
                 showButtons = true
             }
         }
