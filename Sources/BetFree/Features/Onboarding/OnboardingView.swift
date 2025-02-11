@@ -1,16 +1,17 @@
 import SwiftUI
+import UIKit
 
 // MARK: - Models
-struct OnboardingStep: Identifiable {
-    let id = UUID()
-    let title: String
-    let subtitle: String
-    let image: String
-    let imageColor: Color
-    let background: Color
-    let type: StepType
+public struct OnboardingStep: Identifiable {
+    public let id = UUID()
+    public let title: String
+    public let subtitle: String
+    public let image: String
+    public let imageColor: Color
+    public let background: Color
+    public let type: StepType
     
-    enum StepType {
+    public enum StepType {
         case welcome
         case goalSelection(options: [String])
         case situationInput(fields: [InputField])
@@ -18,18 +19,41 @@ struct OnboardingStep: Identifiable {
         case commitmentLevel(sliders: [SliderOption])
     }
     
-    struct InputField {
-        let title: String
-        let placeholder: String
-        let keyboardType: UIKeyboardType
-        let prefix: String?
+    public struct InputField {
+        public let title: String
+        public let placeholder: String
+        public let keyboardType: UIKeyboardType
+        public let prefix: String?
+        
+        public init(title: String, placeholder: String, keyboardType: UIKeyboardType, prefix: String?) {
+            self.title = title
+            self.placeholder = placeholder
+            self.keyboardType = keyboardType
+            self.prefix = prefix
+        }
     }
     
-    struct SliderOption {
-        let title: String
-        let range: ClosedRange<Double>
-        let step: Double
-        let format: String
+    public struct SliderOption {
+        public let title: String
+        public let range: ClosedRange<Double>
+        public let step: Double
+        public let format: String
+        
+        public init(title: String, range: ClosedRange<Double>, step: Double, format: String) {
+            self.title = title
+            self.range = range
+            self.step = step
+            self.format = format
+        }
+    }
+    
+    public init(title: String, subtitle: String, image: String, imageColor: Color, background: Color, type: StepType) {
+        self.title = title
+        self.subtitle = subtitle
+        self.image = image
+        self.imageColor = imageColor
+        self.background = background
+        self.type = type
     }
 }
 
@@ -371,7 +395,7 @@ struct TestimonialCard: View {
     
     var body: some View {
         VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
-            Text(verbatim: """")
+            Text("\u{201C}") // Using Unicode for opening quote
                 .font(.system(size: 48))
                 .foregroundColor(BFDesignSystem.Colors.primary)
             
