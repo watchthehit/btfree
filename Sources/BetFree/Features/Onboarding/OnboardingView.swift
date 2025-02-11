@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import ComposableArchitecture
 
 // MARK: - Models
 public struct OnboardingStep: Identifiable {
@@ -59,8 +60,8 @@ public struct OnboardingStep: Identifiable {
 
 // MARK: - Main View
 public struct OnboardingView: View {
-    @EnvironmentObject private var appState: AppState
     @StateObject private var viewModel = OnboardingViewModel()
+    @EnvironmentObject private var appState: AppState
     
     public var body: some View {
         ZStack {
@@ -107,7 +108,10 @@ public struct OnboardingView: View {
                 
                 BFPaywallView(
                     isPresented: $viewModel.showPaywall,
-                    onSubscribe: viewModel.completeOnboarding
+                    onSubscribe: {
+                        viewModel.completeOnboarding()
+                        appState.completeOnboarding()
+                    }
                 )
                 .transition(.move(edge: .bottom))
             }

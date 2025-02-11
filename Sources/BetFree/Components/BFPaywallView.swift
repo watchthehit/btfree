@@ -67,7 +67,7 @@ public struct BFPaywallView: View {
     }
 }
 
-private struct FeatureRow: View {
+struct FeatureRow: View {
     let icon: String
     let text: String
     
@@ -91,4 +91,4 @@ private struct FeatureRow: View {
         isPresented: .constant(true),
         onSubscribe: {}
     )
-}
+} 
