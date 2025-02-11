@@ -175,10 +175,22 @@ The application uses a unified design system (`BFDesignSystem`) that provides:
   - Purchase restoration
 
 #### Dashboard
-- Progress overview
-- Quick actions
-- Statistics
-- Achievements
+Core features focused on personal progress:
+- Progress visualization
+  - Streak tracking (30-day milestone circle)
+  - Financial savings display
+- Daily Goals
+  - Check-in system
+  - Spending limit tracking
+- Quick Actions
+  - Progress logging
+  - Breathing exercises
+  - Goal setting
+  - Statistics view
+- Motivational System
+  - Dynamic messages based on progress
+  - Milestone celebrations
+  - Visual feedback
 
 #### Resources
 - Support materials
@@ -384,4 +396,28 @@ if !appState.isOnboarded {
 #### Navigation
 - Tab-based main navigation
 - Linear onboarding flow
-- Modal paywall presentation 
+- Modal paywall presentation
+
+#### Dashboard
+```swift
+// Progress Circle
+Circle()
+    .trim(from: 0, to: min(CGFloat(streak) / 30.0, 1.0))
+    .stroke(BFDesignSystem.Colors.primary, style: StrokeStyle(lineWidth: 8, lineCap: .round))
+
+// Goal Card
+VStack {
+    Image(systemName: icon)
+    Text(title)
+    Text(status)
+}
+.background(BFDesignSystem.Colors.cardBackground)
+
+// Quick Action Button
+VStack {
+    Image(systemName: systemImage)
+    Text(title)
+}
+.background(BFDesignSystem.Colors.cardBackground)
+.shadow(radius: 2)
+``` 
