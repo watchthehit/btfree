@@ -172,6 +172,51 @@ private struct OnboardingStepView: View {
                         sliders,
                         commitmentLevels: $viewModel.commitmentLevels
                     )
+                    
+                case .personalInfo(let fields):
+                    PersonalInfoContent(fields: fields, info: $viewModel.personalInfo)
+                    
+                case .assessment(let questions):
+                    AssessmentContent(questions: questions, answers: $viewModel.assessmentAnswers)
+                    
+                case .milestones(let milestones):
+                    MilestonesContent(milestones: milestones, selected: $viewModel.selectedMilestones)
+                    
+                case .rewardSystem(let rewards):
+                    RewardsContent(rewards: rewards, selected: $viewModel.selectedRewards)
+                    
+                case .gamblingHistory(let questions):
+                    GamblingHistoryContent(questions: questions, answers: $viewModel.gamblingHistory)
+                    
+                case .riskAssessment(let factors):
+                    RiskAssessmentContent(factors: factors, identified: $viewModel.riskFactors)
+                    
+                case .supportNetwork(let contacts):
+                    SupportNetworkContent(contacts: contacts, network: $viewModel.supportContacts)
+                    
+                case .therapistIntegration:
+                    TherapistIntegrationContent()
+                    
+                case .triggerIdentification(let triggers):
+                    TriggerIdentificationContent(triggers: triggers, identified: $viewModel.identifiedTriggers)
+                    
+                case .copingStrategies(let strategies):
+                    CopingStrategiesContent(strategies: strategies, selected: $viewModel.selectedStrategies)
+                    
+                case .communityPreview:
+                    CommunityPreviewContent()
+                    
+                case .resourcesIntroduction(let resources):
+                    ResourcesContent(resources: resources)
+                    
+                case .safetyPlan:
+                    SafetyPlanContent(triggers: viewModel.identifiedTriggers, strategies: viewModel.selectedStrategies)
+                    
+                case .emergencyContacts:
+                    EmergencyContactsContent(contacts: $viewModel.emergencyContacts)
+                    
+                case .recap:
+                    RecapContent(viewModel: viewModel)
                 }
             }
             .opacity(showContent ? 1 : 0)
@@ -369,6 +414,241 @@ private struct CommitmentLevelContent: View {
                     }
                 }
             }
+        }
+    }
+}
+
+// MARK: - Additional Step Content Views
+private struct PersonalInfoContent: View {
+    let fields: [OnboardingStep.PersonalField]
+    @Binding var info: [String: String]
+    
+    var body: some View {
+        VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+            ForEach(fields, id: \.title) { field in
+                BFTextField(
+                    title: field.title,
+                    text: Binding(
+                        get: { info[field.title] ?? "" },
+                        set: { info[field.title] = $0 }
+                    ),
+                    placeholder: field.placeholder
+                )
+            }
+        }
+        .padding()
+    }
+}
+
+private struct AssessmentContent: View {
+    let questions: [OnboardingStep.AssessmentQuestion]
+    @Binding var answers: [String: Any]
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+                ForEach(questions, id: \.question) { question in
+                    Text(question.question)
+                        .font(BFDesignSystem.Typography.bodyLarge)
+                }
+            }
+            .padding()
+        }
+    }
+}
+
+private struct MilestonesContent: View {
+    let milestones: [OnboardingStep.Milestone]
+    @Binding var selected: [OnboardingStep.Milestone]
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+                ForEach(milestones, id: \.title) { milestone in
+                    Text(milestone.title)
+                        .font(BFDesignSystem.Typography.bodyLarge)
+                }
+            }
+            .padding()
+        }
+    }
+}
+
+private struct RewardsContent: View {
+    let rewards: [OnboardingStep.Reward]
+    @Binding var selected: [OnboardingStep.Reward]
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+                ForEach(rewards, id: \.title) { reward in
+                    Text(reward.title)
+                        .font(BFDesignSystem.Typography.bodyLarge)
+                }
+            }
+            .padding()
+        }
+    }
+}
+
+private struct GamblingHistoryContent: View {
+    let questions: [OnboardingStep.HistoryQuestion]
+    @Binding var answers: [String: Any]
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+                ForEach(questions, id: \.question) { question in
+                    Text(question.question)
+                        .font(BFDesignSystem.Typography.bodyLarge)
+                }
+            }
+            .padding()
+        }
+    }
+}
+
+private struct RiskAssessmentContent: View {
+    let factors: [OnboardingStep.RiskFactor]
+    @Binding var identified: [OnboardingStep.RiskFactor]
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+                ForEach(factors, id: \.name) { factor in
+                    Text(factor.name)
+                        .font(BFDesignSystem.Typography.bodyLarge)
+                }
+            }
+            .padding()
+        }
+    }
+}
+
+private struct SupportNetworkContent: View {
+    let contacts: [OnboardingStep.Contact]
+    @Binding var network: [OnboardingStep.Contact]
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+                ForEach(contacts, id: \.name) { contact in
+                    Text(contact.name)
+                        .font(BFDesignSystem.Typography.bodyLarge)
+                }
+            }
+            .padding()
+        }
+    }
+}
+
+private struct TherapistIntegrationContent: View {
+    var body: some View {
+        VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+            Text("Connect with a Professional")
+                .font(BFDesignSystem.Typography.titleMedium)
+        }
+        .padding()
+    }
+}
+
+private struct TriggerIdentificationContent: View {
+    let triggers: [OnboardingStep.Trigger]
+    @Binding var identified: [OnboardingStep.Trigger]
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+                ForEach(triggers, id: \.name) { trigger in
+                    Text(trigger.name)
+                        .font(BFDesignSystem.Typography.bodyLarge)
+                }
+            }
+            .padding()
+        }
+    }
+}
+
+private struct CopingStrategiesContent: View {
+    let strategies: [OnboardingStep.Strategy]
+    @Binding var selected: [OnboardingStep.Strategy]
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+                ForEach(strategies, id: \.title) { strategy in
+                    Text(strategy.title)
+                        .font(BFDesignSystem.Typography.bodyLarge)
+                }
+            }
+            .padding()
+        }
+    }
+}
+
+private struct CommunityPreviewContent: View {
+    var body: some View {
+        VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+            Text("Join Our Community")
+                .font(BFDesignSystem.Typography.titleMedium)
+        }
+        .padding()
+    }
+}
+
+private struct ResourcesContent: View {
+    let resources: [OnboardingStep.Resource]
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+                ForEach(resources, id: \.title) { resource in
+                    Text(resource.title)
+                        .font(BFDesignSystem.Typography.bodyLarge)
+                }
+            }
+            .padding()
+        }
+    }
+}
+
+private struct SafetyPlanContent: View {
+    let triggers: [OnboardingStep.Trigger]
+    let strategies: [OnboardingStep.Strategy]
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+                Text("Your Safety Plan")
+                    .font(BFDesignSystem.Typography.titleMedium)
+            }
+            .padding()
+        }
+    }
+}
+
+private struct EmergencyContactsContent: View {
+    @Binding var contacts: [OnboardingStep.Contact]
+    
+    var body: some View {
+        VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+            Text("Emergency Contacts")
+                .font(BFDesignSystem.Typography.titleMedium)
+        }
+        .padding()
+    }
+}
+
+private struct RecapContent: View {
+    @ObservedObject var viewModel: OnboardingViewModel
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+                Text("Your Recovery Plan")
+                    .font(BFDesignSystem.Typography.titleMedium)
+            }
+            .padding()
         }
     }
 }

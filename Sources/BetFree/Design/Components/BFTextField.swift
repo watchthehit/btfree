@@ -1,22 +1,27 @@
 import SwiftUI
-
 #if canImport(UIKit)
 import UIKit
 #endif
 
-public struct BFInputField: View {
+public struct BFTextField: View {
     let title: String
     @Binding var text: String
     let placeholder: String
-    let prefix: String?
-    let keyboardType: BFKeyboardType
+    var keyboardType: BFKeyboardType = .default
+    var prefix: String?
     
-    public init(title: String, text: Binding<String>, placeholder: String, prefix: String? = nil, keyboardType: BFKeyboardType = .default) {
+    public init(
+        title: String,
+        text: Binding<String>,
+        placeholder: String,
+        keyboardType: BFKeyboardType = .default,
+        prefix: String? = nil
+    ) {
         self.title = title
         self._text = text
         self.placeholder = placeholder
-        self.prefix = prefix
         self.keyboardType = keyboardType
+        self.prefix = prefix
     }
     
     public var body: some View {
@@ -48,4 +53,23 @@ public struct BFInputField: View {
             )
         }
     }
+}
+
+#Preview {
+    VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+        BFTextField(
+            title: "Name",
+            text: Binding.constant(""),
+            placeholder: "Enter your name"
+        )
+        
+        BFTextField(
+            title: "Amount",
+            text: Binding.constant(""),
+            placeholder: "Enter amount",
+            keyboardType: .decimalPad,
+            prefix: "$"
+        )
+    }
+    .padding()
 } 
