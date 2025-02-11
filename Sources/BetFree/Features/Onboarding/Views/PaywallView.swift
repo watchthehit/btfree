@@ -1,15 +1,10 @@
 import SwiftUI
 
-public struct PaywallView: View {
+struct PaywallView: View {
     @Binding var isPresented: Bool
     let onSubscribe: () -> Void
     
-    public init(isPresented: Binding<Bool>, onSubscribe: @escaping () -> Void) {
-        self._isPresented = isPresented
-        self.onSubscribe = onSubscribe
-    }
-    
-    public var body: some View {
+    var body: some View {
         VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
             // Header
             VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
