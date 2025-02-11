@@ -1,288 +1,312 @@
 import SwiftUI
 
-public struct OnboardingView: View {
-    @EnvironmentObject private var appState: AppState
-    @State private var username: String = ""
-    @State private var dailyLimit: String = ""
-    @State private var currentStep = 0
-    @State private var showPaywall = false
-    
-    let onboardingSteps = [
-        OnboardingStep(
-            title: "Take Control",
-            subtitle: "Your journey to financial freedom and better habits starts here",
-            image: "arrow.up.forward",
-            imageColor: BFDesignSystem.Colors.primary,
-            background: Color.blue.opacity(0.1)
-        ),
-        OnboardingStep(
-            title: "Track Your Progress",
-            subtitle: "Watch your streaks grow and savings multiply day by day",
-            image: "chart.line.uptrend.xyaxis.circle.fill",
-            imageColor: BFDesignSystem.Colors.success,
-            background: Color.green.opacity(0.1)
-        ),
-        OnboardingStep(
-            title: "Build Better Habits",
-            subtitle: "Daily goals and exercises to help you stay on track",
-            image: "target",
-            imageColor: BFDesignSystem.Colors.secondary,
-            background: Color.purple.opacity(0.1)
-        )
-    ]
-    
-    public var body: some View {
-        ZStack {
-            VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
-                // Skip Button
-                if currentStep < onboardingSteps.count {
-                    HStack {
-                        Spacer()
-                        Button("Skip") {
-                            withAnimation {
-                                currentStep = onboardingSteps.count
-                            }
-                        }
-                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
-                        .padding()
-                    }
-                }
-                
-                Spacer()
-                
-                // Content
-                switch currentStep {
-                case ..<onboardingSteps.count:
-                    // Feature Introduction Steps
-                    FeatureStep(step: onboardingSteps[currentStep])
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .trailing),
-                            removal: .move(edge: .leading)
-                        ))
-                case onboardingSteps.count:
-                    // Profile Setup
-                    ProfileSetupStep(username: $username)
-                        .transition(.move(edge: .trailing))
-                case onboardingSteps.count + 1:
-                    // Goal Setting
-                    GoalSettingStep(dailyLimit: $dailyLimit)
-                        .transition(.move(edge: .trailing))
-                default:
-                    EmptyView()
-                }
-                
-                Spacer()
-                
-                // Progress & Navigation
-                VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
-                    if currentStep < onboardingSteps.count {
-                        // Progress Dots
-                        HStack(spacing: BFDesignSystem.Layout.Spacing.small) {
-                            ForEach(0..<onboardingSteps.count, id: \.self) { index in
-                                Circle()
-                                    .fill(currentStep == index ? BFDesignSystem.Colors.primary : BFDesignSystem.Colors.cardBackground)
-                                    .frame(width: 8, height: 8)
-                            }
-                        }
-                    }
-                    
-                    // Navigation Buttons
-                    NavigationButtons(
-                        currentStep: currentStep,
-                        maxSteps: onboardingSteps.count + 1,
-                        isNextDisabled: isNextDisabled,
-                        onNext: handleNext,
-                        onBack: handleBack
-                    )
-                }
-                .padding(.bottom)
-            }
-            
-            // Paywall Sheet
-            if showPaywall {
-                Color.black.opacity(0.3)
-                    .ignoresSafeArea()
-                    .transition(.opacity)
-                
-                PaywallView(isPresented: $showPaywall, onSubscribe: completeOnboarding)
-                    .transition(.move(edge: .bottom))
-            }
-        }
-    }
-    
-    private var isNextDisabled: Bool {
-        switch currentStep {
-        case onboardingSteps.count:
-            return username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        case onboardingSteps.count + 1:
-            return dailyLimit.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        default:
-            return false
-        }
-    }
-    
-    private func handleNext() {
-        withAnimation {
-            if currentStep == onboardingSteps.count + 1 {
-                showPaywall = true
-            } else {
-                currentStep += 1
-            }
-        }
-    }
-    
-    private func handleBack() {
-        withAnimation {
-            currentStep -= 1
-        }
-    }
-    
-    private func completeOnboarding() {
-        appState.updateUsername(username)
-        if let limit = Double(dailyLimit) {
-            appState.updateDailyLimit(limit)
-        }
-        appState.completeOnboarding()
-    }
-    
-    public init() {}
-}
-
-// MARK: - Supporting Types
-struct OnboardingStep {
+// MARK: - Models
+struct OnboardingStep: Identifiable {
+    let id = UUID()
     let title: String
     let subtitle: String
     let image: String
     let imageColor: Color
     let background: Color
+    let type: StepType
+    
+    enum StepType {
+        case welcome
+        case goalSelection(options: [String])
+        case situationInput(fields: [InputField])
+        case supportSelection(options: [String])
+        case commitmentLevel(sliders: [SliderOption])
+    }
+    
+    struct InputField {
+        let title: String
+        let placeholder: String
+        let keyboardType: UIKeyboardType
+        let prefix: String?
+    }
+    
+    struct SliderOption {
+        let title: String
+        let range: ClosedRange<Double>
+        let step: Double
+        let format: String
+    }
 }
 
-// MARK: - Supporting Views
-struct FeatureStep: View {
+// MARK: - Main View
+public struct OnboardingView: View {
+    @EnvironmentObject private var appState: AppState
+    @StateObject private var viewModel = OnboardingViewModel()
+    
+    public var body: some View {
+        ZStack {
+            // Background
+            BFDesignSystem.Colors.background
+                .ignoresSafeArea()
+            
+            VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+                // Progress Header
+                OnboardingProgressHeader(
+                    currentStep: viewModel.currentStep,
+                    totalSteps: viewModel.steps.count
+                )
+                
+                // Content
+                TabView(selection: $viewModel.currentStep) {
+                    ForEach(Array(viewModel.steps.enumerated()), id: \.element.id) { index, step in
+                        OnboardingStepView(
+                            step: step,
+                            viewModel: viewModel
+                        )
+                        .tag(index)
+                    }
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                .animation(.easeInOut, value: viewModel.currentStep)
+                
+                // Navigation
+                OnboardingNavigation(
+                    currentStep: viewModel.currentStep,
+                    totalSteps: viewModel.steps.count,
+                    isNextEnabled: viewModel.canProceed,
+                    onNext: viewModel.nextStep,
+                    onBack: viewModel.previousStep
+                )
+            }
+            .padding(.vertical, BFDesignSystem.Layout.Spacing.large)
+            
+            // Paywall
+            if viewModel.showPaywall {
+                PaywallView(
+                    isPresented: $viewModel.showPaywall,
+                    onSubscribe: viewModel.completeOnboarding
+                )
+                .transition(.move(edge: .bottom))
+            }
+        }
+    }
+    
+    public init() {}
+}
+
+// MARK: - Progress Header
+struct OnboardingProgressHeader: View {
+    let currentStep: Int
+    let totalSteps: Int
+    
+    var body: some View {
+        VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
+            // Progress Bar
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    // Background
+                    RoundedRectangle(cornerRadius: BFDesignSystem.Layout.CornerRadius.small)
+                        .fill(BFDesignSystem.Colors.cardBackground)
+                        .frame(height: 4)
+                    
+                    // Progress
+                    RoundedRectangle(cornerRadius: BFDesignSystem.Layout.CornerRadius.small)
+                        .fill(BFDesignSystem.Colors.primary)
+                        .frame(width: geometry.size.width * CGFloat(currentStep + 1) / CGFloat(totalSteps), height: 4)
+                        .animation(.spring(), value: currentStep)
+                }
+            }
+            .frame(height: 4)
+            .padding(.horizontal)
+            
+            // Step Counter
+            Text("Step \(currentStep + 1) of \(totalSteps)")
+                .font(BFDesignSystem.Typography.caption)
+                .foregroundColor(BFDesignSystem.Colors.textSecondary)
+        }
+    }
+}
+
+// MARK: - Step View
+struct OnboardingStepView: View {
     let step: OnboardingStep
-    @State private var isAnimating = false
+    @ObservedObject var viewModel: OnboardingViewModel
     
     var body: some View {
         VStack(spacing: BFDesignSystem.Layout.Spacing.xxLarge) {
-            // Image
+            // Header Image
             ZStack {
                 Circle()
                     .fill(step.background)
                     .frame(width: BFDesignSystem.Layout.Size.progressCircleLarge, height: BFDesignSystem.Layout.Size.progressCircleLarge)
-                    .scaleEffect(isAnimating ? 1.1 : 1.0)
                 
                 Image(systemName: step.image)
                     .font(.system(size: BFDesignSystem.Layout.Size.iconLarge, weight: .medium))
                     .foregroundColor(step.imageColor)
-                    .offset(y: isAnimating ? -5 : 5)
+                    .symbolEffect(.bounce, value: viewModel.currentStep)
             }
-            .animation(
-                Animation.easeInOut(duration: 2.0).repeatForever(autoreverses: true),
-                value: isAnimating
-            )
             
-            // Text
-            VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
+            // Title & Subtitle
+            VStack(spacing: BFDesignSystem.Layout.Spacing.small) {
                 Text(step.title)
                     .font(BFDesignSystem.Typography.titleLarge)
                     .multilineTextAlignment(.center)
                 
                 Text(step.subtitle)
                     .font(BFDesignSystem.Typography.bodyLarge)
-                    .multilineTextAlignment(.center)
                     .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                    .multilineTextAlignment(.center)
                     .padding(.horizontal, BFDesignSystem.Layout.Spacing.large)
             }
-        }
-        .onAppear {
-            isAnimating = true
-        }
-    }
-}
-
-struct ProfileSetupStep: View {
-    @Binding var username: String
-    @FocusState private var isUsernameFocused: Bool
-    
-    var body: some View {
-        VStack(spacing: BFDesignSystem.Layout.Spacing.xxLarge) {
-            Image(systemName: "person.crop.circle.fill.badge.plus")
-                .font(.system(size: BFDesignSystem.Layout.Size.iconLarge))
-                .foregroundColor(BFDesignSystem.Colors.primary)
-                .symbolRenderingMode(.hierarchical)
             
-            VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
-                Text("What's your name?")
-                    .font(BFDesignSystem.Typography.titleLarge)
+            // Dynamic Content
+            switch step.type {
+            case .welcome:
+                WelcomeStepContent()
                 
-                TextField("Enter your name", text: $username)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .font(BFDesignSystem.Typography.bodyLarge)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, BFDesignSystem.Layout.Spacing.xxLarge)
-                    .focused($isUsernameFocused)
-                
-                Text("This helps personalize your experience")
-                    .font(BFDesignSystem.Typography.bodyMedium)
-                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
-            }
-        }
-        .onAppear {
-            isUsernameFocused = true
-        }
-    }
-}
-
-struct GoalSettingStep: View {
-    @Binding var dailyLimit: String
-    @FocusState private var isDailyLimitFocused: Bool
-    
-    var body: some View {
-        VStack(spacing: BFDesignSystem.Layout.Spacing.xxLarge) {
-            Image(systemName: "target")
-                .font(.system(size: BFDesignSystem.Layout.Size.iconLarge))
-                .foregroundStyle(
-                    .linearGradient(
-                        colors: [BFDesignSystem.Colors.primary, BFDesignSystem.Colors.secondary],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
+            case .goalSelection(let options):
+                GoalSelectionContent(
+                    options: options,
+                    selectedGoal: $viewModel.selectedGoal
                 )
-                .symbolRenderingMode(.hierarchical)
-            
-            VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
-                Text("Set Your Daily Limit")
-                    .font(BFDesignSystem.Typography.titleLarge)
                 
-                HStack {
-                    Text("$")
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
-                    
-                    TextField("Amount", text: $dailyLimit)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .font(BFDesignSystem.Typography.bodyLarge)
-                        .multilineTextAlignment(.center)
-                        .keyboardType(.decimalPad)
-                        .focused($isDailyLimitFocused)
-                }
-                .padding(.horizontal, BFDesignSystem.Layout.Spacing.xxLarge)
+            case .situationInput(let fields):
+                SituationInputContent(
+                    fields: fields,
+                    inputs: $viewModel.situationInputs
+                )
                 
-                Text("You can adjust this anytime in settings")
-                    .font(BFDesignSystem.Typography.bodyMedium)
-                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
+            case .supportSelection(let options):
+                SupportSelectionContent(
+                    options: options,
+                    selectedSupports: $viewModel.selectedSupports
+                )
+                
+            case .commitmentLevel(let sliders):
+                CommitmentLevelContent(
+                    sliders: sliders,
+                    commitmentLevels: $viewModel.commitmentLevels
+                )
             }
         }
-        .onAppear {
-            isDailyLimitFocused = true
+        .padding()
+    }
+}
+
+// MARK: - Step Content Views
+struct WelcomeStepContent: View {
+    var body: some View {
+        VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+            // Success Stats
+            HStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+                StatCard(value: "10K+", label: "Members")
+                StatCard(value: "87%", label: "Success Rate")
+            }
+            
+            // Testimonial
+            TestimonialCard(
+                quote: "This app changed my life. I'm 6 months free and counting!",
+                author: "John D."
+            )
         }
     }
 }
 
-struct NavigationButtons: View {
+struct GoalSelectionContent: View {
+    let options: [String]
+    @Binding var selectedGoal: String?
+    
+    var body: some View {
+        VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
+            ForEach(options, id: \.self) { option in
+                SelectableCard(
+                    title: option,
+                    isSelected: selectedGoal == option,
+                    action: { selectedGoal = option }
+                )
+            }
+        }
+    }
+}
+
+struct SituationInputContent: View {
+    let fields: [OnboardingStep.InputField]
+    @Binding var inputs: [String: String]
+    
+    var body: some View {
+        VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+            ForEach(fields, id: \.title) { field in
+                InputField(
+                    title: field.title,
+                    text: Binding(
+                        get: { inputs[field.title] ?? "" },
+                        set: { inputs[field.title] = $0 }
+                    ),
+                    placeholder: field.placeholder,
+                    prefix: field.prefix,
+                    keyboardType: field.keyboardType
+                )
+            }
+        }
+    }
+}
+
+struct SupportSelectionContent: View {
+    let options: [String]
+    @Binding var selectedSupports: Set<String>
+    
+    var body: some View {
+        VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
+            ForEach(options, id: \.self) { option in
+                SelectableCard(
+                    title: option,
+                    isSelected: selectedSupports.contains(option),
+                    action: {
+                        if selectedSupports.contains(option) {
+                            selectedSupports.remove(option)
+                        } else {
+                            selectedSupports.insert(option)
+                        }
+                    }
+                )
+            }
+        }
+    }
+}
+
+struct CommitmentLevelContent: View {
+    let sliders: [OnboardingStep.SliderOption]
+    @Binding var commitmentLevels: [String: Double]
+    
+    var body: some View {
+        VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+            ForEach(sliders, id: \.title) { slider in
+                VStack(alignment: .leading, spacing: BFDesignSystem.Layout.Spacing.small) {
+                    Text(slider.title)
+                        .font(BFDesignSystem.Typography.bodyMedium)
+                    
+                    HStack {
+                        Slider(
+                            value: Binding(
+                                get: { commitmentLevels[slider.title] ?? slider.range.lowerBound },
+                                set: { commitmentLevels[slider.title] = $0 }
+                            ),
+                            in: slider.range,
+                            step: slider.step
+                        )
+                        .tint(BFDesignSystem.Colors.primary)
+                        
+                        Text(String(format: slider.format, commitmentLevels[slider.title] ?? slider.range.lowerBound))
+                            .font(BFDesignSystem.Typography.bodyMedium)
+                            .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                            .frame(width: 60)
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Navigation
+struct OnboardingNavigation: View {
     let currentStep: Int
-    let maxSteps: Int
-    let isNextDisabled: Bool
+    let totalSteps: Int
+    let isNextEnabled: Bool
     let onNext: () -> Void
     let onBack: () -> Void
     
@@ -302,107 +326,224 @@ struct NavigationButtons: View {
             
             Button(action: onNext) {
                 HStack {
-                    Text(currentStep == maxSteps ? "Start Free Trial" : "Continue")
-                    if currentStep < maxSteps {
-                        Image(systemName: "chevron.right")
-                    }
+                    Text(currentStep == totalSteps - 1 ? "Get Started" : "Continue")
+                    Image(systemName: "chevron.right")
                 }
                 .font(BFDesignSystem.Typography.headlineMedium)
                 .foregroundColor(.white)
                 .padding(.horizontal, BFDesignSystem.Layout.Spacing.large)
                 .padding(.vertical, BFDesignSystem.Layout.Spacing.medium)
                 .background(
-                    isNextDisabled ? BFDesignSystem.Colors.primary.opacity(0.5) : BFDesignSystem.Colors.primary
+                    isNextEnabled ? BFDesignSystem.Colors.primary : BFDesignSystem.Colors.primary.opacity(0.5)
                 )
                 .cornerRadius(BFDesignSystem.Layout.CornerRadius.button)
             }
-            .disabled(isNextDisabled)
+            .disabled(!isNextEnabled)
         }
         .padding(.horizontal)
     }
 }
 
-struct PaywallView: View {
-    @Binding var isPresented: Bool
-    let onSubscribe: () -> Void
+// MARK: - Supporting Views
+struct StatCard: View {
+    let value: String
+    let label: String
     
     var body: some View {
-        VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
-            // Header
-            VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
-                Text("Unlock Full Access")
-                    .font(BFDesignSystem.Typography.titleLarge)
-                
-                Text("Start your journey to recovery today")
-                    .font(BFDesignSystem.Typography.bodyLarge)
-                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
-            }
+        VStack(spacing: BFDesignSystem.Layout.Spacing.xxSmall) {
+            Text(value)
+                .font(BFDesignSystem.Typography.titleLarge)
+                .foregroundColor(BFDesignSystem.Colors.primary)
             
-            // Features
-            VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
-                FeatureRow(icon: "chart.line.uptrend.xyaxis", text: "Detailed progress tracking")
-                FeatureRow(icon: "bell.fill", text: "Custom notifications and reminders")
-                FeatureRow(icon: "person.fill", text: "24/7 professional support access")
-                FeatureRow(icon: "lock.fill", text: "Privacy focused, secure data")
-            }
-            .padding()
-            
-            // Pricing
-            VStack(spacing: BFDesignSystem.Layout.Spacing.small) {
-                Text("$9.99/month")
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
-                
-                Text("after 7-day free trial")
-                    .font(BFDesignSystem.Typography.bodyMedium)
-                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
-            }
-            
-            // Buttons
-            VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
-                Button(action: {
-                    onSubscribe()
-                }) {
-                    Text("Start 7-Day Free Trial")
-                        .font(BFDesignSystem.Typography.headlineMedium)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(BFDesignSystem.Colors.primary)
-                        .cornerRadius(BFDesignSystem.Layout.CornerRadius.button)
-                }
-                
-                Button("Restore Purchase") {
-                    // TODO: Implement restore purchase
-                }
-                .font(BFDesignSystem.Typography.bodyMedium)
-                .foregroundColor(BFDesignSystem.Colors.textSecondary)
-            }
-            
-            // Terms
-            Text("Cancel anytime. Terms apply.")
+            Text(label)
                 .font(BFDesignSystem.Typography.bodySmall)
                 .foregroundColor(BFDesignSystem.Colors.textSecondary)
         }
         .padding()
-        .background(BFDesignSystem.Colors.background)
+        .background(BFDesignSystem.Colors.cardBackground)
+        .cornerRadius(BFDesignSystem.Layout.CornerRadius.medium)
     }
 }
 
-struct FeatureRow: View {
-    let icon: String
-    let text: String
+struct TestimonialCard: View {
+    let quote: String
+    let author: String
     
     var body: some View {
-        HStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
-            Image(systemName: icon)
+        VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
+            Text(""")
+                .font(.system(size: 48))
                 .foregroundColor(BFDesignSystem.Colors.primary)
-                .frame(width: BFDesignSystem.Layout.Size.iconMedium)
             
-            Text(text)
+            Text(quote)
                 .font(BFDesignSystem.Typography.bodyLarge)
+                .multilineTextAlignment(.center)
+                .foregroundColor(BFDesignSystem.Colors.textPrimary)
             
-            Spacer()
+            Text("- \(author)")
+                .font(BFDesignSystem.Typography.bodyMedium)
+                .foregroundColor(BFDesignSystem.Colors.textSecondary)
         }
+        .padding()
+        .background(BFDesignSystem.Colors.cardBackground)
+        .cornerRadius(BFDesignSystem.Layout.CornerRadius.large)
+    }
+}
+
+struct SelectableCard: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Text(title)
+                    .font(BFDesignSystem.Typography.bodyLarge)
+                    .foregroundColor(isSelected ? .white : BFDesignSystem.Colors.textPrimary)
+                
+                Spacer()
+                
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(isSelected ? .white : BFDesignSystem.Colors.textSecondary)
+            }
+            .padding()
+            .background(isSelected ? BFDesignSystem.Colors.primary : BFDesignSystem.Colors.cardBackground)
+            .cornerRadius(BFDesignSystem.Layout.CornerRadius.medium)
+            .animation(.spring(), value: isSelected)
+        }
+    }
+}
+
+struct InputField: View {
+    let title: String
+    @Binding var text: String
+    let placeholder: String
+    let prefix: String?
+    let keyboardType: UIKeyboardType
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: BFDesignSystem.Layout.Spacing.small) {
+            Text(title)
+                .font(BFDesignSystem.Typography.bodyMedium)
+            
+            HStack {
+                if let prefix = prefix {
+                    Text(prefix)
+                        .font(BFDesignSystem.Typography.bodyLarge)
+                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                }
+                
+                TextField(placeholder, text: $text)
+                    .keyboardType(keyboardType)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .font(BFDesignSystem.Typography.bodyLarge)
+            }
+        }
+    }
+}
+
+// MARK: - ViewModel
+class OnboardingViewModel: ObservableObject {
+    @Published var currentStep = 0
+    @Published var selectedGoal: String?
+    @Published var situationInputs: [String: String] = [:]
+    @Published var selectedSupports: Set<String> = []
+    @Published var commitmentLevels: [String: Double] = [:]
+    @Published var showPaywall = false
+    
+    let steps = [
+        OnboardingStep(
+            title: "Your Journey Starts Here",
+            subtitle: "Join thousands of others taking control of their lives",
+            image: "heart.fill",
+            imageColor: BFDesignSystem.Colors.accent,
+            background: BFDesignSystem.Colors.accent.opacity(0.1),
+            type: .welcome
+        ),
+        OnboardingStep(
+            title: "What's Your Goal?",
+            subtitle: "Choose what matters most to you",
+            image: "target",
+            imageColor: BFDesignSystem.Colors.primary,
+            background: BFDesignSystem.Colors.primary.opacity(0.1),
+            type: .goalSelection(options: [
+                "Save Money",
+                "Build Better Habits",
+                "Support Family",
+                "Reduce Stress"
+            ])
+        ),
+        OnboardingStep(
+            title: "Your Starting Point",
+            subtitle: "Understanding where you are helps us personalize your journey",
+            image: "figure.walk",
+            imageColor: BFDesignSystem.Colors.secondary,
+            background: BFDesignSystem.Colors.secondary.opacity(0.1),
+            type: .situationInput(fields: [
+                .init(title: "Weekly Spend", placeholder: "Enter amount", keyboardType: .decimalPad, prefix: "$"),
+                .init(title: "Main Trigger", placeholder: "e.g., Stress, Boredom", keyboardType: .default, prefix: nil)
+            ])
+        ),
+        OnboardingStep(
+            title: "You're Not Alone",
+            subtitle: "Choose your support preferences",
+            image: "hands.sparkles",
+            imageColor: BFDesignSystem.Colors.success,
+            background: BFDesignSystem.Colors.success.opacity(0.1),
+            type: .supportSelection(options: [
+                "Daily Check-ins",
+                "Progress Tracking",
+                "Community Support",
+                "Expert Guidance"
+            ])
+        ),
+        OnboardingStep(
+            title: "Set Your Pace",
+            subtitle: "Start with achievable goals",
+            image: "chart.line.uptrend.xyaxis",
+            imageColor: BFDesignSystem.Colors.info,
+            background: BFDesignSystem.Colors.info.opacity(0.1),
+            type: .commitmentLevel(sliders: [
+                .init(title: "Daily Time Commitment (minutes)", range: 5...60, step: 5, format: "%.0f min"),
+                .init(title: "Weekly Savings Goal", range: 10...500, step: 10, format: "$%.0f")
+            ])
+        )
+    ]
+    
+    var canProceed: Bool {
+        switch steps[currentStep].type {
+        case .welcome:
+            return true
+        case .goalSelection:
+            return selectedGoal != nil
+        case .situationInput:
+            return !situationInputs.isEmpty && situationInputs.values.allSatisfy { !$0.isEmpty }
+        case .supportSelection:
+            return !selectedSupports.isEmpty
+        case .commitmentLevel:
+            return !commitmentLevels.isEmpty
+        }
+    }
+    
+    func nextStep() {
+        if currentStep < steps.count - 1 {
+            currentStep += 1
+        } else {
+            showPaywall = true
+        }
+    }
+    
+    func previousStep() {
+        if currentStep > 0 {
+            currentStep -= 1
+        }
+    }
+    
+    func completeOnboarding() {
+        // Save all collected data
+        // Update app state
+        showPaywall = false
     }
 }
 
