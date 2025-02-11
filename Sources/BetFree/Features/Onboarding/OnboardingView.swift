@@ -371,7 +371,7 @@ struct TestimonialCard: View {
     
     var body: some View {
         VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
-            Text(""")
+            Text(verbatim: """")
                 .font(.system(size: 48))
                 .foregroundColor(BFDesignSystem.Colors.primary)
             
