@@ -134,22 +134,30 @@ struct OnboardingProgressHeader: View {
                     // Background
                     RoundedRectangle(cornerRadius: BFDesignSystem.Layout.CornerRadius.small)
                         .fill(BFDesignSystem.Colors.cardBackground)
+                        .withShadow(BFDesignSystem.Layout.Shadow.small)
                         .frame(height: 4)
                     
                     // Progress
                     RoundedRectangle(cornerRadius: BFDesignSystem.Layout.CornerRadius.small)
-                        .fill(BFDesignSystem.Colors.primary)
+                        .fill(BFDesignSystem.Colors.primaryGradient)
                         .frame(width: geometry.size.width * CGFloat(currentStep + 1) / CGFloat(totalSteps), height: 4)
-                        .animation(.spring(), value: currentStep)
+                        .animation(BFDesignSystem.Layout.Animation.spring, value: currentStep)
                 }
             }
             .frame(height: 4)
             .padding(.horizontal)
             
             // Step Counter
-            Text("Step \(currentStep + 1) of \(totalSteps)")
-                .font(BFDesignSystem.Typography.caption)
-                .foregroundColor(BFDesignSystem.Colors.textSecondary)
+            HStack(spacing: BFDesignSystem.Layout.Spacing.small) {
+                Text("Step \(currentStep + 1)")
+                    .font(BFDesignSystem.Typography.button)
+                    .foregroundStyle(BFDesignSystem.Colors.primaryGradient)
+                
+                Text("of \(totalSteps)")
+                    .font(BFDesignSystem.Typography.caption)
+                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
+            }
+            .animation(BFDesignSystem.Layout.Animation.spring, value: currentStep)
         }
     }
 }
@@ -159,6 +167,7 @@ struct OnboardingStepView: View {
     let step: OnboardingStep
     @ObservedObject var viewModel: OnboardingViewModel
     @State private var isAnimating = false
+    @State private var showContent = false
     
     var body: some View {
         VStack(spacing: BFDesignSystem.Layout.Spacing.xxLarge) {
@@ -167,68 +176,95 @@ struct OnboardingStepView: View {
                 Circle()
                     .fill(step.background)
                     .frame(width: BFDesignSystem.Layout.Size.progressCircleLarge, height: BFDesignSystem.Layout.Size.progressCircleLarge)
+                    .opacity(isAnimating ? 1 : 0)
+                    .scaleEffect(isAnimating ? 1 : 0.8)
                 
                 Image(systemName: step.image)
-                    .font(.system(size: BFDesignSystem.Layout.Size.iconLarge, weight: .medium))
-                    .foregroundColor(step.imageColor)
-                    .scaleEffect(isAnimating ? 1.1 : 1.0)
+                    .font(.system(size: BFDesignSystem.Layout.Size.iconXLarge, weight: .medium))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [step.imageColor, step.imageColor.opacity(0.8)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .scaleEffect(isAnimating ? 1.1 : 0.9)
+                    .opacity(isAnimating ? 1 : 0)
                     .animation(
                         Animation.easeInOut(duration: 1.5)
                             .repeatForever(autoreverses: true),
                         value: isAnimating
                     )
             }
-            .onAppear {
-                isAnimating = true
-            }
-            .onChange(of: viewModel.currentStep) { _ in
-                isAnimating = true
-            }
+            .animation(BFDesignSystem.Layout.Animation.spring, value: isAnimating)
             
             // Title & Subtitle
             VStack(spacing: BFDesignSystem.Layout.Spacing.small) {
                 Text(step.title)
                     .font(BFDesignSystem.Typography.titleLarge)
+                    .foregroundStyle(BFDesignSystem.Colors.primaryGradient)
                     .multilineTextAlignment(.center)
+                    .opacity(showContent ? 1 : 0)
+                    .offset(y: showContent ? 0 : 20)
                 
                 Text(step.subtitle)
                     .font(BFDesignSystem.Typography.bodyLarge)
                     .foregroundColor(BFDesignSystem.Colors.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, BFDesignSystem.Layout.Spacing.large)
+                    .opacity(showContent ? 1 : 0)
+                    .offset(y: showContent ? 0 : 20)
             }
+            .animation(BFDesignSystem.Layout.Animation.springWithDelay(0.2), value: showContent)
             
             // Dynamic Content
-            switch step.type {
-            case .welcome:
-                WelcomeStepContent()
+            VStack {
+                switch step.type {
+                case .welcome:
+                    WelcomeStepContent()
                 
-            case .goalSelection(let options):
-                GoalSelectionContent(
-                    options: options,
-                    selectedGoal: $viewModel.selectedGoal
-                )
+                case .goalSelection(let options):
+                    GoalSelectionContent(
+                        options: options,
+                        selectedGoal: $viewModel.selectedGoal
+                    )
                 
-            case .situationInput(let fields):
-                SituationInputContent(
-                    fields: fields,
-                    inputs: $viewModel.situationInputs
-                )
+                case .situationInput(let fields):
+                    SituationInputContent(
+                        fields: fields,
+                        inputs: $viewModel.situationInputs
+                    )
                 
-            case .supportSelection(let options):
-                SupportSelectionContent(
-                    options: options,
-                    selectedSupports: $viewModel.selectedSupports
-                )
+                case .supportSelection(let options):
+                    SupportSelectionContent(
+                        options: options,
+                        selectedSupports: $viewModel.selectedSupports
+                    )
                 
-            case .commitmentLevel(let sliders):
-                CommitmentLevelContent(
-                    sliders: sliders,
-                    commitmentLevels: $viewModel.commitmentLevels
-                )
+                case .commitmentLevel(let sliders):
+                    CommitmentLevelContent(
+                        sliders: sliders,
+                        commitmentLevels: $viewModel.commitmentLevels
+                    )
+                }
             }
+            .opacity(showContent ? 1 : 0)
+            .offset(y: showContent ? 0 : 30)
+            .animation(BFDesignSystem.Layout.Animation.springWithDelay(0.4), value: showContent)
         }
         .padding()
+        .onAppear {
+            isAnimating = true
+            withAnimation(BFDesignSystem.Layout.Animation.spring) {
+                showContent = true
+            }
+        }
+        .onChange(of: viewModel.currentStep) { _ in
+            isAnimating = true
+            withAnimation(BFDesignSystem.Layout.Animation.spring) {
+                showContent = true
+            }
+        }
     }
 }
 
@@ -353,36 +389,56 @@ struct OnboardingNavigation: View {
     let isNextEnabled: Bool
     let onNext: () -> Void
     let onBack: () -> Void
+    @State private var isNextHovered = false
+    @State private var isBackHovered = false
     
     var body: some View {
         HStack {
             if currentStep > 0 {
                 Button(action: onBack) {
-                    HStack {
+                    HStack(spacing: BFDesignSystem.Layout.Spacing.small) {
                         Image(systemName: "chevron.left")
+                            .font(.system(size: BFDesignSystem.Layout.Size.iconMedium))
                         Text("Back")
+                            .font(BFDesignSystem.Typography.button)
                     }
                     .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                    .scaleEffect(isBackHovered ? 1.05 : 1.0)
+                }
+                .buttonStyle(.plain)
+                .onHover { hovering in
+                    withAnimation(BFDesignSystem.Layout.Animation.spring) {
+                        isBackHovered = hovering
+                    }
                 }
             }
             
             Spacer()
             
             Button(action: onNext) {
-                HStack {
+                HStack(spacing: BFDesignSystem.Layout.Spacing.small) {
                     Text(currentStep == totalSteps - 1 ? "Get Started" : "Continue")
+                        .font(BFDesignSystem.Typography.button)
                     Image(systemName: "chevron.right")
+                        .font(.system(size: BFDesignSystem.Layout.Size.iconMedium))
                 }
-                .font(BFDesignSystem.Typography.headlineMedium)
                 .foregroundColor(.white)
+                .frame(height: BFDesignSystem.Layout.Size.buttonHeight)
                 .padding(.horizontal, BFDesignSystem.Layout.Spacing.large)
-                .padding(.vertical, BFDesignSystem.Layout.Spacing.medium)
                 .background(
-                    isNextEnabled ? BFDesignSystem.Colors.primary : BFDesignSystem.Colors.primary.opacity(0.5)
+                    isNextEnabled ? BFDesignSystem.Colors.primaryGradient : BFDesignSystem.Colors.textTertiary
                 )
                 .cornerRadius(BFDesignSystem.Layout.CornerRadius.button)
+                .withShadow(isNextEnabled ? BFDesignSystem.Layout.Shadow.button : BFDesignSystem.Layout.Shadow.small)
+                .scaleEffect(isNextHovered && isNextEnabled ? 1.05 : 1.0)
             }
+            .buttonStyle(.plain)
             .disabled(!isNextEnabled)
+            .onHover { hovering in
+                withAnimation(BFDesignSystem.Layout.Animation.spring) {
+                    isNextHovered = hovering
+                }
+            }
         }
         .padding(.horizontal)
     }
@@ -515,78 +571,139 @@ public struct BFInputField: View {
 private struct PaywallView: View {
     @Binding var isPresented: Bool
     let onSubscribe: () -> Void
+    @State private var isAnimating = false
+    @State private var showFeatures = false
+    @State private var showButtons = false
     
     var body: some View {
         VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
             // Header
             VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
                 Text("Unlock Full Access")
-                    .font(BFDesignSystem.Typography.titleLarge)
+                    .font(BFDesignSystem.Typography.display)
+                    .foregroundStyle(BFDesignSystem.Colors.primaryGradient)
                     .multilineTextAlignment(.center)
+                    .scaleEffect(isAnimating ? 1 : 0.8)
+                    .opacity(isAnimating ? 1 : 0)
                 
                 Text("Start your journey to a better life today")
-                    .font(BFDesignSystem.Typography.bodyLarge)
+                    .font(BFDesignSystem.Typography.titleSmall)
                     .foregroundColor(BFDesignSystem.Colors.textSecondary)
                     .multilineTextAlignment(.center)
+                    .scaleEffect(isAnimating ? 1 : 0.8)
+                    .opacity(isAnimating ? 1 : 0)
             }
-            .padding(.top)
+            .padding(.top, BFDesignSystem.Layout.Spacing.xxLarge)
             
             // Features
             VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
-                FeatureRow(icon: "chart.line.uptrend.xyaxis", text: "Personalized Progress Tracking")
-                FeatureRow(icon: "target", text: "Custom Goal Setting")
-                FeatureRow(icon: "bell", text: "Smart Reminders")
-                FeatureRow(icon: "sparkles", text: "Premium Resources")
+                ForEach(Array(["chart.line.uptrend.xyaxis", "target", "bell", "sparkles"].enumerated()), id: \.0) { index, icon in
+                    FeatureRow(
+                        icon: icon,
+                        text: [
+                            "Personalized Progress Tracking",
+                            "Custom Goal Setting",
+                            "Smart Reminders",
+                            "Premium Resources"
+                        ][index]
+                    )
+                    .offset(x: showFeatures ? 0 : -50)
+                    .opacity(showFeatures ? 1 : 0)
+                    .animation(
+                        BFDesignSystem.Layout.Animation.springWithDelay(Double(index) * 0.1),
+                        value: showFeatures
+                    )
+                }
             }
-            .padding(.vertical)
+            .padding(.vertical, BFDesignSystem.Layout.Spacing.large)
             
             // Subscription Button
-            Button(action: onSubscribe) {
+            Button(action: {
+                withAnimation(BFDesignSystem.Layout.Animation.spring) {
+                    onSubscribe()
+                }
+            }) {
                 Text("Start Free Trial")
-                    .font(BFDesignSystem.Typography.headlineMedium)
+                    .font(BFDesignSystem.Typography.button)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(BFDesignSystem.Colors.primary)
+                    .frame(height: BFDesignSystem.Layout.Size.buttonHeight)
+                    .background(BFDesignSystem.Colors.primaryGradient)
                     .cornerRadius(BFDesignSystem.Layout.CornerRadius.button)
+                    .withShadow(BFDesignSystem.Layout.Shadow.button)
             }
+            .scaleEffect(showButtons ? 1 : 0.8)
+            .opacity(showButtons ? 1 : 0)
             
             // Terms
             Text("7-day free trial, then $9.99/month. Cancel anytime.")
                 .font(BFDesignSystem.Typography.caption)
                 .foregroundColor(BFDesignSystem.Colors.textSecondary)
                 .multilineTextAlignment(.center)
+                .opacity(showButtons ? 1 : 0)
             
             // Dismiss Button
             Button("Maybe Later") {
-                isPresented = false
+                withAnimation(BFDesignSystem.Layout.Animation.spring) {
+                    isPresented = false
+                }
             }
-            .font(BFDesignSystem.Typography.bodyMedium)
+            .font(BFDesignSystem.Typography.button)
             .foregroundColor(BFDesignSystem.Colors.textSecondary)
+            .opacity(showButtons ? 1 : 0)
+            .padding(.top, BFDesignSystem.Layout.Spacing.medium)
         }
-        .padding()
-        .background(BFDesignSystem.Colors.background)
-        .cornerRadius(BFDesignSystem.Layout.CornerRadius.large)
-        .shadow(radius: 20)
-        .padding()
+        .padding(BFDesignSystem.Layout.Spacing.xxLarge)
+        .background(BFDesignSystem.Colors.cardBackground)
+        .cornerRadius(BFDesignSystem.Layout.CornerRadius.xLarge)
+        .withShadow(BFDesignSystem.Layout.Shadow.large)
+        .padding(.horizontal, BFDesignSystem.Layout.Spacing.large)
+        .onAppear {
+            withAnimation(BFDesignSystem.Layout.Animation.spring) {
+                isAnimating = true
+            }
+            
+            withAnimation(BFDesignSystem.Layout.Animation.springWithDelay(0.3)) {
+                showFeatures = true
+            }
+            
+            withAnimation(BFDesignSystem.Layout.Animation.springWithDelay(0.6)) {
+                showButtons = true
+            }
+        }
     }
 }
 
 private struct FeatureRow: View {
     let icon: String
     let text: String
+    @State private var isHovered = false
     
     var body: some View {
         HStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
             Image(systemName: icon)
-                .font(.system(size: 24))
-                .foregroundColor(BFDesignSystem.Colors.primary)
-                .frame(width: 32)
+                .font(.system(size: BFDesignSystem.Layout.Size.iconLarge))
+                .foregroundStyle(BFDesignSystem.Colors.primaryGradient)
+                .frame(width: BFDesignSystem.Layout.Size.iconXLarge)
+                .scaleEffect(isHovered ? 1.1 : 1.0)
+                .animation(BFDesignSystem.Layout.Animation.spring, value: isHovered)
             
             Text(text)
                 .font(BFDesignSystem.Typography.bodyLarge)
+                .foregroundColor(BFDesignSystem.Colors.textPrimary)
             
             Spacer()
+        }
+        .padding(BFDesignSystem.Layout.Spacing.medium)
+        .background(
+            RoundedRectangle(cornerRadius: BFDesignSystem.Layout.CornerRadius.medium)
+                .fill(BFDesignSystem.Colors.cardBackground)
+                .withShadow(isHovered ? BFDesignSystem.Layout.Shadow.medium : BFDesignSystem.Layout.Shadow.small)
+        )
+        .onHover { hovering in
+            withAnimation(BFDesignSystem.Layout.Animation.spring) {
+                isHovered = hovering
+            }
         }
     }
 }
