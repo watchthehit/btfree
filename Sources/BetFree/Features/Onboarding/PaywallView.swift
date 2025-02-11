@@ -1,15 +1,35 @@
 import SwiftUI
+import ComposableArchitecture
 
-public struct PaywallView: View {
-    @Binding var isPresented: Bool
+class PaywallViewModel: ObservableObject {
+    @Published var isPresented: Bool
     let onSubscribe: () -> Void
     
-    public init(isPresented: Binding<Bool>, onSubscribe: @escaping () -> Void) {
-        self._isPresented = isPresented
+    init(isPresented: Bool, onSubscribe: @escaping () -> Void) {
+        self.isPresented = isPresented
         self.onSubscribe = onSubscribe
     }
     
-    public var body: some View {
+    func dismiss() {
+        isPresented = false
+    }
+    
+    func subscribe() {
+        onSubscribe()
+    }
+}
+
+struct PaywallView: View {
+    @StateObject private var viewModel: PaywallViewModel
+    
+    init(isPresented: Binding<Bool>, onSubscribe: @escaping () -> Void) {
+        _viewModel = StateObject(wrappedValue: PaywallViewModel(
+            isPresented: isPresented.wrappedValue,
+            onSubscribe: onSubscribe
+        ))
+    }
+    
+    var body: some View {
         VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
             // Header
             VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
@@ -34,9 +54,7 @@ public struct PaywallView: View {
             .padding(.vertical)
             
             // Subscription Button
-            Button(action: {
-                onSubscribe()
-            }) {
+            Button(action: viewModel.subscribe) {
                 Text("Start Free Trial")
                     .font(BFDesignSystem.Typography.headlineMedium)
                     .foregroundColor(.white)
@@ -53,11 +71,9 @@ public struct PaywallView: View {
                 .multilineTextAlignment(.center)
             
             // Dismiss Button
-            Button("Maybe Later") {
-                isPresented = false
-            }
-            .font(BFDesignSystem.Typography.bodyMedium)
-            .foregroundColor(BFDesignSystem.Colors.textSecondary)
+            Button("Maybe Later", action: viewModel.dismiss)
+                .font(BFDesignSystem.Typography.bodyMedium)
+                .foregroundColor(BFDesignSystem.Colors.textSecondary)
         }
         .padding()
         .background(BFDesignSystem.Colors.background)
