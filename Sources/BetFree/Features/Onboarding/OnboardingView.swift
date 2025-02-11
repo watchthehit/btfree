@@ -33,7 +33,7 @@ public struct OnboardingView: View {
     
     public var body: some View {
         ZStack {
-            VStack(spacing: BFDesignSystem.Spacing.large) {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
                 // Skip Button
                 if currentStep < onboardingSteps.count {
                     HStack {
@@ -74,10 +74,10 @@ public struct OnboardingView: View {
                 Spacer()
                 
                 // Progress & Navigation
-                VStack(spacing: BFDesignSystem.Spacing.medium) {
+                VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
                     if currentStep < onboardingSteps.count {
                         // Progress Dots
-                        HStack(spacing: BFDesignSystem.Spacing.small) {
+                        HStack(spacing: BFDesignSystem.Layout.Spacing.small) {
                             ForEach(0..<onboardingSteps.count, id: \.self) { index in
                                 Circle()
                                     .fill(currentStep == index ? BFDesignSystem.Colors.primary : BFDesignSystem.Colors.cardBackground)
@@ -163,16 +163,16 @@ struct FeatureStep: View {
     @State private var isAnimating = false
     
     var body: some View {
-        VStack(spacing: BFDesignSystem.Spacing.xxLarge) {
+        VStack(spacing: BFDesignSystem.Layout.Spacing.xxLarge) {
             // Image
             ZStack {
                 Circle()
                     .fill(step.background)
-                    .frame(width: 240, height: 240)
+                    .frame(width: BFDesignSystem.Layout.Size.progressCircleLarge, height: BFDesignSystem.Layout.Size.progressCircleLarge)
                     .scaleEffect(isAnimating ? 1.1 : 1.0)
                 
                 Image(systemName: step.image)
-                    .font(.system(size: 80, weight: .medium))
+                    .font(.system(size: BFDesignSystem.Layout.Size.iconLarge, weight: .medium))
                     .foregroundColor(step.imageColor)
                     .offset(y: isAnimating ? -5 : 5)
             }
@@ -182,16 +182,16 @@ struct FeatureStep: View {
             )
             
             // Text
-            VStack(spacing: BFDesignSystem.Spacing.medium) {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
                 Text(step.title)
-                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                    .font(BFDesignSystem.Typography.titleLarge)
                     .multilineTextAlignment(.center)
                 
                 Text(step.subtitle)
                     .font(BFDesignSystem.Typography.bodyLarge)
                     .multilineTextAlignment(.center)
                     .foregroundColor(BFDesignSystem.Colors.textSecondary)
-                    .padding(.horizontal, BFDesignSystem.Spacing.large)
+                    .padding(.horizontal, BFDesignSystem.Layout.Spacing.large)
             }
         }
         .onAppear {
@@ -205,21 +205,21 @@ struct ProfileSetupStep: View {
     @FocusState private var isUsernameFocused: Bool
     
     var body: some View {
-        VStack(spacing: BFDesignSystem.Spacing.xxLarge) {
+        VStack(spacing: BFDesignSystem.Layout.Spacing.xxLarge) {
             Image(systemName: "person.crop.circle.fill.badge.plus")
-                .font(.system(size: 80))
+                .font(.system(size: BFDesignSystem.Layout.Size.iconLarge))
                 .foregroundColor(BFDesignSystem.Colors.primary)
                 .symbolRenderingMode(.hierarchical)
             
-            VStack(spacing: BFDesignSystem.Spacing.large) {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
                 Text("What's your name?")
-                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                    .font(BFDesignSystem.Typography.titleLarge)
                 
                 TextField("Enter your name", text: $username)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .font(BFDesignSystem.Typography.bodyLarge)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, BFDesignSystem.Spacing.xxLarge)
+                    .padding(.horizontal, BFDesignSystem.Layout.Spacing.xxLarge)
                     .focused($isUsernameFocused)
                 
                 Text("This helps personalize your experience")
@@ -238,9 +238,9 @@ struct GoalSettingStep: View {
     @FocusState private var isDailyLimitFocused: Bool
     
     var body: some View {
-        VStack(spacing: BFDesignSystem.Spacing.xxLarge) {
+        VStack(spacing: BFDesignSystem.Layout.Spacing.xxLarge) {
             Image(systemName: "target")
-                .font(.system(size: 80))
+                .font(.system(size: BFDesignSystem.Layout.Size.iconLarge))
                 .foregroundStyle(
                     .linearGradient(
                         colors: [BFDesignSystem.Colors.primary, BFDesignSystem.Colors.secondary],
@@ -250,9 +250,9 @@ struct GoalSettingStep: View {
                 )
                 .symbolRenderingMode(.hierarchical)
             
-            VStack(spacing: BFDesignSystem.Spacing.large) {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
                 Text("Set Your Daily Limit")
-                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                    .font(BFDesignSystem.Typography.titleLarge)
                 
                 HStack {
                     Text("$")
@@ -266,7 +266,7 @@ struct GoalSettingStep: View {
                         .keyboardType(.decimalPad)
                         .focused($isDailyLimitFocused)
                 }
-                .padding(.horizontal, BFDesignSystem.Spacing.xxLarge)
+                .padding(.horizontal, BFDesignSystem.Layout.Spacing.xxLarge)
                 
                 Text("You can adjust this anytime in settings")
                     .font(BFDesignSystem.Typography.bodyMedium)
@@ -309,12 +309,12 @@ struct NavigationButtons: View {
                 }
                 .font(BFDesignSystem.Typography.headlineMedium)
                 .foregroundColor(.white)
-                .padding(.horizontal, BFDesignSystem.Spacing.large)
-                .padding(.vertical, BFDesignSystem.Spacing.medium)
+                .padding(.horizontal, BFDesignSystem.Layout.Spacing.large)
+                .padding(.vertical, BFDesignSystem.Layout.Spacing.medium)
                 .background(
                     isNextDisabled ? BFDesignSystem.Colors.primary.opacity(0.5) : BFDesignSystem.Colors.primary
                 )
-                .cornerRadius(BFDesignSystem.CornerRadius.large)
+                .cornerRadius(BFDesignSystem.Layout.CornerRadius.button)
             }
             .disabled(isNextDisabled)
         }
@@ -327,9 +327,9 @@ struct PaywallView: View {
     let onSubscribe: () -> Void
     
     var body: some View {
-        VStack(spacing: BFDesignSystem.Spacing.large) {
+        VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
             // Header
-            VStack(spacing: BFDesignSystem.Spacing.medium) {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
                 Text("Unlock Full Access")
                     .font(BFDesignSystem.Typography.titleLarge)
                 
@@ -339,7 +339,7 @@ struct PaywallView: View {
             }
             
             // Features
-            VStack(spacing: BFDesignSystem.Spacing.medium) {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
                 FeatureRow(icon: "chart.line.uptrend.xyaxis", text: "Detailed progress tracking")
                 FeatureRow(icon: "bell.fill", text: "Custom notifications and reminders")
                 FeatureRow(icon: "person.fill", text: "24/7 professional support access")
@@ -348,7 +348,7 @@ struct PaywallView: View {
             .padding()
             
             // Pricing
-            VStack(spacing: BFDesignSystem.Spacing.small) {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.small) {
                 Text("$9.99/month")
                     .font(.system(size: 34, weight: .bold, design: .rounded))
                 
@@ -358,7 +358,7 @@ struct PaywallView: View {
             }
             
             // Buttons
-            VStack(spacing: BFDesignSystem.Spacing.medium) {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
                 Button(action: {
                     onSubscribe()
                 }) {
@@ -368,7 +368,7 @@ struct PaywallView: View {
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(BFDesignSystem.Colors.primary)
-                        .cornerRadius(BFDesignSystem.CornerRadius.medium)
+                        .cornerRadius(BFDesignSystem.Layout.CornerRadius.button)
                 }
                 
                 Button("Restore Purchase") {
@@ -393,10 +393,10 @@ struct FeatureRow: View {
     let text: String
     
     var body: some View {
-        HStack(spacing: BFDesignSystem.Spacing.medium) {
+        HStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
             Image(systemName: icon)
                 .foregroundColor(BFDesignSystem.Colors.primary)
-                .frame(width: 24)
+                .frame(width: BFDesignSystem.Layout.Size.iconMedium)
             
             Text(text)
                 .font(BFDesignSystem.Typography.bodyLarge)
