@@ -2,6 +2,13 @@ import SwiftUI
 import UIKit
 import ComposableArchitecture
 
+extension Animation {
+    static let defaultSpring = Animation.spring(response: 0.5, dampingFraction: 0.7)
+    static func defaultSpringWithDelay(_ delay: Double) -> Animation {
+        return defaultSpring.delay(delay)
+    }
+}
+
 // MARK: - Models
 public struct OnboardingStep: Identifiable {
     public let id = UUID()
@@ -141,7 +148,7 @@ struct OnboardingProgressHeader: View {
                     RoundedRectangle(cornerRadius: BFDesignSystem.Layout.CornerRadius.small)
                         .fill(BFDesignSystem.Colors.primaryGradient)
                         .frame(width: geometry.size.width * CGFloat(currentStep + 1) / CGFloat(totalSteps), height: 4)
-                        .animation(BFDesignSystem.Layout.Animation.spring, value: currentStep)
+                        .animation(.defaultSpring, value: currentStep)
                 }
             }
             .frame(height: 4)
@@ -157,7 +164,7 @@ struct OnboardingProgressHeader: View {
                     .font(BFDesignSystem.Typography.caption)
                     .foregroundColor(BFDesignSystem.Colors.textSecondary)
             }
-            .animation(BFDesignSystem.Layout.Animation.spring, value: currentStep)
+            .animation(.defaultSpring, value: currentStep)
         }
     }
 }
@@ -180,7 +187,7 @@ struct OnboardingStepView: View {
                     .scaleEffect(isAnimating ? 1 : 0.8)
                 
                 Image(systemName: step.image)
-                    .font(.system(size: BFDesignSystem.Layout.Size.iconXLarge, weight: .medium))
+                    .font(.system(size: 32, weight: .medium))
                     .foregroundStyle(
                         LinearGradient(
                             colors: [step.imageColor, step.imageColor.opacity(0.8)],
@@ -190,13 +197,9 @@ struct OnboardingStepView: View {
                     )
                     .scaleEffect(isAnimating ? 1.1 : 0.9)
                     .opacity(isAnimating ? 1 : 0)
-                    .animation(
-                        Animation.easeInOut(duration: 1.5)
-                            .repeatForever(autoreverses: true),
-                        value: isAnimating
-                    )
+                    .animation(Animation.defaultSpring, value: isAnimating)
             }
-            .animation(BFDesignSystem.Layout.Animation.spring, value: isAnimating)
+            .animation(.defaultSpring, value: isAnimating)
             
             // Title & Subtitle
             VStack(spacing: BFDesignSystem.Layout.Spacing.small) {
@@ -215,7 +218,7 @@ struct OnboardingStepView: View {
                     .opacity(showContent ? 1 : 0)
                     .offset(y: showContent ? 0 : 20)
             }
-            .animation(BFDesignSystem.Layout.Animation.springWithDelay(0.2), value: showContent)
+            .animation(Animation.defaultSpringWithDelay(0.2), value: showContent)
             
             // Dynamic Content
             VStack {
@@ -250,18 +253,18 @@ struct OnboardingStepView: View {
             }
             .opacity(showContent ? 1 : 0)
             .offset(y: showContent ? 0 : 30)
-            .animation(BFDesignSystem.Layout.Animation.springWithDelay(0.4), value: showContent)
+            .animation(Animation.defaultSpringWithDelay(0.4), value: showContent)
         }
         .padding()
         .onAppear {
             isAnimating = true
-            withAnimation(BFDesignSystem.Layout.Animation.spring) {
+            withAnimation(.defaultSpring) {
                 showContent = true
             }
         }
         .onChange(of: viewModel.currentStep) { _ in
             isAnimating = true
-            withAnimation(BFDesignSystem.Layout.Animation.spring) {
+            withAnimation(.defaultSpring) {
                 showContent = true
             }
         }
@@ -372,7 +375,7 @@ struct CommitmentLevelContent: View {
                         .tint(BFDesignSystem.Colors.primary)
                         
                         Text(String(format: slider.format, commitmentLevels[slider.title] ?? slider.range.lowerBound))
-                            .font(BFDesignSystem.Typography.bodyMedium)
+                            .font(BFDesignSystem.Typography.bodyLargeMedium)
                             .foregroundColor(BFDesignSystem.Colors.textSecondary)
                             .frame(width: 60)
                     }
@@ -407,7 +410,7 @@ struct OnboardingNavigation: View {
                 }
                 .buttonStyle(.plain)
                 .onHover { hovering in
-                    withAnimation(BFDesignSystem.Layout.Animation.spring) {
+                    withAnimation(.defaultSpring) {
                         isBackHovered = hovering
                     }
                 }
@@ -426,7 +429,17 @@ struct OnboardingNavigation: View {
                 .frame(height: BFDesignSystem.Layout.Size.buttonHeight)
                 .padding(.horizontal, BFDesignSystem.Layout.Spacing.large)
                 .background(
-                    isNextEnabled ? BFDesignSystem.Colors.primaryGradient : BFDesignSystem.Colors.textTertiary
+                    isNextEnabled ? 
+                        LinearGradient(
+                            colors: [BFDesignSystem.Colors.primary, BFDesignSystem.Colors.primary.opacity(0.8)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ) :
+                        LinearGradient(
+                            colors: [BFDesignSystem.Colors.textSecondary, BFDesignSystem.Colors.textSecondary.opacity(0.8)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
                 )
                 .cornerRadius(BFDesignSystem.Layout.CornerRadius.button)
                 .withShadow(isNextEnabled ? BFDesignSystem.Layout.Shadow.button : BFDesignSystem.Layout.Shadow.small)
@@ -435,7 +448,7 @@ struct OnboardingNavigation: View {
             .buttonStyle(.plain)
             .disabled(!isNextEnabled)
             .onHover { hovering in
-                withAnimation(BFDesignSystem.Layout.Animation.spring) {
+                withAnimation(.defaultSpring) {
                     isNextHovered = hovering
                 }
             }
@@ -619,7 +632,7 @@ private struct PaywallView: View {
             
             // Subscription Button
             Button(action: {
-                withAnimation(BFDesignSystem.Layout.Animation.spring) {
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
                     onSubscribe()
                 }
             }) {
@@ -644,7 +657,7 @@ private struct PaywallView: View {
             
             // Dismiss Button
             Button("Maybe Later") {
-                withAnimation(BFDesignSystem.Layout.Animation.spring) {
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
                     isPresented = false
                 }
             }
@@ -659,11 +672,11 @@ private struct PaywallView: View {
         .withShadow(BFDesignSystem.Layout.Shadow.large)
         .padding(.horizontal, BFDesignSystem.Layout.Spacing.large)
         .onAppear {
-            withAnimation(BFDesignSystem.Layout.Animation.spring) {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
                 isAnimating = true
             }
             
-            withAnimation(BFDesignSystem.Layout.Animation.springWithDelay(0.3)) {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.7).delay(0.3)) {
                 showFeatures = true
             }
             
@@ -686,7 +699,7 @@ private struct FeatureRow: View {
                 .foregroundStyle(BFDesignSystem.Colors.primaryGradient)
                 .frame(width: BFDesignSystem.Layout.Size.iconXLarge)
                 .scaleEffect(isHovered ? 1.1 : 1.0)
-                .animation(BFDesignSystem.Layout.Animation.spring, value: isHovered)
+                .animation(Animation.defaultSpring, value: isHovered)
             
             Text(text)
                 .font(BFDesignSystem.Typography.bodyLarge)
@@ -701,7 +714,7 @@ private struct FeatureRow: View {
                 .withShadow(isHovered ? BFDesignSystem.Layout.Shadow.medium : BFDesignSystem.Layout.Shadow.small)
         )
         .onHover { hovering in
-            withAnimation(BFDesignSystem.Layout.Animation.spring) {
+            withAnimation(Animation.defaultSpring) {
                 isHovered = hovering
             }
         }

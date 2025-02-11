@@ -20,6 +20,7 @@ public enum BFDesignSystem {
         public static let cardBackground = Color(uiColor: .secondarySystemBackground)
         public static let textPrimary = Color(uiColor: .label)
         public static let textSecondary = Color(uiColor: .secondaryLabel)
+        public static let textTertiary = Color(uiColor: .tertiaryLabel)
         public static let separator = Color(uiColor: .separator)
         public static let groupedBackground = Color(uiColor: .systemGroupedBackground)
         #else
@@ -27,6 +28,7 @@ public enum BFDesignSystem {
         public static let cardBackground = Color(.controlBackgroundColor)
         public static let textPrimary = Color(.labelColor)
         public static let textSecondary = Color(.secondaryLabelColor)
+        public static let textTertiary = Color(.tertiaryLabelColor)
         public static let separator = Color(.separatorColor)
         public static let groupedBackground = Color(.windowBackgroundColor)
         #endif
@@ -100,6 +102,7 @@ public enum BFDesignSystem {
         // MARK: - Special
         public static let caption = Font.system(size: captionSize, weight: regular)
         public static let captionMedium = Font.system(size: captionSize, weight: medium)
+        public static let button = Font.system(size: bodyLargeSize, weight: semibold)
         
         // MARK: - Semantic Mapping
         public static let buttonLabel = bodyLargeMedium
@@ -115,15 +118,15 @@ public enum BFDesignSystem {
         // MARK: - Spacing
         public enum Spacing {
             // Base unit = 4pt
-            public static let xxxSmall: CGFloat = 2  // 0.5x
-            public static let xxSmall: CGFloat = 4   // 1x
-            public static let xSmall: CGFloat = 8    // 2x
-            public static let small: CGFloat = 12    // 3x
-            public static let medium: CGFloat = 16   // 4x
-            public static let large: CGFloat = 24    // 6x
-            public static let xLarge: CGFloat = 32   // 8x
-            public static let xxLarge: CGFloat = 40  // 10x
-            public static let xxxLarge: CGFloat = 48 // 12x
+            public static let xxxSmall: CGFloat = 2
+            public static let xxSmall: CGFloat = 4
+            public static let xSmall: CGFloat = 8
+            public static let small: CGFloat = 12
+            public static let medium: CGFloat = 16
+            public static let large: CGFloat = 24
+            public static let xLarge: CGFloat = 32
+            public static let xxLarge: CGFloat = 40
+            public static let xxxLarge: CGFloat = 48
             
             // Semantic Spacing
             public static let cardPadding = medium
@@ -137,15 +140,14 @@ public enum BFDesignSystem {
         
         // MARK: - Corner Radius
         public enum CornerRadius {
-            public static let small: CGFloat = 4
-            public static let medium: CGFloat = 8
-            public static let large: CGFloat = 12
-            public static let xLarge: CGFloat = 16
-            public static let circle: CGFloat = 9999
+            public static let small: CGFloat = 8
+            public static let medium: CGFloat = 12
+            public static let large: CGFloat = 16
+            public static let xLarge: CGFloat = 24
+            public static let button: CGFloat = 12
+            public static let card: CGFloat = 16
             
             // Semantic Mapping
-            public static let button = medium
-            public static let card = large
             public static let input = medium
             public static let modal = xLarge
         }
@@ -155,30 +157,75 @@ public enum BFDesignSystem {
             public static let minimumTapArea: CGFloat = 44
             public static let buttonHeight: CGFloat = 48
             public static let inputHeight: CGFloat = 44
-            public static let iconSmall: CGFloat = 24
-            public static let iconMedium: CGFloat = 32
-            public static let iconLarge: CGFloat = 40
+            public static let iconSmall: CGFloat = 20
+            public static let iconMedium: CGFloat = 24
+            public static let iconLarge: CGFloat = 32
+            public static let iconXLarge: CGFloat = 48
             
             // Card Sizes
             public static let cardMinWidth: CGFloat = 160
             public static let cardMaxWidth: CGFloat = 500
+            public static let cardMinHeight: CGFloat = 80
             
             // Progress Indicators
-            public static let progressCircleSmall: CGFloat = 40
-            public static let progressCircleMedium: CGFloat = 80
             public static let progressCircleLarge: CGFloat = 160
+            public static let progressCircleMedium: CGFloat = 120
+            public static let progressCircleSmall: CGFloat = 80
         }
         
         // MARK: - Shadows
         public enum Shadow {
-            public static let small = ShadowStyle(color: Colors.cardShadow, radius: 4, x: 0, y: 2)
-            public static let medium = ShadowStyle(color: Colors.cardShadow, radius: 8, x: 0, y: 4)
-            public static let large = ShadowStyle(color: Colors.cardShadow, radius: 16, x: 0, y: 8)
+            public static let small = ShadowStyle(
+                color: Colors.textPrimary.opacity(0.05),
+                radius: 4,
+                x: 0,
+                y: 2
+            )
+            
+            public static let medium = ShadowStyle(
+                color: Colors.textPrimary.opacity(0.08),
+                radius: 8,
+                x: 0,
+                y: 4
+            )
+            
+            public static let large = ShadowStyle(
+                color: Colors.textPrimary.opacity(0.12),
+                radius: 16,
+                x: 0,
+                y: 8
+            )
+            
+            public static let button = ShadowStyle(
+                color: Colors.primary.opacity(0.3),
+                radius: 8,
+                x: 0,
+                y: 4
+            )
             
             // Semantic Mapping
             public static let card = small
-            public static let button = medium
             public static let modal = large
+        }
+        
+        // MARK: - Animation
+        public enum Animation {
+            public static let spring = SwiftUI.Animation.spring(
+                response: 0.5,
+                dampingFraction: 0.7,
+                blendDuration: 0
+            )
+            
+            public static let easeOut = SwiftUI.Animation.easeOut(duration: 0.3)
+            public static let easeIn = SwiftUI.Animation.easeIn(duration: 0.3)
+            
+            public static func springWithDelay(_ delay: Double) -> SwiftUI.Animation {
+                SwiftUI.Animation.spring(
+                    response: 0.5,
+                    dampingFraction: 0.7,
+                    blendDuration: 0
+                ).delay(delay)
+            }
         }
         
         // MARK: - Grid
