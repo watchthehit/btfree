@@ -31,7 +31,10 @@ public struct OnboardingView: View {
                     viewModel.completeOnboarding()
                 }
             } else {
-                OnboardingStepView(step: viewModel.steps[viewModel.currentStep], viewModel: viewModel)
+                OnboardingStepView(
+                    step: viewModel.steps[viewModel.currentStep],
+                    viewModel: viewModel
+                )
             }
         }
         .onAppear {
@@ -92,6 +95,12 @@ private struct OnboardingStepView: View {
     
     var body: some View {
         VStack(spacing: BFDesignSystem.Layout.Spacing.xxLarge) {
+            // Progress Header
+            OnboardingProgressHeader(
+                currentStep: viewModel.currentStep,
+                totalSteps: viewModel.steps.count
+            )
+            
             // Header Image
             ZStack {
                 Circle()
@@ -168,6 +177,51 @@ private struct OnboardingStepView: View {
             .opacity(showContent ? 1 : 0)
             .offset(y: showContent ? 0 : 30)
             .animation(Animation.defaultSpringWithDelay(0.4), value: showContent)
+            
+            // Navigation Buttons
+            HStack {
+                if viewModel.currentStep > 0 {
+                    Button(action: viewModel.previousStep) {
+                        HStack(spacing: BFDesignSystem.Layout.Spacing.small) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: BFDesignSystem.Layout.Size.iconMedium))
+                            Text("Back")
+                                .font(BFDesignSystem.Typography.button)
+                        }
+                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+                
+                Spacer()
+                
+                Button(action: viewModel.nextStep) {
+                    HStack(spacing: BFDesignSystem.Layout.Spacing.small) {
+                        Text(viewModel.currentStep == viewModel.steps.count - 1 ? "Get Started" : "Continue")
+                            .font(BFDesignSystem.Typography.button)
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: BFDesignSystem.Layout.Size.iconMedium))
+                    }
+                    .foregroundColor(.white)
+                    .frame(height: BFDesignSystem.Layout.Size.buttonHeight)
+                    .padding(.horizontal, BFDesignSystem.Layout.Spacing.large)
+                    .background(
+                        viewModel.canProceed ? 
+                            BFDesignSystem.Colors.primaryGradient :
+                            LinearGradient(
+                                colors: [BFDesignSystem.Colors.textSecondary, BFDesignSystem.Colors.textSecondary.opacity(0.8)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                    )
+                    .cornerRadius(BFDesignSystem.Layout.CornerRadius.button)
+                }
+                .buttonStyle(.plain)
+                .disabled(!viewModel.canProceed)
+            }
+            .padding(.horizontal)
+            .opacity(showContent ? 1 : 0)
+            .animation(Animation.defaultSpringWithDelay(0.6), value: showContent)
         }
         .padding()
         .onAppear {
