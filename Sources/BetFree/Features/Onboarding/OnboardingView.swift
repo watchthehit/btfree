@@ -9,37 +9,44 @@ public struct OnboardingView: View {
     
     let onboardingSteps = [
         OnboardingStep(
-            title: "Welcome to BetFree",
-            subtitle: "Your journey to a healthier relationship with gambling starts here",
-            image: "heart.fill",
-            imageColor: BFDesignSystem.Colors.primary
+            title: "Take Control",
+            subtitle: "Your journey to financial freedom and better habits starts here",
+            image: "arrow.up.forward",
+            imageColor: BFDesignSystem.Colors.primary,
+            background: Color.blue.opacity(0.1)
         ),
         OnboardingStep(
             title: "Track Your Progress",
-            subtitle: "See your daily streaks and savings grow as you make positive changes",
-            image: "chart.line.uptrend.xyaxis",
-            imageColor: BFDesignSystem.Colors.success
+            subtitle: "Watch your streaks grow and savings multiply day by day",
+            image: "chart.line.uptrend.xyaxis.circle.fill",
+            imageColor: BFDesignSystem.Colors.success,
+            background: Color.green.opacity(0.1)
         ),
         OnboardingStep(
-            title: "24/7 Support",
-            subtitle: "Access to professional resources and emergency help whenever you need it",
-            image: "phone.fill",
-            imageColor: BFDesignSystem.Colors.secondary
-        ),
-        OnboardingStep(
-            title: "Personalize Your Journey",
-            subtitle: "Let's set up your profile for a tailored experience",
-            image: "person.fill",
-            imageColor: BFDesignSystem.Colors.primary
+            title: "Build Better Habits",
+            subtitle: "Daily goals and exercises to help you stay on track",
+            image: "target",
+            imageColor: BFDesignSystem.Colors.secondary,
+            background: Color.purple.opacity(0.1)
         )
     ]
     
     public var body: some View {
         ZStack {
             VStack(spacing: BFDesignSystem.Spacing.large) {
-                // Progress Bar
-                ProgressBar(currentStep: currentStep, totalSteps: onboardingSteps.count + 2)
-                    .padding(.top)
+                // Skip Button
+                if currentStep < onboardingSteps.count {
+                    HStack {
+                        Spacer()
+                        Button("Skip") {
+                            withAnimation {
+                                currentStep = onboardingSteps.count
+                            }
+                        }
+                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                        .padding()
+                    }
+                }
                 
                 Spacer()
                 
@@ -48,40 +55,75 @@ public struct OnboardingView: View {
                 case ..<onboardingSteps.count:
                     // Feature Introduction Steps
                     FeatureStep(step: onboardingSteps[currentStep])
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .trailing),
+                            removal: .move(edge: .leading)
+                        ))
                 case onboardingSteps.count:
                     // Profile Setup
                     ProfileSetupStep(username: $username)
+                        .transition(.move(edge: .trailing))
                 case onboardingSteps.count + 1:
                     // Goal Setting
                     GoalSettingStep(dailyLimit: $dailyLimit)
+                        .transition(.move(edge: .trailing))
                 default:
                     EmptyView()
                 }
                 
                 Spacer()
                 
-                // Navigation Buttons
-                NavigationButtons(
-                    currentStep: currentStep,
-                    maxSteps: onboardingSteps.count + 1,
-                    onNext: handleNext,
-                    onBack: handleBack
-                )
+                // Progress & Navigation
+                VStack(spacing: BFDesignSystem.Spacing.medium) {
+                    if currentStep < onboardingSteps.count {
+                        // Progress Dots
+                        HStack(spacing: BFDesignSystem.Spacing.small) {
+                            ForEach(0..<onboardingSteps.count, id: \.self) { index in
+                                Circle()
+                                    .fill(currentStep == index ? BFDesignSystem.Colors.primary : BFDesignSystem.Colors.cardBackground)
+                                    .frame(width: 8, height: 8)
+                            }
+                        }
+                    }
+                    
+                    // Navigation Buttons
+                    NavigationButtons(
+                        currentStep: currentStep,
+                        maxSteps: onboardingSteps.count + 1,
+                        isNextDisabled: isNextDisabled,
+                        onNext: handleNext,
+                        onBack: handleBack
+                    )
+                }
                 .padding(.bottom)
             }
-            .padding()
             
             // Paywall Sheet
             if showPaywall {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                
                 PaywallView(isPresented: $showPaywall, onSubscribe: completeOnboarding)
+                    .transition(.move(edge: .bottom))
             }
+        }
+    }
+    
+    private var isNextDisabled: Bool {
+        switch currentStep {
+        case onboardingSteps.count:
+            return username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        case onboardingSteps.count + 1:
+            return dailyLimit.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        default:
+            return false
         }
     }
     
     private func handleNext() {
         withAnimation {
             if currentStep == onboardingSteps.count + 1 {
-                // Show paywall before completing onboarding
                 showPaywall = true
             } else {
                 currentStep += 1
@@ -112,86 +154,127 @@ struct OnboardingStep {
     let subtitle: String
     let image: String
     let imageColor: Color
+    let background: Color
 }
 
 // MARK: - Supporting Views
-struct ProgressBar: View {
-    let currentStep: Int
-    let totalSteps: Int
-    
-    var body: some View {
-        HStack(spacing: BFDesignSystem.Spacing.small) {
-            ForEach(0..<totalSteps, id: \.self) { index in
-                Capsule()
-                    .fill(currentStep >= index ? BFDesignSystem.Colors.primary : BFDesignSystem.Colors.cardBackground)
-                    .frame(height: 4)
-            }
-        }
-    }
-}
-
 struct FeatureStep: View {
     let step: OnboardingStep
+    @State private var isAnimating = false
     
     var body: some View {
-        VStack(spacing: BFDesignSystem.Spacing.large) {
-            Image(systemName: step.image)
-                .font(.system(size: 60))
-                .foregroundColor(step.imageColor)
-                .padding()
-                .background(
-                    Circle()
-                        .fill(step.imageColor.opacity(0.1))
-                        .frame(width: 120, height: 120)
-                )
+        VStack(spacing: BFDesignSystem.Spacing.xxLarge) {
+            // Image
+            ZStack {
+                Circle()
+                    .fill(step.background)
+                    .frame(width: 240, height: 240)
+                    .scaleEffect(isAnimating ? 1.1 : 1.0)
+                
+                Image(systemName: step.image)
+                    .font(.system(size: 80, weight: .medium))
+                    .foregroundColor(step.imageColor)
+                    .offset(y: isAnimating ? -5 : 5)
+            }
+            .animation(
+                Animation.easeInOut(duration: 2.0).repeatForever(autoreverses: true),
+                value: isAnimating
+            )
             
-            Text(step.title)
-                .font(BFDesignSystem.Typography.titleLarge)
-                .multilineTextAlignment(.center)
-            
-            Text(step.subtitle)
-                .font(BFDesignSystem.Typography.bodyLarge)
-                .foregroundColor(BFDesignSystem.Colors.textSecondary)
-                .multilineTextAlignment(.center)
+            // Text
+            VStack(spacing: BFDesignSystem.Spacing.medium) {
+                Text(step.title)
+                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                    .multilineTextAlignment(.center)
+                
+                Text(step.subtitle)
+                    .font(BFDesignSystem.Typography.bodyLarge)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                    .padding(.horizontal, BFDesignSystem.Spacing.large)
+            }
+        }
+        .onAppear {
+            isAnimating = true
         }
     }
 }
 
 struct ProfileSetupStep: View {
     @Binding var username: String
+    @FocusState private var isUsernameFocused: Bool
     
     var body: some View {
-        VStack(spacing: BFDesignSystem.Spacing.large) {
-            Text("What should we call you?")
-                .font(BFDesignSystem.Typography.titleMedium)
+        VStack(spacing: BFDesignSystem.Spacing.xxLarge) {
+            Image(systemName: "person.crop.circle.fill.badge.plus")
+                .font(.system(size: 80))
+                .foregroundColor(BFDesignSystem.Colors.primary)
+                .symbolRenderingMode(.hierarchical)
             
-            TextField("Your name", text: $username)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding(.horizontal)
-            
-            Text("This helps us personalize your experience")
-                .font(BFDesignSystem.Typography.bodyMedium)
-                .foregroundColor(BFDesignSystem.Colors.textSecondary)
+            VStack(spacing: BFDesignSystem.Spacing.large) {
+                Text("What's your name?")
+                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                
+                TextField("Enter your name", text: $username)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .font(BFDesignSystem.Typography.bodyLarge)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, BFDesignSystem.Spacing.xxLarge)
+                    .focused($isUsernameFocused)
+                
+                Text("This helps personalize your experience")
+                    .font(BFDesignSystem.Typography.bodyMedium)
+                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
+            }
+        }
+        .onAppear {
+            isUsernameFocused = true
         }
     }
 }
 
 struct GoalSettingStep: View {
     @Binding var dailyLimit: String
+    @FocusState private var isDailyLimitFocused: Bool
     
     var body: some View {
-        VStack(spacing: BFDesignSystem.Spacing.large) {
-            Text("Set Your Daily Limit")
-                .font(BFDesignSystem.Typography.titleMedium)
+        VStack(spacing: BFDesignSystem.Spacing.xxLarge) {
+            Image(systemName: "target")
+                .font(.system(size: 80))
+                .foregroundStyle(
+                    .linearGradient(
+                        colors: [BFDesignSystem.Colors.primary, BFDesignSystem.Colors.secondary],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .symbolRenderingMode(.hierarchical)
             
-            TextField("Amount ($)", text: $dailyLimit)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .keyboardType(.decimalPad)
-                .padding(.horizontal)
-            
-            Text("You can adjust this later in settings")
-                .font(BFDesignSystem.Typography.bodyMedium)
-                .foregroundColor(BFDesignSystem.Colors.textSecondary)
+            VStack(spacing: BFDesignSystem.Spacing.large) {
+                Text("Set Your Daily Limit")
+                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                
+                HStack {
+                    Text("$")
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                    
+                    TextField("Amount", text: $dailyLimit)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .font(BFDesignSystem.Typography.bodyLarge)
+                        .multilineTextAlignment(.center)
+                        .keyboardType(.decimalPad)
+                        .focused($isDailyLimitFocused)
+                }
+                .padding(.horizontal, BFDesignSystem.Spacing.xxLarge)
+                
+                Text("You can adjust this anytime in settings")
+                    .font(BFDesignSystem.Typography.bodyMedium)
+                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
+            }
+        }
+        .onAppear {
+            isDailyLimitFocused = true
         }
     }
 }
@@ -199,25 +282,41 @@ struct GoalSettingStep: View {
 struct NavigationButtons: View {
     let currentStep: Int
     let maxSteps: Int
+    let isNextDisabled: Bool
     let onNext: () -> Void
     let onBack: () -> Void
     
     var body: some View {
         HStack {
             if currentStep > 0 {
-                Button("Back") {
-                    onBack()
+                Button(action: onBack) {
+                    HStack {
+                        Image(systemName: "chevron.left")
+                        Text("Back")
+                    }
+                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
                 }
-                .foregroundColor(BFDesignSystem.Colors.textSecondary)
             }
             
             Spacer()
             
-            Button(currentStep == maxSteps ? "Start Free Trial" : "Next") {
-                onNext()
+            Button(action: onNext) {
+                HStack {
+                    Text(currentStep == maxSteps ? "Start Free Trial" : "Continue")
+                    if currentStep < maxSteps {
+                        Image(systemName: "chevron.right")
+                    }
+                }
+                .font(BFDesignSystem.Typography.headlineMedium)
+                .foregroundColor(.white)
+                .padding(.horizontal, BFDesignSystem.Spacing.large)
+                .padding(.vertical, BFDesignSystem.Spacing.medium)
+                .background(
+                    isNextDisabled ? BFDesignSystem.Colors.primary.opacity(0.5) : BFDesignSystem.Colors.primary
+                )
+                .cornerRadius(BFDesignSystem.CornerRadius.large)
             }
-            .foregroundColor(BFDesignSystem.Colors.primary)
-            .bold()
+            .disabled(isNextDisabled)
         }
         .padding(.horizontal)
     }
