@@ -6,7 +6,7 @@ public struct DashboardView: View {
     
     public var body: some View {
         ScrollView {
-            VStack(spacing: BFDesignSystem.Spacing.large) {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
                 // Main Progress Card
                 ProgressCard(
                     streak: appState.currentStreak,
@@ -29,7 +29,7 @@ public struct DashboardView: View {
                 MotivationCard(streak: appState.currentStreak)
                     .padding(.horizontal)
             }
-            .padding(.vertical, BFDesignSystem.Spacing.medium)
+            .padding(.vertical, BFDesignSystem.Layout.Spacing.medium)
         }
         .background(BFDesignSystem.Colors.background)
         .navigationTitle("Dashboard")
@@ -44,13 +44,13 @@ struct ProgressCard: View {
     let savings: Double
     
     var body: some View {
-        VStack(spacing: BFDesignSystem.Spacing.large) {
+        VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
             // Streak Circle
             ZStack {
                 // Background Circle
                 Circle()
                     .stroke(BFDesignSystem.Colors.primary.opacity(0.1), lineWidth: 12)
-                    .frame(width: 160, height: 160)
+                    .frame(width: BFDesignSystem.Layout.Size.progressCircleLarge, height: BFDesignSystem.Layout.Size.progressCircleLarge)
                 
                 // Progress Circle
                 Circle()
@@ -64,11 +64,11 @@ struct ProgressCard: View {
                         ),
                         style: StrokeStyle(lineWidth: 12, lineCap: .round)
                     )
-                    .frame(width: 160, height: 160)
+                    .frame(width: BFDesignSystem.Layout.Size.progressCircleLarge, height: BFDesignSystem.Layout.Size.progressCircleLarge)
                     .rotationEffect(.degrees(-90))
                 
                 // Center Content
-                VStack(spacing: 4) {
+                VStack(spacing: BFDesignSystem.Layout.Spacing.xxSmall) {
                     Text("\(streak)")
                         .font(.system(size: 48, weight: .bold, design: .rounded))
                         .foregroundColor(BFDesignSystem.Colors.primary)
@@ -79,7 +79,7 @@ struct ProgressCard: View {
             }
             
             // Savings
-            VStack(spacing: 8) {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.small) {
                 Text("Total Savings")
                     .font(BFDesignSystem.Typography.headlineMedium)
                     .foregroundColor(BFDesignSystem.Colors.textPrimary)
@@ -88,12 +88,12 @@ struct ProgressCard: View {
                     .foregroundColor(BFDesignSystem.Colors.success)
             }
         }
-        .padding(.vertical, BFDesignSystem.Spacing.large)
+        .padding(.vertical, BFDesignSystem.Layout.Spacing.large)
         .padding(.horizontal)
         .background(
-            RoundedRectangle(cornerRadius: BFDesignSystem.CornerRadius.large)
+            RoundedRectangle(cornerRadius: BFDesignSystem.Layout.CornerRadius.card)
                 .fill(BFDesignSystem.Colors.cardBackground)
-                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
+                .withShadow(BFDesignSystem.Layout.Shadow.card)
         )
     }
 }
@@ -104,12 +104,12 @@ struct DailyGoalsSection: View {
     let hasCheckedIn: Bool
     
     var body: some View {
-        VStack(alignment: .leading, spacing: BFDesignSystem.Spacing.medium) {
+        VStack(alignment: .leading, spacing: BFDesignSystem.Layout.Spacing.medium) {
             Text("Today's Goals")
                 .font(BFDesignSystem.Typography.titleSmall)
                 .foregroundColor(BFDesignSystem.Colors.textPrimary)
             
-            HStack(spacing: BFDesignSystem.Spacing.medium) {
+            HStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
                 GoalCard(
                     title: "Daily Check-in",
                     isCompleted: hasCheckedIn,
@@ -132,9 +132,9 @@ struct GoalCard: View {
     let icon: String
     
     var body: some View {
-        VStack(spacing: BFDesignSystem.Spacing.medium) {
+        VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
             Image(systemName: icon)
-                .font(.system(size: 28, weight: .medium))
+                .font(.system(size: BFDesignSystem.Layout.Size.iconLarge, weight: .medium))
                 .foregroundColor(isCompleted ? BFDesignSystem.Colors.success : BFDesignSystem.Colors.textSecondary)
             
             Text(title)
@@ -148,11 +148,11 @@ struct GoalCard: View {
                 .foregroundColor(isCompleted ? BFDesignSystem.Colors.success : BFDesignSystem.Colors.textSecondary)
         }
         .frame(maxWidth: .infinity)
-        .padding()
+        .padding(BFDesignSystem.Layout.Spacing.medium)
         .background(
-            RoundedRectangle(cornerRadius: BFDesignSystem.CornerRadius.medium)
+            RoundedRectangle(cornerRadius: BFDesignSystem.Layout.CornerRadius.card)
                 .fill(BFDesignSystem.Colors.cardBackground)
-                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                .withShadow(BFDesignSystem.Layout.Shadow.card)
         )
     }
 }
@@ -160,14 +160,14 @@ struct GoalCard: View {
 // MARK: - Quick Actions Grid
 struct QuickActionsGrid: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: BFDesignSystem.Spacing.medium) {
+        VStack(alignment: .leading, spacing: BFDesignSystem.Layout.Spacing.medium) {
             Text("Quick Actions")
                 .font(BFDesignSystem.Typography.titleSmall)
                 .foregroundColor(BFDesignSystem.Colors.textPrimary)
             
             LazyVGrid(
-                columns: [GridItem(.flexible()), GridItem(.flexible())],
-                spacing: BFDesignSystem.Spacing.medium
+                columns: BFDesignSystem.Layout.Grid.columns,
+                spacing: BFDesignSystem.Layout.Spacing.medium
             ) {
                 QuickActionButton(
                     title: "Log Progress",
@@ -203,9 +203,9 @@ struct QuickActionButton: View {
     let color: Color
     
     var body: some View {
-        VStack(spacing: BFDesignSystem.Spacing.small) {
+        VStack(spacing: BFDesignSystem.Layout.Spacing.small) {
             Image(systemName: systemImage)
-                .font(.system(size: 28, weight: .medium))
+                .font(.system(size: BFDesignSystem.Layout.Size.iconMedium, weight: .medium))
                 .foregroundColor(color)
             
             Text(title)
@@ -214,11 +214,11 @@ struct QuickActionButton: View {
                 .foregroundColor(BFDesignSystem.Colors.textPrimary)
         }
         .frame(maxWidth: .infinity)
-        .padding()
+        .padding(BFDesignSystem.Layout.Spacing.medium)
         .background(
-            RoundedRectangle(cornerRadius: BFDesignSystem.CornerRadius.medium)
+            RoundedRectangle(cornerRadius: BFDesignSystem.Layout.CornerRadius.card)
                 .fill(BFDesignSystem.Colors.cardBackground)
-                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                .withShadow(BFDesignSystem.Layout.Shadow.card)
         )
     }
 }
@@ -240,7 +240,7 @@ struct MotivationCard: View {
     }
     
     var body: some View {
-        VStack(spacing: BFDesignSystem.Spacing.medium) {
+        VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
             Text("💪 Daily Motivation")
                 .font(BFDesignSystem.Typography.headlineMedium)
                 .foregroundColor(BFDesignSystem.Colors.textPrimary)
@@ -249,14 +249,14 @@ struct MotivationCard: View {
                 .font(BFDesignSystem.Typography.bodyLarge)
                 .multilineTextAlignment(.center)
                 .foregroundColor(BFDesignSystem.Colors.textSecondary)
-                .padding(.horizontal, BFDesignSystem.Spacing.small)
+                .padding(.horizontal, BFDesignSystem.Layout.Spacing.small)
         }
-        .padding()
+        .padding(BFDesignSystem.Layout.Spacing.medium)
         .frame(maxWidth: .infinity)
         .background(
-            RoundedRectangle(cornerRadius: BFDesignSystem.CornerRadius.medium)
+            RoundedRectangle(cornerRadius: BFDesignSystem.Layout.CornerRadius.card)
                 .fill(BFDesignSystem.Colors.cardBackground)
-                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                .withShadow(BFDesignSystem.Layout.Shadow.card)
         )
     }
 }
