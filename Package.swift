@@ -4,27 +4,28 @@ import PackageDescription
 let package = Package(
     name: "BetFree",
     platforms: [
-        .iOS(.v16)
+        .iOS(.v17),
+        .macOS(.v14)
     ],
     products: [
         .library(
             name: "BetFree",
             targets: ["BetFree"]
-        )
+        ),
     ],
-    dependencies: [
-        .package(url: "https://github.com/pointfreeco/swift-composable-architecture", exact: "1.5.5")
-    ],
+    dependencies: [],
     targets: [
         .target(
             name: "BetFree",
-            dependencies: [
-                .product(name: "ComposableArchitecture", package: "swift-composable-architecture")
-            ],
+            dependencies: [],
             path: "Sources/BetFree",
             resources: [
                 .process("Resources")
             ]
-        )
+        ),
+        .testTarget(
+            name: "BetFreeTests",
+            dependencies: ["BetFree"]
+        ),
     ]
 ) 
