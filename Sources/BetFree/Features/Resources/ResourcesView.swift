@@ -116,5 +116,5 @@ struct ResourceItemView: View {
 
 #Preview {
     ResourcesView()
-        .environmentObject(AppState.shared)
+        .environmentObject(AppState())
 } 

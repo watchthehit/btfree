@@ -7,7 +7,7 @@ public struct ProfileView: View {
     public var body: some View {
         List {
             // User Info Section
-            Section(header: Text("User Information")) {
+            Section {
                 HStack {
                     Text("Username")
                     Spacer()
@@ -16,28 +16,44 @@ public struct ProfileView: View {
                 }
                 
                 HStack {
+                    Text("Daily Limit")
+                    Spacer()
+                    Text("$\(appState.dailyLimit, specifier: "%.2f")")
+                        .foregroundColor(.secondary)
+                }
+            } header: {
+                Text("User Information")
+            }
+            
+            // Stats Section
+            Section {
+                HStack {
                     Text("Current Streak")
                     Spacer()
-                    Text("\(appState.currentStreak) days")
+                    Text("\(appState.streak) days")
                         .foregroundColor(.secondary)
                 }
                 
                 HStack {
                     Text("Total Savings")
                     Spacer()
-                    Text("$\(String(format: "%.2f", appState.totalSavings))")
+                    Text("$\(appState.savings, specifier: "%.2f")")
                         .foregroundColor(.secondary)
                 }
+            } header: {
+                Text("Statistics")
             }
             
             // Settings Section
-            Section(header: Text("Settings")) {
-                HStack {
-                    Text("Daily Limit")
-                    Spacer()
-                    Text("$\(String(format: "%.2f", appState.dailyLimit))")
-                        .foregroundColor(.secondary)
+            Section {
+                Button(action: {
+                    // Reset action
+                }) {
+                    Text("Reset Progress")
+                        .foregroundColor(.red)
                 }
+            } header: {
+                Text("Settings")
             }
             
             // Support Section
@@ -78,5 +94,5 @@ public struct ProfileView: View {
 
 #Preview {
     ProfileView()
-        .environmentObject(AppState.shared)
+        .environmentObject(AppState())
 } 

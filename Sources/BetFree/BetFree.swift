@@ -2,27 +2,19 @@ import SwiftUI
 import ComposableArchitecture
 
 public struct BetFreeRootView: View {
-    @StateObject private var appState: AppState
-    let store: StoreOf<AppFeature>
+    @StateObject private var appState = AppState()
     
     public var body: some View {
-        WithViewStore(store, observe: { $0 }) { viewStore in
-            if !appState.isOnboarded {
-                OnboardingView()
-                    .environmentObject(appState)
-            } else {
-                MainTabView()
-                    .environmentObject(appState)
-            }
+        if !appState.isOnboarded {
+            OnboardingView()
+                .environmentObject(appState)
+        } else {
+            MainTabView()
+                .environmentObject(appState)
         }
     }
     
-    public init(appState: AppState = .shared, store: StoreOf<AppFeature> = Store(initialState: AppFeature.State()) {
-        AppFeature()
-    }) {
-        _appState = StateObject(wrappedValue: appState)
-        self.store = store
-    }
+    public init() {}
 }
 
 public struct AppFeature: Reducer {
@@ -47,18 +39,53 @@ public struct AppFeature: Reducer {
     public init() {}
 }
 
+// Renamed to avoid collision with the app's main struct
+struct BetFreeLibraryPreviewApp: App {
+    @StateObject private var appState = AppState()
+    
+    var body: some Scene {
+        WindowGroup {
+            if !appState.isOnboarded {
+                OnboardingView()
+                    .environmentObject(appState)
+            } else {
+                MainTabView()
+                    .environmentObject(appState)
+            }
+        }
+    }
+}
+
 #Preview("Onboarding Flow") {
-    let appState = AppState()
-    appState.isOnboarded = false  // Force onboarding
-    return BetFreeRootView(appState: appState)
+    BetFreeRootView()
+        .onAppear {
+            let appState = AppState()
+            appState.isOnboarded = false
+        }
 }
 
 #Preview("Main App") {
+    BetFreeRootView()
+        .onAppear {
+            let appState = AppState()
+            appState.isOnboarded = true
+            appState.updateUsername("John")
+            appState.updateDailyLimit(100)
+            appState.updateStreak(7)
+            appState.updateSavings(500)
+        }
+}
+
+public var previewContent: some View {
     let appState = AppState()
-    appState.isOnboarded = true  // Force main app
-    appState.updateUsername("John")
-    appState.updateDailyLimit(100)
+    appState.isOnboarded = false  // Force onboarding
+    return BetFreeRootView()
+}
+
+public var previewContentOnboarded: some View {
+    let appState = AppState()
+    appState.isOnboarded = true
     appState.updateStreak(7)
     appState.updateSavings(500)
-    return BetFreeRootView(appState: appState)
+    return BetFreeRootView()
 } 

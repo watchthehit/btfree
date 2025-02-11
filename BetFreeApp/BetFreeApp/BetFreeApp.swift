@@ -1,28 +1,14 @@
 import SwiftUI
 import BetFree
-import ComposableArchitecture
 
 @main
 struct BetFreeApp: App {
-    init() {
-        // Force onboarding for testing
-        UserDefaults.standard.set(false, forKey: "isOnboarded")
-    }
+    @StateObject private var appState = AppState()
     
     var body: some Scene {
         WindowGroup {
-            BetFreeRootView(
-                appState: AppState.shared,
-                store: Store(initialState: AppFeature.State()) {
-                    AppFeature()
-                }
-            )
+            BetFreeRootView()
+                .environmentObject(appState)
         }
-    }
-}
-
-struct MainView: View {
-    var body: some View {
-        BetFreeRootView()
     }
 } 
