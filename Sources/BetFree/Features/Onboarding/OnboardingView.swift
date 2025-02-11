@@ -106,7 +106,7 @@ public struct OnboardingView: View {
                     .ignoresSafeArea()
                     .transition(.opacity)
                 
-                PaywallView(
+                BetFree.PaywallView(
                     isPresented: $viewModel.showPaywall,
                     onSubscribe: {
                         viewModel.completeOnboarding()

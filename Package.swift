@@ -9,6 +9,7 @@ let package = Package(
     products: [
         .library(
             name: "BetFree",
+            type: .dynamic,
             targets: ["BetFree"]
         )
     ],
@@ -23,7 +24,8 @@ let package = Package(
             ],
             path: "Sources/BetFree",
             swiftSettings: [
-                .enableUpcomingFeature("BareSlashRegexLiterals")
+                .enableUpcomingFeature("BareSlashRegexLiterals"),
+                .define("SWIFT_ENABLE_LIBRARY_EVOLUTION", .when(configuration: .release))
             ]
         )
     ]
