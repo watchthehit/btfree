@@ -10,69 +10,68 @@ struct PaywallView: View {
             VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
                 Text("Unlock Full Access")
                     .font(BFDesignSystem.Typography.titleLarge)
+                    .multilineTextAlignment(.center)
                 
-                Text("Start your journey to recovery today")
+                Text("Start your journey to a better life today")
                     .font(BFDesignSystem.Typography.bodyLarge)
                     .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                    .multilineTextAlignment(.center)
             }
+            .padding(.top)
             
             // Features
             VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
-                FeatureRow(icon: "chart.line.uptrend.xyaxis", text: "Detailed progress tracking")
-                FeatureRow(icon: "bell.fill", text: "Custom notifications and reminders")
-                FeatureRow(icon: "person.fill", text: "24/7 professional support access")
-                FeatureRow(icon: "lock.fill", text: "Privacy focused, secure data")
+                FeatureRow(icon: "chart.line.uptrend.xyaxis", text: "Personalized Progress Tracking")
+                FeatureRow(icon: "target", text: "Custom Goal Setting")
+                FeatureRow(icon: "bell", text: "Smart Reminders")
+                FeatureRow(icon: "sparkles", text: "Premium Resources")
             }
-            .padding()
+            .padding(.vertical)
             
-            // Pricing
-            VStack(spacing: BFDesignSystem.Layout.Spacing.small) {
-                Text("$9.99/month")
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
-                
-                Text("after 7-day free trial")
-                    .font(BFDesignSystem.Typography.bodyMedium)
-                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
-            }
-            
-            // Buttons
-            VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
-                Button(action: onSubscribe) {
-                    Text("Start 7-Day Free Trial")
-                        .font(BFDesignSystem.Typography.headlineMedium)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(BFDesignSystem.Colors.primary)
-                        .cornerRadius(BFDesignSystem.Layout.CornerRadius.button)
-                }
-                
-                Button("Restore Purchase") {
-                    // TODO: Implement restore purchase
-                }
-                .font(BFDesignSystem.Typography.bodyMedium)
-                .foregroundColor(BFDesignSystem.Colors.textSecondary)
+            // Subscription Button
+            Button(action: {
+                onSubscribe()
+            }) {
+                Text("Start Free Trial")
+                    .font(BFDesignSystem.Typography.headlineMedium)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(BFDesignSystem.Colors.primary)
+                    .cornerRadius(BFDesignSystem.Layout.CornerRadius.button)
             }
             
             // Terms
-            Text("Cancel anytime. Terms apply.")
-                .font(BFDesignSystem.Typography.bodySmall)
+            Text("7-day free trial, then $9.99/month. Cancel anytime.")
+                .font(BFDesignSystem.Typography.caption)
                 .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                .multilineTextAlignment(.center)
+            
+            // Dismiss Button
+            Button("Maybe Later") {
+                isPresented = false
+            }
+            .font(BFDesignSystem.Typography.bodyMedium)
+            .foregroundColor(BFDesignSystem.Colors.textSecondary)
         }
         .padding()
         .background(BFDesignSystem.Colors.background)
+        .cornerRadius(BFDesignSystem.Layout.CornerRadius.large)
+        .shadow(radius: 20)
+        .padding()
     }
 }
 
-struct FeatureRow: View {
+private struct FeatureRow: View {
     let icon: String
     let text: String
     
     var body: some View {
         HStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
             Image(systemName: icon)
+                .font(.system(size: 24))
                 .foregroundColor(BFDesignSystem.Colors.primary)
-                .frame(width: BFDesignSystem.Layout.Size.iconMedium)
+                .frame(width: 32)
             
             Text(text)
                 .font(BFDesignSystem.Typography.bodyLarge)
@@ -80,4 +79,11 @@ struct FeatureRow: View {
             Spacer()
         }
     }
+}
+
+#Preview {
+    PaywallView(
+        isPresented: .constant(true),
+        onSubscribe: {}
+    )
 } 

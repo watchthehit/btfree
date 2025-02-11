@@ -21,11 +21,7 @@ let package = Package(
             dependencies: [
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture")
             ],
-            path: "Sources/BetFree",
-            swiftSettings: [
-                .enableUpcomingFeature("BareSlashRegexLiterals"),
-                .enableExperimentalFeature("StrictConcurrency")
-            ]
+            path: "Sources/BetFree"
         )
     ]
 ) 
