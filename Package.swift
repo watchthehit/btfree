@@ -3,13 +3,13 @@ import PackageDescription
 
 let package = Package(
     name: "BetFree",
+    defaultLocalization: "en",
     platforms: [
         .iOS(.v16)
     ],
     products: [
         .library(
             name: "BetFree",
-            type: .dynamic,
             targets: ["BetFree"]
         )
     ],
@@ -23,9 +23,20 @@ let package = Package(
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture")
             ],
             path: "Sources/BetFree",
+            exclude: ["README.md"],
+            sources: ["Features", "Core", "Views"],
+            resources: [
+                .process("Resources")
+            ],
+            publicHeadersPath: "include",
+            cSettings: [
+                .headerSearchPath("include")
+            ],
             swiftSettings: [
                 .enableUpcomingFeature("BareSlashRegexLiterals"),
-                .define("SWIFT_ENABLE_LIBRARY_EVOLUTION", .when(configuration: .release))
+                .define("DEBUG", .when(configuration: .debug)),
+                .define("RELEASE", .when(configuration: .release)),
+                .unsafeFlags(["-enable-testing"])
             ]
         )
     ]

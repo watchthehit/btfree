@@ -1,0 +1,6 @@
+framework module BetFree {
+    umbrella header "BetFree.h"
+    
+    export *
+    module * { export * }
+} 
