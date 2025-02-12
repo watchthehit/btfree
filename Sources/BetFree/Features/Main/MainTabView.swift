@@ -15,11 +15,17 @@ public struct MainTabView: View {
                     }
                     .tag(0)
                 
+                ProgressView(appState: appState)
+                    .tabItem {
+                        Label("Progress", systemImage: "chart.line.uptrend.xyaxis")
+                    }
+                    .tag(1)
+                
                 ProfileView(appState: appState)
                     .tabItem {
                         Label("Profile", systemImage: "person.fill")
                     }
-                    .tag(1)
+                    .tag(2)
             }
         }
         .onAppear {
