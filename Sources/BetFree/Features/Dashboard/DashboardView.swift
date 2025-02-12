@@ -3,6 +3,13 @@ import ComposableArchitecture
 
 public struct DashboardView: View {
     @EnvironmentObject private var appState: AppState
+    @State private var showingTransactionSheet = false
+    @State private var transactionAmount = ""
+    @State private var transactionNote = ""
+    @State private var showingError = false
+    @State private var errorMessage = ""
+    
+    private let coreDataManager = CoreDataManager.shared
     
     public var body: some View {
         NavigationView {
@@ -14,8 +21,14 @@ public struct DashboardView: View {
                     // Daily Progress Card
                     DailyProgressCard(
                         dailyLimit: appState.dailyLimit,
-                        currentSpend: 0  // TODO: Implement current spend tracking
+                        currentSpend: coreDataManager.getTotalSpentToday()
                     )
+                    .onTapGesture {
+                        showingTransactionSheet = true
+                    }
+                    
+                    // Today's Transactions
+                    TransactionsListView(transactions: coreDataManager.getTodaysTransactions())
                     
                     // Motivation Section
                     MotivationSection()
@@ -24,10 +37,125 @@ public struct DashboardView: View {
             }
             .navigationTitle("Dashboard")
             .background(BFDesignSystem.Colors.background)
+            .sheet(isPresented: $showingTransactionSheet) {
+                AddTransactionSheet(
+                    isPresented: $showingTransactionSheet,
+                    amount: $transactionAmount,
+                    note: $transactionNote,
+                    onSave: addTransaction
+                )
+            }
+            .alert("Error", isPresented: $showingError) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(errorMessage)
+            }
+        }
+    }
+    
+    private func addTransaction() {
+        guard let amount = Double(transactionAmount) else {
+            errorMessage = "Please enter a valid amount"
+            showingError = true
+            return
+        }
+        
+        do {
+            try coreDataManager.addTransaction(amount: amount, note: transactionNote)
+            transactionAmount = ""
+            transactionNote = ""
+            showingTransactionSheet = false
+        } catch {
+            errorMessage = "Failed to save transaction: \(error.localizedDescription)"
+            showingError = true
         }
     }
     
     public init() {}
+}
+
+// MARK: - Add Transaction Sheet
+private struct AddTransactionSheet: View {
+    @Binding var isPresented: Bool
+    @Binding var amount: String
+    @Binding var note: String
+    let onSave: () -> Void
+    
+    var body: some View {
+        NavigationView {
+            Form {
+                Section {
+                    TextField("Amount", text: $amount)
+                        .keyboardType(.decimalPad)
+                    
+                    TextField("Note (optional)", text: $note)
+                }
+            }
+            .navigationTitle("Add Transaction")
+            .navigationBarItems(
+                leading: Button("Cancel") {
+                    isPresented = false
+                },
+                trailing: Button("Save") {
+                    onSave()
+                }
+            )
+        }
+    }
+}
+
+// MARK: - Transactions List View
+private struct TransactionsListView: View {
+    let transactions: [Transaction]
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: BFDesignSystem.Layout.Spacing.medium) {
+            Text("Today's Transactions")
+                .font(BFDesignSystem.Typography.titleMedium)
+                .foregroundColor(BFDesignSystem.Colors.textPrimary)
+            
+            if transactions.isEmpty {
+                Text("No transactions today")
+                    .font(BFDesignSystem.Typography.bodyLarge)
+                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding()
+            } else {
+                ForEach(transactions, id: \.id) { transaction in
+                    TransactionRow(transaction: transaction)
+                }
+            }
+        }
+        .padding()
+        .background(BFDesignSystem.Colors.cardBackground)
+        .cornerRadius(BFDesignSystem.Layout.CornerRadius.medium)
+        .withShadow(BFDesignSystem.Layout.Shadow.card)
+    }
+}
+
+private struct TransactionRow: View {
+    let transaction: Transaction
+    
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(transaction.note ?? "No note")
+                    .font(BFDesignSystem.Typography.bodyLarge)
+                    .foregroundColor(BFDesignSystem.Colors.textPrimary)
+                
+                Text(transaction.date?.formatted(date: .omitted, time: .shortened) ?? "")
+                    .font(BFDesignSystem.Typography.caption)
+                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
+            }
+            
+            Spacer()
+            
+            Text("$\(transaction.amount, specifier: "%.2f")")
+                .font(BFDesignSystem.Typography.bodyLargeMedium)
+                .foregroundColor(BFDesignSystem.Colors.textPrimary)
+        }
+        .padding(.vertical, 8)
+    }
 }
 
 // MARK: - Header Stats View
