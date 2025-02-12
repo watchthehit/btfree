@@ -7,16 +7,8 @@ public class OnboardingViewModel: ObservableObject {
     @Published var assessmentAnswers: [String: Any] = [:]
     @Published var selectedGoal: String?
     @Published var selectedMilestones: [OnboardingStep.Milestone] = []
-    @Published var selectedRewards: [OnboardingStep.Reward] = []
     @Published var situationInputs: [String: String] = [:]
-    @Published var gamblingHistory: [String: Any] = [:]
-    @Published var riskFactors: [OnboardingStep.RiskFactor] = []
-    @Published var selectedSupports: Set<String> = []
-    @Published var supportContacts: [OnboardingStep.Contact] = []
     @Published var commitmentLevels: [String: Double] = [:]
-    @Published var identifiedTriggers: [OnboardingStep.Trigger] = []
-    @Published var selectedStrategies: [OnboardingStep.Strategy] = []
-    @Published var emergencyContacts: [OnboardingStep.Contact] = []
     @Published var showPaywall = false
     
     weak var appState: AppState?
@@ -25,50 +17,43 @@ public class OnboardingViewModel: ObservableObject {
         // Welcome & Introduction
         .init(
             title: "Welcome to BetFree",
-            subtitle: "Join thousands of others on their journey to freedom from gambling addiction",
+            subtitle: "Your journey to freedom starts here",
             image: "star.fill",
             imageColor: BFDesignSystem.Colors.primary,
             background: BFDesignSystem.Colors.primary.opacity(0.1),
             type: .welcome
         ),
+        
+        // Personal Info with Apple Sign In
         .init(
-            title: "Let's Get to Know You",
-            subtitle: "Help us personalize your recovery journey",
+            title: "Quick Setup",
+            subtitle: "Sign in to get started",
             image: "person.fill",
             imageColor: BFDesignSystem.Colors.secondary,
             background: BFDesignSystem.Colors.secondary.opacity(0.1),
             type: .personalInfo([
                 .init(title: "Name", placeholder: "Your name", type: .name, validation: nil),
-                .init(title: "Age", placeholder: "Your age", type: .age, validation: .age(min: 18, max: 100)),
                 .init(title: "Email", placeholder: "Your email", type: .email, validation: .email)
             ])
         ),
+        
+        // Combined Assessment & Situation
         .init(
-            title: "Quick Assessment",
-            subtitle: "Help us understand your current situation",
-            image: "clipboard.fill",
+            title: "Your Profile",
+            subtitle: "Help us personalize your experience",
+            image: "chart.bar.fill",
             imageColor: BFDesignSystem.Colors.info,
             background: BFDesignSystem.Colors.info.opacity(0.1),
-            type: .assessment([
-                .init(
-                    question: "How often do you gamble?",
-                    options: ["Daily", "Weekly", "Monthly", "Occasionally"],
-                    type: .singleChoice,
-                    weight: 3
-                ),
-                .init(
-                    question: "How would you rate your current control over gambling?",
-                    options: [],
-                    type: .scale(min: 1, max: 10),
-                    weight: 2
-                )
+            type: .situationInput([
+                .init(title: "Weekly Spend", placeholder: "Average weekly gambling spend", keyboardType: .decimalPad, prefix: "$"),
+                .init(title: "Main Trigger", placeholder: "e.g., Stress, Boredom", keyboardType: .default, prefix: nil)
             ])
         ),
         
         // Goal Setting
         .init(
             title: "Set Your Goal",
-            subtitle: "What's your primary motivation for quitting?",
+            subtitle: "What motivates you to quit?",
             image: "target",
             imageColor: BFDesignSystem.Colors.primary,
             background: BFDesignSystem.Colors.primary.opacity(0.1),
@@ -80,102 +65,24 @@ public class OnboardingViewModel: ObservableObject {
                 "Career Focus"
             ])
         ),
-        .init(
-            title: "Your Milestones",
-            subtitle: "Let's break down your goal into achievable steps",
-            image: "flag.fill",
-            imageColor: BFDesignSystem.Colors.success,
-            background: BFDesignSystem.Colors.success.opacity(0.1),
-            type: .milestones([
-                .init(
-                    title: "First Week Free",
-                    duration: 7 * 24 * 60 * 60,
-                    type: .shortTerm,
-                    rewards: []
-                ),
-                .init(
-                    title: "One Month Milestone",
-                    duration: 30 * 24 * 60 * 60,
-                    type: .mediumTerm,
-                    rewards: []
-                )
-            ])
-        ),
         
-        // Current Situation
+        // Commitment
         .init(
-            title: "Your Situation",
-            subtitle: "Help us understand your current situation better",
-            image: "chart.bar.fill",
-            imageColor: BFDesignSystem.Colors.secondary,
-            background: BFDesignSystem.Colors.secondary.opacity(0.1),
-            type: .situationInput([
-                .init(title: "Weekly Spend", placeholder: "Enter amount", keyboardType: .decimalPad, prefix: "$"),
-                .init(title: "Main Trigger", placeholder: "e.g., Stress, Boredom", keyboardType: .default, prefix: nil)
-            ])
-        ),
-        
-        // Support System
-        .init(
-            title: "Build Your Support Network",
-            subtitle: "Add people who can help you on your journey",
-            image: "person.3.fill",
-            imageColor: BFDesignSystem.Colors.primary,
-            background: BFDesignSystem.Colors.primary.opacity(0.1),
-            type: .supportNetwork([])
-        ),
-        .init(
-            title: "Choose Your Support",
-            subtitle: "Select the tools that will help you succeed",
-            image: "hand.raised.fill",
-            imageColor: BFDesignSystem.Colors.success,
-            background: BFDesignSystem.Colors.success.opacity(0.1),
-            type: .supportSelection([
-                "Daily Check-ins",
-                "Progress Tracking",
-                "Community Support",
-                "Expert Guidance",
-                "Emergency Hotline"
-            ])
-        ),
-        
-        // Commitment & Planning
-        .init(
-            title: "Set Your Commitment",
-            subtitle: "How much time can you dedicate to your recovery?",
+            title: "Your Commitment",
+            subtitle: "Set your recovery goals",
             image: "clock.fill",
-            imageColor: BFDesignSystem.Colors.info,
-            background: BFDesignSystem.Colors.info.opacity(0.1),
+            imageColor: BFDesignSystem.Colors.success,
+            background: BFDesignSystem.Colors.success.opacity(0.1),
             type: .commitmentLevel([
-                .init(title: "Daily Time Commitment (minutes)", range: 5...60, step: 5, format: "%.0f min"),
+                .init(title: "Daily Check-in Time", range: 5...30, step: 5, format: "%.0f min"),
                 .init(title: "Weekly Savings Goal", range: 10...500, step: 10, format: "$%.0f")
             ])
         ),
         
-        // Safety Planning
+        // Success Preview
         .init(
-            title: "Your Safety Plan",
-            subtitle: "Let's prepare for challenging moments",
-            image: "shield.fill",
-            imageColor: BFDesignSystem.Colors.success,
-            background: BFDesignSystem.Colors.success.opacity(0.1),
-            type: .safetyPlan
-        ),
-        
-        // Emergency Contacts
-        .init(
-            title: "Emergency Contacts",
-            subtitle: "Add people to contact in critical moments",
-            image: "phone.fill",
-            imageColor: BFDesignSystem.Colors.error,
-            background: BFDesignSystem.Colors.error.opacity(0.1),
-            type: .emergencyContacts
-        ),
-        
-        // Recap
-        .init(
-            title: "You're All Set!",
-            subtitle: "Let's review your personalized recovery plan",
+            title: "You're Ready!",
+            subtitle: "Let's start your journey to freedom",
             image: "checkmark.circle.fill",
             imageColor: BFDesignSystem.Colors.success,
             background: BFDesignSystem.Colors.success.opacity(0.1),
@@ -205,28 +112,16 @@ public class OnboardingViewModel: ObservableObject {
                 }
                 return !value.isEmpty
             }
-        case .assessment:
-            return !assessmentAnswers.isEmpty
-        case .goalSelection:
-            return selectedGoal != nil
-        case .milestones:
-            return !selectedMilestones.isEmpty
         case .situationInput(let fields):
             return fields.allSatisfy { field in
                 situationInputs[field.title]?.isEmpty == false
             }
-        case .supportNetwork:
-            return supportContacts.count >= 1
-        case .supportSelection:
-            return !selectedSupports.isEmpty
+        case .goalSelection:
+            return selectedGoal != nil
         case .commitmentLevel(let sliders):
             return sliders.allSatisfy { slider in
                 commitmentLevels[slider.title] != nil
             }
-        case .safetyPlan:
-            return !identifiedTriggers.isEmpty && !selectedStrategies.isEmpty
-        case .emergencyContacts:
-            return emergencyContacts.count >= 1
         case .recap:
             return true
         default:
@@ -264,8 +159,15 @@ public class OnboardingViewModel: ObservableObject {
             appState.updateSavings(weeklySpend)
         }
         
-        // Save other preferences
-        // TODO: Save additional user data and preferences
+        // Save commitment levels
+        if let dailyTime = commitmentLevels["Daily Check-in Time"] {
+            // Store daily commitment time if needed
+            print("Daily commitment time: \(dailyTime) minutes")
+        }
+        
+        if let weeklySavings = commitmentLevels["Weekly Savings Goal"] {
+            appState.updateDailyLimit(weeklySavings / 7.0)
+        }
         
         showPaywall = false
     }
