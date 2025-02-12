@@ -17,13 +17,12 @@ extension Animation {
 // MARK: - Main View
 public struct OnboardingView: View {
     @StateObject private var viewModel = OnboardingViewModel()
-    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appState: AppState
     
     public var body: some View {
         ZStack {
             // Background
-            BFDesignSystem.Colors.cardBackground
+            BFDesignSystem.Colors.background
                 .ignoresSafeArea()
             
             // Content
@@ -38,6 +37,7 @@ public struct OnboardingView: View {
                 )
             }
         }
+        .navigationBarHidden(true)
         .onAppear {
             viewModel.appState = appState
         }
@@ -234,7 +234,7 @@ private struct OnboardingStepView: View {
                 showContent = true
             }
         }
-        .onChange(of: viewModel.currentStep) { _ in
+        .onChange(of: viewModel.currentStep) { newValue in
             isAnimating = true
             withAnimation(.defaultSpring) {
                 showContent = true

@@ -1,4 +1,6 @@
 // swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+
 import PackageDescription
 
 let package = Package(
@@ -6,29 +8,29 @@ let package = Package(
     defaultLocalization: "en",
     platforms: [
         .iOS(.v16),
-        .macOS(.v13)
+        .macOS(.v14)
     ],
     products: [
         .library(
             name: "BetFree",
-            targets: ["BetFree"]
-        )
+            targets: ["BetFree"]),
     ],
     dependencies: [
         .package(url: "https://github.com/pointfreeco/swift-composable-architecture", exact: "1.7.0"),
-        .package(url: "https://github.com/apple/swift-syntax", from: "509.0.0")
     ],
     targets: [
         .target(
             name: "BetFree",
             dependencies: [
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
-                .product(name: "SwiftParser", package: "swift-syntax")
             ],
             path: "Sources/BetFree",
             resources: [
-                .process("Design/Resources")
+                .process("Resources"),
+                .process("Core/Data/Resources/CoreData")
+            ],
+            swiftSettings: [
+                .enableExperimentalFeature("StrictConcurrency")
             ]
         ),
         .testTarget(

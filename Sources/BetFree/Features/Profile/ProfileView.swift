@@ -2,12 +2,13 @@ import SwiftUI
 import ComposableArchitecture
 
 public struct ProfileView: View {
-    @EnvironmentObject private var appState: AppState
+    @ObservedObject var appState: AppState
+    @State private var showingLogoutAlert = false
     
     public var body: some View {
         List {
             // User Info Section
-            Section {
+            Section("User Information") {
                 HStack {
                     Text("Username")
                     Spacer()
@@ -15,18 +16,6 @@ public struct ProfileView: View {
                         .foregroundColor(.secondary)
                 }
                 
-                HStack {
-                    Text("Daily Limit")
-                    Spacer()
-                    Text("$\(appState.dailyLimit, specifier: "%.2f")")
-                        .foregroundColor(.secondary)
-                }
-            } header: {
-                Text("User Information")
-            }
-            
-            // Stats Section
-            Section {
                 HStack {
                     Text("Current Streak")
                     Spacer()
@@ -37,23 +26,19 @@ public struct ProfileView: View {
                 HStack {
                     Text("Total Savings")
                     Spacer()
-                    Text("$\(appState.savings, specifier: "%.2f")")
+                    Text("$\(String(format: "%.2f", appState.savings))")
                         .foregroundColor(.secondary)
                 }
-            } header: {
-                Text("Statistics")
             }
             
             // Settings Section
-            Section {
-                Button(action: {
-                    // Reset action
-                }) {
-                    Text("Reset Progress")
-                        .foregroundColor(.red)
+            Section("Settings") {
+                HStack {
+                    Text("Daily Limit")
+                    Spacer()
+                    Text("$\(String(format: "%.2f", appState.dailyLimit))")
+                        .foregroundColor(.secondary)
                 }
-            } header: {
-                Text("Settings")
             }
             
             // Support Section
@@ -80,6 +65,18 @@ public struct ProfileView: View {
                         .foregroundColor(.secondary)
                 }
             }
+            
+            // Logout Section
+            Section {
+                Button(role: .destructive) {
+                    showingLogoutAlert = true
+                } label: {
+                    HStack {
+                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                        Text("Logout")
+                    }
+                }
+            }
         }
         .navigationTitle("Profile")
         #if os(iOS)
@@ -87,12 +84,22 @@ public struct ProfileView: View {
         #else
         .listStyle(.sidebar)
         #endif
+        .alert("Logout", isPresented: $showingLogoutAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Logout", role: .destructive) {
+                HapticFeedback.fireAndForget()
+                appState.logout()
+            }
+        } message: {
+            Text("Are you sure you want to logout? This will reset all your data.")
+        }
     }
     
-    public init() {}
+    public init(appState: AppState) {
+        self.appState = appState
+    }
 }
 
 #Preview {
-    ProfileView()
-        .environmentObject(AppState())
+    ProfileView(appState: AppState())
 } 

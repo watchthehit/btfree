@@ -2,19 +2,45 @@ import SwiftUI
 import ComposableArchitecture
 
 public struct BetFreeRootView: View {
-    @StateObject private var appState = AppState()
+    @StateObject private var appState: AppState
     
     public var body: some View {
-        if !appState.isOnboarded {
-            OnboardingView()
-                .environmentObject(appState)
-        } else {
-            MainTabView()
-                .environmentObject(appState)
+        ZStack {
+            // Set background color at root level
+            BFDesignSystem.Colors.background
+                .ignoresSafeArea()
+            
+            NavigationView {
+                ZStack {
+                    if appState.isOnboarded {
+                        MainTabView(appState: appState)
+                    } else {
+                        OnboardingView()
+                            .environmentObject(appState)
+                    }
+                }
+            }
+            .navigationViewStyle(.stack)
         }
     }
     
-    public init() {}
+    public init() {
+        // Initialize Core Data
+        _ = CoreDataManager.shared
+        
+        // Initialize AppState
+        _appState = StateObject(wrappedValue: AppState())
+        
+        // Set navigation bar appearance
+        #if canImport(UIKit)
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithTransparentBackground()
+        appearance.backgroundColor = .clear
+        UINavigationBar.appearance().standardAppearance = appearance
+        UINavigationBar.appearance().compactAppearance = appearance
+        UINavigationBar.appearance().scrollEdgeAppearance = appearance
+        #endif
+    }
 }
 
 public struct AppFeature: Reducer {
@@ -43,49 +69,39 @@ public struct AppFeature: Reducer {
 struct BetFreeLibraryPreviewApp: App {
     @StateObject private var appState = AppState()
     
-    var body: some Scene {
+    public var body: some Scene {
         WindowGroup {
             if !appState.isOnboarded {
                 OnboardingView()
                     .environmentObject(appState)
             } else {
-                MainTabView()
-                    .environmentObject(appState)
+                MainTabView(appState: appState)
             }
         }
     }
+    
+    public init() {}
 }
 
-#Preview("Onboarding Flow") {
+#Preview {
     BetFreeRootView()
-        .onAppear {
-            let appState = AppState()
-            appState.isOnboarded = false
-        }
 }
 
-#Preview("Main App") {
-    BetFreeRootView()
-        .onAppear {
-            let appState = AppState()
-            appState.isOnboarded = true
-            appState.updateUsername("John")
-            appState.updateDailyLimit(100)
-            appState.updateStreak(7)
-            appState.updateSavings(500)
-        }
+#Preview("Onboarding") {
+    OnboardingView()
+        .environmentObject(AppState())
 }
 
+#Preview("Dashboard") {
+    DashboardView(appState: AppState())
+}
+
+@MainActor
 public var previewContent: some View {
-    let appState = AppState()
-    appState.isOnboarded = false  // Force onboarding
-    return BetFreeRootView()
+    BetFreeRootView()
 }
 
+@MainActor
 public var previewContentOnboarded: some View {
-    let appState = AppState()
-    appState.isOnboarded = true
-    appState.updateStreak(7)
-    appState.updateSavings(500)
-    return BetFreeRootView()
+    BetFreeRootView()
 } 

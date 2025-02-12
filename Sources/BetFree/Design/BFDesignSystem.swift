@@ -3,59 +3,47 @@ import SwiftUI
 public enum BFDesignSystem {
     public enum Colors {
         // Primary Brand Colors
-        public static let primary = Color(hex: "4A90E2")  // Trustworthy Blue
-        public static let secondary = Color(hex: "9B6B9D")  // Calming Purple
-        public static let accent = Color(hex: "F5A623")  // Motivational Orange
+        public static let primary = Color(hex: "6C5CE7")  // Modern Purple
+        public static let secondary = Color(hex: "00B894")  // Fresh Mint
+        public static let accent = Color(hex: "FD79A8")  // Soft Pink
         
         // Semantic Colors
-        public static let success = Color(hex: "7ED321")  // Positive Green
-        public static let info = Color(hex: "50E3C2")  // Informative Teal
-        public static let warning = Color(hex: "F5A623")  // Cautionary Orange
-        public static let error = Color(hex: "D0021B")  // Alert Red
+        public static let success = Color(hex: "00B894")  // Fresh Green
+        public static let info = Color(hex: "74B9FF")  // Sky Blue
+        public static let warning = Color(hex: "FDCB6E")  // Warm Yellow
+        public static let error = Color(hex: "FF7675")  // Soft Red
         
         // Text Colors
-        public static let textPrimary = Color(hex: "2C3E50")  // Deep Blue-Gray
-        public static let textSecondary = Color(hex: "8492A6")  // Muted Gray
-        public static let textTertiary = Color(hex: "C0CCDA")  // Light Gray
+        public static let textPrimary = Color(hex: "2D3436")  // Deep Gray
+        public static let textSecondary = Color(hex: "636E72")  // Medium Gray
+        public static let textTertiary = Color(hex: "B2BEC3")  // Light Gray
         
         // Background Colors
         public static let cardBackground = Color(hex: "FFFFFF")  // Pure White
-        public static let background = Color(hex: "F8FAFC")  // Off-White
-        public static let separator = Color(hex: "E5E9F2").opacity(0.6)  // Light Border
+        public static let background = Color(hex: "F7F7F9")  // Soft Background
+        public static let separator = Color(hex: "DFE6E9").opacity(0.6)  // Subtle Border
         
         // Gradients
         public static let calmingGradient = LinearGradient(
-            colors: [
-                Color(hex: "4A90E2"),  // Trustworthy Blue
-                Color(hex: "50E3C2")   // Calming Teal
-            ],
+            colors: [primary, info],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
         
         public static let warmGradient = LinearGradient(
-            colors: [
-                Color(hex: "F5A623"),  // Warm Orange
-                Color(hex: "F8E71C")   // Energetic Yellow
-            ],
+            colors: [accent, warning],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
         
         public static let mindfulGradient = LinearGradient(
-            colors: [
-                Color(hex: "7ED321"),  // Fresh Green
-                Color(hex: "50E3C2")   // Calming Teal
-            ],
+            colors: [success, info],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
         
         public static let primaryGradient = LinearGradient(
-            colors: [
-                Color(hex: "4A90E2"),  // Trustworthy Blue
-                Color(hex: "357ABD")   // Deeper Blue
-            ],
+            colors: [primary, primary.opacity(0.8)],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
@@ -63,34 +51,31 @@ public enum BFDesignSystem {
         // Progress Gradients
         public static let progressGradient = LinearGradient(
             colors: [
-                Color(hex: "7ED321"),  // Success Green
-                Color(hex: "50E3C2")   // Calming Teal
+                Color(hex: "00B894"),  // Fresh Green
+                Color(hex: "74B9FF")   // Sky Blue
             ],
             startPoint: .leading,
             endPoint: .trailing
         )
         
         // Dark Mode Colors
-        public static let darkBackground = Color(hex: "1A1F36")
-        public static let darkCardBackground = Color(hex: "252D4A")
-        public static let darkTextPrimary = Color(hex: "F8FAFC")
-        public static let darkTextSecondary = Color(hex: "C0CCDA")
+        public static let darkBackground = Color(hex: "17171F")
+        public static let darkCardBackground = Color(hex: "252530")
+        public static let darkTextPrimary = Color(hex: "F7F7F9")
+        public static let darkTextSecondary = Color(hex: "B2BEC3")
     }
     
     public enum Typography {
-        public static let display = Font.system(size: 32, weight: .bold)
-        public static let titleLarge = Font.system(size: 28, weight: .bold)
-        public static let titleMedium = Font.system(size: 24, weight: .bold)
-        public static let titleSmall = Font.system(size: 20, weight: .semibold)
-        public static let headlineMedium = Font.system(size: 22, weight: .semibold)
-        
-        public static let bodyLarge = Font.system(size: 18)
-        public static let bodyLargeMedium = Font.system(size: 18, weight: .medium)
-        public static let bodyMedium = Font.system(size: 16)
-        public static let bodySmall = Font.system(size: 14)
-        
-        public static let button = Font.system(size: 16, weight: .medium)
-        public static let caption = Font.system(size: 12)
+        public static let display: Font = .system(size: 34, weight: .bold)
+        public static let titleLarge: Font = .system(size: 28, weight: .bold)
+        public static let titleMedium: Font = .system(size: 24, weight: .bold)
+        public static let titleSmall: Font = .system(size: 20, weight: .semibold)
+        public static let bodyLargeMedium: Font = .system(size: 17, weight: .medium)
+        public static let bodyMedium: Font = .system(size: 15, weight: .medium)
+        public static let bodyLarge: Font = .system(size: 17, weight: .regular)
+        public static let body: Font = .system(size: 15, weight: .regular)
+        public static let caption: Font = .system(size: 13, weight: .regular)
+        public static let button: Font = .system(size: 17, weight: .semibold)
     }
     
     public enum Layout {
@@ -105,47 +90,49 @@ public enum BFDesignSystem {
         }
         
         public enum CornerRadius {
-            public static let small: CGFloat = 8
-            public static let medium: CGFloat = 12
-            public static let large: CGFloat = 16
-            public static let xLarge: CGFloat = 24
-            public static let card: CGFloat = 20
-            public static let button: CGFloat = 12
+            public static let small: CGFloat = 12
+            public static let medium: CGFloat = 16
+            public static let large: CGFloat = 20
+            public static let xLarge: CGFloat = 28
+            public static let card: CGFloat = 24
+            public static let button: CGFloat = 16
         }
         
         public enum Shadow {
-            public static let small = ViewShadow(radius: 4, y: 2)
-            public static let medium = ViewShadow(radius: 8, y: 4)
-            public static let large = ViewShadow(radius: 16, y: 8)
-            public static let card = ViewShadow(radius: 8, y: 4)
-            public static let button = ViewShadow(radius: 6, y: 3)
+            public static let small = ViewShadow(radius: 10, y: 4, opacity: 0.1)
+            public static let medium = ViewShadow(radius: 15, y: 8, opacity: 0.12)
+            public static let large = ViewShadow(radius: 20, y: 12, opacity: 0.14)
+            public static let card = ViewShadow(radius: 15, y: 8, opacity: 0.1)
+            public static let button = ViewShadow(radius: 12, y: 6, opacity: 0.15)
         }
         
         public enum Size {
-            public static let iconSmall: CGFloat = 16
-            public static let iconMedium: CGFloat = 20
-            public static let iconLarge: CGFloat = 24
-            public static let iconXLarge: CGFloat = 32
+            public static let iconSmall: CGFloat = 18
+            public static let iconMedium: CGFloat = 24
+            public static let iconLarge: CGFloat = 32
+            public static let iconXLarge: CGFloat = 40
             
-            public static let buttonHeight: CGFloat = 48
-            public static let progressCircleLarge: CGFloat = 80
+            public static let buttonHeight: CGFloat = 56
+            public static let progressCircleLarge: CGFloat = 100
         }
     }
 }
 
-public struct ViewShadow {
+public struct ViewShadow: Sendable {
     let radius: CGFloat
     let y: CGFloat
+    let opacity: CGFloat
     
-    public init(radius: CGFloat, y: CGFloat) {
+    init(radius: CGFloat, y: CGFloat, opacity: CGFloat) {
         self.radius = radius
         self.y = y
+        self.opacity = opacity
     }
 }
 
 public extension View {
     func withShadow(_ shadow: ViewShadow) -> some View {
-        self.shadow(radius: shadow.radius, y: shadow.y)
+        self.shadow(color: Color.black.opacity(shadow.opacity), radius: shadow.radius, y: shadow.y)
     }
 }
 

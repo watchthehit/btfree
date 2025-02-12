@@ -1,35 +1,41 @@
 import SwiftUI
 
 public struct MainTabView: View {
-    @EnvironmentObject private var appState: AppState
+    @ObservedObject var appState: AppState
     
     public var body: some View {
-        TabView(selection: $appState.selectedTab) {
-            DashboardView()
-                .tabItem {
-                    Label("Home", systemImage: "house.fill")
-                }
-                .tag(0)
+        ZStack {
+            BFDesignSystem.Colors.background
+                .ignoresSafeArea()
             
-            Text("Progress")
-                .tabItem {
-                    Label("Progress", systemImage: "chart.line.uptrend.xyaxis")
-                }
-                .tag(1)
-            
-            Text("Community")
-                .tabItem {
-                    Label("Community", systemImage: "person.3.fill")
-                }
-                .tag(2)
-            
-            Text("Settings")
-                .tabItem {
-                    Label("Settings", systemImage: "gear")
-                }
-                .tag(3)
+            TabView(selection: $appState.selectedTab) {
+                DashboardView(appState: appState)
+                    .tabItem {
+                        Label("Home", systemImage: "house.fill")
+                    }
+                    .tag(0)
+                
+                ProfileView(appState: appState)
+                    .tabItem {
+                        Label("Profile", systemImage: "person.fill")
+                    }
+                    .tag(1)
+            }
+        }
+        .onAppear {
+            // Configure tab bar appearance
+            #if canImport(UIKit)
+            let appearance = UITabBarAppearance()
+            appearance.configureWithDefaultBackground()
+            UITabBar.appearance().standardAppearance = appearance
+            if #available(iOS 15.0, *) {
+                UITabBar.appearance().scrollEdgeAppearance = appearance
+            }
+            #endif
         }
     }
     
-    public init() {}
+    public init(appState: AppState) {
+        self.appState = appState
+    }
 } 
