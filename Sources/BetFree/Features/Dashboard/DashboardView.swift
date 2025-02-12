@@ -19,9 +19,6 @@ public struct DashboardView: View {
                     
                     // Motivation Section
                     MotivationSection()
-                    
-                    // Community Highlights
-                    CommunityHighlightsView()
                 }
                 .padding()
             }
@@ -171,30 +168,6 @@ private struct MotivationSection: View {
                 .background(BFDesignSystem.Colors.cardBackground)
                 .cornerRadius(BFDesignSystem.Layout.CornerRadius.medium)
                 .withShadow(BFDesignSystem.Layout.Shadow.card)
-        }
-    }
-}
-
-// MARK: - Community Highlights
-private struct CommunityHighlightsView: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: BFDesignSystem.Layout.Spacing.medium) {
-            Text("Community Highlights")
-                .font(BFDesignSystem.Typography.titleMedium)
-                .foregroundColor(BFDesignSystem.Colors.textPrimary)
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
-                    ForEach(1...3, id: \.self) { _ in
-                        BFTestimonialCard(
-                            quote: "This app helped me stay accountable. 30 days and counting!",
-                            author: "Anonymous"
-                        )
-                        .frame(width: 280)
-                    }
-                }
-                .padding(.horizontal, 1) // Prevent shadow clipping
-            }
         }
     }
 }
