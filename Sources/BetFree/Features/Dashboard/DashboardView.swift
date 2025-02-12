@@ -5,132 +5,150 @@ public struct DashboardView: View {
     @EnvironmentObject private var appState: AppState
     
     public var body: some View {
-        ScrollView {
-            VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
-                // Main Progress Card
-                ProgressCard(
-                    streak: appState.streak,
-                    savings: appState.savings
-                )
-                .padding(.horizontal)
-                
-                // Daily Limit Card
-                DailyLimitCard(limit: appState.dailyLimit)
-                    .padding(.horizontal)
-                
-                // Motivation Card
-                MotivationCard()
-                    .padding(.horizontal)
+        NavigationView {
+            ScrollView {
+                VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+                    // Header with Streak and Savings
+                    HeaderStatsView(streak: appState.streak, savings: appState.savings)
+                    
+                    // Daily Progress Card
+                    DailyProgressCard(
+                        dailyLimit: appState.dailyLimit,
+                        currentSpend: 0  // TODO: Implement current spend tracking
+                    )
+                    
+                    // Motivation Section
+                    MotivationSection()
+                    
+                    // Community Highlights
+                    CommunityHighlightsView()
+                }
+                .padding()
             }
-            .padding(.vertical)
+            .navigationTitle("Dashboard")
+            .background(BFDesignSystem.Colors.background)
         }
-        .navigationTitle("Dashboard")
     }
     
     public init() {}
 }
 
-private struct ProgressCard: View {
+// MARK: - Header Stats View
+private struct HeaderStatsView: View {
     let streak: Int
     let savings: Double
     
     var body: some View {
-        VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
-            // Header
-            HStack {
-                Text("Your Progress")
-                    .font(BFDesignSystem.Typography.titleMedium)
-                    .foregroundColor(BFDesignSystem.Colors.textPrimary)
-                Spacer()
-            }
-            
-            // Stats
-            HStack(spacing: BFDesignSystem.Layout.Spacing.large) {
-                // Streak
-                VStack(spacing: BFDesignSystem.Layout.Spacing.small) {
+        HStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+            // Streak Card
+            VStack(spacing: BFDesignSystem.Layout.Spacing.small) {
+                HStack(alignment: .top, spacing: 4) {
                     Text("\(streak)")
                         .font(BFDesignSystem.Typography.titleLarge)
-                        .foregroundColor(BFDesignSystem.Colors.primary)
-                    Text("Day Streak")
+                    Text("days")
                         .font(BFDesignSystem.Typography.caption)
-                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                        .padding(.top, 4)
                 }
+                .foregroundStyle(BFDesignSystem.Colors.primaryGradient)
                 
-                Divider()
-                
-                // Savings
-                VStack(spacing: BFDesignSystem.Layout.Spacing.small) {
-                    Text("$\(savings, specifier: "%.2f")")
-                        .font(BFDesignSystem.Typography.titleLarge)
-                        .foregroundColor(BFDesignSystem.Colors.success)
-                    Text("Saved")
-                        .font(BFDesignSystem.Typography.caption)
-                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
-                }
+                Text("Current Streak")
+                    .font(BFDesignSystem.Typography.caption)
+                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
             }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(BFDesignSystem.Colors.cardBackground)
+            .cornerRadius(BFDesignSystem.Layout.CornerRadius.medium)
+            .withShadow(BFDesignSystem.Layout.Shadow.small)
+            
+            // Savings Card
+            VStack(spacing: BFDesignSystem.Layout.Spacing.small) {
+                Text("$\(savings, specifier: "%.0f")")
+                    .font(BFDesignSystem.Typography.titleLarge)
+                    .foregroundStyle(BFDesignSystem.Colors.mindfulGradient)
+                
+                Text("Total Savings")
+                    .font(BFDesignSystem.Typography.caption)
+                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
+            }
+            .frame(maxWidth: .infinity)
             .padding()
             .background(BFDesignSystem.Colors.cardBackground)
             .cornerRadius(BFDesignSystem.Layout.CornerRadius.medium)
             .withShadow(BFDesignSystem.Layout.Shadow.small)
         }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: BFDesignSystem.Layout.CornerRadius.card)
-                .fill(BFDesignSystem.Colors.cardBackground)
-                .withShadow(BFDesignSystem.Layout.Shadow.card)
-        )
     }
 }
 
-private struct DailyLimitCard: View {
-    let limit: Double
+// MARK: - Daily Progress Card
+private struct DailyProgressCard: View {
+    let dailyLimit: Double
+    let currentSpend: Double
+    
+    var progress: Double {
+        guard dailyLimit > 0 else { return 0 }
+        return min(currentSpend / dailyLimit, 1.0)
+    }
     
     var body: some View {
-        VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
-            // Header
-            HStack {
-                Text("Daily Limit")
-                    .font(BFDesignSystem.Typography.titleMedium)
-                    .foregroundColor(BFDesignSystem.Colors.textPrimary)
-                Spacer()
-            }
+        VStack(alignment: .leading, spacing: BFDesignSystem.Layout.Spacing.medium) {
+            Text("Daily Progress")
+                .font(BFDesignSystem.Typography.titleMedium)
+                .foregroundColor(BFDesignSystem.Colors.textPrimary)
             
-            // Limit Display
-            HStack {
-                Text("$\(limit, specifier: "%.2f")")
-                    .font(BFDesignSystem.Typography.titleLarge)
-                    .foregroundColor(BFDesignSystem.Colors.primary)
-                
-                Spacer()
-                
-                Button(action: {
-                    // Edit limit action
-                }) {
-                    Image(systemName: "pencil.circle.fill")
-                        .font(.system(size: BFDesignSystem.Layout.Size.iconLarge))
-                        .foregroundColor(BFDesignSystem.Colors.primary)
+            // Progress Bar
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    // Background
+                    RoundedRectangle(cornerRadius: BFDesignSystem.Layout.CornerRadius.small)
+                        .fill(BFDesignSystem.Colors.separator)
+                        .frame(height: 8)
+                    
+                    // Progress
+                    RoundedRectangle(cornerRadius: BFDesignSystem.Layout.CornerRadius.small)
+                        .fill(progress > 0.8 ? BFDesignSystem.Colors.error : BFDesignSystem.Colors.success)
+                        .frame(width: geometry.size.width * progress, height: 8)
                 }
             }
-            .padding()
-            .background(BFDesignSystem.Colors.cardBackground)
-            .cornerRadius(BFDesignSystem.Layout.CornerRadius.medium)
-            .withShadow(BFDesignSystem.Layout.Shadow.small)
+            .frame(height: 8)
+            
+            // Stats
+            HStack {
+                VStack(alignment: .leading) {
+                    Text("Spent")
+                        .font(BFDesignSystem.Typography.caption)
+                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                    Text("$\(currentSpend, specifier: "%.2f")")
+                        .font(BFDesignSystem.Typography.bodyLargeMedium)
+                        .foregroundColor(BFDesignSystem.Colors.textPrimary)
+                }
+                
+                Spacer()
+                
+                VStack(alignment: .trailing) {
+                    Text("Limit")
+                        .font(BFDesignSystem.Typography.caption)
+                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                    Text("$\(dailyLimit, specifier: "%.2f")")
+                        .font(BFDesignSystem.Typography.bodyLargeMedium)
+                        .foregroundColor(BFDesignSystem.Colors.textPrimary)
+                }
+            }
         }
         .padding()
-        .background(
-            RoundedRectangle(cornerRadius: BFDesignSystem.Layout.CornerRadius.card)
-                .fill(BFDesignSystem.Colors.cardBackground)
-                .withShadow(BFDesignSystem.Layout.Shadow.card)
-        )
+        .background(BFDesignSystem.Colors.cardBackground)
+        .cornerRadius(BFDesignSystem.Layout.CornerRadius.medium)
+        .withShadow(BFDesignSystem.Layout.Shadow.card)
     }
 }
 
-private struct MotivationCard: View {
+// MARK: - Motivation Section
+private struct MotivationSection: View {
     let quotes = [
         "Every day is a new opportunity to stay strong.",
-        "Small steps lead to big changes.",
+        "Progress is progress, no matter how small.",
         "You are stronger than you think.",
-        "Focus on progress, not perfection.",
+        "Focus on the day ahead, not the mistakes behind.",
         "Your future self will thank you."
     ]
     
@@ -139,8 +157,8 @@ private struct MotivationCard: View {
     }
     
     var body: some View {
-        VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
-            Text("💪 Daily Motivation")
+        VStack(alignment: .leading, spacing: BFDesignSystem.Layout.Spacing.medium) {
+            Text("Daily Motivation")
                 .font(BFDesignSystem.Typography.titleMedium)
                 .foregroundColor(BFDesignSystem.Colors.textPrimary)
             
@@ -148,20 +166,40 @@ private struct MotivationCard: View {
                 .font(BFDesignSystem.Typography.bodyLarge)
                 .foregroundColor(BFDesignSystem.Colors.textSecondary)
                 .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
                 .padding()
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: BFDesignSystem.Layout.CornerRadius.card)
-                .fill(BFDesignSystem.Colors.cardBackground)
+                .background(BFDesignSystem.Colors.cardBackground)
+                .cornerRadius(BFDesignSystem.Layout.CornerRadius.medium)
                 .withShadow(BFDesignSystem.Layout.Shadow.card)
-        )
+        }
+    }
+}
+
+// MARK: - Community Highlights
+private struct CommunityHighlightsView: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: BFDesignSystem.Layout.Spacing.medium) {
+            Text("Community Highlights")
+                .font(BFDesignSystem.Typography.titleMedium)
+                .foregroundColor(BFDesignSystem.Colors.textPrimary)
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
+                    ForEach(1...3, id: \.self) { _ in
+                        BFTestimonialCard(
+                            quote: "This app helped me stay accountable. 30 days and counting!",
+                            author: "Anonymous"
+                        )
+                        .frame(width: 280)
+                    }
+                }
+                .padding(.horizontal, 1) // Prevent shadow clipping
+            }
+        }
     }
 }
 
 #Preview {
-    NavigationView {
-        DashboardView()
-            .environmentObject(AppState())
-    }
+    DashboardView()
+        .environmentObject(AppState())
 } 
