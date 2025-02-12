@@ -2,7 +2,7 @@ import CoreData
 import Foundation
 
 @MainActor
-public class CoreDataManager {
+public final class CoreDataManager {
     public static let shared = CoreDataManager()
     
     private init() {
@@ -25,6 +25,10 @@ public class CoreDataManager {
             if let error = error {
                 fatalError("Unable to load persistent stores: \(error)")
             }
+            
+            // Enable migration
+            description.shouldMigrateStoreAutomatically = true
+            description.shouldInferMappingModelAutomatically = true
         }
         
         // Configure the container
@@ -46,6 +50,7 @@ public class CoreDataManager {
         transaction.amount = amount
         transaction.date = Date()
         transaction.note = note
+        transaction.category = amount < 0 ? "Expense" : "Savings"
         
         try context.save()
     }
@@ -95,9 +100,6 @@ public class CoreDataManager {
             user = existingUser
         } else {
             user = UserProfile(context: context)
-            user.id = UUID()
-            user.streak = 0
-            user.totalSavings = 0
         }
         
         user.name = name ?? ""

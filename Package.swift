@@ -13,6 +13,7 @@ let package = Package(
     products: [
         .library(
             name: "BetFree",
+            type: .dynamic,
             targets: ["BetFree"]),
     ],
     dependencies: [

@@ -15,10 +15,11 @@
 		8A1234567890ABCE /* BetFreeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BetFreeApp.swift; sourceTree = "<group>"; };
 		8A1234567890ABD1 /* BetFreeApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BetFreeApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8A1234567890ABD2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8A1234567890ABD3 /* BetFree */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = BetFree; path = ..; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		8A1234567890ABD3 /* Frameworks */ = {
+		8A1234567890ABD4 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -29,16 +30,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		8A1234567890ABD4 = {
+		8A1234567890ABD5 = {
 			isa = PBXGroup;
 			children = (
-				8A1234567890ABD5 /* BetFreeApp */,
-				8A1234567890ABD6 /* Products */,
-				8A1234567890ABD7 /* Frameworks */,
+				8A1234567890ABD3 /* BetFree */,
+				8A1234567890ABD6 /* BetFreeApp */,
+				8A1234567890ABD7 /* Products */,
+				8A1234567890ABD8 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
-		8A1234567890ABD5 /* BetFreeApp */ = {
+		8A1234567890ABD6 /* BetFreeApp */ = {
 			isa = PBXGroup;
 			children = (
 				8A1234567890ABCE /* BetFreeApp.swift */,
@@ -47,7 +49,7 @@
 			path = BetFreeApp;
 			sourceTree = "<group>";
 		};
-		8A1234567890ABD6 /* Products */ = {
+		8A1234567890ABD7 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				8A1234567890ABD1 /* BetFreeApp.app */,
@@ -55,7 +57,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		8A1234567890ABD7 /* Frameworks */ = {
+		8A1234567890ABD8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 			);
@@ -65,13 +67,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		8A1234567890ABD8 /* BetFreeApp */ = {
+		8A1234567890ABD9 /* BetFreeApp */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8A1234567890ABD9 /* Build configuration list for PBXNativeTarget "BetFreeApp" */;
+			buildConfigurationList = 8A1234567890ABDA /* Build configuration list for PBXNativeTarget "BetFreeApp" */;
 			buildPhases = (
-				8A1234567890ABDA /* Sources */,
-				8A1234567890ABD3 /* Frameworks */,
-				8A1234567890ABDB /* Resources */,
+				8A1234567890ABDB /* Sources */,
+				8A1234567890ABD4 /* Frameworks */,
+				8A1234567890ABDC /* Resources */,
 			);
 			buildRules = (
 			);
@@ -88,19 +90,19 @@
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		8A1234567890ABDC /* Project object */ = {
+		8A1234567890ABDD /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
-					8A1234567890ABD8 = {
+					8A1234567890ABD9 = {
 						CreatedOnToolsVersion = 15.0;
 					};
 				};
 			};
-			buildConfigurationList = 8A1234567890ABDD /* Build configuration list for PBXProject "BetFreeApp" */;
+			buildConfigurationList = 8A1234567890ABDE /* Build configuration list for PBXProject "BetFreeApp" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -108,21 +110,21 @@
 				en,
 				Base,
 			);
-			mainGroup = 8A1234567890ABD4;
+			mainGroup = 8A1234567890ABD5;
 			packageReferences = (
-				8A1234567890ABDE /* XCLocalSwiftPackageReference "(null)" */,
+				8A1234567890ABDF /* XCLocalSwiftPackageReference ".." */,
 			);
-			productRefGroup = 8A1234567890ABD6 /* Products */;
+			productRefGroup = 8A1234567890ABD7 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8A1234567890ABD8 /* BetFreeApp */,
+				8A1234567890ABD9 /* BetFreeApp */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		8A1234567890ABDB /* Resources */ = {
+		8A1234567890ABDC /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -132,7 +134,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		8A1234567890ABDA /* Sources */ = {
+		8A1234567890ABDB /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -143,7 +145,7 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		8A1234567890ABDF /* Debug */ = {
+		8A1234567890ABE0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -206,7 +208,7 @@
 			};
 			name = Debug;
 		};
-		8A1234567890ABE0 /* Release */ = {
+		8A1234567890ABE1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -262,7 +264,7 @@
 			};
 			name = Release;
 		};
-		8A1234567890ABE1 /* Debug */ = {
+		8A1234567890ABE2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -292,7 +294,7 @@
 			};
 			name = Debug;
 		};
-		8A1234567890ABE2 /* Release */ = {
+		8A1234567890ABE3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -325,20 +327,20 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		8A1234567890ABD9 /* Build configuration list for PBXNativeTarget "BetFreeApp" */ = {
+		8A1234567890ABDA /* Build configuration list for PBXNativeTarget "BetFreeApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				8A1234567890ABE1 /* Debug */,
-				8A1234567890ABE2 /* Release */,
+				8A1234567890ABE2 /* Debug */,
+				8A1234567890ABE3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8A1234567890ABDD /* Build configuration list for PBXProject "BetFreeApp" */ = {
+		8A1234567890ABDE /* Build configuration list for PBXProject "BetFreeApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				8A1234567890ABDF /* Debug */,
-				8A1234567890ABE0 /* Release */,
+				8A1234567890ABE0 /* Debug */,
+				8A1234567890ABE1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -346,18 +348,18 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		8A1234567890ABDE /* XCLocalSwiftPackageReference "(null)" */ = {
+		8A1234567890ABDF /* XCLocalSwiftPackageReference ".." */ = {
 			isa = XCLocalSwiftPackageReference;
+			relativePath = ..;
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		8A1234567890ABD0 /* BetFree */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 8A1234567890ABDE /* XCLocalSwiftPackageReference "(null)" */;
 			productName = BetFree;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
-	rootObject = 8A1234567890ABDC /* Project object */;
+	rootObject = 8A1234567890ABDD /* Project object */;
 }

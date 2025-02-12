@@ -6,14 +6,20 @@ import UIKit
 
 struct DashboardHeaderView: View {
     @ObservedObject var appState: AppState
+    @State private var isAnimated = false
     
     var body: some View {
         VStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
+            // Welcome Message with Animation
             Text("Welcome back, \(appState.username)")
                 .font(BFDesignSystem.Typography.titleLarge)
                 .foregroundStyle(BFDesignSystem.Colors.primaryGradient)
                 .padding(.top, BFDesignSystem.Layout.Spacing.large)
+                .opacity(isAnimated ? 1 : 0)
+                .offset(y: isAnimated ? 0 : 20)
+                .animation(.spring(response: 0.6, dampingFraction: 0.8), value: isAnimated)
             
+            // Stat Cards
             HStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
                 StatCard(
                     title: "Streak",
@@ -21,6 +27,7 @@ struct DashboardHeaderView: View {
                     icon: "flame.fill",
                     gradient: BFDesignSystem.Colors.warmGradient
                 )
+                .offset(x: isAnimated ? 0 : -50)
                 
                 StatCard(
                     title: "Savings",
@@ -28,9 +35,17 @@ struct DashboardHeaderView: View {
                     icon: "dollarsign.circle.fill",
                     gradient: BFDesignSystem.Colors.mindfulGradient
                 )
+                .offset(x: isAnimated ? 0 : 50)
             }
+            .opacity(isAnimated ? 1 : 0)
+            .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.2), value: isAnimated)
         }
         .padding(.horizontal)
+        .onAppear {
+            withAnimation {
+                isAnimated = true
+            }
+        }
     }
 }
 
@@ -39,6 +54,7 @@ struct StatCard: View {
     let value: String
     let icon: String
     let gradient: LinearGradient
+    @State private var isHovered = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: BFDesignSystem.Layout.Spacing.small) {
@@ -46,6 +62,8 @@ struct StatCard: View {
                 Image(systemName: icon)
                     .font(.system(size: BFDesignSystem.Layout.Size.iconMedium))
                     .foregroundStyle(gradient)
+                    .scaleEffect(isHovered ? 1.1 : 1.0)
+                    .animation(.spring(response: 0.3), value: isHovered)
                 
                 Text(title)
                     .font(BFDesignSystem.Typography.bodyMedium)
@@ -60,7 +78,12 @@ struct StatCard: View {
         .padding(BFDesignSystem.Layout.Spacing.large)
         .background(BFDesignSystem.Colors.cardBackground)
         .cornerRadius(BFDesignSystem.Layout.CornerRadius.card)
-        .withShadow(BFDesignSystem.Layout.Shadow.card)
+        .withShadow(isHovered ? BFDesignSystem.Layout.Shadow.large : BFDesignSystem.Layout.Shadow.card)
+        .scaleEffect(isHovered ? 1.02 : 1.0)
+        .animation(.spring(response: 0.3), value: isHovered)
+        .onHover { hovering in
+            isHovered = hovering
+        }
     }
 }
 
@@ -137,9 +160,11 @@ public struct DashboardView: View {
 struct TransactionListView: View {
     @ObservedObject var appState: AppState
     @State private var selectedTransaction: Transaction?
+    @State private var isAnimated = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: BFDesignSystem.Layout.Spacing.medium) {
+            // Section Header
             HStack {
                 Text("Recent Transactions")
                     .font(BFDesignSystem.Typography.titleSmall)
@@ -156,22 +181,70 @@ struct TransactionListView: View {
                 }
             }
             .padding(.horizontal)
+            .opacity(isAnimated ? 1 : 0)
+            .offset(y: isAnimated ? 0 : 20)
+            .animation(.spring(response: 0.6).delay(0.3), value: isAnimated)
             
-            LazyVStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
-                ForEach(CoreDataManager.shared.getTodaysTransactions(), id: \.id) { transaction in
-                    TransactionRow(transaction: transaction)
-                        .onTapGesture {
-                            selectedTransaction = transaction
-                        }
+            let transactions = CoreDataManager.shared.getTodaysTransactions()
+            
+            if transactions.isEmpty {
+                EmptyTransactionView()
+                    .opacity(isAnimated ? 1 : 0)
+                    .offset(y: isAnimated ? 0 : 20)
+                    .animation(.spring(response: 0.6).delay(0.4), value: isAnimated)
+            } else {
+                LazyVStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
+                    ForEach(Array(transactions.enumerated()), id: \.element.id) { index, transaction in
+                        TransactionRow(transaction: transaction)
+                            .opacity(isAnimated ? 1 : 0)
+                            .offset(y: isAnimated ? 0 : 20)
+                            .animation(.spring(response: 0.6).delay(Double(index) * 0.1 + 0.4), value: isAnimated)
+                            .onTapGesture {
+                                withAnimation(.spring(response: 0.3)) {
+                                    selectedTransaction = transaction
+                                }
+                            }
+                    }
                 }
+                .padding(.horizontal)
             }
-            .padding(.horizontal)
         }
+        .onAppear {
+            withAnimation {
+                isAnimated = true
+            }
+        }
+    }
+}
+
+struct EmptyTransactionView: View {
+    var body: some View {
+        VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+            Image(systemName: "list.bullet.rectangle.portrait")
+                .font(.system(size: 48))
+                .foregroundStyle(BFDesignSystem.Colors.calmingGradient)
+            
+            Text("No Transactions Today")
+                .font(BFDesignSystem.Typography.titleSmall)
+                .foregroundColor(BFDesignSystem.Colors.textPrimary)
+            
+            Text("Add your first transaction using the + button")
+                .font(BFDesignSystem.Typography.body)
+                .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(BFDesignSystem.Layout.Spacing.xxLarge)
+        .background(BFDesignSystem.Colors.cardBackground)
+        .cornerRadius(BFDesignSystem.Layout.CornerRadius.card)
+        .withShadow(BFDesignSystem.Layout.Shadow.card)
+        .padding(.horizontal)
     }
 }
 
 struct TransactionRow: View {
     let transaction: Transaction
+    @State private var isHovered = false
     
     var body: some View {
         HStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
@@ -189,6 +262,8 @@ struct TransactionRow: View {
                     .foregroundColor(transaction.amount < 0 ? 
                                    BFDesignSystem.Colors.error :
                                    BFDesignSystem.Colors.success)
+                    .scaleEffect(isHovered ? 1.1 : 1.0)
+                    .animation(.spring(response: 0.3), value: isHovered)
             }
             
             // Transaction Details
@@ -214,7 +289,12 @@ struct TransactionRow: View {
         .padding()
         .background(BFDesignSystem.Colors.cardBackground)
         .cornerRadius(BFDesignSystem.Layout.CornerRadius.card)
-        .withShadow(BFDesignSystem.Layout.Shadow.card)
+        .withShadow(isHovered ? BFDesignSystem.Layout.Shadow.medium : BFDesignSystem.Layout.Shadow.card)
+        .scaleEffect(isHovered ? 1.02 : 1.0)
+        .animation(.spring(response: 0.3), value: isHovered)
+        .onHover { hovering in
+            isHovered = hovering
+        }
     }
 }
 

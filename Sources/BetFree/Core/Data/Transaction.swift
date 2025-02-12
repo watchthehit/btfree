@@ -13,13 +13,12 @@ public class Transaction: NSManagedObject {
         super.awakeFromInsert()
         id = UUID()
         date = Date()
+        category = "Expense"
     }
 }
 
 extension Transaction {
-    static var entityName: String { "Transaction" }
-    
-    static func fetchRequest() -> NSFetchRequest<Transaction> {
-        return NSFetchRequest<Transaction>(entityName: entityName)
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<Transaction> {
+        return NSFetchRequest<Transaction>(entityName: "Transaction")
     }
 } 

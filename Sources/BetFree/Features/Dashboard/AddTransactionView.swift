@@ -3,7 +3,7 @@ import SwiftUI
 import UIKit
 #endif
 
-struct AddTransactionView: View {
+public struct AddTransactionView: View {
     @ObservedObject var appState: AppState
     @Environment(\.dismiss) private var dismiss
     
@@ -12,50 +12,145 @@ struct AddTransactionView: View {
     @State private var category = "Expense"
     @State private var showingError = false
     @State private var errorMessage = ""
+    @State private var isAnimated = false
     
     private let categories = ["Expense", "Savings"]
     
-    var body: some View {
+    public init(appState: AppState) {
+        self.appState = appState
+    }
+    
+    public var body: some View {
         NavigationView {
-            Form {
-                Section {
-                    #if os(iOS)
-                    TextField("Amount", text: $amount)
-                        .keyboardType(.decimalPad)
-                    #else
-                    TextField("Amount", text: $amount)
-                    #endif
-                    
-                    TextField("Note (Optional)", text: $note)
-                    
-                    Picker("Category", selection: $category) {
-                        ForEach(categories, id: \.self) { category in
-                            Text(category)
+            mainContent
+        }
+    }
+    
+    private var mainContent: some View {
+        ZStack {
+            BFDesignSystem.Colors.background
+                .ignoresSafeArea()
+            
+            VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+                amountInputSection
+                noteInputSection
+                categorySelectionSection
+                Spacer()
+                saveButton
+            }
+            .padding()
+        }
+        .navigationTitle("Add Transaction")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") {
+                    dismiss()
+                }
+            }
+        }
+        .alert("Error", isPresented: $showingError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(errorMessage)
+        }
+        .onAppear {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                isAnimated = true
+            }
+        }
+    }
+    
+    private var amountInputSection: some View {
+        VStack(alignment: .leading, spacing: BFDesignSystem.Layout.Spacing.small) {
+            Text("Amount")
+                .font(BFDesignSystem.Typography.titleSmall)
+                .foregroundStyle(BFDesignSystem.Colors.primaryGradient)
+            
+            HStack {
+                Text("$")
+                    .font(BFDesignSystem.Typography.titleLarge)
+                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                
+                TextField("0.00", text: $amount)
+                    .font(BFDesignSystem.Typography.titleLarge)
+                    .keyboardType(.decimalPad)
+                    .multilineTextAlignment(.leading)
+                    .textFieldStyle(.plain)
+            }
+            .padding()
+            .background(BFDesignSystem.Colors.cardBackground)
+            .cornerRadius(BFDesignSystem.Layout.CornerRadius.large)
+            .withShadow(BFDesignSystem.Layout.Shadow.small)
+        }
+        .opacity(isAnimated ? 1 : 0)
+        .offset(y: isAnimated ? 0 : 20)
+    }
+    
+    private var noteInputSection: some View {
+        VStack(alignment: .leading, spacing: BFDesignSystem.Layout.Spacing.small) {
+            Text("Note")
+                .font(BFDesignSystem.Typography.titleSmall)
+                .foregroundStyle(BFDesignSystem.Colors.primaryGradient)
+            
+            TextField("What's this for?", text: $note)
+                .font(BFDesignSystem.Typography.bodyLarge)
+                .padding()
+                .background(BFDesignSystem.Colors.cardBackground)
+                .cornerRadius(BFDesignSystem.Layout.CornerRadius.large)
+                .withShadow(BFDesignSystem.Layout.Shadow.small)
+        }
+        .opacity(isAnimated ? 1 : 0)
+        .offset(y: isAnimated ? 0 : 20)
+    }
+    
+    private var categorySelectionSection: some View {
+        VStack(alignment: .leading, spacing: BFDesignSystem.Layout.Spacing.small) {
+            Text("Category")
+                .font(BFDesignSystem.Typography.titleSmall)
+                .foregroundStyle(BFDesignSystem.Colors.primaryGradient)
+            
+            HStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
+                ForEach(categories, id: \.self) { cat in
+                    CategoryButton(
+                        title: cat,
+                        isSelected: category == cat,
+                        icon: cat == "Expense" ? "arrow.down.circle.fill" : "arrow.up.circle.fill",
+                        color: cat == "Expense" ? BFDesignSystem.Colors.error : BFDesignSystem.Colors.success
+                    ) {
+                        withAnimation(.spring(response: 0.3)) {
+                            category = cat
+                            HapticFeedback.fireAndForget(style: .light)
                         }
                     }
                 }
-                
-                Section {
-                    Button("Save") {
-                        saveTransaction()
-                    }
-                    .disabled(amount.isEmpty)
-                }
-            }
-            .navigationTitle("Add Transaction")
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-            }
-            .alert("Error", isPresented: $showingError) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text(errorMessage)
             }
         }
+        .opacity(isAnimated ? 1 : 0)
+        .offset(y: isAnimated ? 0 : 20)
+    }
+    
+    private var saveButton: some View {
+        Button(action: saveTransaction) {
+            HStack {
+                Image(systemName: "checkmark.circle.fill")
+                Text("Save Transaction")
+            }
+            .font(BFDesignSystem.Typography.button)
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .frame(height: BFDesignSystem.Layout.Size.buttonHeight)
+            .background(
+                amount.isEmpty ? 
+                AnyShapeStyle(BFDesignSystem.Colors.textSecondary) :
+                AnyShapeStyle(BFDesignSystem.Colors.primaryGradient)
+            )
+            .cornerRadius(BFDesignSystem.Layout.CornerRadius.button)
+            .withShadow(BFDesignSystem.Layout.Shadow.button)
+        }
+        .disabled(amount.isEmpty)
+        .opacity(isAnimated ? 1 : 0)
+        .offset(y: isAnimated ? 0 : 20)
     }
     
     private func saveTransaction() {
@@ -68,12 +163,55 @@ struct AddTransactionView: View {
         do {
             try CoreDataManager.shared.addTransaction(
                 amount: category == "Expense" ? -amountValue : amountValue,
-                note: note
+                note: note.isEmpty ? nil : note
             )
+            HapticFeedback.fireAndForget(style: .medium)
             dismiss()
         } catch {
             errorMessage = error.localizedDescription
             showingError = true
+            HapticFeedback.fireAndForget(style: .rigid)
         }
     }
+}
+
+private struct CategoryButton: View {
+    let title: String
+    let isSelected: Bool
+    let icon: String
+    let color: Color
+    let action: () -> Void
+    @State private var isHovered = false
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.small) {
+                Image(systemName: icon)
+                    .font(.system(size: BFDesignSystem.Layout.Size.iconLarge))
+                    .foregroundColor(isSelected ? .white : color)
+                    .scaleEffect(isHovered ? 1.1 : 1.0)
+                
+                Text(title)
+                    .font(BFDesignSystem.Typography.bodyMedium)
+                    .foregroundColor(isSelected ? .white : BFDesignSystem.Colors.textPrimary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: BFDesignSystem.Layout.CornerRadius.large)
+                    .fill(isSelected ? color : BFDesignSystem.Colors.cardBackground)
+            )
+            .withShadow(isHovered ? BFDesignSystem.Layout.Shadow.medium : BFDesignSystem.Layout.Shadow.small)
+        }
+        .buttonStyle(.plain)
+        .scaleEffect(isHovered ? 1.02 : 1.0)
+        .animation(.spring(response: 0.3), value: isHovered)
+        .onHover { hovering in
+            isHovered = hovering
+        }
+    }
+}
+
+#Preview {
+    AddTransactionView(appState: AppState())
 } 

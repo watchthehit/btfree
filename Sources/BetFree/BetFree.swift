@@ -2,7 +2,7 @@ import SwiftUI
 import ComposableArchitecture
 
 public struct BetFreeRootView: View {
-    @StateObject private var appState: AppState
+    @EnvironmentObject private var appState: AppState
     
     public var body: some View {
         ZStack {
@@ -10,26 +10,17 @@ public struct BetFreeRootView: View {
             BFDesignSystem.Colors.background
                 .ignoresSafeArea()
             
-            NavigationView {
-                ZStack {
-                    if appState.isOnboarded {
-                        MainTabView(appState: appState)
-                    } else {
-                        OnboardingView()
-                            .environmentObject(appState)
-                    }
-                }
+            if appState.isOnboarded {
+                MainTabView(appState: appState)
+            } else {
+                OnboardingView()
             }
-            .navigationViewStyle(.stack)
         }
     }
     
     public init() {
         // Initialize Core Data
         _ = CoreDataManager.shared
-        
-        // Initialize AppState
-        _appState = StateObject(wrappedValue: AppState())
         
         // Set navigation bar appearance
         #if canImport(UIKit)
