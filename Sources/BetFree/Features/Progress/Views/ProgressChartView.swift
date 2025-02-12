@@ -1,142 +1,182 @@
 import SwiftUI
+import CoreData
 
-struct ProgressChartView: View {
+public struct ProgressChartView: View {
     @ObservedObject var appState: AppState
     let timeframe: ProgressView.Timeframe
-    @State private var isHovered: Int? = nil
+    @State private var isHovered: Bool = false
+    @State private var hoveredValue: (date: Date, value: Double)?
     
-    private var data: [(date: Date, amount: Double)] {
-        // TODO: Replace with actual data from Core Data
+    private var data: [(date: Date, value: Double)] {
         let calendar = Calendar.current
-        let today = Date()
+        let now = Date()
+        
+        let numberOfPoints: Int
+        let component: Calendar.Component
         
         switch timeframe {
         case .week:
-            return (0..<7).map { day in
-                let date = calendar.date(byAdding: .day, value: -day, to: today)!
-                return (date, Double.random(in: 0...100)) // Replace with actual data
-            }.reversed()
+            numberOfPoints = 7
+            component = .day
         case .month:
-            return (0..<30).map { day in
-                let date = calendar.date(byAdding: .day, value: -day, to: today)!
-                return (date, Double.random(in: 0...100)) // Replace with actual data
-            }.reversed()
+            numberOfPoints = 30
+            component = .day
         case .year:
-            return (0..<12).map { month in
-                let date = calendar.date(byAdding: .month, value: -month, to: today)!
-                return (date, Double.random(in: 0...1200)) // Replace with actual data
-            }.reversed()
+            numberOfPoints = 12
+            component = .month
         }
+        
+        return fetchTransactionData(for: numberOfPoints, component: component, from: now)
     }
     
-    private var dateFormatter: DateFormatter {
+    private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        switch timeframe {
-        case .week:
-            formatter.dateFormat = "EEE"
-        case .month:
-            formatter.dateFormat = "d MMM"
-        case .year:
-            formatter.dateFormat = "MMM"
-        }
+        formatter.dateStyle = .short
+        formatter.timeStyle = .none
         return formatter
-    }
+    }()
     
-    var body: some View {
-        VStack(alignment: .leading, spacing: BFDesignSystem.Layout.Spacing.medium) {
-            // Chart Title
-            Text("Savings Over Time")
-                .font(BFDesignSystem.Typography.titleSmall)
-                .foregroundStyle(BFDesignSystem.Colors.primaryGradient)
-            
-            // Chart
-            GeometryReader { geometry in
-                ZStack(alignment: .bottom) {
+    public var body: some View {
+        GeometryReader { geometry in
+            VStack {
+                // Chart Title with Value
+                if let hoveredValue = hoveredValue {
+                    Text("$\(String(format: "%.2f", hoveredValue.value))")
+                        .font(BFDesignSystem.Typography.title2)
+                        .foregroundColor(BFDesignSystem.Colors.textPrimary)
+                } else {
+                    Text("Savings Over Time")
+                        .font(BFDesignSystem.Typography.title3)
+                        .foregroundColor(BFDesignSystem.Colors.textPrimary)
+                }
+                
+                // Chart
+                ZStack {
                     // Background Grid
-                    VStack(spacing: 0) {
-                        ForEach(0..<4) { i in
-                            Divider()
-                                .background(BFDesignSystem.Colors.separator)
-                                .frame(height: 1)
-                            if i < 3 {
-                                Spacer()
-                            }
-                        }
-                    }
-                    
-                    // Chart Lines
                     Path { path in
-                        let width = geometry.size.width
-                        let height = geometry.size.height - 30 // Reserve space for labels
-                        let step = width / CGFloat(data.count - 1)
-                        
-                        let points = data.enumerated().map { index, item in
-                            CGPoint(
-                                x: CGFloat(index) * step,
-                                y: height * (1 - CGFloat(item.amount / data.map(\.amount).max()!))
-                            )
-                        }
-                        
-                        path.move(to: points[0])
-                        for point in points.dropFirst() {
-                            path.addLine(to: point)
+                        for i in 0...4 {
+                            let y = geometry.size.height * CGFloat(i) / 4
+                            path.move(to: CGPoint(x: 0, y: y))
+                            path.addLine(to: CGPoint(x: geometry.size.width, y: y))
                         }
                     }
-                    .stroke(BFDesignSystem.Colors.primary, lineWidth: 2)
+                    .stroke(BFDesignSystem.Colors.backgroundSecondary, lineWidth: 1)
                     
-                    // Data Points
-                    ForEach(Array(data.enumerated()), id: \.offset) { index, item in
-                        let width = geometry.size.width
-                        let height = geometry.size.height - 30
-                        let step = width / CGFloat(data.count - 1)
-                        let x = CGFloat(index) * step
-                        let y = height * (1 - CGFloat(item.amount / data.map(\.amount).max()!))
-                        
-                        Circle()
-                            .fill(BFDesignSystem.Colors.primary)
-                            .frame(width: 8, height: 8)
-                            .position(x: x, y: y)
-                            .overlay(
-                                Circle()
-                                    .stroke(BFDesignSystem.Colors.cardBackground, lineWidth: 2)
-                                    .frame(width: 8, height: 8)
-                            )
-                            .overlay(
-                                Text("$\(Int(item.amount))")
-                                    .font(BFDesignSystem.Typography.caption)
-                                    .foregroundColor(BFDesignSystem.Colors.textPrimary)
-                                    .opacity(isHovered == index ? 1 : 0)
-                                    .offset(y: -20)
-                            )
-                            .onHover { hovering in
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    isHovered = hovering ? index : nil
-                                }
+                    // Line Chart
+                    if !data.isEmpty {
+                        Path { path in
+                            let points = data.enumerated().map { index, item -> CGPoint in
+                                let x = geometry.size.width * CGFloat(index) / CGFloat(data.count - 1)
+                                let y = geometry.size.height * (1 - CGFloat(item.value / (maxValue() ?? 1)))
+                                return CGPoint(x: x, y: y)
                             }
+                            
+                            path.move(to: points[0])
+                            for point in points.dropFirst() {
+                                path.addLine(to: point)
+                            }
+                        }
+                        .stroke(BFDesignSystem.Colors.primary, lineWidth: 2)
                         
-                        // X-Axis Labels
-                        Text(dateFormatter.string(from: item.date))
-                            .font(BFDesignSystem.Typography.caption)
-                            .foregroundColor(BFDesignSystem.Colors.textSecondary)
-                            .position(x: x, y: height + 15)
+                        // Data Points
+                        ForEach(data.indices, id: \.self) { index in
+                            let point = data[index]
+                            let x = geometry.size.width * CGFloat(index) / CGFloat(data.count - 1)
+                            let y = geometry.size.height * (1 - CGFloat(point.value / (maxValue() ?? 1)))
+                            
+                            Circle()
+                                .fill(BFDesignSystem.Colors.primary)
+                                .frame(width: 8, height: 8)
+                                .position(x: x, y: y)
+                                .onHover { hovering in
+                                    if hovering {
+                                        hoveredValue = point
+                                    } else if hoveredValue?.date == point.date {
+                                        hoveredValue = nil
+                                    }
+                                }
+                        }
                     }
                 }
+                
+                // X-Axis Labels
+                HStack {
+                    ForEach(data.indices, id: \.self) { index in
+                        Text(formatDate(data[index].date))
+                            .font(BFDesignSystem.Typography.caption)
+                            .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                            .frame(maxWidth: .infinity)
+                            .rotationEffect(.degrees(-45))
+                    }
+                }
+                .padding(.top, BFDesignSystem.Spacing.md)
             }
         }
-        .padding(BFDesignSystem.Layout.Spacing.medium)
-        .background(BFDesignSystem.Colors.cardBackground)
-        .cornerRadius(BFDesignSystem.Layout.CornerRadius.card)
-        .withShadow(BFDesignSystem.Layout.Shadow.card)
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        switch timeframe {
+        case .week:
+            dateFormatter.dateFormat = "EEE"
+        case .month:
+            dateFormatter.dateFormat = "d MMM"
+        case .year:
+            dateFormatter.dateFormat = "MMM"
+        }
+        return dateFormatter.string(from: date)
+    }
+    
+    private func maxValue() -> Double? {
+        data.map { $0.value }.max()
+    }
+    
+    private func fetchTransactionData(for count: Int, component: Calendar.Component, from date: Date) -> [(date: Date, value: Double)] {
+        let calendar = Calendar.current
+        var result: [(date: Date, value: Double)] = []
+        
+        // Create date components for the range
+        let endDate = calendar.startOfDay(for: date)
+        guard let startDate = calendar.date(byAdding: component, value: -(count - 1), to: endDate) else {
+            return []
+        }
+        
+        // Fetch transactions for the date range
+        let request = NSFetchRequest<Transaction>(entityName: "Transaction")
+        request.predicate = NSPredicate(format: "date >= %@ AND date <= %@", startDate as NSDate, endDate as NSDate)
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \Transaction.date, ascending: true)]
+        
+        let transactions: [Transaction]
+        do {
+            transactions = try appState.context.fetch(request)
+        } catch {
+            print("Error fetching transactions: \(error)")
+            return []
+        }
+        
+        // Group transactions by date
+        var datePoints: [Date] = []
+        var currentDate = startDate
+        
+        while currentDate <= endDate {
+            datePoints.append(currentDate)
+            currentDate = calendar.date(byAdding: component, value: 1, to: currentDate) ?? currentDate
+        }
+        
+        // Calculate cumulative savings for each date
+        var runningTotal: Double = 0
+        for date in datePoints {
+            let dateTransactions = transactions.filter { calendar.isDate($0.date, equalTo: date, toGranularity: component) }
+            let dailySavings = dateTransactions.reduce(0.0) { $0 + $1.amount }
+            runningTotal += dailySavings
+            result.append((date: date, value: runningTotal))
+        }
+        
+        return result
     }
 }
 
 #Preview {
-    VStack {
-        ForEach(ProgressView.Timeframe.allCases, id: \.self) { timeframe in
-            ProgressChartView(appState: AppState(), timeframe: timeframe)
-                .frame(height: 200)
-                .padding()
-        }
-    }
-    .background(BFDesignSystem.Colors.background)
+    ProgressChartView(appState: AppState(), timeframe: .week)
+        .frame(height: 200)
+        .padding()
 } 
