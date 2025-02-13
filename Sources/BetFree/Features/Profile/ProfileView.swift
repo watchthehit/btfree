@@ -39,6 +39,12 @@ public struct ProfileView: View {
                     Text("$\(String(format: "%.2f", appState.dailyLimit))")
                         .foregroundColor(.secondary)
                 }
+                
+                NavigationLink {
+                    NotificationSettingsView(appState: appState)
+                } label: {
+                    Label("Notifications", systemImage: "bell.fill")
+                }
             }
             
             // Support Section

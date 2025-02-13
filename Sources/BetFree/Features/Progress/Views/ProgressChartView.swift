@@ -26,7 +26,7 @@ public struct ProgressChartView: View {
             component = .month
         }
         
-        return fetchTransactionData(for: numberOfPoints, component: component, from: now)
+        return fetchTransactionData(for: numberOfPoints, component: component, from: now, using: calendar)
     }
     
     private let dateFormatter: DateFormatter = {
@@ -42,11 +42,11 @@ public struct ProgressChartView: View {
                 // Chart Title with Value
                 if let hoveredValue = hoveredValue {
                     Text("$\(String(format: "%.2f", hoveredValue.value))")
-                        .font(BFDesignSystem.Typography.title2)
+                        .font(BFDesignSystem.Typography.titleMedium)
                         .foregroundColor(BFDesignSystem.Colors.textPrimary)
                 } else {
                     Text("Savings Over Time")
-                        .font(BFDesignSystem.Typography.title3)
+                        .font(BFDesignSystem.Typography.titleSmall)
                         .foregroundColor(BFDesignSystem.Colors.textPrimary)
                 }
                 
@@ -60,7 +60,7 @@ public struct ProgressChartView: View {
                             path.addLine(to: CGPoint(x: geometry.size.width, y: y))
                         }
                     }
-                    .stroke(BFDesignSystem.Colors.backgroundSecondary, lineWidth: 1)
+                    .stroke(BFDesignSystem.Colors.separator, lineWidth: 1)
                     
                     // Line Chart
                     if !data.isEmpty {
@@ -109,7 +109,7 @@ public struct ProgressChartView: View {
                             .rotationEffect(.degrees(-45))
                     }
                 }
-                .padding(.top, BFDesignSystem.Spacing.md)
+                .padding(.top, BFDesignSystem.Layout.Spacing.medium)
             }
         }
     }
@@ -130,8 +130,12 @@ public struct ProgressChartView: View {
         data.map { $0.value }.max()
     }
     
-    private func fetchTransactionData(for count: Int, component: Calendar.Component, from date: Date) -> [(date: Date, value: Double)] {
-        let calendar = Calendar.current
+    private func fetchTransactionData(
+        for count: Int,
+        component: Calendar.Component,
+        from date: Date,
+        using calendar: Calendar
+    ) -> [(date: Date, value: Double)] {
         var result: [(date: Date, value: Double)] = []
         
         // Create date components for the range
@@ -147,7 +151,7 @@ public struct ProgressChartView: View {
         
         let transactions: [Transaction]
         do {
-            transactions = try appState.context.fetch(request)
+            transactions = try CoreDataManager.shared.context.fetch(request)
         } catch {
             print("Error fetching transactions: \(error)")
             return []

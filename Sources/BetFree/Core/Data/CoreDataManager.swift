@@ -33,7 +33,10 @@ public final class CoreDataManager {
         
         // Configure the container
         container.viewContext.automaticallyMergesChangesFromParent = true
-        container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        
+        // Create a local instance of the merge policy to avoid shared state
+        let mergePolicy = NSMergePolicy(merge: .mergeByPropertyObjectTrumpMergePolicyType)
+        container.viewContext.mergePolicy = mergePolicy
         
         return container
     }()

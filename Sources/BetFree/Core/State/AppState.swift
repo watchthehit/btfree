@@ -14,13 +14,19 @@ public class AppState: ObservableObject {
         didSet { 
             saveToUserDefaults()
             try? CoreDataManager.shared.updateUserStreak()
+            handleStreakMilestone()
+            checkAchievements()
         }
     }
     
     @Published public var totalSavings: Double {
-        didSet { 
+        willSet {
             saveToUserDefaults()
-            try? CoreDataManager.shared.updateTotalSavings(amount: totalSavings)
+            try? CoreDataManager.shared.updateTotalSavings(amount: newValue)
+        }
+        didSet {
+            handleSavingsMilestone(oldValue: oldValue)
+            checkAchievements()
         }
     }
     
@@ -66,6 +72,13 @@ public class AppState: ObservableObject {
                 dailyLimit: dailyLimit
             )
         }
+        
+        // Setup notification categories
+        NotificationService.shared.setupNotificationCategories()
+        
+        // Initialize achievements
+        try? AchievementManager.shared.initializeAchievements()
+        checkAchievements()
     }
     
     private func saveToUserDefaults() {
@@ -75,6 +88,55 @@ public class AppState: ObservableObject {
         UserDefaults.standard.set(dailyLimit, forKey: "dailyLimit")
         UserDefaults.standard.set(isOnboarded, forKey: "isOnboarded")
         UserDefaults.standard.set(selectedTab, forKey: "selectedTab")
+    }
+    
+    private func handleStreakMilestone() {
+        Task {
+            // Check if notifications are enabled
+            guard UserDefaults.standard.bool(forKey: "milestoneAlertsEnabled", defaultValue: true) else {
+                return
+            }
+            
+            // Check for streak milestones
+            if currentStreak == 7 {
+                try? await NotificationService.shared.scheduleMilestoneCelebration(milestone: "a 7-day streak")
+            } else if currentStreak == 30 {
+                try? await NotificationService.shared.scheduleMilestoneCelebration(milestone: "a 30-day streak")
+            } else if currentStreak == 90 {
+                try? await NotificationService.shared.scheduleMilestoneCelebration(milestone: "a 90-day streak")
+            } else if currentStreak == 365 {
+                try? await NotificationService.shared.scheduleMilestoneCelebration(milestone: "a 1-year streak")
+            }
+        }
+    }
+    
+    private func handleSavingsMilestone(oldValue: Double) {
+        Task {
+            // Check if notifications are enabled
+            guard UserDefaults.standard.bool(forKey: "milestoneAlertsEnabled", defaultValue: true) else {
+                return
+            }
+            
+            // Check for savings milestones
+            let milestones = [100, 500, 1000, 5000, 10000]
+            for milestone in milestones {
+                if totalSavings >= Double(milestone) && totalSavings - oldValue < Double(milestone) {
+                    try? await NotificationService.shared.scheduleMilestoneCelebration(
+                        milestone: "saving $\(milestone)"
+                    )
+                    break
+                }
+            }
+        }
+    }
+    
+    private func checkAchievements() {
+        Task {
+            try? await AchievementManager.shared.checkProgress(
+                streak: Int32(currentStreak),
+                savings: totalSavings
+            )
+        }
     }
     
     public func updateStreak(_ newStreak: Int) {
@@ -95,6 +157,21 @@ public class AppState: ObservableObject {
     
     public func completeOnboarding() {
         isOnboarded = true
+        
+        // Request notification permissions after onboarding
+        Task {
+            do {
+                if try await NotificationService.shared.requestAuthorization() {
+                    // Schedule initial daily check-in if enabled
+                    if UserDefaults.standard.bool(forKey: "dailyCheckInEnabled", defaultValue: true) {
+                        let defaultTime = Calendar.current.date(from: DateComponents(hour: 9, minute: 0)) ?? Date()
+                        try? await NotificationService.shared.scheduleDailyCheckIn(at: defaultTime)
+                    }
+                }
+            } catch {
+                print("Failed to request notification authorization: \(error)")
+            }
+        }
     }
     
     public func selectTab(_ tab: Int) {
@@ -102,6 +179,11 @@ public class AppState: ObservableObject {
     }
     
     public func logout() {
+        // Cancel all notifications
+        Task {
+            NotificationService.shared.cancelAllNotifications()
+        }
+        
         // Reset all user data
         username = ""
         currentStreak = 0
@@ -120,5 +202,14 @@ public class AppState: ObservableObject {
         
         // Reset Core Data
         CoreDataManager.shared.reset()
+    }
+}
+
+extension UserDefaults {
+    func bool(forKey key: String, defaultValue: Bool) -> Bool {
+        if object(forKey: key) == nil {
+            return defaultValue
+        }
+        return bool(forKey: key)
     }
 } 

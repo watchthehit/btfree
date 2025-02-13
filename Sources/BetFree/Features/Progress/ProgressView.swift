@@ -11,9 +11,32 @@ public struct ProgressView: View {
     
     private let achievementService: AchievementService
     
-    public init(appState: AppState, context: NSManagedObjectContext) {
+    private struct ProgressStatCard: View {
+        let title: String
+        let value: String
+        let icon: String
+        let gradient: LinearGradient
+        
+        var body: some View {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.small) {
+                Text(title)
+                    .font(BFDesignSystem.Typography.caption)
+                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                
+                Text(value)
+                    .font(BFDesignSystem.Typography.titleMedium)
+                    .foregroundColor(BFDesignSystem.Colors.textPrimary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(BFDesignSystem.Colors.cardBackground)
+            .cornerRadius(BFDesignSystem.Layout.CornerRadius.medium)
+        }
+    }
+    
+    public init(appState: AppState) {
         self.appState = appState
-        self.achievementService = AchievementService(context: context)
+        self.achievementService = AchievementService(context: CoreDataManager.shared.context)
     }
     
     public enum Timeframe: String, CaseIterable {
@@ -64,16 +87,16 @@ public struct ProgressView: View {
                     GridItem(.flexible()),
                     GridItem(.flexible())
                 ], spacing: BFDesignSystem.Layout.Spacing.medium) {
-                    StatCard(
+                    ProgressStatCard(
                         title: "Longest Streak",
-                        value: "\(appState.userProfile?.streak ?? 0) days",
+                        value: "\(appState.streak) days",
                         icon: "flame.fill",
                         gradient: BFDesignSystem.Colors.warmGradient
                     )
                     
-                    StatCard(
+                    ProgressStatCard(
                         title: "Total Savings",
-                        value: "$\(String(format: "%.2f", appState.userProfile?.totalSavings ?? 0))",
+                        value: "$\(String(format: "%.2f", appState.savings))",
                         icon: "dollarsign.circle.fill",
                         gradient: BFDesignSystem.Colors.mindfulGradient
                     )
@@ -123,43 +146,18 @@ public struct ProgressView: View {
             try achievementService.initializeDefaultAchievementsIfNeeded()
             achievements = try achievementService.fetchAchievements()
             
-            if let profile = appState.userProfile {
-                try achievementService.checkAndUpdateAchievements(
-                    streak: profile.streak,
-                    savings: profile.totalSavings
-                )
-            }
+            try achievementService.checkAndUpdateAchievements(
+                streak: Int32(appState.streak),
+                savings: appState.savings
+            )
         } catch {
             self.error = error
         }
     }
 }
 
-private struct StatCard: View {
-    let title: String
-    let value: String
-    let icon: String
-    let gradient: LinearGradient
-    
-    var body: some View {
-        VStack(spacing: BFDesignSystem.Layout.Spacing.xs) {
-            Text(title)
-                .font(BFDesignSystem.Typography.caption)
-                .foregroundColor(BFDesignSystem.Colors.textSecondary)
-            
-            Text(value)
-                .font(BFDesignSystem.Typography.title2)
-                .foregroundColor(BFDesignSystem.Colors.textPrimary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding()
-        .background(BFDesignSystem.Colors.backgroundSecondary)
-        .cornerRadius(BFDesignSystem.Radius.lg)
-    }
-}
-
 #Preview {
     NavigationView {
-        ProgressView(appState: AppState(), context: NSManagedObjectContext())
+        ProgressView(appState: AppState())
     }
 } 

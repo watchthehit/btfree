@@ -56,7 +56,7 @@ public class AchievementService {
     public func initializeDefaultAchievementsIfNeeded() throws {
         let count = try context.count(for: NSFetchRequest<Achievement>(entityName: "Achievement"))
         if count == 0 {
-            Achievement.createDefaultAchievements(context: context)
+            try Achievement.createDefaultAchievements(context: context)
         }
     }
 } 

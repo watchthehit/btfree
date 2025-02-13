@@ -21,6 +21,7 @@ public enum BFDesignSystem {
         // Background Colors
         public static let cardBackground = Color(hex: "FFFFFF")  // Pure White
         public static let background = Color(hex: "F7F7F9")  // Soft Background
+        public static let backgroundSecondary = Color(hex: "E5E9EC")  // Secondary Background
         public static let separator = Color(hex: "DFE6E9").opacity(0.6)  // Subtle Border
         
         // Gradients
@@ -161,5 +162,34 @@ extension Color {
             blue:  Double(b) / 255,
             opacity: Double(a) / 255
         )
+    }
+}
+
+// MARK: - Color to Hex Conversion
+extension Color {
+    func toHex() -> String? {
+        #if canImport(UIKit)
+        let uiColor = UIColor(self)
+        guard let components = uiColor.cgColor.components, components.count >= 3 else { return nil }
+        let r = components[0]
+        let g = components[1]
+        let b = components[2]
+        return String(format: "#%02lX%02lX%02lX",
+                      lroundf(Float(r) * 255),
+                      lroundf(Float(g) * 255),
+                      lroundf(Float(b) * 255))
+        #elseif canImport(AppKit)
+        let nsColor = NSColor(self)
+        guard let components = nsColor.usingColorSpace(.sRGB)?.cgColor.components, components.count >= 3 else { return nil }
+        let r = components[0]
+        let g = components[1]
+        let b = components[2]
+        return String(format: "#%02lX%02lX%02lX",
+                      lroundf(Float(r) * 255),
+                      lroundf(Float(g) * 255),
+                      lroundf(Float(b) * 255))
+        #else
+        return nil
+        #endif
     }
 } 
