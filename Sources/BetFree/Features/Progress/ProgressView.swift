@@ -129,7 +129,9 @@ public struct ProgressView: View {
         }
         .navigationTitle("Progress")
         .onAppear {
-            loadAchievements()
+            Task {
+                await loadAchievements()
+            }
             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                 isAnimated = true
             }
@@ -141,17 +143,17 @@ public struct ProgressView: View {
         }
     }
     
-    private func loadAchievements() {
+    private func loadAchievements() async {
         do {
-            try achievementService.initializeDefaultAchievementsIfNeeded()
-            achievements = try achievementService.fetchAchievements()
+            try await achievementService.initializeDefaultAchievementsIfNeeded()
+            achievements = try await achievementService.fetchAchievements()
             
-            try achievementService.checkAndUpdateAchievements(
+            try await achievementService.checkAndUpdateAchievements(
                 streak: Int32(appState.streak),
                 savings: appState.savings
             )
         } catch {
-            self.error = error
+            print("Error loading achievements: \(error)")
         }
     }
 }

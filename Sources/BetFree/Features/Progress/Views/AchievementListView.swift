@@ -2,132 +2,132 @@ import SwiftUI
 
 public struct AchievementListView: View {
     @ObservedObject private var achievementManager = AchievementManager.shared
-    @State private var achievements: [Achievement] = []
     @State private var isLoading = true
     @State private var error: Error?
     @State private var showingError = false
+    
+    private let categories = [
+        "Streak Achievements",
+        "Savings Achievements",
+        "Check-in Achievements",
+        "Transaction Achievements"
+    ]
+    
+    private func achievementsForCategory(_ category: String) -> [Achievement] {
+        switch category {
+        case "Streak Achievements":
+            return achievementManager.achievements.filter { ["First Step", "Week Warrior", "Monthly Marvel", "Quarterly Victor", "Annual Legend"].contains($0.title) }
+        case "Savings Achievements":
+            return achievementManager.achievements.filter { ["Money Master", "Savings Champion", "Wealth Builder", "Fortune Maker"].contains($0.title) }
+        case "Check-in Achievements":
+            return achievementManager.achievements.filter { ["Early Bird", "Night Owl", "Consistency King"].contains($0.title) }
+        case "Transaction Achievements":
+            return achievementManager.achievements.filter { ["Smart Saver", "Budget Master", "Goal Getter"].contains($0.title) }
+        default:
+            return []
+        }
+    }
     
     public var body: some View {
         Group {
             if isLoading {
                 SwiftUI.ProgressView()
                     .scaleEffect(1.5)
-            } else if !achievements.isEmpty {
+            } else if !achievementManager.achievements.isEmpty {
                 ScrollView {
-                    LazyVStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
-                        ForEach(achievements) { achievement in
-                            AchievementListCard(achievement: achievement)
-                                .transition(.scale.combined(with: .opacity))
+                    VStack(alignment: .leading, spacing: BFDesignSystem.Layout.Spacing.large) {
+                        ForEach(categories, id: \.self) { category in
+                            let categoryAchievements = achievementsForCategory(category)
+                            if !categoryAchievements.isEmpty {
+                                CategorySection(
+                                    title: category,
+                                    achievements: categoryAchievements
+                                )
+                            }
                         }
                     }
-                    .padding()
+                    .padding(.vertical, BFDesignSystem.Layout.Spacing.medium)
                 }
             } else {
-                VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
-                    Image(systemName: "trophy.fill")
-                        .font(.system(size: BFDesignSystem.Layout.Size.iconXLarge))
-                        .foregroundStyle(BFDesignSystem.Colors.primaryGradient)
-                    
-                    Text("No Achievements")
-                        .font(BFDesignSystem.Typography.titleMedium)
-                        .foregroundColor(BFDesignSystem.Colors.textPrimary)
-                    
-                    Text("Start your journey to unlock achievements!")
-                        .font(BFDesignSystem.Typography.bodyMedium)
-                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
-                        .multilineTextAlignment(.center)
-                }
-                .padding()
+                EmptyAchievementsView()
             }
         }
         .alert("Error", isPresented: $showingError) {
             Button("OK", role: .cancel) { }
+            Button("Retry") {
+                Task {
+                    await loadAchievements()
+                }
+            }
         } message: {
             if let error = error {
                 Text(error.localizedDescription)
             }
         }
-        .onAppear(perform: loadAchievements)
+        .task {
+            await loadAchievements()
+        }
     }
     
-    private func loadAchievements() {
+    private func loadAchievements() async {
         isLoading = true
         do {
-            achievements = try achievementManager.getAllAchievements()
-            withAnimation {
-                isLoading = false
+            try await AchievementManager.shared.initializeAchievements()
+            await MainActor.run {
+                withAnimation {
+                    isLoading = false
+                }
             }
         } catch {
-            self.error = error
-            self.showingError = true
-            isLoading = false
+            await MainActor.run {
+                self.error = error
+                self.showingError = true
+                isLoading = false
+            }
         }
     }
     
     public init() {}
 }
 
-private struct AchievementListCard: View {
-    let achievement: Achievement
-    @State private var isHovered = false
-    @State private var iconScale: CGFloat = 1.0
+private struct CategorySection: View {
+    let title: String
+    let achievements: [Achievement]
     
     var body: some View {
-        HStack(spacing: BFDesignSystem.Layout.Spacing.large) {
-            // Icon
-            Image(systemName: achievement.icon)
-                .font(.system(size: BFDesignSystem.Layout.Size.iconLarge))
-                .foregroundStyle(
-                    achievement.isUnlocked ? 
-                    achievement.color : 
-                    BFDesignSystem.Colors.textSecondary
-                )
-                .opacity(achievement.isUnlocked ? 1 : 0.5)
-                .scaleEffect(isHovered && achievement.isUnlocked ? 1.1 : 1.0)
-                .animation(.spring(response: 0.3), value: isHovered)
+        VStack(alignment: .leading, spacing: BFDesignSystem.Layout.Spacing.medium) {
+            Text(title)
+                .font(BFDesignSystem.Typography.titleSmall)
+                .foregroundStyle(BFDesignSystem.Colors.primaryGradient)
+                .padding(.horizontal, BFDesignSystem.Layout.Spacing.large)
             
-            VStack(alignment: .leading, spacing: BFDesignSystem.Layout.Spacing.small) {
-                // Title
-                Text(achievement.title)
-                    .font(BFDesignSystem.Typography.bodyLargeMedium)
-                    .foregroundColor(
-                        achievement.isUnlocked ? 
-                        BFDesignSystem.Colors.textPrimary : 
-                        BFDesignSystem.Colors.textSecondary
-                    )
-                
-                // Description
-                Text(achievement.desc)
-                    .font(BFDesignSystem.Typography.caption)
-                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
-                    .opacity(achievement.isUnlocked ? 1 : 0.7)
-                
-                // Progress Bar
-                SwiftUI.ProgressView(value: achievement.progress)
-                    .tint(achievement.color)
-                    .opacity(achievement.isUnlocked ? 1 : 0.5)
+            LazyVStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
+                ForEach(achievements) { achievement in
+                    AchievementListCard(achievement: achievement)
+                        .transition(.scale.combined(with: .opacity))
+                }
             }
+        }
+    }
+}
+
+private struct EmptyAchievementsView: View {
+    var body: some View {
+        VStack(spacing: BFDesignSystem.Layout.Spacing.large) {
+            Image(systemName: "trophy.fill")
+                .font(.system(size: BFDesignSystem.Layout.Size.iconXLarge))
+                .foregroundStyle(BFDesignSystem.Colors.primaryGradient)
             
-            Spacer()
+            Text("No Achievements")
+                .font(BFDesignSystem.Typography.titleMedium)
+                .foregroundColor(BFDesignSystem.Colors.textPrimary)
             
-            // Unlock Date
-            if let unlockDate = achievement.unlockDate {
-                Text(unlockDate.formatted(.dateTime.month().day()))
-                    .font(BFDesignSystem.Typography.caption)
-                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
-            }
+            Text("Start your journey to unlock achievements!")
+                .font(BFDesignSystem.Typography.bodyMedium)
+                .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                .multilineTextAlignment(.center)
         }
         .padding()
-        .background(
-            RoundedRectangle(cornerRadius: BFDesignSystem.Layout.CornerRadius.large)
-                .fill(BFDesignSystem.Colors.cardBackground)
-                .withShadow(isHovered ? BFDesignSystem.Layout.Shadow.medium : BFDesignSystem.Layout.Shadow.small)
-        )
-        .scaleEffect(isHovered ? 1.02 : 1.0)
-        .animation(.spring(response: 0.3), value: isHovered)
-        .onHover { hovering in
-            isHovered = hovering
-        }
     }
 }
 

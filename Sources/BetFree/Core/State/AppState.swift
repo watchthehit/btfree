@@ -45,6 +45,35 @@ public class AppState: ObservableObject {
         didSet { saveToUserDefaults() }
     }
     
+    // New published properties for achievement tracking
+    @Published private var transactionCount: Int = 0 {
+        didSet {
+            saveToUserDefaults()
+            checkAchievements()
+        }
+    }
+    
+    @Published private var daysUnderLimit: Int = 0 {
+        didSet {
+            saveToUserDefaults()
+            checkAchievements()
+        }
+    }
+    
+    @Published private var lastCheckInTime: Date? {
+        didSet {
+            saveToUserDefaults()
+            checkAchievements()
+        }
+    }
+    
+    @Published private var goalReached: Bool = false {
+        didSet {
+            saveToUserDefaults()
+            checkAchievements()
+        }
+    }
+    
     // Computed properties for UI
     public var streak: Int { currentStreak }
     public var savings: Double { totalSavings }
@@ -76,9 +105,20 @@ public class AppState: ObservableObject {
         // Setup notification categories
         NotificationService.shared.setupNotificationCategories()
         
-        // Initialize achievements
-        try? AchievementManager.shared.initializeAchievements()
-        checkAchievements()
+        // Initialize async components later
+        Task {
+            await initializeAsyncComponents()
+        }
+    }
+    
+    private func initializeAsyncComponents() async {
+        do {
+            // Initialize achievements
+            try await AchievementManager.shared.initializeAchievements()
+            await checkAchievements()
+        } catch {
+            print("Error initializing async components: \(error)")
+        }
     }
     
     private func saveToUserDefaults() {
@@ -88,6 +128,10 @@ public class AppState: ObservableObject {
         UserDefaults.standard.set(dailyLimit, forKey: "dailyLimit")
         UserDefaults.standard.set(isOnboarded, forKey: "isOnboarded")
         UserDefaults.standard.set(selectedTab, forKey: "selectedTab")
+        UserDefaults.standard.set(transactionCount, forKey: "transactionCount")
+        UserDefaults.standard.set(daysUnderLimit, forKey: "daysUnderLimit")
+        UserDefaults.standard.set(lastCheckInTime, forKey: "lastCheckInTime")
+        UserDefaults.standard.set(goalReached, forKey: "goalReached")
     }
     
     private func handleStreakMilestone() {
@@ -134,7 +178,11 @@ public class AppState: ObservableObject {
         Task {
             try? await AchievementManager.shared.checkProgress(
                 streak: Int32(currentStreak),
-                savings: totalSavings
+                savings: totalSavings,
+                checkInTime: lastCheckInTime,
+                transactionCount: transactionCount,
+                daysUnderLimit: daysUnderLimit,
+                goalReached: goalReached
             )
         }
     }
@@ -202,6 +250,23 @@ public class AppState: ObservableObject {
         
         // Reset Core Data
         CoreDataManager.shared.reset()
+    }
+    
+    // New public methods for updating achievement metrics
+    public func incrementTransactionCount() {
+        transactionCount += 1
+    }
+    
+    public func updateDaysUnderLimit(_ days: Int) {
+        daysUnderLimit = days
+    }
+    
+    public func recordCheckIn() {
+        lastCheckInTime = Date()
+    }
+    
+    public func markGoalReached() {
+        goalReached = true
     }
 }
 

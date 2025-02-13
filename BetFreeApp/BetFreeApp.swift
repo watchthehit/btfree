@@ -7,11 +7,10 @@ struct BetFreeApp: App {
     
     var body: some Scene {
         WindowGroup {
-            NavigationView {
+            NavigationStack {
                 BetFreeRootView()
+                    .environmentObject(appState)
             }
-            .environmentObject(appState)
-            .navigationViewStyle(.stack)
         }
     }
 } 

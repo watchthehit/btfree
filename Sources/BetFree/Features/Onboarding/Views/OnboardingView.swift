@@ -234,7 +234,7 @@ private struct OnboardingStepView: View {
                 showContent = true
             }
         }
-        .onChange(of: viewModel.currentStep) { _ in
+        .onChange(of: viewModel.currentStep) { newValue in
             isAnimating = true
             withAnimation(.defaultSpring) {
                 showContent = false

@@ -17,7 +17,7 @@ let package = Package(
             targets: ["BetFree"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/pointfreeco/swift-composable-architecture", exact: "1.7.0"),
+        .package(url: "https://github.com/pointfreeco/swift-composable-architecture", exact: "1.8.2"),
     ],
     targets: [
         .target(

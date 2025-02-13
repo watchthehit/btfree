@@ -10,18 +10,36 @@ public final class AchievementManager: ObservableObject {
     
     @Published private(set) var recentlyUnlocked: [Achievement] = []
     @Published private(set) var isShowingUnlockAnimation = false
+    @Published private(set) var achievements: [Achievement] = []
     
     private init() {
         self.achievementService = AchievementService(context: CoreDataManager.shared.context)
         self.notificationService = NotificationService.shared
     }
     
-    public func checkProgress(streak: Int32, savings: Double) async throws {
-        let previouslyUnlocked = try achievementService.fetchAchievements().filter(\.isUnlocked)
-        try await achievementService.checkAndUpdateAchievements(streak: streak, savings: savings)
-        let currentlyUnlocked = try achievementService.fetchAchievements().filter(\.isUnlocked)
+    public func checkProgress(
+        streak: Int32,
+        savings: Double,
+        checkInTime: Date? = nil,
+        transactionCount: Int = 0,
+        daysUnderLimit: Int = 0,
+        goalReached: Bool = false
+    ) async throws {
+        let previouslyUnlocked = try await achievementService.fetchAchievements().filter(\.isUnlocked)
+        try await achievementService.checkAndUpdateAchievements(
+            streak: streak,
+            savings: savings,
+            checkInTime: checkInTime,
+            transactionCount: transactionCount,
+            daysUnderLimit: daysUnderLimit,
+            goalReached: goalReached
+        )
+        
+        // Refresh achievements after update
+        achievements = try await achievementService.fetchAchievements()
         
         // Find newly unlocked achievements
+        let currentlyUnlocked = achievements.filter(\.isUnlocked)
         let newlyUnlocked = Set(currentlyUnlocked.map(\.id)).subtracting(Set(previouslyUnlocked.map(\.id)))
         if !newlyUnlocked.isEmpty {
             let newAchievements = currentlyUnlocked.filter { newlyUnlocked.contains($0.id) }
@@ -46,21 +64,22 @@ public final class AchievementManager: ObservableObject {
         }
         
         // Auto-dismiss after delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
-            self?.isShowingUnlockAnimation = false
-            self?.recentlyUnlocked.removeAll()
-        }
+        try? await Task.sleep(nanoseconds: 3_000_000_000) // 3 seconds
+        isShowingUnlockAnimation = false
+        recentlyUnlocked.removeAll()
     }
     
     public func getProgress(forAchievement achievement: Achievement) -> Double {
         achievement.progress
     }
     
-    public func getAllAchievements() throws -> [Achievement] {
-        try achievementService.fetchAchievements()
+    public func getAllAchievements() async throws -> [Achievement] {
+        achievements = try await achievementService.fetchAchievements()
+        return achievements
     }
     
-    public func initializeAchievements() throws {
-        try achievementService.initializeDefaultAchievementsIfNeeded()
+    public func initializeAchievements() async throws {
+        try await achievementService.initializeDefaultAchievementsIfNeeded()
+        achievements = try await achievementService.fetchAchievements()
     }
 } 

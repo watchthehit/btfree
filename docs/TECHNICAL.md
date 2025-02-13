@@ -420,4 +420,17 @@ VStack {
 }
 .background(BFDesignSystem.Colors.cardBackground)
 .shadow(radius: 2)
-``` 
+```
+
+## Components
+
+### PaywallView
+The PaywallView is a critical component for user monetization. See detailed documentation in [PAYWALL.md](PAYWALL.md).
+
+Key features:
+- Subscription plan presentation
+- Feature highlighting
+- Visual hierarchy
+- Responsive design
+
+For implementation details and troubleshooting, refer to the dedicated paywall documentation. 

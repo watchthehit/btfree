@@ -2,7 +2,7 @@ import CoreData
 import SwiftUI
 
 @objc(Achievement)
-public class Achievement: NSManagedObject {
+public final class Achievement: NSManagedObject, @unchecked Sendable {
     @NSManaged public var id: UUID
     @NSManaged public var title: String
     @NSManaged public var desc: String
@@ -47,13 +47,28 @@ public class Achievement: NSManagedObject {
     
     static func createDefaultAchievements(context: NSManagedObjectContext) throws {
         let defaults = [
+            // Streak Achievements
             (title: "First Step", description: "Complete your first day", icon: "figure.walk", color: BFDesignSystem.Colors.success),
             (title: "Week Warrior", description: "Complete a 7-day streak", icon: "star.fill", color: BFDesignSystem.Colors.primary),
-            (title: "Money Master", description: "Save your first $100", icon: "dollarsign.circle.fill", color: BFDesignSystem.Colors.secondary),
             (title: "Monthly Marvel", description: "Complete a 30-day streak", icon: "crown.fill", color: BFDesignSystem.Colors.accent),
-            (title: "Savings Champion", description: "Save $1,000 in total", icon: "trophy.fill", color: BFDesignSystem.Colors.success),
             (title: "Quarterly Victor", description: "Complete a 90-day streak", icon: "medal.fill", color: BFDesignSystem.Colors.primary),
-            (title: "Annual Legend", description: "Complete a 365-day streak", icon: "crown.fill", color: BFDesignSystem.Colors.accent)
+            (title: "Annual Legend", description: "Complete a 365-day streak", icon: "crown.fill", color: BFDesignSystem.Colors.accent),
+            
+            // Savings Achievements
+            (title: "Money Master", description: "Save your first $100", icon: "dollarsign.circle.fill", color: BFDesignSystem.Colors.secondary),
+            (title: "Savings Champion", description: "Save $1,000 in total", icon: "trophy.fill", color: BFDesignSystem.Colors.success),
+            (title: "Wealth Builder", description: "Save $5,000 in total", icon: "bag.fill", color: BFDesignSystem.Colors.primary),
+            (title: "Fortune Maker", description: "Save $10,000 in total", icon: "sparkles", color: BFDesignSystem.Colors.accent),
+            
+            // Check-in Achievements
+            (title: "Early Bird", description: "Check in before 9 AM for 5 days", icon: "sunrise.fill", color: BFDesignSystem.Colors.success),
+            (title: "Night Owl", description: "Check in after 8 PM for 5 days", icon: "moon.stars.fill", color: BFDesignSystem.Colors.primary),
+            (title: "Consistency King", description: "Check in at the same time for 7 days", icon: "clock.fill", color: BFDesignSystem.Colors.accent),
+            
+            // Transaction Achievements
+            (title: "Smart Saver", description: "Add 10 savings transactions", icon: "plus.circle.fill", color: BFDesignSystem.Colors.success),
+            (title: "Budget Master", description: "Stay under daily limit for 14 days", icon: "chart.line.downtrend.xyaxis", color: BFDesignSystem.Colors.primary),
+            (title: "Goal Getter", description: "Reach your savings goal", icon: "target", color: BFDesignSystem.Colors.accent)
         ]
         // Check for existing achievements
         let request: NSFetchRequest<Achievement> = Achievement.fetchRequest()
