@@ -3,18 +3,36 @@ import SwiftUI
 import UIKit
 #endif
 
+public final class AddTransactionViewModel: ObservableObject {
+    @Published var amount = ""
+    @Published var note = ""
+    @Published var category = "Expense"
+    @Published var showingError = false
+    @Published var errorMessage = ""
+    @Published var isAnimated = false
+    
+    let categories = ["Expense", "Savings"]
+    
+    @MainActor
+    func saveTransaction() async throws {
+        guard let amountValue = Double(amount) else {
+            errorMessage = "Please enter a valid amount"
+            showingError = true
+            return
+        }
+        
+        try CoreDataManager.shared.addTransaction(
+            amount: category == "Expense" ? -amountValue : amountValue,
+            note: note.isEmpty ? nil : note
+        )
+        HapticFeedback.fireAndForget(style: .medium)
+    }
+}
+
 public struct AddTransactionView: View {
-    @ObservedObject var appState: AppState
     @Environment(\.dismiss) private var dismiss
-    
-    @State private var amount = ""
-    @State private var note = ""
-    @State private var category = "Expense"
-    @State private var showingError = false
-    @State private var errorMessage = ""
-    @State private var isAnimated = false
-    
-    private let categories = ["Expense", "Savings"]
+    @StateObject private var viewModel = AddTransactionViewModel()
+    @ObservedObject var appState: AppState
     
     public init(appState: AppState) {
         self.appState = appState
@@ -41,7 +59,9 @@ public struct AddTransactionView: View {
             .padding()
         }
         .navigationTitle("Add Transaction")
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+        #endif
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") {
@@ -49,14 +69,14 @@ public struct AddTransactionView: View {
                 }
             }
         }
-        .alert("Error", isPresented: $showingError) {
+        .alert("Error", isPresented: $viewModel.showingError) {
             Button("OK", role: .cancel) { }
         } message: {
-            Text(errorMessage)
+            Text(viewModel.errorMessage)
         }
         .onAppear {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                isAnimated = true
+                viewModel.isAnimated = true
             }
         }
     }
@@ -72,19 +92,20 @@ public struct AddTransactionView: View {
                     .font(BFDesignSystem.Typography.titleLarge)
                     .foregroundColor(BFDesignSystem.Colors.textSecondary)
                 
-                TextField("0.00", text: $amount)
+                TextField("0.00", text: $viewModel.amount)
                     .font(BFDesignSystem.Typography.titleLarge)
+                    #if os(iOS)
                     .keyboardType(.decimalPad)
+                    #endif
                     .multilineTextAlignment(.leading)
                     .textFieldStyle(.plain)
             }
             .padding()
             .background(BFDesignSystem.Colors.cardBackground)
-            .cornerRadius(BFDesignSystem.Layout.CornerRadius.large)
-            .withShadow(BFDesignSystem.Layout.Shadow.small)
+            .cornerRadius(BFDesignSystem.Layout.CornerRadius.medium)
+            .opacity(viewModel.isAnimated ? 1 : 0)
+            .offset(y: viewModel.isAnimated ? 0 : 20)
         }
-        .opacity(isAnimated ? 1 : 0)
-        .offset(y: isAnimated ? 0 : 20)
     }
     
     private var noteInputSection: some View {
@@ -93,15 +114,15 @@ public struct AddTransactionView: View {
                 .font(BFDesignSystem.Typography.titleSmall)
                 .foregroundStyle(BFDesignSystem.Colors.primaryGradient)
             
-            TextField("What's this for?", text: $note)
+            TextField("What's this for?", text: $viewModel.note)
                 .font(BFDesignSystem.Typography.bodyLarge)
                 .padding()
                 .background(BFDesignSystem.Colors.cardBackground)
                 .cornerRadius(BFDesignSystem.Layout.CornerRadius.large)
                 .withShadow(BFDesignSystem.Layout.Shadow.small)
         }
-        .opacity(isAnimated ? 1 : 0)
-        .offset(y: isAnimated ? 0 : 20)
+        .opacity(viewModel.isAnimated ? 1 : 0)
+        .offset(y: viewModel.isAnimated ? 0 : 20)
     }
     
     private var categorySelectionSection: some View {
@@ -111,27 +132,38 @@ public struct AddTransactionView: View {
                 .foregroundStyle(BFDesignSystem.Colors.primaryGradient)
             
             HStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
-                ForEach(categories, id: \.self) { cat in
+                ForEach(viewModel.categories, id: \.self) { cat in
                     CategoryButton(
                         title: cat,
-                        isSelected: category == cat,
+                        isSelected: viewModel.category == cat,
                         icon: cat == "Expense" ? "arrow.down.circle.fill" : "arrow.up.circle.fill",
                         color: cat == "Expense" ? BFDesignSystem.Colors.error : BFDesignSystem.Colors.success
                     ) {
                         withAnimation(.spring(response: 0.3)) {
-                            category = cat
+                            viewModel.category = cat
                             HapticFeedback.fireAndForget(style: .light)
                         }
                     }
                 }
             }
         }
-        .opacity(isAnimated ? 1 : 0)
-        .offset(y: isAnimated ? 0 : 20)
+        .opacity(viewModel.isAnimated ? 1 : 0)
+        .offset(y: viewModel.isAnimated ? 0 : 20)
     }
     
     private var saveButton: some View {
-        Button(action: saveTransaction) {
+        Button {
+            Task {
+                do {
+                    try await viewModel.saveTransaction()
+                    dismiss()
+                } catch {
+                    viewModel.errorMessage = error.localizedDescription
+                    viewModel.showingError = true
+                    HapticFeedback.fireAndForget(style: .rigid)
+                }
+            }
+        } label: {
             HStack {
                 Image(systemName: "checkmark.circle.fill")
                 Text("Save Transaction")
@@ -141,37 +173,16 @@ public struct AddTransactionView: View {
             .frame(maxWidth: .infinity)
             .frame(height: BFDesignSystem.Layout.Size.buttonHeight)
             .background(
-                amount.isEmpty ? 
+                viewModel.amount.isEmpty ? 
                 AnyShapeStyle(BFDesignSystem.Colors.textSecondary) :
                 AnyShapeStyle(BFDesignSystem.Colors.primaryGradient)
             )
             .cornerRadius(BFDesignSystem.Layout.CornerRadius.button)
             .withShadow(BFDesignSystem.Layout.Shadow.button)
         }
-        .disabled(amount.isEmpty)
-        .opacity(isAnimated ? 1 : 0)
-        .offset(y: isAnimated ? 0 : 20)
-    }
-    
-    private func saveTransaction() {
-        guard let amountValue = Double(amount) else {
-            errorMessage = "Please enter a valid amount"
-            showingError = true
-            return
-        }
-        
-        do {
-            try CoreDataManager.shared.addTransaction(
-                amount: category == "Expense" ? -amountValue : amountValue,
-                note: note.isEmpty ? nil : note
-            )
-            HapticFeedback.fireAndForget(style: .medium)
-            dismiss()
-        } catch {
-            errorMessage = error.localizedDescription
-            showingError = true
-            HapticFeedback.fireAndForget(style: .rigid)
-        }
+        .disabled(viewModel.amount.isEmpty)
+        .opacity(viewModel.isAnimated ? 1 : 0)
+        .offset(y: viewModel.isAnimated ? 0 : 20)
     }
 }
 

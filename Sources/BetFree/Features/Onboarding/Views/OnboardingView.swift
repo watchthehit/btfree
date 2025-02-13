@@ -37,7 +37,7 @@ public struct OnboardingView: View {
                 )
             }
         }
-        .navigationBarHidden(true)
+        .toolbar(.hidden)
         .onAppear {
             viewModel.appState = appState
         }
@@ -234,10 +234,16 @@ private struct OnboardingStepView: View {
                 showContent = true
             }
         }
-        .onChange(of: viewModel.currentStep) { newValue in
+        .onChange(of: viewModel.currentStep) { _ in
             isAnimating = true
             withAnimation(.defaultSpring) {
-                showContent = true
+                showContent = false
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                withAnimation(.defaultSpring) {
+                    showContent = true
+                }
             }
         }
     }
