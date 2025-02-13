@@ -29,10 +29,12 @@ struct AchievementCard: View {
                 .multilineTextAlignment(.center)
             
             // Description
-            Text(achievement.description)
+            Text(achievement.desc)
                 .font(BFDesignSystem.Typography.caption)
                 .foregroundColor(BFDesignSystem.Colors.textSecondary)
                 .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
             
             // Progress Bar
             GeometryReader { geometry in
