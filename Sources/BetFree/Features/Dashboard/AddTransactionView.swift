@@ -32,11 +32,9 @@ public final class AddTransactionViewModel: ObservableObject {
 public struct AddTransactionView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = AddTransactionViewModel()
-    @ObservedObject var appState: AppState
+    @EnvironmentObject var appState: AppState
     
-    public init(appState: AppState) {
-        self.appState = appState
-    }
+    public init() {}
     
     public var body: some View {
         NavigationView {
@@ -224,5 +222,6 @@ private struct CategoryButton: View {
 }
 
 #Preview {
-    AddTransactionView(appState: AppState())
+    AddTransactionView()
+        .environmentObject(AppState.preview())
 } 

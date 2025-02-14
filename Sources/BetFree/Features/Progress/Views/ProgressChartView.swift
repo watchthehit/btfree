@@ -180,7 +180,10 @@ public struct ProgressChartView: View {
 }
 
 #Preview {
-    ProgressChartView(appState: AppState(), timeframe: .week)
-        .frame(height: 200)
-        .padding()
+    PreviewAppState { appState in
+        ProgressChartView(appState: appState, timeframe: .week)
+            .frame(height: 200)
+            .padding()
+    }
+    .background(BFDesignSystem.Colors.background)
 } 

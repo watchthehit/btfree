@@ -1,8 +1,8 @@
 import Foundation
 import CoreData
 
-@objc(UserProfile)
-public class UserProfile: NSManagedObject {
+@objc(UserProfileEntity)
+public class UserProfileEntity: NSManagedObject {
     @NSManaged public var id: UUID
     @NSManaged public var name: String
     @NSManaged public var email: String
@@ -12,13 +12,13 @@ public class UserProfile: NSManagedObject {
     @NSManaged public var totalSavings: Double
     @NSManaged public var dailyLimit: Double
     @NSManaged public var lastLoginDate: Date
-    @NSManaged public var lastCheckIn: Date
+    @NSManaged public var lastCheckIn: Date?
     
     public override func awakeFromInsert() {
         super.awakeFromInsert()
         id = UUID()
         lastLoginDate = Date()
-        lastCheckIn = Date()
+        lastCheckIn = nil
         streak = 0
         savings = 0
         totalSavings = 0
@@ -29,8 +29,10 @@ public class UserProfile: NSManagedObject {
     }
 }
 
-extension UserProfile {
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<UserProfile> {
-        return NSFetchRequest<UserProfile>(entityName: "UserProfile")
+extension UserProfileEntity {
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<UserProfileEntity> {
+        return NSFetchRequest<UserProfileEntity>(entityName: "UserProfile")
     }
-} 
+}
+
+extension UserProfileEntity : Identifiable {} 

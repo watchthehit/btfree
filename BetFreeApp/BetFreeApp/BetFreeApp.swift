@@ -3,7 +3,7 @@ import BetFree
 
 @main
 struct BetFreeApp: App {
-    @StateObject private var appState = AppState()
+    @StateObject private var appState = AppState(syncDataManager: MockCDManager.shared)
     
     var body: some Scene {
         WindowGroup {

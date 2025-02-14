@@ -2,13 +2,13 @@ import SwiftUI
 import ComposableArchitecture
 
 public struct ProfileView: View {
-    @ObservedObject var appState: AppState
+    @EnvironmentObject var appState: AppState
     @State private var showingLogoutAlert = false
     
     public var body: some View {
         List {
             // User Info Section
-            Section("User Information") {
+            Section {
                 HStack {
                     Text("Username")
                     Spacer()
@@ -29,10 +29,12 @@ public struct ProfileView: View {
                     Text("$\(String(format: "%.2f", appState.savings))")
                         .foregroundColor(.secondary)
                 }
+            } header: {
+                Text("User Information")
             }
             
             // Settings Section
-            Section("Settings") {
+            Section {
                 HStack {
                     Text("Daily Limit")
                     Spacer()
@@ -41,14 +43,16 @@ public struct ProfileView: View {
                 }
                 
                 NavigationLink {
-                    NotificationSettingsView(appState: appState)
+                    NotificationSettingsView()
                 } label: {
                     Label("Notifications", systemImage: "bell.fill")
                 }
+            } header: {
+                Text("Settings")
             }
             
             // Support Section
-            Section(header: Text("Support")) {
+            Section {
                 Button(action: {
                     // Add support action
                 }) {
@@ -60,16 +64,20 @@ public struct ProfileView: View {
                 }) {
                     Label("Send Feedback", systemImage: "message.fill")
                 }
+            } header: {
+                Text("Support")
             }
             
             // About Section
-            Section(header: Text("About")) {
+            Section {
                 HStack {
                     Text("Version")
                     Spacer()
                     Text("1.0.0")
                         .foregroundColor(.secondary)
                 }
+            } header: {
+                Text("About")
             }
             
             // Logout Section
@@ -101,11 +109,10 @@ public struct ProfileView: View {
         }
     }
     
-    public init(appState: AppState) {
-        self.appState = appState
-    }
+    public init() {}
 }
 
 #Preview {
-    ProfileView(appState: AppState())
+    ProfileView()
+        .environmentObject(AppState.preview())
 } 

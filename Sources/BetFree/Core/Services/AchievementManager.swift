@@ -1,20 +1,43 @@
 import Foundation
 import CoreData
+import SwiftUI
 
 @MainActor
 public final class AchievementManager: ObservableObject {
-    public static let shared = AchievementManager()
+    public static var shared = AchievementManager()
     
     private let achievementService: AchievementService
-    private let notificationService: NotificationService
+    private let timeProvider: TimeProvider
+    private let notificationService: NotificationServiceType
     
     @Published private(set) var recentlyUnlocked: [Achievement] = []
     @Published private(set) var isShowingUnlockAnimation = false
     @Published private(set) var achievements: [Achievement] = []
     
-    private init() {
-        self.achievementService = AchievementService(context: CoreDataManager.shared.context)
-        self.notificationService = NotificationService.shared
+    init(
+        timeProvider: TimeProvider? = nil,
+        achievementService: AchievementService? = nil,
+        notificationService: NotificationServiceType? = nil
+    ) {
+        let tp = timeProvider ?? DefaultTimeProvider()
+        self.timeProvider = tp
+        self.achievementService = achievementService ?? AchievementService(
+            context: CoreDataManager.shared.context,
+            timeProvider: tp
+        )
+        self.notificationService = notificationService ?? NotificationService.shared
+    }
+    
+    public func reset() {
+        achievementService.reset()
+        recentlyUnlocked = []
+        isShowingUnlockAnimation = false
+        achievements = []
+    }
+    
+    public func initializeAchievements() async throws {
+        try await achievementService.initializeDefaultAchievementsIfNeeded()
+        achievements = try await achievementService.fetchAchievements()
     }
     
     public func checkProgress(
@@ -25,8 +48,7 @@ public final class AchievementManager: ObservableObject {
         daysUnderLimit: Int = 0,
         goalReached: Bool = false
     ) async throws {
-        let previouslyUnlocked = try await achievementService.fetchAchievements().filter(\.isUnlocked)
-        try await achievementService.checkAndUpdateAchievements(
+        let unlockedAchievements = try await achievementService.checkProgress(
             streak: streak,
             savings: savings,
             checkInTime: checkInTime,
@@ -35,51 +57,47 @@ public final class AchievementManager: ObservableObject {
             goalReached: goalReached
         )
         
-        // Refresh achievements after update
-        achievements = try await achievementService.fetchAchievements()
-        
-        // Find newly unlocked achievements
-        let currentlyUnlocked = achievements.filter(\.isUnlocked)
-        let newlyUnlocked = Set(currentlyUnlocked.map(\.id)).subtracting(Set(previouslyUnlocked.map(\.id)))
-        if !newlyUnlocked.isEmpty {
-            let newAchievements = currentlyUnlocked.filter { newlyUnlocked.contains($0.id) }
-            await handleNewlyUnlockedAchievements(newAchievements)
-        }
-    }
-    
-    private func handleNewlyUnlockedAchievements(_ achievements: [Achievement]) async {
-        // Update UI
-        recentlyUnlocked = achievements
-        isShowingUnlockAnimation = true
-        
-        // Schedule notifications
-        for achievement in achievements {
-            do {
-                try await notificationService.scheduleMilestoneCelebration(
-                    milestone: "the '\(achievement.title)' achievement"
+        if !unlockedAchievements.isEmpty {
+            recentlyUnlocked = unlockedAchievements
+            isShowingUnlockAnimation = true
+            
+            for achievement in unlockedAchievements {
+                await notificationService.scheduleAchievementUnlockNotification(
+                    title: achievement.title,
+                    description: achievement.desc
                 )
-            } catch {
-                print("Failed to schedule achievement notification: \(error)")
+            }
+            
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
+                isShowingUnlockAnimation = false
             }
         }
         
-        // Auto-dismiss after delay
-        try? await Task.sleep(nanoseconds: 3_000_000_000) // 3 seconds
-        isShowingUnlockAnimation = false
-        recentlyUnlocked.removeAll()
-    }
-    
-    public func getProgress(forAchievement achievement: Achievement) -> Double {
-        achievement.progress
+        achievements = try await achievementService.fetchAchievements()
     }
     
     public func getAllAchievements() async throws -> [Achievement] {
         achievements = try await achievementService.fetchAchievements()
         return achievements
     }
-    
-    public func initializeAchievements() async throws {
-        try await achievementService.initializeDefaultAchievementsIfNeeded()
-        achievements = try await achievementService.fetchAchievements()
+}
+
+extension AchievementManager {
+    public enum AchievementError: LocalizedError {
+        case invalidStreak
+        case invalidSavings
+        case initializationFailed
+        
+        public var errorDescription: String? {
+            switch self {
+            case .invalidStreak:
+                return "Streak cannot be negative"
+            case .invalidSavings:
+                return "Savings cannot be negative"
+            case .initializationFailed:
+                return "Failed to initialize achievements"
+            }
+        }
     }
 } 

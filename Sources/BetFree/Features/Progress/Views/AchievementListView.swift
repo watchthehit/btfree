@@ -1,7 +1,9 @@
 import SwiftUI
+import CoreData
 
 public struct AchievementListView: View {
-    @ObservedObject private var achievementManager = AchievementManager.shared
+    @StateObject private var achievementManager = AchievementManager.shared
+    @EnvironmentObject var appState: AppState
     @State private var isLoading = true
     @State private var error: Error?
     @State private var showingError = false
@@ -14,15 +16,16 @@ public struct AchievementListView: View {
     ]
     
     private func achievementsForCategory(_ category: String) -> [Achievement] {
+        let achievements = achievementManager.achievements
         switch category {
         case "Streak Achievements":
-            return achievementManager.achievements.filter { ["First Step", "Week Warrior", "Monthly Marvel", "Quarterly Victor", "Annual Legend"].contains($0.title) }
+            return achievements.filter { ["First Step", "Week Warrior", "Monthly Marvel", "Quarterly Victor", "Annual Legend"].contains($0.title) }
         case "Savings Achievements":
-            return achievementManager.achievements.filter { ["Money Master", "Savings Champion", "Wealth Builder", "Fortune Maker"].contains($0.title) }
+            return achievements.filter { ["Money Master", "Savings Champion", "Wealth Builder", "Fortune Maker"].contains($0.title) }
         case "Check-in Achievements":
-            return achievementManager.achievements.filter { ["Early Bird", "Night Owl", "Consistency King"].contains($0.title) }
+            return achievements.filter { ["Early Bird", "Night Owl", "Consistency King"].contains($0.title) }
         case "Transaction Achievements":
-            return achievementManager.achievements.filter { ["Smart Saver", "Budget Master", "Goal Getter"].contains($0.title) }
+            return achievements.filter { ["Smart Saver", "Budget Master", "Goal Getter"].contains($0.title) }
         default:
             return []
         }
@@ -72,7 +75,7 @@ public struct AchievementListView: View {
     private func loadAchievements() async {
         isLoading = true
         do {
-            try await AchievementManager.shared.initializeAchievements()
+            try await achievementManager.initializeAchievements()
             await MainActor.run {
                 withAnimation {
                     isLoading = false
@@ -133,4 +136,6 @@ private struct EmptyAchievementsView: View {
 
 #Preview {
     AchievementListView()
+        .environmentObject(AppState.preview())
+        .background(BFDesignSystem.Colors.background)
 } 

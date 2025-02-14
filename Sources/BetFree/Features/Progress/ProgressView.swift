@@ -3,7 +3,7 @@ import ComposableArchitecture
 import CoreData
 
 public struct ProgressView: View {
-    @ObservedObject var appState: AppState
+    @EnvironmentObject var appState: AppState
     @State private var selectedTimeframe: Timeframe = .week
     @State private var isAnimated = false
     @State private var achievements: [Achievement] = []
@@ -34,8 +34,7 @@ public struct ProgressView: View {
         }
     }
     
-    public init(appState: AppState) {
-        self.appState = appState
+    public init() {
         self.achievementService = AchievementService(context: CoreDataManager.shared.context)
     }
     
@@ -148,10 +147,15 @@ public struct ProgressView: View {
             try await achievementService.initializeDefaultAchievementsIfNeeded()
             achievements = try await achievementService.fetchAchievements()
             
-            try await achievementService.checkAndUpdateAchievements(
+            let unlockedAchievements = try await achievementService.checkProgress(
                 streak: Int32(appState.streak),
-                savings: appState.savings
+                savings: appState.savings,
+                checkInTime: Date()
             )
+            
+            if !unlockedAchievements.isEmpty {
+                print("Found \(unlockedAchievements.count) newly unlocked achievements")
+            }
         } catch {
             print("Error loading achievements: \(error)")
         }
@@ -160,6 +164,7 @@ public struct ProgressView: View {
 
 #Preview {
     NavigationView {
-        ProgressView(appState: AppState())
+        ProgressView()
+            .environmentObject(AppState.preview())
     }
 } 

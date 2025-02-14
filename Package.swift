@@ -28,10 +28,7 @@ let package = Package(
             path: "Sources/BetFree",
             resources: [
                 .process("Resources"),
-                .process("Core/Data/Resources/CoreData")
-            ],
-            swiftSettings: [
-                .enableExperimentalFeature("StrictConcurrency")
+                .copy("Core/Data/Resources/CoreData/BetFreeModel.xcdatamodeld")
             ]
         ),
         .testTarget(

@@ -24,6 +24,8 @@ targets:
       com.apple.applesignin: {}
     dependencies:
       - package: BetFree
+        product: BetFree
 packages:
   BetFree:
-    path: .. 
+    path: ..
+    group: Dependencies 

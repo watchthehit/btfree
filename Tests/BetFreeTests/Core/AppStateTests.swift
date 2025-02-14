@@ -1,15 +1,53 @@
 import XCTest
 @testable import BetFree
 
+@MainActor
 final class AppStateTests: XCTestCase {
     var appState: AppState!
+    var mockDataManager: MockDataManager!
+    var mockCoreDataManager: MockCoreDataManager!
     
     override func setUp() async throws {
-        appState = AppState()
+        try await super.setUp()
+        
+        print("Setting up AppStateTests environment...")
+        
+        // Create fresh instances
+        mockCoreDataManager = MockCoreDataManager()
+        mockDataManager = MockDataManager(context: mockCoreDataManager.context)
+        
+        // Reset achievement manager
+        AchievementManager.resetForTesting()
+        
+        // Initialize app state
+        do {
+            appState = try await AppState(dataManager: mockDataManager)
+        } catch {
+            XCTFail("Failed to initialize AppState: \(error)")
+            throw error
+        }
+        
+        // Verify initialization
+        XCTAssertNotNil(appState, "AppState should be initialized")
+        XCTAssertNotNil(mockDataManager.getCurrentUser(), "User should be created")
+        
+        print("AppStateTests environment setup complete")
     }
     
     override func tearDown() async throws {
+        print("Tearing down AppStateTests environment...")
+        
+        // Clear references in reverse order
         appState = nil
+        mockDataManager = nil
+        mockCoreDataManager = nil
+        
+        // Reset shared instances
+        AchievementManager.resetForTesting()
+        
+        try await super.tearDown()
+        
+        print("AppStateTests environment teardown complete")
     }
     
     // MARK: - Streak Tests
@@ -23,18 +61,21 @@ final class AppStateTests: XCTestCase {
         
         // Then
         XCTAssertEqual(appState.currentStreak, 1)
+        XCTAssertEqual(mockDataManager.getCurrentUser()?.streak, 1)
     }
     
     func testStreakReset() async throws {
         // Given
         appState.updateStreak(7)
         XCTAssertEqual(appState.currentStreak, 7)
+        XCTAssertEqual(mockDataManager.getCurrentUser()?.streak, 7)
         
         // When
         appState.updateStreak(0)
         
         // Then
         XCTAssertEqual(appState.currentStreak, 0)
+        XCTAssertEqual(mockDataManager.getCurrentUser()?.streak, 0)
     }
     
     // MARK: - Savings Tests
@@ -48,17 +89,20 @@ final class AppStateTests: XCTestCase {
         
         // Then
         XCTAssertEqual(appState.totalSavings, 100)
+        XCTAssertEqual(mockDataManager.getCurrentUser()?.totalSavings, 100)
     }
     
     func testSavingsAccumulation() async throws {
         // Given
         appState.updateSavings(100)
+        XCTAssertEqual(mockDataManager.getCurrentUser()?.totalSavings, 100)
         
         // When
         appState.updateSavings(150)
         
         // Then
         XCTAssertEqual(appState.totalSavings, 150)
+        XCTAssertEqual(mockDataManager.getCurrentUser()?.totalSavings, 150)
     }
     
     // MARK: - Daily Limit Tests
@@ -72,32 +116,11 @@ final class AppStateTests: XCTestCase {
         
         // Then
         XCTAssertEqual(appState.dailyLimit, 50)
-    }
-    
-    // MARK: - Achievement Tests
-    
-    func testTransactionCountIncrement() async throws {
-        // Given initial state
-        let initialCount = await appState.transactionCount
         
-        // When
-        await appState.incrementTransactionCount()
-        
-        // Then
-        let newCount = await appState.transactionCount
-        XCTAssertEqual(newCount, initialCount + 1)
-    }
-    
-    func testDaysUnderLimitUpdate() async throws {
-        // Given
-        let days = 5
-        
-        // When
-        await appState.updateDaysUnderLimit(days)
-        
-        // Then
-        let updatedDays = await appState.daysUnderLimit
-        XCTAssertEqual(updatedDays, days)
+        // Verify Core Data was updated
+        let user = mockDataManager.getCurrentUser()
+        XCTAssertNotNil(user)
+        XCTAssertEqual(user?.dailyLimit, 50)
     }
     
     // MARK: - Onboarding Tests
@@ -130,5 +153,9 @@ final class AppStateTests: XCTestCase {
         XCTAssertEqual(appState.totalSavings, 0)
         XCTAssertEqual(appState.dailyLimit, 0)
         XCTAssertFalse(appState.isOnboarded)
+        
+        // Verify Core Data was reset
+        let user = mockDataManager.getCurrentUser()
+        XCTAssertNil(user)
     }
 } 

@@ -1,4 +1,5 @@
 import SwiftUI
+import CoreData
 
 struct AchievementCard: View {
     let achievement: Achievement
@@ -67,13 +68,33 @@ struct AchievementCard: View {
 }
 
 #Preview {
-    ScrollView(.horizontal) {
+    let context = CoreDataManager.shared.context
+    let achievements = [
+        createPreviewAchievement(title: "First Step", desc: "Complete your first day", icon: "figure.walk", color: BFDesignSystem.Colors.success, context: context),
+        createPreviewAchievement(title: "Week Warrior", desc: "Complete a 7-day streak", icon: "star.fill", color: BFDesignSystem.Colors.primary, context: context),
+        createPreviewAchievement(title: "Money Master", desc: "Save your first $100", icon: "dollarsign.circle.fill", color: BFDesignSystem.Colors.secondary, context: context)
+    ]
+    
+    return ScrollView(.horizontal) {
         HStack {
-            ForEach(Achievement.samples) { achievement in
+            ForEach(achievements) { achievement in
                 AchievementCard(achievement: achievement)
             }
         }
         .padding()
     }
     .background(BFDesignSystem.Colors.background)
+}
+
+private func createPreviewAchievement(title: String, desc: String, icon: String, color: Color, context: NSManagedObjectContext) -> Achievement {
+    let achievement = Achievement(context: context)
+    achievement.title = title
+    achievement.desc = desc
+    achievement.icon = icon
+    achievement.colorHex = color.toHex() ?? "#007AFF"
+    achievement.isUnlocked = false
+    achievement.progress = 0.0
+    achievement.unlockDate = nil
+    achievement.lastCheckInHour = -1
+    return achievement
 } 

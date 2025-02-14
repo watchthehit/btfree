@@ -3,37 +3,43 @@ import SwiftUI
 
 @MainActor
 public class AppState: ObservableObject {
+    private let dataManager: BetFreeDataManager
+    
     @Published public var username: String {
         didSet { 
             saveToUserDefaults()
-            try? CoreDataManager.shared.createOrUpdateUser(name: username, email: nil, dailyLimit: dailyLimit)
+            try? dataManager.createOrUpdateUser(name: username, email: (nil as String?), dailyLimit: dailyLimit)
         }
     }
     
     @Published public var currentStreak: Int {
         didSet { 
             saveToUserDefaults()
-            try? CoreDataManager.shared.updateUserStreak()
+            try? dataManager.updateUserStreak()
             handleStreakMilestone()
-            checkAchievements()
+            Task {
+                await checkAchievements()
+            }
         }
     }
     
     @Published public var totalSavings: Double {
         willSet {
             saveToUserDefaults()
-            try? CoreDataManager.shared.updateTotalSavings(amount: newValue)
+            try? dataManager.updateTotalSavings(amount: newValue)
         }
         didSet {
             handleSavingsMilestone(oldValue: oldValue)
-            checkAchievements()
+            Task {
+                await checkAchievements()
+            }
         }
     }
     
     @Published public var dailyLimit: Double {
         didSet { 
             saveToUserDefaults()
-            try? CoreDataManager.shared.createOrUpdateUser(name: username, email: nil, dailyLimit: dailyLimit)
+            try? dataManager.createOrUpdateUser(name: username, email: (nil as String?), dailyLimit: dailyLimit)
         }
     }
     
@@ -49,28 +55,36 @@ public class AppState: ObservableObject {
     @Published private var transactionCount: Int = 0 {
         didSet {
             saveToUserDefaults()
-            checkAchievements()
+            Task {
+                await checkAchievements()
+            }
         }
     }
     
     @Published private var daysUnderLimit: Int = 0 {
         didSet {
             saveToUserDefaults()
-            checkAchievements()
+            Task {
+                await checkAchievements()
+            }
         }
     }
     
     @Published private var lastCheckInTime: Date? {
         didSet {
             saveToUserDefaults()
-            checkAchievements()
+            Task {
+                await checkAchievements()
+            }
         }
     }
     
     @Published private var goalReached: Bool = false {
         didSet {
             saveToUserDefaults()
-            checkAchievements()
+            Task {
+                await checkAchievements()
+            }
         }
     }
     
@@ -78,47 +92,58 @@ public class AppState: ObservableObject {
     public var streak: Int { currentStreak }
     public var savings: Double { totalSavings }
     
-    public init() {
-        // Load from UserDefaults first
-        self.username = UserDefaults.standard.string(forKey: "username") ?? ""
+    public init(dataManager: BetFreeDataManager? = nil) async throws {
+        let dataManager = dataManager ?? CoreDataManager.shared
+        self.dataManager = dataManager
+        
+        // Initialize basic state
+        self.isOnboarded = UserDefaults.standard.bool(forKey: "isOnboarded")
+        self.selectedTab = UserDefaults.standard.integer(forKey: "selectedTab")
+        self.username = UserDefaults.standard.string(forKey: "username") ?? "User"
         self.currentStreak = UserDefaults.standard.integer(forKey: "currentStreak")
         self.totalSavings = UserDefaults.standard.double(forKey: "totalSavings")
         self.dailyLimit = UserDefaults.standard.double(forKey: "dailyLimit")
-        self.isOnboarded = UserDefaults.standard.bool(forKey: "isOnboarded")
-        self.selectedTab = UserDefaults.standard.integer(forKey: "selectedTab")
         
-        // Then try to load from Core Data
-        if let user = CoreDataManager.shared.getCurrentUser() {
-            self.username = user.name
+        // Initialize from Core Data if available
+        if let user = dataManager.getCurrentUser() {
+            self.username = user.name.isEmpty ? "User" : user.name
             self.currentStreak = Int(user.streak)
             self.totalSavings = user.totalSavings
             self.dailyLimit = user.dailyLimit
         } else {
-            // Create initial user profile in Core Data
-            try? CoreDataManager.shared.createOrUpdateUser(
-                name: username,
-                email: nil,
-                dailyLimit: dailyLimit
-            )
+            try dataManager.createOrUpdateUser(name: username, email: (nil as String?), dailyLimit: dailyLimit)
+
+            guard let _ = dataManager.getCurrentUser() else {
+                throw AppStateError.userProfileCreationFailed
+            }
         }
         
-        // Setup notification categories
-        NotificationService.shared.setupNotificationCategories()
+        // Initialize achievements
+        try await AchievementManager.shared.initializeAchievements()
         
-        // Initialize async components later
-        Task {
-            await initializeAsyncComponents()
-        }
+        // Initialize achievement tracking properties
+        self.transactionCount = UserDefaults.standard.integer(forKey: "transactionCount")
+        self.daysUnderLimit = UserDefaults.standard.integer(forKey: "daysUnderLimit")
+        self.lastCheckInTime = UserDefaults.standard.object(forKey: "lastCheckInTime") as? Date
+        self.goalReached = UserDefaults.standard.bool(forKey: "goalReached")
+        
+        // Check achievements
+        await checkAchievements()
     }
     
-    private func initializeAsyncComponents() async {
-        do {
-            // Initialize achievements
-            try await AchievementManager.shared.initializeAchievements()
-            await checkAchievements()
-        } catch {
-            print("Error initializing async components: \(error)")
-        }
+    // New public initializer for previews
+    public init(syncDataManager: BetFreeDataManager) {
+        self.dataManager = syncDataManager
+        self.username = ""
+        self.currentStreak = 0
+        self.totalSavings = 0
+        self.dailyLimit = 0
+        self.isOnboarded = false
+        self.selectedTab = 0
+        self.transactionCount = 0
+        self.daysUnderLimit = 0
+        self.lastCheckInTime = nil
+        self.goalReached = false
     }
     
     private func saveToUserDefaults() {
@@ -174,9 +199,9 @@ public class AppState: ObservableObject {
         }
     }
     
-    private func checkAchievements() {
-        Task {
-            try? await AchievementManager.shared.checkProgress(
+    private func checkAchievements() async {
+        do {
+            try await AchievementManager.shared.checkProgress(
                 streak: Int32(currentStreak),
                 savings: totalSavings,
                 checkInTime: lastCheckInTime,
@@ -184,19 +209,36 @@ public class AppState: ObservableObject {
                 daysUnderLimit: daysUnderLimit,
                 goalReached: goalReached
             )
+        } catch {
+            print("Error checking achievements: \(error)")
         }
     }
     
-    public func updateStreak(_ newStreak: Int) {
-        self.currentStreak = newStreak
+    public func updateStreak(_ value: Int) {
+        currentStreak = value
+        do {
+            try dataManager.updateUserStreak()
+        } catch {
+            print("Error updating streak: \(error)")
+        }
     }
     
-    public func updateSavings(_ amount: Double) {
-        self.totalSavings = amount
+    public func updateSavings(_ value: Double) {
+        totalSavings = value
+        do {
+            try dataManager.updateTotalSavings(amount: value)
+        } catch {
+            print("Error updating savings: \(error)")
+        }
     }
     
-    public func updateDailyLimit(_ newLimit: Double) {
-        self.dailyLimit = newLimit
+    public func updateDailyLimit(_ value: Double) {
+        dailyLimit = value
+        do {
+            try dataManager.createOrUpdateUser(name: username, email: (nil as String?), dailyLimit: value)
+        } catch {
+            print("Error updating daily limit: \(error)")
+        }
     }
     
     public func updateUsername(_ newUsername: String) {
@@ -205,51 +247,19 @@ public class AppState: ObservableObject {
     
     public func completeOnboarding() {
         isOnboarded = true
-        
-        // Request notification permissions after onboarding
-        Task {
-            do {
-                if try await NotificationService.shared.requestAuthorization() {
-                    // Schedule initial daily check-in if enabled
-                    if UserDefaults.standard.bool(forKey: "dailyCheckInEnabled", defaultValue: true) {
-                        let defaultTime = Calendar.current.date(from: DateComponents(hour: 9, minute: 0)) ?? Date()
-                        try? await NotificationService.shared.scheduleDailyCheckIn(at: defaultTime)
-                    }
-                }
-            } catch {
-                print("Failed to request notification authorization: \(error)")
-            }
-        }
-    }
-    
-    public func selectTab(_ tab: Int) {
-        selectedTab = tab
     }
     
     public func logout() {
-        // Cancel all notifications
-        Task {
-            NotificationService.shared.cancelAllNotifications()
-        }
-        
-        // Reset all user data
-        username = ""
         currentStreak = 0
         totalSavings = 0
         dailyLimit = 0
         isOnboarded = false
         selectedTab = 0
-        
-        // Reset UserDefaults
-        UserDefaults.standard.removeObject(forKey: "username")
-        UserDefaults.standard.removeObject(forKey: "currentStreak")
-        UserDefaults.standard.removeObject(forKey: "totalSavings")
-        UserDefaults.standard.removeObject(forKey: "dailyLimit")
-        UserDefaults.standard.removeObject(forKey: "isOnboarded")
-        UserDefaults.standard.removeObject(forKey: "selectedTab")
-        
-        // Reset Core Data
-        CoreDataManager.shared.reset()
+        transactionCount = 0
+        daysUnderLimit = 0
+        lastCheckInTime = nil
+        goalReached = false
+        dataManager.reset()
     }
     
     // New public methods for updating achievement metrics
@@ -268,6 +278,17 @@ public class AppState: ObservableObject {
     public func markGoalReached() {
         goalReached = true
     }
+    
+    public enum AppStateError: LocalizedError {
+        case userProfileCreationFailed
+        
+        public var errorDescription: String? {
+            switch self {
+            case .userProfileCreationFailed:
+                return "Failed to create user profile"
+            }
+        }
+    }
 }
 
 extension UserDefaults {
@@ -276,5 +297,18 @@ extension UserDefaults {
             return defaultValue
         }
         return bool(forKey: key)
+    }
+}
+
+extension AppState {
+    static func preview() -> AppState {
+        let state = AppState(syncDataManager: MockCoreDataManager.shared)
+        state.username = "Preview User"
+        state.currentStreak = 7
+        state.totalSavings = 500.0
+        state.dailyLimit = 50.0
+        state.isOnboarded = true
+        state.selectedTab = 0
+        return state
     }
 } 

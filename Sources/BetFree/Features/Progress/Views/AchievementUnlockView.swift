@@ -1,4 +1,5 @@
 import SwiftUI
+import CoreData
 
 public struct AchievementUnlockView: View {
     let achievement: Achievement
@@ -73,4 +74,16 @@ public struct AchievementUnlockOverlay: View {
     }
     
     public init() {}
+}
+
+#Preview {
+    let context = CoreDataManager.shared.context
+    let achievement = Achievement(context: context)
+    achievement.title = "First Step"
+    achievement.desc = "Complete your first day"
+    achievement.icon = "figure.walk"
+    achievement.colorHex = BFDesignSystem.Colors.success.toHex() ?? "#007AFF"
+    
+    return AchievementUnlockView(achievement: achievement)
+        .background(BFDesignSystem.Colors.background)
 } 

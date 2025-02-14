@@ -3,77 +3,78 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8A1234567890ABCD /* BetFreeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1234567890ABCE /* BetFreeApp.swift */; };
-		8A1234567890ABCF /* BetFree in Frameworks */ = {isa = PBXBuildFile; productRef = 8A1234567890ABD0 /* BetFree */; };
+		91E1B16EF2233B04D8302BEF /* BetFree in Frameworks */ = {isa = PBXBuildFile; productRef = CFC018ECC7DDE74A1679EF47 /* BetFree */; };
+		A09F274A0B117558A503160E /* BetFreeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4E29F125F3BBA59BE1E445 /* BetFreeApp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		8A1234567890ABCE /* BetFreeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BetFreeApp.swift; sourceTree = "<group>"; };
-		8A1234567890ABD1 /* BetFreeApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BetFreeApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		8A1234567890ABD2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		8A1234567890ABD3 /* BetFree */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = BetFree; path = ..; sourceTree = "<group>"; };
+		04A54948B2C04BDC859D6066 /* BetFreeApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BetFreeApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9F43C406CF1D7FE919BCEC2E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		AF4E8930437122A580FD3BE3 /* project */ = {isa = PBXFileReference; lastKnownFileType = folder; name = project; path = ..; sourceTree = SOURCE_ROOT; };
+		E271FA1C5215B29717167247 /* BetFreeApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BetFreeApp.entitlements; sourceTree = "<group>"; };
+		ED4E29F125F3BBA59BE1E445 /* BetFreeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BetFreeApp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		8A1234567890ABD4 /* Frameworks */ = {
+		232FBE7AD5DBFB4302708062 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8A1234567890ABCF /* BetFree in Frameworks */,
+				91E1B16EF2233B04D8302BEF /* BetFree in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		8A1234567890ABD5 = {
+		7E357DBF413DC218ACE01E96 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8A1234567890ABD3 /* BetFree */,
-				8A1234567890ABD6 /* BetFreeApp */,
-				8A1234567890ABD7 /* Products */,
-				8A1234567890ABD8 /* Frameworks */,
-			);
-			sourceTree = "<group>";
-		};
-		8A1234567890ABD6 /* BetFreeApp */ = {
-			isa = PBXGroup;
-			children = (
-				8A1234567890ABCE /* BetFreeApp.swift */,
-				8A1234567890ABD2 /* Info.plist */,
-			);
-			path = BetFreeApp;
-			sourceTree = "<group>";
-		};
-		8A1234567890ABD7 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				8A1234567890ABD1 /* BetFreeApp.app */,
+				04A54948B2C04BDC859D6066 /* BetFreeApp.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		8A1234567890ABD8 /* Frameworks */ = {
+		877E598CB1EA14E94F2F4A9C /* Dependencies */ = {
 			isa = PBXGroup;
 			children = (
+				AF4E8930437122A580FD3BE3 /* project */,
 			);
-			name = Frameworks;
+			name = Dependencies;
+			sourceTree = "<group>";
+		};
+		D4DF1692877FCF9635EE1059 /* BetFreeApp */ = {
+			isa = PBXGroup;
+			children = (
+				E271FA1C5215B29717167247 /* BetFreeApp.entitlements */,
+				ED4E29F125F3BBA59BE1E445 /* BetFreeApp.swift */,
+				9F43C406CF1D7FE919BCEC2E /* Info.plist */,
+			);
+			path = BetFreeApp;
+			sourceTree = "<group>";
+		};
+		D6FF4D85BD6A9E5ADBBFC364 = {
+			isa = PBXGroup;
+			children = (
+				D4DF1692877FCF9635EE1059 /* BetFreeApp */,
+				877E598CB1EA14E94F2F4A9C /* Dependencies */,
+				7E357DBF413DC218ACE01E96 /* Products */,
+			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		8A1234567890ABD9 /* BetFreeApp */ = {
+		60F0CE3003AAAB8C1868ABF6 /* BetFreeApp */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8A1234567890ABDA /* Build configuration list for PBXNativeTarget "BetFreeApp" */;
+			buildConfigurationList = 25457660F9E055E035D7504F /* Build configuration list for PBXNativeTarget "BetFreeApp" */;
 			buildPhases = (
-				8A1234567890ABDB /* Sources */,
-				8A1234567890ABD4 /* Frameworks */,
-				8A1234567890ABDC /* Resources */,
+				9C051BF80E20C1161846D88D /* Sources */,
+				232FBE7AD5DBFB4302708062 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -81,78 +82,105 @@
 			);
 			name = BetFreeApp;
 			packageProductDependencies = (
-				8A1234567890ABD0 /* BetFree */,
+				CFC018ECC7DDE74A1679EF47 /* BetFree */,
 			);
 			productName = BetFreeApp;
-			productReference = 8A1234567890ABD1 /* BetFreeApp.app */;
+			productReference = 04A54948B2C04BDC859D6066 /* BetFreeApp.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		8A1234567890ABDD /* Project object */ = {
+		BD63A296A2EF65B363A3E04D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1500;
-				LastUpgradeCheck = 1500;
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
 				TargetAttributes = {
-					8A1234567890ABD9 = {
-						CreatedOnToolsVersion = 15.0;
+					60F0CE3003AAAB8C1868ABF6 = {
+						DevelopmentTeam = "${DEVELOPMENT_TEAM}";
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
-			buildConfigurationList = 8A1234567890ABDE /* Build configuration list for PBXProject "BetFreeApp" */;
+			buildConfigurationList = 83D8129B74F010BF4E24F86A /* Build configuration list for PBXProject "BetFreeApp" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
 				Base,
+				en,
 			);
-			mainGroup = 8A1234567890ABD5;
+			mainGroup = D6FF4D85BD6A9E5ADBBFC364;
 			packageReferences = (
-				8A1234567890ABDF /* XCLocalSwiftPackageReference ".." */,
+				C820367B13EED748E203D668 /* XCLocalSwiftPackageReference ".." */,
 			);
-			productRefGroup = 8A1234567890ABD7 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8A1234567890ABD9 /* BetFreeApp */,
+				60F0CE3003AAAB8C1868ABF6 /* BetFreeApp */,
 			);
 		};
 /* End PBXProject section */
 
-/* Begin PBXResourcesBuildPhase section */
-		8A1234567890ABDC /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXResourcesBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
-		8A1234567890ABDB /* Sources */ = {
+		9C051BF80E20C1161846D88D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8A1234567890ABCD /* BetFreeApp.swift in Sources */,
+				A09F274A0B117558A503160E /* BetFreeApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		8A1234567890ABE0 /* Debug */ = {
+		55D6B40551B52C7F00BF6ED0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = BetFreeApp/BetFreeApp.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "${DEVELOPMENT_TEAM}";
+				INFOPLIST_FILE = BetFreeApp/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.BetFreeApp;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		BC5B42F08315E1D68A8CE6A3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = BetFreeApp/BetFreeApp.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "${DEVELOPMENT_TEAM}";
+				INFOPLIST_FILE = BetFreeApp/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.BetFreeApp;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		BD9278CED60F7BD728BFD41A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
@@ -182,14 +210,13 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
 					"$(inherited)",
+					"DEBUG=1",
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -198,24 +225,25 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
-		8A1234567890ABE1 /* Release */ = {
+		FEB8F26C4E48D138A4ADE48B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
@@ -245,8 +273,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -255,111 +282,52 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		8A1234567890ABE2 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = R8TRWNSA3C;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = BetFreeApp/Info.plist;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.BetFreeApp;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		8A1234567890ABE3 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = R8TRWNSA3C;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = BetFreeApp/Info.plist;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.BetFreeApp;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		8A1234567890ABDA /* Build configuration list for PBXNativeTarget "BetFreeApp" */ = {
+		25457660F9E055E035D7504F /* Build configuration list for PBXNativeTarget "BetFreeApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				8A1234567890ABE2 /* Debug */,
-				8A1234567890ABE3 /* Release */,
+				BC5B42F08315E1D68A8CE6A3 /* Debug */,
+				55D6B40551B52C7F00BF6ED0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
-		8A1234567890ABDE /* Build configuration list for PBXProject "BetFreeApp" */ = {
+		83D8129B74F010BF4E24F86A /* Build configuration list for PBXProject "BetFreeApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				8A1234567890ABE0 /* Debug */,
-				8A1234567890ABE1 /* Release */,
+				BD9278CED60F7BD728BFD41A /* Debug */,
+				FEB8F26C4E48D138A4ADE48B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		8A1234567890ABDF /* XCLocalSwiftPackageReference ".." */ = {
+		C820367B13EED748E203D668 /* XCLocalSwiftPackageReference ".." */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ..;
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		8A1234567890ABD0 /* BetFree */ = {
+		CFC018ECC7DDE74A1679EF47 /* BetFree */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = BetFree;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
-	rootObject = 8A1234567890ABDD /* Project object */;
+	rootObject = BD63A296A2EF65B363A3E04D /* Project object */;
 }

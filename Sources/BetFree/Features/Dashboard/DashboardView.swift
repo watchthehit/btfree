@@ -88,11 +88,13 @@ struct StatCard: View {
 }
 
 public struct DashboardView: View {
-    @ObservedObject var appState: AppState
+    @EnvironmentObject var appState: AppState
     @State private var isRefreshing = false
     @State private var showingTransactionSheet = false
     @State private var showingErrorAlert = false
     @State private var errorMessage = ""
+    
+    public init() {}
     
     public var body: some View {
         NavigationView {
@@ -119,7 +121,7 @@ public struct DashboardView: View {
                 }
             }
             .sheet(isPresented: $showingTransactionSheet) {
-                AddTransactionView(appState: appState)
+                AddTransactionView()
             }
             .alert("Error", isPresented: $showingErrorAlert) {
                 Button("OK", role: .cancel) { }
@@ -299,5 +301,6 @@ struct TransactionRow: View {
 }
 
 #Preview {
-    DashboardView(appState: AppState())
+    DashboardView()
+        .environmentObject(AppState.preview())
 } 

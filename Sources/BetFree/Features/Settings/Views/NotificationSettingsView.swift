@@ -5,6 +5,7 @@ import UIKit
 #endif
 
 public struct NotificationSettingsView: View {
+    @EnvironmentObject var appState: AppState
     @State private var notificationTime = Calendar.current.date(from: DateComponents(hour: 9, minute: 0)) ?? Date()
     @State private var dailyCheckInEnabled = UserDefaults.standard.bool(forKey: "dailyCheckInEnabled", defaultValue: true)
     @State private var progressUpdatesEnabled = UserDefaults.standard.bool(forKey: "progressUpdatesEnabled", defaultValue: true)
@@ -14,7 +15,7 @@ public struct NotificationSettingsView: View {
     @State private var permissionStatus: UNAuthorizationStatus = .notDetermined
     @State private var isLoading = false
     
-    let appState: AppState
+    public init() {}
     
     public var body: some View {
         Form {
@@ -163,14 +164,11 @@ public struct NotificationSettingsView: View {
         }
         #endif
     }
-    
-    public init(appState: AppState) {
-        self.appState = appState
-    }
 }
 
 #Preview {
     NavigationView {
-        NotificationSettingsView(appState: AppState())
+        NotificationSettingsView()
+            .environmentObject(AppState.preview())
     }
 } 

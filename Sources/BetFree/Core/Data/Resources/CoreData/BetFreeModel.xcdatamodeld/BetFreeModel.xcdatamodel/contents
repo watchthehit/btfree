@@ -7,7 +7,7 @@
         <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="note" optional="YES" attributeType="String"/>
     </entity>
-    <entity name="UserProfile" representedClassName="BetFree.UserProfile" syncable="YES">
+    <entity name="BetFree_UserProfile" representedClassName="BetFree.UserProfile" syncable="YES">
         <attribute name="dailyLimit" optional="NO" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="email" optional="YES" attributeType="String"/>
         <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
@@ -19,7 +19,7 @@
         <attribute name="totalSavings" optional="NO" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="username" optional="NO" attributeType="String"/>
     </entity>
-    <entity name="Achievement" representedClassName="BetFree.Achievement" syncable="YES">
+    <entity name="BetFree_Achievement" representedClassName="BetFree.BetFree_Achievement" syncable="YES">
         <attribute name="colorHex" optional="NO" attributeType="String"/>
         <attribute name="desc" optional="NO" attributeType="String"/>
         <attribute name="icon" optional="NO" attributeType="String"/>

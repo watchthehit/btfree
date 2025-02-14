@@ -1,47 +1,40 @@
 import SwiftUI
 
 public struct MainTabView: View {
-    @ObservedObject var appState: AppState
+    @EnvironmentObject var appState: AppState
     
     public var body: some View {
-        ZStack {
-            BFDesignSystem.Colors.background
-                .ignoresSafeArea()
+        TabView(selection: $appState.selectedTab) {
+            DashboardView()
+                .tabItem {
+                    Label("Home", systemImage: "house.fill")
+                }
+                .tag(0)
             
-            TabView(selection: $appState.selectedTab) {
-                DashboardView(appState: appState)
-                    .tabItem {
-                        Label("Home", systemImage: "house.fill")
-                    }
-                    .tag(0)
-                
-                ProgressView(appState: appState)
-                    .tabItem {
-                        Label("Progress", systemImage: "chart.line.uptrend.xyaxis")
-                    }
-                    .tag(1)
-                
-                ProfileView(appState: appState)
-                    .tabItem {
-                        Label("Profile", systemImage: "person.fill")
-                    }
-                    .tag(2)
-            }
-        }
-        .onAppear {
-            // Configure tab bar appearance
-            #if canImport(UIKit)
-            let appearance = UITabBarAppearance()
-            appearance.configureWithDefaultBackground()
-            UITabBar.appearance().standardAppearance = appearance
-            if #available(iOS 15.0, *) {
-                UITabBar.appearance().scrollEdgeAppearance = appearance
-            }
-            #endif
+            ProgressView()
+                .tabItem {
+                    Label("Progress", systemImage: "chart.line.uptrend.xyaxis")
+                }
+                .tag(1)
+            
+            ResourcesView()
+                .tabItem {
+                    Label("Resources", systemImage: "book.fill")
+                }
+                .tag(2)
+            
+            ProfileView()
+                .tabItem {
+                    Label("Profile", systemImage: "person.fill")
+                }
+                .tag(3)
         }
     }
     
-    public init(appState: AppState) {
-        self.appState = appState
-    }
+    public init() {}
+}
+
+#Preview {
+    MainTabView()
+        .environmentObject(AppState.preview())
 } 

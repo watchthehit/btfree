@@ -14,6 +14,12 @@ extension Animation {
     }
 }
 
+extension View {
+    func safeOnChange<Value: Equatable>(of value: Value, perform action: @escaping (Value) -> Void) -> some View {
+        self.onChange(of: value, perform: action)
+    }
+}
+
 // MARK: - Main View
 public struct OnboardingView: View {
     @StateObject private var viewModel = OnboardingViewModel()
@@ -234,12 +240,12 @@ private struct OnboardingStepView: View {
                 showContent = true
             }
         }
-        .onChange(of: viewModel.currentStep) { newValue in
+        .safeOnChange(of: viewModel.currentStep) { newValue in
             isAnimating = true
             withAnimation(.defaultSpring) {
                 showContent = false
             }
-            
+
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                 withAnimation(.defaultSpring) {
                     showContent = true
@@ -783,5 +789,5 @@ private struct FeatureRow: View {
 
 #Preview {
     OnboardingView()
-        .environmentObject(AppState())
+        .environmentObject(AppState.preview())
 } 
