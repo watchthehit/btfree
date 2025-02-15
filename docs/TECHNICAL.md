@@ -274,6 +274,231 @@ BFCard(isInteractive: true) {
 // - Fade in on appear
 ```
 
+### Haptic Feedback System
+
+The app uses a structured haptic feedback system defined in `BFHaptics` to provide tactile feedback for important interactions.
+
+#### Basic Feedback
+```swift
+// Success feedback (e.g., completing a goal)
+BFHaptics.success()
+
+// Error feedback (e.g., exceeding daily limit)
+BFHaptics.error()
+
+// Warning feedback (e.g., approaching daily limit)
+BFHaptics.warning()
+```
+
+#### Interactive Feedback
+```swift
+// Light tap for subtle interactions
+BFHaptics.lightTap()
+
+// Medium tap for standard interactions
+BFHaptics.mediumTap()
+
+// Heavy tap for emphasized interactions
+BFHaptics.heavyTap()
+
+// Soft/Rigid taps for specific feelings
+BFHaptics.softTap()
+BFHaptics.rigidTap()
+```
+
+#### View Modifiers
+```swift
+// Add haptic feedback to any button
+someButton.withHaptics(style: .light)
+
+// Trigger success haptics on condition
+someView.withSuccessHaptics(when: condition)
+
+// Trigger error haptics on condition
+someView.withErrorHaptics(when: condition)
+```
+
+#### Custom Patterns
+For special achievements or milestones, use the `BFHapticEngine`:
+```swift
+let engine = BFHapticEngine()
+engine.playAchievementPattern()  // Custom celebration pattern
+engine.playProgressCompletionPattern()  // Custom progress pattern
+```
+
+#### Implementation Example
+The progress section demonstrates proper usage:
+```swift
+progressSection
+    .onChange(of: dailySpentAmount) { newAmount in
+        if newAmount >= dailyLimit {
+            BFHaptics.error()  // Over limit
+        } else if newAmount >= dailyLimit * 0.8 {
+            BFHaptics.warning()  // Approaching limit
+        }
+    }
+```
+
+### Accessibility System
+
+The app uses a comprehensive accessibility system defined in `BFAccessibility` to ensure the app is usable by everyone.
+
+#### Dynamic Type Support
+```swift
+// Scale font size based on user preferences
+BFAccessibility.TextSize.scaled(16)
+
+// Create dynamically scaled font
+BFAccessibility.TextSize.scaledFont(size: 16, weight: .bold)
+```
+
+#### Reduced Motion Support
+```swift
+// Check if reduced motion is enabled
+if BFAccessibility.Motion.isReduced {
+    // Use simpler animation
+}
+
+// Get motion-respecting animation
+animation(BFAccessibility.Motion.animation(.default))
+
+// Get motion-respecting transition
+transition(BFAccessibility.Motion.transition(.scale))
+```
+
+#### High Contrast Support
+```swift
+// Check if increased contrast is enabled
+if BFAccessibility.Contrast.isIncreased {
+    // Use higher contrast colors
+}
+
+// Get contrast-appropriate color
+BFAccessibility.Contrast.color(.blue, increased: .blue.opacity(0.8))
+
+// Get contrast-adjusted opacity
+BFAccessibility.Contrast.opacity(0.7)
+```
+
+#### VoiceOver Support
+```swift
+// Check if VoiceOver is running
+if BFAccessibility.VoiceOver.isRunning {
+    // Provide additional context
+}
+
+// Combine multiple elements into single announcement
+BFAccessibility.VoiceOver.combine("Amount", "$100", "Saved")
+```
+
+#### View Modifiers
+```swift
+// Add semantic meaning
+someView.semanticMeaning("Daily Progress")
+
+// Add value description
+someView.semanticValue("50% complete")
+
+// Add usage hint
+someView.semanticHint("Double tap to view details")
+
+// Group related elements
+someView.semanticGroup("Progress Section")
+
+// Add custom trait
+someView.semanticTrait(.isButton)
+
+// Respect motion preferences
+someView.respectReducedMotion()
+
+// Respect contrast preferences
+someView.respectIncreaseContrast()
+```
+
+#### Implementation Example
+The progress section demonstrates proper accessibility:
+```swift
+VStack {
+    Text("Daily Progress")
+    SwiftUI.ProgressView(value: progress)
+}
+.semanticGroup("Daily Progress Section")
+.semanticValue("\(Int(progress * 100))% of daily limit")
+.semanticHint("Shows your spending progress for today")
+.respectReducedMotion()
+.respectIncreaseContrast()
+```
+
+### Design System Overview
+
+The BetFree app uses a comprehensive design system with several key components:
+
+1. **Typography**
+   - Dynamic type support for all text
+   - Semantic styles for consistent hierarchy
+   - High contrast support
+   ```swift
+   BFDesignSystem.Typography.titleLarge
+   BFDesignSystem.Typography.bodyMedium
+   ```
+
+2. **Card System**
+   - Accessible tap targets
+   - High contrast support
+   - VoiceOver optimizations
+   ```swift
+   BFCard(style: .default)
+       .semanticMeaning("Statistics Card")
+   ```
+
+3. **Animation System**
+   - Reduced motion support
+   - Optional animations
+   - Subtle transitions
+   ```swift
+   .animation(BFAccessibility.Motion.animation(.default))
+   ```
+
+4. **Haptic Feedback**
+   - Complementary to visual feedback
+   - Clear tactile patterns
+   - Important state changes
+
+5. **Layout & Spacing**
+   - Generous tap targets
+   - Clear visual hierarchy
+   - Consistent spacing
+   ```swift
+   BFDesignSystem.Layout.Spacing.medium
+   ```
+
+### Best Practices
+
+1. **Typography**
+   - Always use dynamic type
+   - Maintain readable contrast
+   - Provide clear hierarchy
+
+2. **Interaction**
+   - Ensure large touch targets
+   - Provide multiple feedback types
+   - Support keyboard navigation
+
+3. **Motion**
+   - Respect reduced motion
+   - Keep animations optional
+   - Provide static alternatives
+
+4. **VoiceOver**
+   - Write clear labels
+   - Group related content
+   - Provide context and hints
+
+5. **Color**
+   - Ensure sufficient contrast
+   - Don't rely solely on color
+   - Support dark mode
+
 ## Building the Project
 
 ### Prerequisites
