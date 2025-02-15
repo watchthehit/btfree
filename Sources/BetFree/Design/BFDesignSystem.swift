@@ -3,26 +3,26 @@ import SwiftUI
 public enum BFDesignSystem {
     public enum Colors {
         // Primary Brand Colors
-        public static let primary = Color(hex: "6C5CE7")  // Modern Purple
-        public static let secondary = Color(hex: "00B894")  // Fresh Mint
-        public static let accent = Color(hex: "FD79A8")  // Soft Pink
+        public static let primary = Color(hexString: "6C5CE7")  // Modern Purple
+        public static let secondary = Color(hexString: "00B894")  // Fresh Mint
+        public static let accent = Color(hexString: "FD79A8")  // Soft Pink
         
         // Semantic Colors
-        public static let success = Color(hex: "00B894")  // Fresh Green
-        public static let info = Color(hex: "74B9FF")  // Sky Blue
-        public static let warning = Color(hex: "FDCB6E")  // Warm Yellow
-        public static let error = Color(hex: "FF7675")  // Soft Red
+        public static let success = Color(hexString: "00B894")  // Fresh Green
+        public static let info = Color(hexString: "74B9FF")  // Sky Blue
+        public static let warning = Color(hexString: "FDCB6E")  // Warm Yellow
+        public static let error = Color(hexString: "FF7675")  // Soft Red
         
         // Text Colors
-        public static let textPrimary = Color(hex: "2D3436")  // Deep Gray
-        public static let textSecondary = Color(hex: "636E72")  // Medium Gray
-        public static let textTertiary = Color(hex: "B2BEC3")  // Light Gray
+        public static let textPrimary = Color(hexString: "2D3436")  // Deep Gray
+        public static let textSecondary = Color(hexString: "636E72")  // Medium Gray
+        public static let textTertiary = Color(hexString: "B2BEC3")  // Light Gray
         
         // Background Colors
-        public static let cardBackground = Color(hex: "FFFFFF")  // Pure White
-        public static let background = Color(hex: "F7F7F9")  // Soft Background
-        public static let backgroundSecondary = Color(hex: "E5E9EC")  // Secondary Background
-        public static let separator = Color(hex: "DFE6E9").opacity(0.6)  // Subtle Border
+        public static let cardBackground = Color(hexString: "FFFFFF")  // Pure White
+        public static let background = Color(hexString: "F7F7F9")  // Soft Background
+        public static let backgroundSecondary = Color(hexString: "E5E9EC")  // Secondary Background
+        public static let separator = Color(hexString: "DFE6E9").opacity(0.6)  // Subtle Border
         
         // Gradients
         public static let calmingGradient = LinearGradient(
@@ -52,18 +52,18 @@ public enum BFDesignSystem {
         // Progress Gradients
         public static let progressGradient = LinearGradient(
             colors: [
-                Color(hex: "00B894"),  // Fresh Green
-                Color(hex: "74B9FF")   // Sky Blue
+                Color(hexString: "00B894"),
+                Color(hexString: "74B9FF")
             ],
             startPoint: .leading,
             endPoint: .trailing
         )
         
         // Dark Mode Colors
-        public static let darkBackground = Color(hex: "17171F")
-        public static let darkCardBackground = Color(hex: "252530")
-        public static let darkTextPrimary = Color(hex: "F7F7F9")
-        public static let darkTextSecondary = Color(hex: "B2BEC3")
+        public static let darkBackground = Color(hexString: "17171F")
+        public static let darkCardBackground = Color(hexString: "252530")
+        public static let darkTextPrimary = Color(hexString: "F7F7F9")
+        public static let darkTextSecondary = Color(hexString: "B2BEC3")
     }
     
     public enum Typography {
@@ -139,29 +139,22 @@ public extension View {
 
 // Color Hex Extension
 extension Color {
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+    init(hexString: String) {
+        let hex = hexString.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         var int: UInt64 = 0
         Scanner(string: hex).scanHexInt64(&int)
         let a, r, g, b: UInt64
         switch hex.count {
-        case 3: // RGB (12-bit)
+        case 3:
             (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: // RGB (24-bit)
+        case 6:
             (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: // ARGB (32-bit)
+        case 8:
             (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
         default:
-            (a, r, g, b) = (1, 1, 1, 0)
+            (a, r, g, b) = (255, 0, 0, 0)
         }
-
-        self.init(
-            .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue:  Double(b) / 255,
-            opacity: Double(a) / 255
-        )
+        self.init(.sRGB, red: Double(r)/255, green: Double(g)/255, blue: Double(b)/255, opacity: Double(a)/255)
     }
 }
 

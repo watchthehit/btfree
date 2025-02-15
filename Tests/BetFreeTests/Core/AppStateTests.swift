@@ -16,9 +16,6 @@ final class AppStateTests: XCTestCase {
         mockCoreDataManager = MockCoreDataManager()
         mockDataManager = MockDataManager(context: mockCoreDataManager.context)
         
-        // Reset achievement manager
-        AchievementManager.resetForTesting()
-        
         // Initialize app state
         do {
             appState = try await AppState(dataManager: mockDataManager)
@@ -41,9 +38,6 @@ final class AppStateTests: XCTestCase {
         appState = nil
         mockDataManager = nil
         mockCoreDataManager = nil
-        
-        // Reset shared instances
-        AchievementManager.resetForTesting()
         
         try await super.tearDown()
         

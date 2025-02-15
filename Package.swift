@@ -1,29 +1,31 @@
 // swift-tools-version: 5.9
-// The swift-tools-version declares the minimum version of Swift required to build this package.
-
 import PackageDescription
 
 let package = Package(
     name: "BetFree",
     defaultLocalization: "en",
     platforms: [
-        .iOS(.v16),
-        .macOS(.v14)
+        .iOS(.v15),
+        .macOS(.v12)
     ],
     products: [
         .library(
             name: "BetFree",
             type: .dynamic,
-            targets: ["BetFree"]),
+            targets: ["BetFree"]
+        ),
     ],
     dependencies: [
-        .package(url: "https://github.com/pointfreeco/swift-composable-architecture", exact: "1.8.2"),
+        .package(url: "https://github.com/pointfreeco/swift-composable-architecture", exact: "1.2.0")
     ],
     targets: [
         .target(
             name: "BetFree",
             dependencies: [
-                .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+                .product(
+                    name: "ComposableArchitecture",
+                    package: "swift-composable-architecture"
+                )
             ],
             path: "Sources/BetFree",
             resources: [
@@ -37,4 +39,4 @@ let package = Package(
             path: "Tests/BetFreeTests"
         )
     ]
-) 
+)

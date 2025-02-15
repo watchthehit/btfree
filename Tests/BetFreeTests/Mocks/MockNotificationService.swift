@@ -57,9 +57,4 @@ public final class MockNotificationService: NotificationServiceType {
         shared = MockNotificationService()
         shared.reset()
     }
-    
-    // Add missing method required by NotificationServiceType
-    public func scheduleAchievementUnlockNotification(title: String, description: String) async {
-        print("Mock: Scheduling achievement unlock notification for title: \(title), description: \(description)")
-    }
 } 

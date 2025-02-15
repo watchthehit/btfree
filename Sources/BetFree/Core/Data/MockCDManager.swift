@@ -13,7 +13,7 @@ public class MockCDManager: BetFreeDataManager {
         
         // User Profile Entity
         let userEntity = NSEntityDescription()
-        userEntity.name = "UserProfile"
+        userEntity.name = "BetFree_UserProfile"
         userEntity.managedObjectClassName = "BetFree.UserProfileEntity"
         
         let userIdAttribute = NSAttributeDescription()
@@ -25,20 +25,13 @@ public class MockCDManager: BetFreeDataManager {
         let nameAttribute = NSAttributeDescription()
         nameAttribute.name = "name"
         nameAttribute.attributeType = .stringAttributeType
-        nameAttribute.isOptional = true
+        nameAttribute.isOptional = false
         nameAttribute.defaultValue = ""
         
         let emailAttribute = NSAttributeDescription()
         emailAttribute.name = "email"
         emailAttribute.attributeType = .stringAttributeType
         emailAttribute.isOptional = true
-        emailAttribute.defaultValue = ""
-        
-        let usernameAttribute = NSAttributeDescription()
-        usernameAttribute.name = "username"
-        usernameAttribute.attributeType = .stringAttributeType
-        usernameAttribute.isOptional = false
-        usernameAttribute.defaultValue = "User"
         
         let dailyLimitAttribute = NSAttributeDescription()
         dailyLimitAttribute.name = "dailyLimit"
@@ -57,18 +50,6 @@ public class MockCDManager: BetFreeDataManager {
         lastCheckInAttribute.attributeType = .dateAttributeType
         lastCheckInAttribute.isOptional = true
         
-        let lastLoginDateAttribute = NSAttributeDescription()
-        lastLoginDateAttribute.name = "lastLoginDate"
-        lastLoginDateAttribute.attributeType = .dateAttributeType
-        lastLoginDateAttribute.isOptional = false
-        lastLoginDateAttribute.defaultValue = Date()
-        
-        let savingsAttribute = NSAttributeDescription()
-        savingsAttribute.name = "savings"
-        savingsAttribute.attributeType = .doubleAttributeType
-        savingsAttribute.isOptional = false
-        savingsAttribute.defaultValue = 0.0
-        
         let totalSavingsAttribute = NSAttributeDescription()
         totalSavingsAttribute.name = "totalSavings"
         totalSavingsAttribute.attributeType = .doubleAttributeType
@@ -79,12 +60,9 @@ public class MockCDManager: BetFreeDataManager {
             userIdAttribute,
             nameAttribute,
             emailAttribute,
-            usernameAttribute,
             dailyLimitAttribute,
             streakAttribute,
             lastCheckInAttribute,
-            lastLoginDateAttribute,
-            savingsAttribute,
             totalSavingsAttribute
         ]
         
@@ -115,13 +93,11 @@ public class MockCDManager: BetFreeDataManager {
         noteAttribute.name = "note"
         noteAttribute.attributeType = .stringAttributeType
         noteAttribute.isOptional = true
-        noteAttribute.defaultValue = ""
         
         let categoryAttribute = NSAttributeDescription()
         categoryAttribute.name = "category"
         categoryAttribute.attributeType = .stringAttributeType
         categoryAttribute.isOptional = true
-        categoryAttribute.defaultValue = ""
         
         transactionEntity.properties = [
             transactionIdAttribute,
@@ -131,71 +107,7 @@ public class MockCDManager: BetFreeDataManager {
             categoryAttribute
         ]
         
-        // Add Achievement Entity
-        let achievementEntity = NSEntityDescription()
-        achievementEntity.name = "BetFree_Achievement"
-        achievementEntity.managedObjectClassName = "BetFree.BetFree_Achievement"
-        
-        let achievementIdAttribute = NSAttributeDescription()
-        achievementIdAttribute.name = "id"
-        achievementIdAttribute.attributeType = .UUIDAttributeType
-        achievementIdAttribute.isOptional = false
-        achievementIdAttribute.defaultValue = UUID()
-        
-        let titleAttribute = NSAttributeDescription()
-        titleAttribute.name = "title"
-        titleAttribute.attributeType = .stringAttributeType
-        titleAttribute.isOptional = false
-        titleAttribute.defaultValue = ""
-        
-        let descAttribute = NSAttributeDescription()
-        descAttribute.name = "desc"
-        descAttribute.attributeType = .stringAttributeType
-        descAttribute.isOptional = false
-        descAttribute.defaultValue = ""
-        
-        let iconAttribute = NSAttributeDescription()
-        iconAttribute.name = "icon"
-        iconAttribute.attributeType = .stringAttributeType
-        iconAttribute.isOptional = false
-        iconAttribute.defaultValue = ""
-        
-        let colorHexAttribute = NSAttributeDescription()
-        colorHexAttribute.name = "colorHex"
-        colorHexAttribute.attributeType = .stringAttributeType
-        colorHexAttribute.isOptional = false
-        colorHexAttribute.defaultValue = "#007AFF"
-        
-        let progressAttribute = NSAttributeDescription()
-        progressAttribute.name = "progress"
-        progressAttribute.attributeType = .doubleAttributeType
-        progressAttribute.isOptional = false
-        progressAttribute.defaultValue = 0.0
-        
-        let isUnlockedAttribute = NSAttributeDescription()
-        isUnlockedAttribute.name = "isUnlocked"
-        isUnlockedAttribute.attributeType = .booleanAttributeType
-        isUnlockedAttribute.isOptional = false
-        isUnlockedAttribute.defaultValue = false
-        
-        let unlockDateAttribute = NSAttributeDescription()
-        unlockDateAttribute.name = "unlockDate"
-        unlockDateAttribute.attributeType = .dateAttributeType
-        unlockDateAttribute.isOptional = true
-        
-        achievementEntity.properties = [
-            achievementIdAttribute,
-            titleAttribute,
-            descAttribute,
-            iconAttribute,
-            colorHexAttribute,
-            progressAttribute,
-            isUnlockedAttribute,
-            unlockDateAttribute
-        ]
-        
-        // Add entities to model
-        model.entities = [userEntity, transactionEntity, achievementEntity]
+        model.entities = [userEntity, transactionEntity]
         
         // Create container with in-memory store
         let container = NSPersistentContainer(name: "BetFreeTestModel", managedObjectModel: model)
@@ -220,7 +132,7 @@ public class MockCDManager: BetFreeDataManager {
     }
     
     public func getCurrentUser() -> UserProfileEntity? {
-        let request: NSFetchRequest<UserProfileEntity> = UserProfileEntity.fetchRequest()
+        let request = NSFetchRequest<UserProfileEntity>(entityName: "BetFree_UserProfile")
         request.fetchLimit = 1
         
         do {
@@ -240,13 +152,10 @@ public class MockCDManager: BetFreeDataManager {
             user.id = UUID()
             user.streak = 0
             user.totalSavings = 0
-            user.savings = 0
-            user.lastLoginDate = Date()
-            user.username = name ?? "User"
         }
         
         user.name = name ?? ""
-        user.email = email ?? ""
+        user.email = email
         user.dailyLimit = dailyLimit
         
         try context.save()
@@ -262,10 +171,10 @@ public class MockCDManager: BetFreeDataManager {
             let daysSinceLastCheckIn = calendar.dateComponents([.day], from: lastCheckIn, to: now).day ?? 0
             
             if daysSinceLastCheckIn == 1 {
-                // Consecutive day
+                // Increment streak for consecutive days
                 user.streak += 1
             } else if daysSinceLastCheckIn > 1 {
-                // Streak broken
+                // Reset streak for missed days
                 user.streak = 1
             }
         } else {
@@ -279,11 +188,11 @@ public class MockCDManager: BetFreeDataManager {
     
     public func updateTotalSavings(amount: Double) throws {
         guard let user = getCurrentUser() else { return }
-        user.totalSavings += amount
+        user.totalSavings = amount
         try context.save()
     }
     
-    public func addTransaction(amount: Double, note: String?) throws {
+    public func addTransaction(amount: Double, note: String? = nil) throws {
         let transaction = Transaction(context: context)
         transaction.id = UUID()
         transaction.amount = amount
@@ -320,9 +229,7 @@ public class MockCDManager: BetFreeDataManager {
     }
     
     public func save() throws {
-        if context.hasChanges {
-            try context.save()
-        }
+        try context.save()
     }
     
     public func reset() {
@@ -330,12 +237,8 @@ public class MockCDManager: BetFreeDataManager {
         entities.compactMap { $0.name }.forEach { entityName in
             let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: entityName)
             let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
-            
-            do {
-                try persistentContainer.persistentStoreCoordinator.execute(deleteRequest, with: context)
-            } catch {
-                print("Error resetting data: \(error)")
-            }
+            try? context.execute(deleteRequest)
         }
+        try? context.save()
     }
-} 
+}

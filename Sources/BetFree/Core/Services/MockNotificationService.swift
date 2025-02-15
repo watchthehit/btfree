@@ -7,8 +7,9 @@ public final class MockNotificationService: NotificationServiceType {
     public static var shared = MockNotificationService()
     
     private(set) var scheduledMilestones: [(milestone: String, date: Date)] = []
-    private(set) var scheduledAchievements: [(title: String, description: String, date: Date)] = []
-    private(set) var permissionStatus: UNAuthorizationStatus = .authorized
+    private(set) var scheduledNotifications: [String] = []
+    private(set) var permissionStatus: UNAuthorizationStatus = .notDetermined
+    private var shouldGrantPermission = true
     private(set) var permissionRequests: Int = 0
     
     public init() {
@@ -20,9 +21,8 @@ public final class MockNotificationService: NotificationServiceType {
         scheduledMilestones.append((milestone: milestone, date: Date()))
     }
     
-    public func scheduleAchievementUnlockNotification(title: String, description: String) async {
-        print("Mock: Scheduling achievement unlock notification for: \(title)")
-        scheduledAchievements.append((title: title, description: description, date: Date()))
+    public func removeAllNotifications() async {
+        scheduledNotifications.removeAll()
     }
     
     public func checkPermissionStatus() async -> UNAuthorizationStatus {
@@ -33,21 +33,25 @@ public final class MockNotificationService: NotificationServiceType {
     public func requestPermissions() async throws -> Bool {
         print("Mock: Requesting permissions")
         permissionRequests += 1
-        return true
+        return shouldGrantPermission
     }
     
     // Test helper methods
     public func reset() {
         print("Mock: Resetting notification service state")
         scheduledMilestones.removeAll()
-        scheduledAchievements.removeAll()
-        permissionStatus = .authorized
+        scheduledNotifications.removeAll()
+        permissionStatus = .notDetermined
         permissionRequests = 0
     }
     
     public func setPermissionStatus(_ status: UNAuthorizationStatus) {
         print("Mock: Setting permission status to: \(status)")
         permissionStatus = status
+    }
+    
+    public func setShouldGrantPermission(_ shouldGrant: Bool) {
+        shouldGrantPermission = shouldGrant
     }
     
     public func getScheduledMilestoneCount() -> Int {
@@ -65,4 +69,4 @@ public final class MockNotificationService: NotificationServiceType {
         shared.reset()
     }
 }
-#endif 
+#endif

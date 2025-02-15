@@ -6,7 +6,6 @@ public protocol NotificationServiceType {
     func scheduleMilestoneCelebration(milestone: String) async throws
     func checkPermissionStatus() async -> UNAuthorizationStatus
     func requestPermissions() async throws -> Bool
-    func scheduleAchievementUnlockNotification(title: String, description: String) async
 }
 
 @MainActor
@@ -227,58 +226,10 @@ public final class NotificationService: NotificationServiceType {
             options: []
         )
         
-        let celebrateAction = UNNotificationAction(
-            identifier: "CELEBRATE",
-            title: "View Achievement",
-            options: .foreground
-        )
-        
-        let milestoneCategory = UNNotificationCategory(
-            identifier: "milestone",
-            actions: [celebrateAction],
-            intentIdentifiers: [],
-            options: []
-        )
-        
         notificationCenter.setNotificationCategories([
             checkInCategory,
-            progressCategory,
-            milestoneCategory
+            progressCategory
         ])
-    }
-    
-    public func scheduleAchievementUnlockNotification(title: String, description: String) async {
-        if isTestEnvironment {
-            print("Mock: Would schedule achievement unlock notification for: \(title)")
-            return
-        }
-        
-        guard let notificationCenter = notificationCenter else {
-            print("Warning: No notification center available")
-            return
-        }
-        
-        let content = UNMutableNotificationContent()
-        content.title = "Achievement Unlocked! 🎉"
-        content.body = "\(title): \(description)"
-        content.sound = .default
-        content.categoryIdentifier = "milestone"
-        
-        // Create a unique identifier for the notification
-        let identifier = "achievement_\(UUID().uuidString)"
-        
-        // Schedule for immediate delivery
-        let request = UNNotificationRequest(
-            identifier: identifier,
-            content: content,
-            trigger: nil // nil trigger means deliver immediately
-        )
-        
-        do {
-            try await notificationCenter.add(request)
-        } catch {
-            print("Error scheduling achievement notification: \(error)")
-        }
     }
     
     // For testing purposes

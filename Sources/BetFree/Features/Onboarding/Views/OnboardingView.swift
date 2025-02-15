@@ -21,6 +21,7 @@ extension View {
 }
 
 // MARK: - Main View
+@available(iOS 15, macOS 12, *)
 public struct OnboardingView: View {
     @StateObject private var viewModel = OnboardingViewModel()
     @EnvironmentObject private var appState: AppState
@@ -35,6 +36,7 @@ public struct OnboardingView: View {
             if viewModel.showPaywall {
                 PaywallView(isPresented: $viewModel.showPaywall) {
                     viewModel.completeOnboarding()
+                    appState.isOnboarded = true
                 }
             } else {
                 OnboardingStepView(
@@ -43,7 +45,7 @@ public struct OnboardingView: View {
                 )
             }
         }
-        .toolbar(.hidden)
+        .modifier(OnboardingToolbarModifier())
         .onAppear {
             viewModel.appState = appState
         }
@@ -783,6 +785,24 @@ private struct FeatureRow: View {
             withAnimation(Animation.defaultSpring) {
                 isHovered = hovering
             }
+        }
+    }
+}
+
+private struct OnboardingToolbarModifier: ViewModifier {
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if #available(iOS 16.0, macOS 13.0, *) {
+            content
+                .toolbar(.hidden)
+        } else {
+            #if os(iOS)
+            content
+                .navigationBarHidden(true)
+                .navigationBarBackButtonHidden(true)
+            #else
+            content
+            #endif
         }
     }
 }

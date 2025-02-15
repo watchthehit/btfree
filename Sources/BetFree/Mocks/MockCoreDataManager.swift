@@ -1,6 +1,5 @@
 import Foundation
 import CoreData
-@testable import BetFree
 
 // Removed the local DataManager protocol and dummy UserProfile definition
 

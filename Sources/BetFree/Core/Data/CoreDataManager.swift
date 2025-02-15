@@ -32,10 +32,7 @@ public final class CoreDataManager: BetFreeDataManager {
         
         // Configure the container
         container.viewContext.automaticallyMergesChangesFromParent = true
-        
-        // Create a local instance of the merge policy to avoid shared state
-        let mergePolicy = NSMergePolicy(merge: .mergeByPropertyObjectTrumpMergePolicyType)
-        container.viewContext.mergePolicy = mergePolicy
+        container.viewContext.mergePolicy = NSMergePolicy(merge: .mergeByPropertyObjectTrumpMergePolicyType)
         
         return container
     }()
@@ -44,10 +41,75 @@ public final class CoreDataManager: BetFreeDataManager {
         persistentContainer.viewContext
     }
     
+    // MARK: - User Profile Methods
+    
+    public func getCurrentUser() -> UserProfileEntity? {
+        let request = NSFetchRequest<UserProfileEntity>(entityName: "BetFree_UserProfile")
+        request.fetchLimit = 1
+        
+        do {
+            return try context.fetch(request).first
+        } catch {
+            print("Error fetching user profile: \(error)")
+            return nil
+        }
+    }
+    
+    public func createOrUpdateUser(name: String?, email: String?, dailyLimit: Double) throws {
+        let user: UserProfileEntity
+        if let existingUser = getCurrentUser() {
+            user = existingUser
+        } else {
+            let entity = NSEntityDescription.entity(forEntityName: "BetFree_UserProfile", in: context)!
+            user = UserProfileEntity(entity: entity, insertInto: context)
+            user.id = UUID()
+            user.streak = 0
+            user.totalSavings = 0
+        }
+        
+        user.name = name ?? ""
+        user.email = email
+        user.dailyLimit = dailyLimit
+        
+        try context.save()
+    }
+    
+    public func updateUserStreak() throws {
+        guard let user = getCurrentUser() else { return }
+        
+        let calendar = Calendar.current
+        let now = Date()
+        
+        if let lastCheckIn = user.lastCheckIn {
+            let daysSinceLastCheckIn = calendar.dateComponents([.day], from: lastCheckIn, to: now).day ?? 0
+            
+            if daysSinceLastCheckIn == 1 {
+                // Consecutive day
+                user.streak += 1
+            } else if daysSinceLastCheckIn > 1 {
+                // Streak broken
+                user.streak = 1
+            }
+        } else {
+            // First check-in
+            user.streak = 1
+        }
+        
+        user.lastCheckIn = now
+        try context.save()
+    }
+    
+    public func updateTotalSavings(amount: Double) throws {
+        guard let user = getCurrentUser() else { return }
+        user.totalSavings = amount
+        try context.save()
+    }
+    
     // MARK: - Transaction Methods
     
     public func addTransaction(amount: Double, note: String? = nil) throws {
-        let transaction = Transaction(context: context)
+        let entity = NSEntityDescription.entity(forEntityName: "Transaction", in: context)!
+        let transaction = Transaction(entity: entity, insertInto: context)
         transaction.id = UUID()
         transaction.amount = amount
         transaction.date = Date()
@@ -82,72 +144,8 @@ public final class CoreDataManager: BetFreeDataManager {
         getTodaysTransactions().reduce(0) { $0 + $1.amount }
     }
     
-    // MARK: - User Profile Methods
-    
-    public func getCurrentUser() -> UserProfileEntity? {
-        let request: NSFetchRequest<UserProfileEntity> = UserProfileEntity.fetchRequest()
-        request.fetchLimit = 1
-        
-        do {
-            return try context.fetch(request).first
-        } catch {
-            print("Error fetching user profile: \(error)")
-            return nil
-        }
-    }
-    
-    public func createOrUpdateUser(name: String?, email: String?, dailyLimit: Double) throws {
-        let user: UserProfileEntity
-        if let existingUser = getCurrentUser() {
-            user = existingUser
-        } else {
-            user = UserProfileEntity(context: context)
-        }
-        
-        user.name = name ?? ""
-        user.email = email ?? ""
-        user.dailyLimit = dailyLimit
-        
-        try context.save()
-    }
-    
-    public func updateUserStreak() throws {
-        guard let user = getCurrentUser() else { return }
-        
-        let calendar = Calendar.current
-        let now = Date()
-        
-        if let lastCheckIn = user.lastCheckIn {
-            let daysSinceLastCheckIn = calendar.dateComponents([.day], from: lastCheckIn, to: now).day ?? 0
-            
-            if daysSinceLastCheckIn == 1 {
-                // Consecutive day
-                user.streak += 1
-            } else if daysSinceLastCheckIn > 1 {
-                // Streak broken
-                user.streak = 1
-            }
-        } else {
-            // First check-in
-            user.streak = 1
-        }
-        
-        user.lastCheckIn = now
-        try context.save()
-    }
-    
-    public func updateTotalSavings(amount: Double) throws {
-        guard let user = getCurrentUser() else { return }
-        user.totalSavings += amount
-        try context.save()
-    }
-    
-    // MARK: - Helper Methods
-    
     public func save() throws {
-        if context.hasChanges {
-            try context.save()
-        }
+        try context.save()
     }
     
     public func reset() {
@@ -155,12 +153,8 @@ public final class CoreDataManager: BetFreeDataManager {
         entities.compactMap { $0.name }.forEach { entityName in
             let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: entityName)
             let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
-            
-            do {
-                try persistentContainer.persistentStoreCoordinator.execute(deleteRequest, with: context)
-            } catch {
-                print("Error resetting data: \(error)")
-            }
+            try? context.execute(deleteRequest)
         }
+        try? context.save()
     }
-} 
+}

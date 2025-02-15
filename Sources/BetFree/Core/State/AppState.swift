@@ -17,9 +17,6 @@ public class AppState: ObservableObject {
             saveToUserDefaults()
             try? dataManager.updateUserStreak()
             handleStreakMilestone()
-            Task {
-                await checkAchievements()
-            }
         }
     }
     
@@ -30,9 +27,6 @@ public class AppState: ObservableObject {
         }
         didSet {
             handleSavingsMilestone(oldValue: oldValue)
-            Task {
-                await checkAchievements()
-            }
         }
     }
     
@@ -49,43 +43,6 @@ public class AppState: ObservableObject {
     
     @Published public var selectedTab: Int {
         didSet { saveToUserDefaults() }
-    }
-    
-    // New published properties for achievement tracking
-    @Published private var transactionCount: Int = 0 {
-        didSet {
-            saveToUserDefaults()
-            Task {
-                await checkAchievements()
-            }
-        }
-    }
-    
-    @Published private var daysUnderLimit: Int = 0 {
-        didSet {
-            saveToUserDefaults()
-            Task {
-                await checkAchievements()
-            }
-        }
-    }
-    
-    @Published private var lastCheckInTime: Date? {
-        didSet {
-            saveToUserDefaults()
-            Task {
-                await checkAchievements()
-            }
-        }
-    }
-    
-    @Published private var goalReached: Bool = false {
-        didSet {
-            saveToUserDefaults()
-            Task {
-                await checkAchievements()
-            }
-        }
     }
     
     // Computed properties for UI
@@ -117,18 +74,6 @@ public class AppState: ObservableObject {
                 throw AppStateError.userProfileCreationFailed
             }
         }
-        
-        // Initialize achievements
-        try await AchievementManager.shared.initializeAchievements()
-        
-        // Initialize achievement tracking properties
-        self.transactionCount = UserDefaults.standard.integer(forKey: "transactionCount")
-        self.daysUnderLimit = UserDefaults.standard.integer(forKey: "daysUnderLimit")
-        self.lastCheckInTime = UserDefaults.standard.object(forKey: "lastCheckInTime") as? Date
-        self.goalReached = UserDefaults.standard.bool(forKey: "goalReached")
-        
-        // Check achievements
-        await checkAchievements()
     }
     
     // New public initializer for previews
@@ -140,10 +85,6 @@ public class AppState: ObservableObject {
         self.dailyLimit = 0
         self.isOnboarded = false
         self.selectedTab = 0
-        self.transactionCount = 0
-        self.daysUnderLimit = 0
-        self.lastCheckInTime = nil
-        self.goalReached = false
     }
     
     private func saveToUserDefaults() {
@@ -153,10 +94,6 @@ public class AppState: ObservableObject {
         UserDefaults.standard.set(dailyLimit, forKey: "dailyLimit")
         UserDefaults.standard.set(isOnboarded, forKey: "isOnboarded")
         UserDefaults.standard.set(selectedTab, forKey: "selectedTab")
-        UserDefaults.standard.set(transactionCount, forKey: "transactionCount")
-        UserDefaults.standard.set(daysUnderLimit, forKey: "daysUnderLimit")
-        UserDefaults.standard.set(lastCheckInTime, forKey: "lastCheckInTime")
-        UserDefaults.standard.set(goalReached, forKey: "goalReached")
     }
     
     private func handleStreakMilestone() {
@@ -196,21 +133,6 @@ public class AppState: ObservableObject {
                     break
                 }
             }
-        }
-    }
-    
-    private func checkAchievements() async {
-        do {
-            try await AchievementManager.shared.checkProgress(
-                streak: Int32(currentStreak),
-                savings: totalSavings,
-                checkInTime: lastCheckInTime,
-                transactionCount: transactionCount,
-                daysUnderLimit: daysUnderLimit,
-                goalReached: goalReached
-            )
-        } catch {
-            print("Error checking achievements: \(error)")
         }
     }
     
@@ -255,28 +177,7 @@ public class AppState: ObservableObject {
         dailyLimit = 0
         isOnboarded = false
         selectedTab = 0
-        transactionCount = 0
-        daysUnderLimit = 0
-        lastCheckInTime = nil
-        goalReached = false
         dataManager.reset()
-    }
-    
-    // New public methods for updating achievement metrics
-    public func incrementTransactionCount() {
-        transactionCount += 1
-    }
-    
-    public func updateDaysUnderLimit(_ days: Int) {
-        daysUnderLimit = days
-    }
-    
-    public func recordCheckIn() {
-        lastCheckInTime = Date()
-    }
-    
-    public func markGoalReached() {
-        goalReached = true
     }
     
     public enum AppStateError: LocalizedError {

@@ -136,78 +136,8 @@ public class MockCoreDataManager: DataManager {
                 categoryAttribute
             ]
             
-            // Achievement Entity
-            let achievementEntity = NSEntityDescription()
-            achievementEntity.name = "BetFree_Achievement"
-            achievementEntity.managedObjectClassName = "BetFree.BetFree_Achievement"
-            
-            let achievementIdAttribute = NSAttributeDescription()
-            achievementIdAttribute.name = "id"
-            achievementIdAttribute.attributeType = .UUIDAttributeType
-            achievementIdAttribute.isOptional = false
-            achievementIdAttribute.defaultValue = UUID()
-            
-            let titleAttribute = NSAttributeDescription()
-            titleAttribute.name = "title"
-            titleAttribute.attributeType = .stringAttributeType
-            titleAttribute.isOptional = false
-            titleAttribute.defaultValue = ""
-            
-            let descAttribute = NSAttributeDescription()
-            descAttribute.name = "desc"
-            descAttribute.attributeType = .stringAttributeType
-            descAttribute.isOptional = false
-            descAttribute.defaultValue = ""
-            
-            let iconAttribute = NSAttributeDescription()
-            iconAttribute.name = "icon"
-            iconAttribute.attributeType = .stringAttributeType
-            iconAttribute.isOptional = false
-            iconAttribute.defaultValue = ""
-            
-            let colorHexAttribute = NSAttributeDescription()
-            colorHexAttribute.name = "colorHex"
-            colorHexAttribute.attributeType = .stringAttributeType
-            colorHexAttribute.isOptional = false
-            colorHexAttribute.defaultValue = "#007AFF"
-            
-            let progressAttribute = NSAttributeDescription()
-            progressAttribute.name = "progress"
-            progressAttribute.attributeType = .doubleAttributeType
-            progressAttribute.isOptional = false
-            progressAttribute.defaultValue = 0.0
-            
-            let isUnlockedAttribute = NSAttributeDescription()
-            isUnlockedAttribute.name = "isUnlocked"
-            isUnlockedAttribute.attributeType = .booleanAttributeType
-            isUnlockedAttribute.isOptional = false
-            isUnlockedAttribute.defaultValue = false
-            
-            let unlockDateAttribute = NSAttributeDescription()
-            unlockDateAttribute.name = "unlockDate"
-            unlockDateAttribute.attributeType = .dateAttributeType
-            unlockDateAttribute.isOptional = true
-            
-            let lastCheckInHourAttribute = NSAttributeDescription()
-            lastCheckInHourAttribute.name = "lastCheckInHour"
-            lastCheckInHourAttribute.attributeType = .integer16AttributeType
-            lastCheckInHourAttribute.isOptional = false
-            lastCheckInHourAttribute.defaultValue = -1
-            
-            achievementEntity.properties = [
-                achievementIdAttribute,
-                titleAttribute,
-                descAttribute,
-                iconAttribute,
-                colorHexAttribute,
-                progressAttribute,
-                isUnlockedAttribute,
-                unlockDateAttribute,
-                lastCheckInHourAttribute
-            ]
-            
             // Add entities to model
-            model.entities = [userEntity, transactionEntity, achievementEntity]
+            model.entities = [userEntity, transactionEntity]
             
             print("Created model with entities: \(model.entities.map { $0.name ?? "unnamed" })")
             

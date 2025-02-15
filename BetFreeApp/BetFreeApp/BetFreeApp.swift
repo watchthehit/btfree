@@ -3,12 +3,14 @@ import BetFree
 
 @main
 struct BetFreeApp: App {
-    @StateObject private var appState = AppState(syncDataManager: MockCDManager.shared)
+    @StateObject private var appState = AppState(syncDataManager: DataManagerFactory.createDataManager())
     
     var body: some Scene {
         WindowGroup {
-            BetFreeRootView()
-                .environmentObject(appState)
+            NavigationStack {
+                BetFreeRootView()
+                    .environmentObject(appState)
+            }
         }
     }
-} 
+}

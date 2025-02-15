@@ -153,7 +153,6 @@ public struct OnboardingStep: Identifiable {
         public let type: RewardType
         
         public enum RewardType {
-            case achievement
             case streak
             case savings
             case custom

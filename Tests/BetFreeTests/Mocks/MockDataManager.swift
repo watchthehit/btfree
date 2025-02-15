@@ -123,7 +123,7 @@ public class MockDataManager: DataManager {
         context.reset()
         
         // Perform a batch delete for all entities
-        let entities = ["BetFree_UserProfile", "Transaction", "BetFree_Achievement"]
+        let entities = ["BetFree_UserProfile", "Transaction"]
         entities.forEach { entityName in
             let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: entityName)
             let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)

@@ -13,7 +13,7 @@ public enum CoreDataModel {
         // User Profile Entity
         let userEntity = NSEntityDescription()
         userEntity.name = "BetFree_UserProfile"
-        userEntity.managedObjectClassName = "BetFree.UserProfile"
+        userEntity.managedObjectClassName = NSStringFromClass(UserProfileEntity.self)
         
         let userIdAttribute = NSAttributeDescription()
         userIdAttribute.name = "id"
@@ -24,14 +24,13 @@ public enum CoreDataModel {
         let nameAttribute = NSAttributeDescription()
         nameAttribute.name = "name"
         nameAttribute.attributeType = .stringAttributeType
-        nameAttribute.isOptional = true
+        nameAttribute.isOptional = false
         nameAttribute.defaultValue = ""
         
         let emailAttribute = NSAttributeDescription()
         emailAttribute.name = "email"
         emailAttribute.attributeType = .stringAttributeType
         emailAttribute.isOptional = true
-        emailAttribute.defaultValue = ""
         
         let dailyLimitAttribute = NSAttributeDescription()
         dailyLimitAttribute.name = "dailyLimit"
@@ -69,7 +68,7 @@ public enum CoreDataModel {
         // Transaction Entity
         let transactionEntity = NSEntityDescription()
         transactionEntity.name = "Transaction"
-        transactionEntity.managedObjectClassName = "BetFree.Transaction"
+        transactionEntity.managedObjectClassName = NSStringFromClass(Transaction.self)
         
         let transactionIdAttribute = NSAttributeDescription()
         transactionIdAttribute.name = "id"
@@ -93,13 +92,11 @@ public enum CoreDataModel {
         noteAttribute.name = "note"
         noteAttribute.attributeType = .stringAttributeType
         noteAttribute.isOptional = true
-        noteAttribute.defaultValue = ""
         
         let categoryAttribute = NSAttributeDescription()
         categoryAttribute.name = "category"
         categoryAttribute.attributeType = .stringAttributeType
         categoryAttribute.isOptional = true
-        categoryAttribute.defaultValue = ""
         
         transactionEntity.properties = [
             transactionIdAttribute,
@@ -109,79 +106,7 @@ public enum CoreDataModel {
             categoryAttribute
         ]
         
-        // Achievement Entity
-        let achievementEntity = NSEntityDescription()
-        achievementEntity.name = "BetFree_Achievement"
-        achievementEntity.managedObjectClassName = "BetFree.BetFree_Achievement"
-        
-        let achievementIdAttribute = NSAttributeDescription()
-        achievementIdAttribute.name = "id"
-        achievementIdAttribute.attributeType = .UUIDAttributeType
-        achievementIdAttribute.isOptional = false
-        achievementIdAttribute.defaultValue = UUID()
-        
-        let titleAttribute = NSAttributeDescription()
-        titleAttribute.name = "title"
-        titleAttribute.attributeType = .stringAttributeType
-        titleAttribute.isOptional = false
-        titleAttribute.defaultValue = ""
-        
-        let descAttribute = NSAttributeDescription()
-        descAttribute.name = "desc"
-        descAttribute.attributeType = .stringAttributeType
-        descAttribute.isOptional = false
-        descAttribute.defaultValue = ""
-        
-        let iconAttribute = NSAttributeDescription()
-        iconAttribute.name = "icon"
-        iconAttribute.attributeType = .stringAttributeType
-        iconAttribute.isOptional = false
-        iconAttribute.defaultValue = ""
-        
-        let colorHexAttribute = NSAttributeDescription()
-        colorHexAttribute.name = "colorHex"
-        colorHexAttribute.attributeType = .stringAttributeType
-        colorHexAttribute.isOptional = false
-        colorHexAttribute.defaultValue = "#007AFF"
-        
-        let progressAttribute = NSAttributeDescription()
-        progressAttribute.name = "progress"
-        progressAttribute.attributeType = .doubleAttributeType
-        progressAttribute.isOptional = false
-        progressAttribute.defaultValue = 0.0
-        
-        let isUnlockedAttribute = NSAttributeDescription()
-        isUnlockedAttribute.name = "isUnlocked"
-        isUnlockedAttribute.attributeType = .booleanAttributeType
-        isUnlockedAttribute.isOptional = false
-        isUnlockedAttribute.defaultValue = false
-        
-        let unlockDateAttribute = NSAttributeDescription()
-        unlockDateAttribute.name = "unlockDate"
-        unlockDateAttribute.attributeType = .dateAttributeType
-        unlockDateAttribute.isOptional = true
-        
-        let lastCheckInHourAttribute = NSAttributeDescription()
-        lastCheckInHourAttribute.name = "lastCheckInHour"
-        lastCheckInHourAttribute.attributeType = .integer16AttributeType
-        lastCheckInHourAttribute.isOptional = false
-        lastCheckInHourAttribute.defaultValue = -1
-        
-        achievementEntity.properties = [
-            achievementIdAttribute,
-            titleAttribute,
-            descAttribute,
-            iconAttribute,
-            colorHexAttribute,
-            progressAttribute,
-            isUnlockedAttribute,
-            unlockDateAttribute,
-            lastCheckInHourAttribute
-        ]
-        
-        // Add entities to model
-        model.entities = [userEntity, transactionEntity, achievementEntity]
-        
+        model.entities = [userEntity, transactionEntity]
         return model
     }
     
