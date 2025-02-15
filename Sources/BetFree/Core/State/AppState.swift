@@ -67,6 +67,16 @@ public class AppState: ObservableObject {
         }
     }
     
+    @Published public var subscriptionStatus: BFUserState = .expired {
+        didSet {
+            saveSettings()
+            if case .trial(let endDate) = subscriptionStatus {
+                defaults.set(true, forKey: "BF_HAS_HAD_TRIAL")
+                scheduleTrialEndNotification(endDate: endDate)
+            }
+        }
+    }
+    
     @Published public var savings: [Saving] = []
     
     // Computed properties for UI
@@ -83,6 +93,7 @@ public class AppState: ObservableObject {
     private let hasBlockedAppsKey = "BFHasBlockedApps"
     private let typicalBetAmountKey = "BFTypicalBetAmount"
     private let preferredSportsKey = "BFPreferredSports"
+    private let subscriptionStatusKey = "BFSubscriptionStatus"
     
     public init(dataManager: BetFreeDataManager? = nil) async throws {
         let dataManager = dataManager ?? CoreDataManager.shared
@@ -98,6 +109,7 @@ public class AppState: ObservableObject {
         self.typicalBetAmount = defaults.double(forKey: typicalBetAmountKey)
         self.preferredSports = defaults.stringArray(forKey: preferredSportsKey) ?? []
         self.hasBlockedApps = defaults.bool(forKey: hasBlockedAppsKey)
+        self.subscriptionStatus = BFUserState(rawValue: defaults.integer(forKey: subscriptionStatusKey)) ?? .expired
         
         // Initialize from Core Data if available
         if let user = dataManager.getCurrentUser() {
@@ -120,6 +132,7 @@ public class AppState: ObservableObject {
         self.typicalBetAmount = 0.0
         self.preferredSports = []
         self.hasBlockedApps = false
+        self.subscriptionStatus = .expired
     }
     
     // MARK: - Transaction Methods
@@ -148,6 +161,29 @@ public class AppState: ObservableObject {
         defaults.set(typicalBetAmount, forKey: typicalBetAmountKey)
         defaults.set(preferredSports, forKey: preferredSportsKey)
         defaults.set(hasBlockedApps, forKey: hasBlockedAppsKey)
+        defaults.set(subscriptionStatus.rawValue, forKey: subscriptionStatusKey)
+    }
+    
+    private func scheduleTrialEndNotification(endDate: Date) {
+        let content = UNMutableNotificationContent()
+        content.title = "Trial Ending Soon"
+        content.body = "Your BetFree trial is ending soon. Subscribe now to keep your recovery on track!"
+        content.sound = .default
+        
+        // Schedule for 24 hours before trial ends
+        let triggerDate = Calendar.current.date(byAdding: .day, value: -1, to: endDate) ?? endDate
+        let trigger = UNCalendarNotificationTrigger(
+            dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: triggerDate),
+            repeats: false
+        )
+        
+        let request = UNNotificationRequest(
+            identifier: "trial_end_reminder",
+            content: content,
+            trigger: trigger
+        )
+        
+        UNUserNotificationCenter.current().add(request)
     }
     
     private func handleStreakMilestone() {
@@ -225,6 +261,7 @@ public class AppState: ObservableObject {
         typicalBetAmount = 0.0
         preferredSports = []
         hasBlockedApps = false
+        subscriptionStatus = .expired
         dataManager.reset()
     }
     

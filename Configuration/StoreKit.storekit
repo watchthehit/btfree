@@ -1,0 +1,91 @@
+{
+  "identifier" : "BF6D5F42",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "com.betfree.app",
+    "_developerTeamID" : "ABCDE12345",
+    "_lastSynchronizedDate" : 703893612.12481201
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "BF8A3E71",
+      "localizations" : [
+        {
+          "description" : "Access all BetFree features",
+          "displayName" : "BetFree Premium",
+          "locale" : "en_US"
+        }
+      ],
+      "name" : "Premium",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "9.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "com.betfree.subscription.monthly",
+          "introductoryOffer" : {
+            "internalID" : "BF7D2E91",
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P1W"
+          },
+          "localizations" : [
+            {
+              "description" : "Full access to all BetFree features",
+              "displayName" : "Monthly Premium",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.betfree.subscription.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Monthly Premium",
+          "subscriptionGroupID" : "BF8A3E71",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "79.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "com.betfree.subscription.yearly",
+          "introductoryOffer" : {
+            "internalID" : "BF7D2E92",
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P1W"
+          },
+          "localizations" : [
+            {
+              "description" : "Full access to all BetFree features",
+              "displayName" : "Yearly Premium",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.betfree.subscription.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Yearly Premium",
+          "subscriptionGroupID" : "BF8A3E71",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}
