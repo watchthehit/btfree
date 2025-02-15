@@ -1,122 +1,141 @@
 import SwiftUI
-import ComposableArchitecture
 
 public struct ResourcesView: View {
+    @StateObject private var viewModel = ResourcesViewModel()
+    @State private var selectedResource: Resource?
+    @State private var showArticle = false
+    @State private var showEmergencyContact = false
+    @State private var showChatView = false
+    
     public var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                // Emergency Support
-                ResourceSection(
-                    title: "Emergency Support",
-                    items: [
-                        ResourceItem(
-                            title: "National Problem Gambling Helpline",
-                            description: "24/7 confidential support",
-                            actionText: "Call 1-800-522-4700",
-                            systemImage: "phone.fill",
-                            color: .red
-                        ),
-                        ResourceItem(
-                            title: "Crisis Text Line",
-                            description: "Text HOME to 741741",
-                            actionText: "Send Text",
-                            systemImage: "message.fill",
-                            color: .blue
-                        )
-                    ]
-                )
+        NavigationView {
+            ScrollView {
+                LazyVGrid(
+                    columns: [GridItem(.flexible())],
+                    spacing: 16
+                ) {
+                    ForEach(viewModel.resources) { resource in
+                        ResourceCard(resource: resource) {
+                            handleResourceTap(resource)
+                        }
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("Recovery Resources")
+            .sheet(isPresented: $showArticle) {
+                if let resource = selectedResource,
+                   case let .article(articleId) = resource.action {
+                    ArticleView(articleId: articleId)
+                }
+            }
+            .sheet(isPresented: $showEmergencyContact) {
+                EmergencyContactView()
+            }
+            .sheet(isPresented: $showChatView) {
+                CounselorChatView()
+            }
+        }
+    }
+    
+    private func handleResourceTap(_ resource: Resource) {
+        selectedResource = resource
+        
+        switch resource.action {
+        case .article:
+            showArticle = true
+        case .contact:
+            showEmergencyContact = true
+        case .chat:
+            showChatView = true
+        default:
+            viewModel.handleResourceAction(resource.action)
+        }
+    }
+}
+
+private struct ResourceCard: View {
+    let resource: Resource
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 16) {
+                Image(systemName: resource.icon)
+                    .font(.title2)
+                    .foregroundColor(resource.type.color)
+                    .frame(width: 32)
                 
-                // Support Groups
-                ResourceSection(
-                    title: "Support Groups",
-                    items: [
-                        ResourceItem(
-                            title: "Gamblers Anonymous",
-                            description: "Find local meetings",
-                            actionText: "Find Meetings",
-                            systemImage: "person.3.fill",
-                            color: .green
-                        ),
-                        ResourceItem(
-                            title: "Online Support Community",
-                            description: "Connect with others",
-                            actionText: "Join Forum",
-                            systemImage: "globe",
-                            color: .purple
-                        )
-                    ]
-                )
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(resource.title)
+                        .font(BFDesignSystem.Typography.titleMedium)
+                        .foregroundColor(BFDesignSystem.Colors.textPrimary)
+                    
+                    Text(resource.description)
+                        .font(BFDesignSystem.Typography.bodyMedium)
+                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                }
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
             }
             .padding()
-        }
-        .navigationTitle("Resources")
-    }
-    
-    public init() {}
-}
-
-struct ResourceSection: View {
-    let title: String
-    let items: [ResourceItem]
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(title)
-                .font(.title2)
-                .fontWeight(.bold)
-            
-            ForEach(items) { item in
-                ResourceItemView(item: item)
-            }
+            .background(BFDesignSystem.Colors.cardBackground)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(resource.type.color.opacity(0.2), lineWidth: 1)
+            )
         }
     }
 }
 
-struct ResourceItem: Identifiable {
-    let id = UUID()
-    let title: String
-    let description: String
-    let actionText: String
-    let systemImage: String
-    let color: Color
-}
-
-struct ResourceItemView: View {
-    let item: ResourceItem
+private struct ArticleView: View {
+    let articleId: String
     
     var body: some View {
-        HStack {
-            Image(systemName: item.systemImage)
-                .font(.title2)
-                .foregroundColor(item.color)
-                .frame(width: 40)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(item.title)
-                    .font(.headline)
-                Text(item.description)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+        NavigationView {
+            ScrollView {
+                // Article content would go here
+                Text("Article: \(articleId)")
+                    .padding()
             }
-            
-            Spacer()
-            
-            Button(action: {
-                // Handle resource action
-            }) {
-                Text(item.actionText)
-                    .foregroundColor(BFDesignSystem.Colors.primary)
-            }
+            .navigationTitle("Article")
+            .navigationBarTitleDisplayMode(.inline)
         }
-        .padding()
-        .background(BFDesignSystem.Colors.cardBackground)
-        .cornerRadius(10)
+    }
+}
+
+private struct EmergencyContactView: View {
+    var body: some View {
+        NavigationView {
+            VStack {
+                // Emergency contact UI would go here
+                Text("Emergency Contact")
+                    .padding()
+            }
+            .navigationTitle("Emergency Contact")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+}
+
+private struct CounselorChatView: View {
+    var body: some View {
+        NavigationView {
+            VStack {
+                // Chat UI would go here
+                Text("Chat with Counselor")
+                    .padding()
+            }
+            .navigationTitle("Chat with Counselor")
+            .navigationBarTitleDisplayMode(.inline)
+        }
     }
 }
 
 #Preview {
-    NavigationView {
-        ResourcesView()
-            .environmentObject(AppState.preview)
-    }
+    ResourcesView()
 }

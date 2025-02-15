@@ -39,6 +39,8 @@ public class CravingManager: ObservableObject {
     @Published public private(set) var averageIntensity: Double = 0
     @Published public private(set) var commonTriggers: [(trigger: String, count: Int)] = []
     @Published public private(set) var cravingsByTime: [(hour: Int, count: Int)] = []
+    @Published public private(set) var totalCravingsResisted: Int = 0
+    @Published public private(set) var highRiskDaysSurvived: Int = 0
     
     private let defaults = UserDefaults.standard
     private let cravingsKey = "BFCravings"
@@ -83,26 +85,35 @@ public class CravingManager: ObservableObject {
     }
     
     private func updateStatistics() {
-        // Calculate average intensity
-        averageIntensity = cravings.isEmpty ? 0 :
-            Double(cravings.reduce(0) { $0 + $1.intensity }) / Double(cravings.count)
-        
-        // Find common triggers
-        var triggerCounts: [String: Int] = [:]
-        cravings.forEach { craving in
-            triggerCounts[craving.trigger, default: 0] += 1
+        // Update average intensity
+        if !cravings.isEmpty {
+            averageIntensity = Double(cravings.map { $0.intensity }.reduce(0, +)) / Double(cravings.count)
         }
-        commonTriggers = triggerCounts
+        
+        // Update total cravings resisted
+        totalCravingsResisted = cravings.count
+        
+        // Update high risk days survived (days with multiple cravings)
+        let calendar = Calendar.current
+        let cravingsByDay = Dictionary(grouping: cravings) { craving in
+            calendar.startOfDay(for: craving.timestamp)
+        }
+        highRiskDaysSurvived = cravingsByDay.filter { $0.value.count > 1 }.count
+        
+        // Update common triggers
+        let triggerCounts = Dictionary(grouping: cravings, by: { $0.trigger })
+            .mapValues { $0.count }
             .sorted { $0.value > $1.value }
-            .map { (trigger: $0.key, count: $0.value) }
+            .prefix(5)
+        commonTriggers = triggerCounts.map { ($0.key, $0.value) }
         
-        // Analyze cravings by time
-        var hourCounts = Array(repeating: 0, count: 24)
-        cravings.forEach { craving in
-            let hour = Calendar.current.component(.hour, from: craving.timestamp)
-            hourCounts[hour] += 1
+        // Update cravings by time
+        let hourCounts = Dictionary(grouping: cravings) { craving in
+            calendar.component(.hour, from: craving.timestamp)
         }
-        cravingsByTime = hourCounts.enumerated().map { (hour: $0, count: $1) }
+        cravingsByTime = (0...23).map { hour in
+            (hour: hour, count: hourCounts[hour]?.count ?? 0)
+        }
     }
     
     public func getRecentCravings(limit: Int = 7) -> [Craving] {
@@ -124,28 +135,204 @@ public class CravingManager: ObservableObject {
         formatter.unitsStyle = .abbreviated
         return formatter.string(from: duration) ?? "0m"
     }
+    
+    public func hadCravingOn(_ date: Date) -> Bool {
+        let calendar = Calendar.current
+        return cravings.contains { craving in
+            calendar.isDate(craving.timestamp, inSameDayAs: date)
+        }
+    }
 }
 
-// MARK: - Emotions
+// MARK: - Common Triggers
 public extension CravingManager {
+    static let commonTriggers = [
+        "Live game on TV",
+        "Sports betting ad",
+        "Friend discussing odds",
+        "Upcoming big game",
+        "Social media sports content",
+        "Fantasy sports update",
+        "Sports news/stats",
+        "Game day atmosphere",
+        "Past betting success memory",
+        "Team playing well",
+        "Potential parlay opportunity",
+        "Close game situation",
+        "Underdog story",
+        "Championship/playoff game",
+        "Free betting credit offer"
+    ]
+    
+    static let commonLocations = [
+        "At home watching TV",
+        "Sports bar",
+        "Friend's house",
+        "Stadium/arena",
+        "Mobile phone",
+        "Computer/laptop",
+        "Public transport",
+        "Work break room",
+        "Restaurant with games on",
+        "Gym with sports TV"
+    ]
+    
     static let commonEmotions = [
-        "Stressed", "Anxious", "Bored", "Lonely", "Excited",
-        "Frustrated", "Angry", "Happy", "Sad", "Overwhelmed"
+        "Excited by close game",
+        "Confident in pick",
+        "FOMO on big game",
+        "Frustrated by loss",
+        "Bored during game",
+        "Anxious about score",
+        "Regret from past bet",
+        "Hopeful for comeback",
+        "Tempted by odds",
+        "Peer pressure"
     ]
 }
 
 // MARK: - Coping Strategies
 public extension CravingManager {
     static let copingStrategies = [
-        "Deep breathing",
-        "Physical exercise",
-        "Call a friend",
-        "Mindfulness meditation",
-        "Go for a walk",
-        "Listen to music",
-        "Write in journal",
-        "Read a book",
-        "Take a shower",
-        "Practice hobby"
+        "Turn off game/stream",
+        "Call recovery sponsor",
+        "Block betting apps",
+        "Review savings progress",
+        "Use breathing technique",
+        "Play non-betting game",
+        "Exercise/physical activity",
+        "Read recovery stories",
+        "Message support group",
+        "Mindfulness exercise",
+        "Review betting losses",
+        "Focus on family goals",
+        "Practice new hobby",
+        "Listen to recovery podcast",
+        "Write in recovery journal"
     ]
+    
+    static let riskySituations = [
+        "Big game days",
+        "Playoff season",
+        "Holiday tournaments",
+        "Payday periods",
+        "Weekend games",
+        "Late-night games",
+        "Social viewing events",
+        "Sports bar visits",
+        "Fantasy draft season",
+        "March Madness"
+    ]
+    
+    static func getRiskLevel(for situation: String) -> Int {
+        switch situation {
+        case "Big game days", "Playoff season", "Payday periods":
+            return 5 // Highest risk
+        case "Weekend games", "Social viewing events", "Fantasy draft season":
+            return 4
+        case "Late-night games", "Sports bar visits":
+            return 3
+        default:
+            return 2
+        }
+    }
+    
+    func getSafetyPlan(for riskLevel: Int) -> [String] {
+        switch riskLevel {
+        case 5:
+            return [
+                "Avoid watching game completely",
+                "Stay with support person",
+                "Keep betting apps blocked",
+                "Have emergency contact ready"
+            ]
+        case 4:
+            return [
+                "Watch with recovery buddy",
+                "Set strict time limit",
+                "Keep devices with friend",
+                "Plan alternative activity"
+            ]
+        case 3:
+            return [
+                "Enable betting site blocks",
+                "Focus on game only",
+                "Keep recovery app open",
+                "Set check-in schedule"
+            ]
+        default:
+            return [
+                "Monitor triggers",
+                "Use coping strategies",
+                "Stay connected to support",
+                "Track progress in app"
+            ]
+        }
+    }
+    
+    func analyzeRiskPatterns() -> [String: Int] {
+        var patterns: [String: Int] = [:]
+        
+        // Analyze time patterns
+        let gameTimeCravings = cravings.filter { craving in
+            craving.trigger.contains("game") || craving.trigger.contains("match")
+        }
+        
+        // Count evening/night triggers (typical game times)
+        let eveningCravings = cravings.filter { craving in
+            let hour = Calendar.current.component(.hour, from: craving.timestamp)
+            return hour >= 18 && hour <= 23
+        }
+        
+        patterns["game_time"] = gameTimeCravings.count
+        patterns["evening"] = eveningCravings.count
+        
+        // Analyze social patterns
+        let socialTriggers = cravings.filter { craving in
+            craving.trigger.contains("friend") || craving.trigger.contains("social") ||
+            craving.location?.contains("bar") == true
+        }
+        patterns["social"] = socialTriggers.count
+        
+        return patterns
+    }
+    
+    func getProgressInsights() -> [String] {
+        var insights: [String] = []
+        
+        // Analyze trend
+        let trend = getCravingTrend()
+        if trend < -0.5 {
+            insights.append("Your resistance to sports betting urges is improving! Keep using your coping strategies.")
+        }
+        
+        // Analyze patterns
+        let patterns = analyzeRiskPatterns()
+        if let gameTime = patterns["game_time"], gameTime > 5 {
+            insights.append("Live games are a major trigger. Consider watching recorded games instead to avoid betting pressure.")
+        }
+        
+        if let social = patterns["social"], social > 3 {
+            insights.append("Social situations increase your risk. Try watching games with your recovery support group.")
+        }
+        
+        // Check coping strategy effectiveness
+        let successfulStrategies = cravings
+            .filter { $0.copingStrategy != nil && $0.outcome?.contains("passed") == true }
+            .compactMap { $0.copingStrategy }
+        
+        if let bestStrategy = successfulStrategies.mostCommon {
+            insights.append("\"\(bestStrategy)\" has been your most effective coping strategy. Keep it up!")
+        }
+        
+        return insights
+    }
+}
+
+// Helper extension for finding most common element
+extension Array where Element: Hashable {
+    var mostCommon: Element? {
+        let counts = self.reduce(into: [:]) { $0[$1, default: 0] += 1 }
+        return counts.max(by: { $0.value < $1.value })?.key
+    }
 }

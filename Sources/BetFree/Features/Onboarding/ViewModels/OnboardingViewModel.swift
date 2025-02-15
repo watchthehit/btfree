@@ -154,10 +154,15 @@ public class OnboardingViewModel: ObservableObject {
             appState.updateUsername(name)
         }
         
-        // Save financial goals
-        if let weeklySpend = Double(situationInputs["Weekly Spend"] ?? "0") {
-            appState.updateSavings(weeklySpend)
-        }
+        // Update savings
+        let weeklySpend = Double(commitmentLevels["Weekly Spend"] ?? 0)
+        let saving = Saving(
+            amount: weeklySpend,
+            description: "Initial weekly spend estimate",
+            date: Date(),
+            sport: "All"
+        )
+        appState.addSaving(saving)
         
         // Save commitment levels
         if let dailyTime = commitmentLevels["Daily Check-in Time"] {
