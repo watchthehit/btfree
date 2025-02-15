@@ -1,135 +1,91 @@
-# BetFree Documentation
+# BetFree
 
-## Overview
-BetFree is a comprehensive iOS application designed to help users overcome gambling addiction through progress tracking, goal setting, and personalized support.
+BetFree is an iOS application designed to support individuals in their recovery from sports betting addiction. The app provides a comprehensive set of tools for tracking progress, managing betting urges, and accessing support resources.
 
-## Documentation Structure
+## Features
 
-### Technical Documentation
-- [Technical Overview](TECHNICAL.md) - Complete technical implementation details
-- [Paywall Implementation](PAYWALL.md) - Subscription and monetization system
+### 1. Progress Tracking
+- Track consecutive bet-free days
+- Monitor money saved from not betting
+- Weekly progress visualization
+- Achievement celebrations
 
-### Features
-1. **Core Features**
-   - Progress Tracking
-   - Goal Setting
-   - Daily Check-ins
-   - Achievement System
+### 2. Sports Betting Recovery Tools
+- High-risk game day alerts
+- Personalized safety plans
+- Common trigger identification
+- Coping strategy suggestions
+- Emergency sponsor contact
 
-2. **User Experience**
-   - Onboarding Flow
-   - Dashboard Interface
-   - Resource Center
-   - Profile Management
+### 3. Financial Recovery
+- Track money saved
+- Set savings goals
+- Transaction history
+- Financial insights
 
-3. **Monetization**
-   - Subscription Plans
-   - Feature Gating
-   - Trial System
-   - Restore Purchases
-
-### Architecture
-1. **Design System**
-   ```swift
-   BFDesignSystem
-   ├── Colors
-   ├── Typography
-   ├── Layout
-   └── Components
-   ```
-
-2. **Core Architecture**
-   ```
-   BetFree
-   ├── Core
-   │   ├── State
-   │   ├── Design
-   │   └── Services
-   └── Features
-       ├── Onboarding
-       ├── Dashboard
-       ├── Progress
-       └── Profile
-   ```
-
-### Quick Links
-- [Getting Started](#getting-started)
-- [Installation](#installation)
-- [Contributing](#contributing)
-- [Support](#support)
+### 4. Support Resources
+- 24/7 support access
+- Educational content
+- Community resources
+- Recovery articles
 
 ## Getting Started
 
 ### Prerequisites
-- Xcode 14.0+
-- iOS 16.0+
-- Swift 5.9+
-- macOS 13.0+ (for development)
+- iOS 15.0 or later
+- Xcode 14.0 or later
+- Swift 5.5 or later
 
 ### Installation
 1. Clone the repository
-2. Open `BetFreeApp/BetFreeApp.xcodeproj`
-3. Wait for package resolution
-4. Build and run
-
-### Development Setup
 ```bash
-# Clone repository
 git clone https://github.com/yourusername/betfree.git
-
-# Navigate to project
-cd betfree
-
-# Open in Xcode
-xed .
 ```
 
+2. Open the project in Xcode
+```bash
+cd betfree
+open BetFree.xcodeproj
+```
+
+3. Build and run the application
+- Select your target device
+- Press Cmd + R to build and run
+
+## Usage
+
+### Setting Up
+1. Launch the app
+2. Complete the initial setup questionnaire
+3. Set your daily goals and limits
+4. Configure emergency contacts
+
+### Daily Use
+1. Track your bet-free days
+2. Log any betting urges
+3. Record money saved
+4. Access support when needed
+
 ## Contributing
+We welcome contributions to BetFree! Please read our [Contributing Guidelines](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
 
-### Development Process
+### Development Setup
 1. Fork the repository
-2. Create feature branch
-3. Implement changes
-4. Submit pull request
-
-### Code Style
-- Follow SwiftUI best practices
-- Use Swift style guide
-- Implement proper documentation
-- Include unit tests
-
-### Testing
-- Run unit tests
-- Verify UI on different devices
-- Check accessibility support
-- Test dark/light modes
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
 
 ## Support
-
-### Resources
-- GitHub Issues
-- Documentation
-- Stack Overflow
-- Developer Portal
-
-### Contact
-- Technical Support: support@betfree.com
-- Bug Reports: bugs@betfree.com
-- Feature Requests: features@betfree.com
-
-## Version History
-
-### Current Version (1.0.0)
-- Initial release
-- Core features implemented
-- Basic subscription system
-- Achievement tracking
-
-### Planned Updates
-- Enhanced analytics
-- Additional achievements
-- Community features
-- Advanced statistics
+If you need help:
+- Check our [Documentation](docs/TECHNICAL.md)
+- Open an [Issue](../../issues)
+- Contact our support team
 
 ## License
-Copyright © 2024 BetFree. All rights reserved. 
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+- Thanks to all contributors
+- Inspired by the recovery community
+- Built with SwiftUI and ❤️
