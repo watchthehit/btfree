@@ -10,6 +10,8 @@ public class SavingsManager: ObservableObject {
     private let savingsKey = "BFSavings"
     private let streakKey = "BFSavingsStreak"
     private let lastUpdateKey = "BFSavingsLastUpdate"
+    private let savingsByDateKey = "BFSavingsByDate"
+    private var savingsByDate: [String: Double] = [:]
     
     public init() {
         loadSavings()
@@ -19,6 +21,9 @@ public class SavingsManager: ObservableObject {
         totalSaved = defaults.double(forKey: savingsKey)
         streakDays = defaults.integer(forKey: streakKey)
         lastUpdate = defaults.object(forKey: lastUpdateKey) as? Date
+        if let savedDict = defaults.dictionary(forKey: savingsByDateKey) as? [String: Double] {
+            savingsByDate = savedDict
+        }
         calculateDailyAverage()
     }
     
@@ -26,6 +31,7 @@ public class SavingsManager: ObservableObject {
         defaults.set(totalSaved, forKey: savingsKey)
         defaults.set(streakDays, forKey: streakKey)
         defaults.set(lastUpdate, forKey: lastUpdateKey)
+        defaults.set(savingsByDate, forKey: savingsByDateKey)
     }
     
     private func calculateDailyAverage() {
@@ -36,6 +42,11 @@ public class SavingsManager: ObservableObject {
     
     public func addSaving(_ amount: Double) {
         totalSaved += amount
+        
+        // Save amount for today
+        let dateString = Self.dateFormatter.string(from: Date())
+        savingsByDate[dateString] = (savingsByDate[dateString] ?? 0) + amount
+        
         updateStreak()
         calculateDailyAverage()
         saveSavings()
@@ -48,6 +59,11 @@ public class SavingsManager: ObservableObject {
                 userInfo: ["milestone": milestone]
             )
         }
+    }
+    
+    public func savings(for date: Date) -> Double {
+        let dateString = Self.dateFormatter.string(from: date)
+        return savingsByDate[dateString] ?? 0
     }
     
     private func updateStreak() {
@@ -90,6 +106,12 @@ public class SavingsManager: ObservableObject {
         formatter.maximumFractionDigits = 2
         return formatter.string(from: NSNumber(value: amount)) ?? "$0.00"
     }
+    
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
 }
 
 // MARK: - Notification Names

@@ -1,156 +1,205 @@
 import SwiftUI
 
 public struct SavingsView: View {
-    @StateObject private var manager = SavingsManager()
-    @State private var newAmount: String = ""
-    @State private var showingAddSheet = false
-    @State private var showingCelebration = false
-    @State private var celebrationMessage = ""
+    @EnvironmentObject private var appState: AppState
+    @State private var showingAddSaving = false
+    @State private var selectedTimeFrame: TimeFrame = .month
     
-    public init() {}
+    private enum TimeFrame: String, CaseIterable {
+        case week = "Week"
+        case month = "Month"
+        case year = "Year"
+        case all = "All Time"
+    }
     
     public var body: some View {
-        VStack(spacing: 20) {
-            // Total Savings Card
-            savingsCard
-            
-            // Stats Grid
-            statsGrid
-            
-            // Add Savings Button
-            addButton
-        }
-        .padding()
-        .onReceive(NotificationCenter.default.publisher(for: .savingsMilestoneReached)) { notification in
-            if let milestone = notification.userInfo?["milestone"] as? Int {
-                celebrationMessage = "Congratulations! You've saved \(manager.formatAmount(Double(milestone)))!"
-                showingCelebration = true
-                BFHaptics.success()  
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Total Savings Card
+                    BFCard(style: .elevated) {
+                        VStack(spacing: 12) {
+                            Text("Total Savings")
+                                .font(BFDesignSystem.Typography.titleMedium)
+                            
+                            Text("$\(String(format: "%.2f", totalSavings))")
+                                .font(BFDesignSystem.Typography.displayLarge)
+                                .foregroundColor(BFDesignSystem.Colors.success)
+                            
+                            Text("from avoided sports bets")
+                                .font(BFDesignSystem.Typography.bodyMedium)
+                                .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                            
+                            // Time Frame Picker
+                            Picker("Time Frame", selection: $selectedTimeFrame) {
+                                ForEach(TimeFrame.allCases, id: \.self) { timeFrame in
+                                    Text(timeFrame.rawValue).tag(timeFrame)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                            .padding(.top, 8)
+                        }
+                        .padding()
+                    }
+                    
+                    // Stats Grid
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                        StatBox(
+                            title: "Bets Avoided",
+                            value: "\(filteredSavings.count)",
+                            icon: "hand.raised.fill",
+                            color: BFDesignSystem.Colors.primary
+                        )
+                        
+                        StatBox(
+                            title: "Average Saved",
+                            value: "$\(String(format: "%.0f", averageSaving))",
+                            icon: "chart.bar.fill",
+                            color: BFDesignSystem.Colors.warning
+                        )
+                    }
+                    
+                    // Recent Savings
+                    BFCard(style: .elevated) {
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Recent Savings")
+                                .font(BFDesignSystem.Typography.titleMedium)
+                            
+                            if filteredSavings.isEmpty {
+                                EmptyStateView()
+                            } else {
+                                ForEach(filteredSavings.prefix(5)) { saving in
+                                    SavingRow(saving: saving)
+                                    
+                                    if saving.id != filteredSavings.prefix(5).last?.id {
+                                        Divider()
+                                    }
+                                }
+                            }
+                        }
+                        .padding()
+                    }
+                }
+                .padding()
             }
-        }
-        .sheet(isPresented: $showingAddSheet) {
-            addSavingsSheet
-        }
-        .alert("Milestone Reached! 🎉", isPresented: $showingCelebration) {
-            Button("Thanks!", role: .cancel) {}
-        } message: {
-            Text(celebrationMessage)
+            .navigationTitle("Savings")
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        showingAddSaving = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
+            .sheet(isPresented: $showingAddSaving) {
+                AddSavingView()
+            }
         }
     }
     
-    private var savingsCard: some View {
-        BFCard(style: .elevated) {
-            VStack(alignment: .center, spacing: 12) {
-                Text("Total Saved")
-                    .font(BFDesignSystem.Typography.titleMedium)
+    private var filteredSavings: [Saving] {
+        let calendar = Calendar.current
+        let now = Date()
+        
+        return appState.savings.filter { saving in
+            switch selectedTimeFrame {
+            case .week:
+                return calendar.isDate(saving.date, equalTo: now, toGranularity: .weekOfYear)
+            case .month:
+                return calendar.isDate(saving.date, equalTo: now, toGranularity: .month)
+            case .year:
+                return calendar.isDate(saving.date, equalTo: now, toGranularity: .year)
+            case .all:
+                return true
+            }
+        }
+        .sorted { $0.date > $1.date }
+    }
+    
+    private var totalSavings: Double {
+        filteredSavings.reduce(0) { $0 + $1.amount }
+    }
+    
+    private var averageSaving: Double {
+        guard !filteredSavings.isEmpty else { return 0 }
+        return totalSavings / Double(filteredSavings.count)
+    }
+}
+
+private struct StatBox: View {
+    let title: String
+    let value: String
+    let icon: String
+    let color: Color
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundColor(color)
+            
+            Text(value)
+                .font(BFDesignSystem.Typography.titleLarge)
+                .foregroundColor(color)
+            
+            Text(title)
+                .font(BFDesignSystem.Typography.labelMedium)
+                .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(color.opacity(0.1))
+        .cornerRadius(12)
+    }
+}
+
+private struct SavingRow: View {
+    let saving: Saving
+    
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(saving.description)
+                    .font(BFDesignSystem.Typography.bodyLarge)
                     .foregroundColor(BFDesignSystem.Colors.textPrimary)
                 
-                Text(manager.formatAmount(manager.totalSaved))
-                    .font(BFDesignSystem.Typography.displayLarge)
-                    .foregroundColor(BFDesignSystem.Colors.success)
+                Text(saving.date, style: .date)
+                    .font(BFDesignSystem.Typography.bodySmall)
+                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
             }
-            .padding()
-            .frame(maxWidth: .infinity)
-        }
-        .semanticMeaning("Total Savings Card")
-        .semanticValue("\(manager.formatAmount(manager.totalSaved)) saved in total")
-        .semanticHint("Shows your total savings from not gambling")
-    }
-    
-    private var statsGrid: some View {
-        LazyVGrid(columns: [
-            GridItem(.flexible()),
-            GridItem(.flexible())
-        ], spacing: 16) {
-            statCard(
-                title: "Daily Average",
-                value: manager.formatAmount(manager.dailyAverage),
-                icon: "chart.line.uptrend.xyaxis",
-                color: BFDesignSystem.Colors.primary
-            )
             
-            statCard(
-                title: "Streak",
-                value: "\(manager.streakDays) days",
-                icon: "flame.fill",
-                color: BFDesignSystem.Colors.warning
-            )
+            Spacer()
+            
+            Text("$\(String(format: "%.2f", saving.amount))")
+                .font(BFDesignSystem.Typography.titleMedium)
+                .foregroundColor(BFDesignSystem.Colors.success)
         }
     }
-    
-    private func statCard(title: String, value: String, icon: String, color: Color) -> some View {
-        BFCard(style: .default) {
-            VStack(alignment: .center, spacing: 8) {
-                HStack {
-                    Image(systemName: icon)
-                        .foregroundColor(color)
-                    Text(title)
-                        .font(BFDesignSystem.Typography.labelMedium)
-                }
-                
-                Text(value)
-                    .font(BFDesignSystem.Typography.titleLarge)
-                    .foregroundColor(color)
-            }
-            .padding()
-            .frame(maxWidth: .infinity)
+}
+
+private struct EmptyStateView: View {
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "piggybank.fill")
+                .font(.system(size: 48))
+                .foregroundColor(BFDesignSystem.Colors.primary)
+            
+            Text("No Savings Yet")
+                .font(BFDesignSystem.Typography.titleMedium)
+            
+            Text("Start tracking your savings from avoided sports bets")
+                .font(BFDesignSystem.Typography.bodyMedium)
+                .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                .multilineTextAlignment(.center)
         }
-        .semanticMeaning("\(title) Card")
-        .semanticValue(value)
-        .semanticHint("Shows your \(title.lowercased())")
-    }
-    
-    private var addButton: some View {
-        Button {
-            showingAddSheet = true
-            BFHaptics.warning()  
-        } label: {
-            HStack {
-                Image(systemName: "plus.circle.fill")
-                Text("Add Savings")
-            }
-            .font(BFDesignSystem.Typography.labelLarge)
-            .foregroundColor(.white)
-            .padding()
-            .frame(maxWidth: .infinity)
-            .background(BFDesignSystem.Colors.primary)
-            .cornerRadius(12)
-        }
-        .semanticMeaning("Add Savings Button")
-        .semanticHint("Double tap to add new savings amount")
-    }
-    
-    private var addSavingsSheet: some View {
-        NavigationView {
-            Form {
-                Section {
-                    TextField("Amount", text: $newAmount)
-                        .keyboardType(.decimalPad)
-                        .semanticMeaning("Savings Amount Input")
-                        .semanticHint("Enter the amount you saved")
-                }
-                
-                Section {
-                    Button("Add Savings") {
-                        if let amount = Double(newAmount) {
-                            manager.addSaving(amount)
-                            BFHaptics.success()
-                            showingAddSheet = false
-                            newAmount = ""
-                        }
-                    }
-                    .disabled(Double(newAmount) == nil)
-                }
-            }
-            .navigationTitle("Add Savings")
-            .navigationBarItems(trailing: Button("Cancel") {
-                showingAddSheet = false
-                BFHaptics.error()  
-            })
-        }
+        .frame(maxWidth: .infinity)
+        .padding()
     }
 }
 
 #Preview {
     SavingsView()
+        .environmentObject(AppState.preview)
 }

@@ -1,172 +1,273 @@
 import SwiftUI
 
-public struct ProgressView: View {
+public struct BFProgressView: View {
     @EnvironmentObject private var appState: AppState
-    @StateObject private var cravingManager = CravingManager()
+    @StateObject private var savingsManager = SavingsManager()
+    @State private var selectedTimeframe: Timeframe = .week
+    
+    public init() {}
     
     public var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 20) {
-                    // Streak Card
+                VStack(spacing: 24) {
+                    // Timeframe Picker
+                    Picker("Timeframe", selection: $selectedTimeframe) {
+                        ForEach(Timeframe.allCases) { timeframe in
+                            Text(timeframe.title).tag(timeframe)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal)
+                    
+                    // Calendar/Progress View
+                    switch selectedTimeframe {
+                    case .week:
+                        weekView
+                    case .month:
+                        monthView
+                    }
+                    
+                    // Stats Summary
                     BFCard(style: .elevated) {
-                        VStack(spacing: 12) {
-                            Text("Bet-Free Streak")
-                                .font(BFDesignSystem.Typography.titleMedium)
+                        VStack(spacing: 16) {
+                            StatRow(
+                                title: "Clean Days",
+                                value: "\(cleanDays)",
+                                icon: "checkmark.circle.fill",
+                                color: BFDesignSystem.Colors.success
+                            )
                             
-                            Text("\(appState.currentStreak)")
-                                .font(BFDesignSystem.Typography.displayLarge)
-                                .foregroundColor(BFDesignSystem.Colors.success)
+                            Divider()
                             
-                            Text("Days Strong")
-                                .font(BFDesignSystem.Typography.bodyMedium)
-                                .foregroundColor(BFDesignSystem.Colors.textSecondary)
-                            
-                            if appState.currentStreak > 0 {
-                                Text("Next milestone: \(nextMilestone) days")
-                                    .font(BFDesignSystem.Typography.labelMedium)
-                                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
-                            }
+                            StatRow(
+                                title: "Money Saved",
+                                value: "$\(Int(savingsInPeriod))",
+                                icon: "dollarsign.circle.fill",
+                                color: BFDesignSystem.Colors.primary
+                            )
                         }
                         .padding()
                     }
+                    .padding(.horizontal)
                     
-                    // Weekly Calendar
-                    BFCard(style: .elevated) {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Weekly Progress")
-                                .font(BFDesignSystem.Typography.titleMedium)
-                            
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 8) {
-                                ForEach(lastSevenDays, id: \.self) { date in
-                                    DayCell(
-                                        date: date,
-                                        isClean: appState.wasCleanOn(date),
-                                        hadCraving: cravingManager.hadCravingOn(date)
-                                    )
-                                }
-                            }
-                        }
-                        .padding()
-                    }
-                    
-                    // Achievement Stats
-                    BFCard(style: .elevated) {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Recovery Achievements")
-                                .font(BFDesignSystem.Typography.titleMedium)
-                            
-                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                                StatBox(
-                                    title: "Games Resisted",
-                                    value: "\(appState.currentStreak * 2)",
-                                    icon: "sportscourt.fill",
-                                    color: BFDesignSystem.Colors.success
-                                )
-                                
-                                StatBox(
-                                    title: "Clean Weekends",
-                                    value: "\(appState.currentStreak / 7)",
-                                    icon: "calendar.badge.clock",
-                                    color: BFDesignSystem.Colors.primary
-                                )
-                                
-                                StatBox(
-                                    title: "Urges Overcome",
-                                    value: "\(cravingManager.totalCravingsResisted)",
-                                    icon: "hand.raised.fill",
-                                    color: BFDesignSystem.Colors.warning
-                                )
-                                
-                                StatBox(
-                                    title: "High Risk Days",
-                                    value: "\(cravingManager.highRiskDaysSurvived)",
-                                    icon: "exclamationmark.triangle.fill",
-                                    color: BFDesignSystem.Colors.error
-                                )
-                            }
-                        }
-                        .padding()
-                    }
-                    
-                    // Recent Milestones
-                    if !recentMilestones.isEmpty {
-                        BFCard(style: .elevated) {
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("Recent Milestones")
-                                    .font(BFDesignSystem.Typography.titleMedium)
-                                
-                                ForEach(recentMilestones, id: \.title) { milestone in
-                                    HStack {
-                                        Image(systemName: milestone.icon)
-                                            .foregroundColor(BFDesignSystem.Colors.primary)
-                                        
-                                        VStack(alignment: .leading) {
-                                            Text(milestone.title)
-                                                .font(BFDesignSystem.Typography.bodyLarge)
-                                            Text(milestone.date, style: .date)
-                                                .font(BFDesignSystem.Typography.bodySmall)
-                                                .foregroundColor(BFDesignSystem.Colors.textSecondary)
-                                        }
-                                    }
-                                    
-                                    if milestone.title != recentMilestones.last?.title {
-                                        Divider()
-                                    }
-                                }
-                            }
-                            .padding()
-                        }
+                    // Achievements
+                    if !achievements.isEmpty {
+                        achievementsSection
                     }
                 }
-                .padding()
             }
             .navigationTitle("Progress")
         }
     }
     
-    private var nextMilestone: Int {
-        let milestones = [1, 3, 7, 14, 30, 60, 90, 180, 365]
-        return milestones.first { $0 > appState.currentStreak } ?? (milestones.last! + 365)
+    private var weekView: some View {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 8) {
+            ForEach(weekDays, id: \.self) { date in
+                DayCell(
+                    date: date,
+                    isClean: appState.wasCleanOn(date),
+                    amount: savingsManager.savings(for: date)
+                )
+            }
+        }
+        .padding(.horizontal)
     }
     
-    private var lastSevenDays: [Date] {
-        (0..<7).map { index in
-            Calendar.current.date(byAdding: .day, value: -index, to: Date()) ?? Date()
+    private var monthView: some View {
+        VStack(spacing: 16) {
+            ForEach(monthWeeks, id: \.self) { week in
+                HStack(spacing: 8) {
+                    ForEach(week, id: \.self) { date in
+                        DayCell(
+                            date: date,
+                            isClean: appState.wasCleanOn(date),
+                            amount: savingsManager.savings(for: date)
+                        )
+                    }
+                }
+            }
+        }
+        .padding(.horizontal)
+    }
+    
+    private var achievementsSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Achievements")
+                .font(BFDesignSystem.Typography.titleMedium)
+                .padding(.horizontal)
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 16) {
+                    ForEach(achievements) { achievement in
+                        AchievementCard(achievement: achievement)
+                    }
+                }
+                .padding(.horizontal)
+            }
+        }
+    }
+    
+    // MARK: - Helper Properties
+    
+    private var weekDays: [Date] {
+        let calendar = Calendar.current
+        let today = Date()
+        return (0..<7).map { days in
+            calendar.date(byAdding: .day, value: -days, to: today) ?? today
         }.reversed()
     }
     
-    private var recentMilestones: [Milestone] {
-        [
-            Milestone(
-                title: "First Game Day Clean",
-                date: Date().addingTimeInterval(-7 * 24 * 3600),
-                icon: "1.circle.fill"
-            ),
-            Milestone(
-                title: "Survived March Madness",
-                date: Date().addingTimeInterval(-5 * 24 * 3600),
-                icon: "trophy.fill"
-            ),
-            Milestone(
-                title: "Week Without Betting",
-                date: Date().addingTimeInterval(-2 * 24 * 3600),
-                icon: "calendar.circle.fill"
-            )
-        ]
+    private var monthDays: [Date] {
+        let calendar = Calendar.current
+        let today = Date()
+        return (0..<30).map { days in
+            calendar.date(byAdding: .day, value: -days, to: today) ?? today
+        }.reversed()
+    }
+    
+    private var monthWeeks: [[Date]] {
+        let days = monthDays
+        return stride(from: 0, to: days.count, by: 7).map {
+            Array(days[days.index(days.startIndex, offsetBy: $0)..<min(days.index(days.startIndex, offsetBy: $0+7), days.endIndex)])
+        }
+    }
+    
+    private var cleanDays: Int {
+        switch selectedTimeframe {
+        case .week:
+            return weekDays.filter { appState.wasCleanOn($0) }.count
+        case .month:
+            return monthDays.filter { appState.wasCleanOn($0) }.count
+        }
+    }
+    
+    private var savingsInPeriod: Double {
+        switch selectedTimeframe {
+        case .week:
+            return weekDays.reduce(0) { $0 + savingsManager.savings(for: $1) }
+        case .month:
+            return monthDays.reduce(0) { $0 + savingsManager.savings(for: $1) }
+        }
+    }
+    
+    private var achievements: [Achievement] {
+        var result: [Achievement] = []
+        
+        // Week achievements
+        if appState.currentStreak >= 7 {
+            result.append(Achievement(
+                id: "week",
+                title: "First Week",
+                description: "Completed first week bet-free",
+                icon: "star.fill",
+                color: BFDesignSystem.Colors.success
+            ))
+        }
+        
+        // Month achievements
+        if appState.currentStreak >= 30 {
+            result.append(Achievement(
+                id: "month",
+                title: "First Month",
+                description: "Completed first month bet-free",
+                icon: "star.circle.fill",
+                color: BFDesignSystem.Colors.primary
+            ))
+        }
+        
+        // Savings achievements
+        if savingsManager.totalSaved >= 1000 {
+            result.append(Achievement(
+                id: "savings1k",
+                title: "$1,000 Saved",
+                description: "Saved your first thousand",
+                icon: "dollarsign.circle.fill",
+                color: BFDesignSystem.Colors.success
+            ))
+        }
+        
+        return result
     }
 }
 
-private struct Milestone {
+// MARK: - Supporting Types
+
+private enum Timeframe: String, CaseIterable, Identifiable {
+    case week
+    case month
+    
+    var id: String { rawValue }
+    
+    var title: String {
+        switch self {
+        case .week: return "Week"
+        case .month: return "Month"
+        }
+    }
+}
+
+private struct StatRow: View {
     let title: String
-    let date: Date
+    let value: String
     let icon: String
+    let color: Color
+    
+    var body: some View {
+        HStack {
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundColor(color)
+            
+            Text(title)
+                .font(BFDesignSystem.Typography.bodyMedium)
+                .foregroundColor(BFDesignSystem.Colors.textSecondary)
+            
+            Spacer()
+            
+            Text(value)
+                .font(BFDesignSystem.Typography.titleMedium)
+                .foregroundColor(BFDesignSystem.Colors.textPrimary)
+        }
+    }
+}
+
+private struct AchievementCard: View {
+    let achievement: Achievement
+    
+    var body: some View {
+        BFCard(style: .elevated) {
+            VStack(spacing: 8) {
+                Image(systemName: achievement.icon)
+                    .font(.title)
+                    .foregroundColor(achievement.color)
+                
+                Text(achievement.title)
+                    .font(BFDesignSystem.Typography.labelLarge)
+                
+                Text(achievement.description)
+                    .font(BFDesignSystem.Typography.bodySmall)
+                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                    .multilineTextAlignment(.center)
+            }
+            .frame(width: 120)
+            .padding()
+        }
+    }
+}
+
+private struct Achievement: Identifiable {
+    let id: String
+    let title: String
+    let description: String
+    let icon: String
+    let color: Color
 }
 
 private struct DayCell: View {
     let date: Date
     let isClean: Bool
-    let hadCraving: Bool
+    let amount: Double
     
     var body: some View {
         VStack(spacing: 4) {
@@ -177,8 +278,8 @@ private struct DayCell: View {
                 .fill(backgroundColor)
                 .frame(width: 32, height: 32)
                 .overlay {
-                    if hadCraving {
-                        Image(systemName: "bolt.fill")
+                    if amount > 0 {
+                        Image(systemName: "dollarsign.circle.fill")
                             .font(.caption)
                             .foregroundColor(.white)
                     }
@@ -189,43 +290,8 @@ private struct DayCell: View {
     private var backgroundColor: Color {
         if !isClean {
             return BFDesignSystem.Colors.error
-        } else if hadCraving {
-            return BFDesignSystem.Colors.warning
         } else {
             return BFDesignSystem.Colors.success
         }
     }
-}
-
-private struct StatBox: View {
-    let title: String
-    let value: String
-    let icon: String
-    let color: Color
-    
-    var body: some View {
-        VStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundColor(color)
-            
-            Text(value)
-                .font(BFDesignSystem.Typography.titleLarge)
-                .foregroundColor(color)
-            
-            Text(title)
-                .font(BFDesignSystem.Typography.labelMedium)
-                .foregroundColor(BFDesignSystem.Colors.textSecondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-        .padding()
-        .background(color.opacity(0.1))
-        .cornerRadius(12)
-    }
-}
-
-#Preview {
-    ProgressView()
-        .environmentObject(AppState.preview)
 }

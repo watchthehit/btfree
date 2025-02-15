@@ -1065,7 +1065,130 @@ BFHaptics.error()
    }
    ```
 
-## Features
+4. **Contrast**
+   - Ensure sufficient contrast
+   - Don't rely solely on color
+   - Support dark mode
+
+5. **Motion**
+   - Respect reduced motion
+   - Keep animations optional
+   - Provide static alternatives
+
+### Implementation Checklist
+
+When implementing new features, ensure:
+
+1. **Accessibility**
+   - [ ] VoiceOver support added
+   - [ ] Dynamic type implemented
+   - [ ] High contrast support added
+   - [ ] Reduced motion respected
+
+2. **Feedback**
+   - [ ] Appropriate haptics used
+   - [ ] Visual feedback provided
+   - [ ] Clear error states
+   - [ ] Progress indicators
+
+3. **Documentation**
+   - [ ] Accessibility features documented
+   - [ ] Usage examples provided
+   - [ ] Testing guidelines included
+   - [ ] Best practices noted
+
+## Cravings Tracking System
+Located in `Sources/BetFree/Features/Cravings/CravingManager.swift`
+
+The cravings tracking system provides comprehensive monitoring of betting urges and user progress.
+
+#### Key Features
+1. **Craving Statistics**
+   ```swift
+   @Published public private(set) var totalCravingsResisted: Int
+   @Published public private(set) var highRiskDaysSurvived: Int
+   @Published public private(set) var averageIntensity: Double
+   @Published public private(set) var commonTriggers: [(trigger: String, count: Int)]
+   @Published public private(set) var cravingsByTime: [(hour: Int, count: Int)]
+   ```
+
+2. **Date-Based Tracking**
+   ```swift
+   // Check for cravings on a specific date
+   func hadCravingOn(_ date: Date) -> Bool
+   
+   // Group cravings by day
+   Dictionary(grouping: cravings) { craving in
+       calendar.startOfDay(for: craving.timestamp)
+   }
+   ```
+
+3. **Statistics Calculation**
+   - Uses modern Swift collection methods
+   - Automatically updates when cravings change
+   - Provides time-based analysis
+
+#### Progress View Integration
+Located in `Sources/BetFree/Features/Progress/ProgressView.swift`
+
+The progress view displays user achievements and craving data:
+
+1. **Weekly Calendar**
+   - Shows clean days and craving incidents
+   - Uses custom DayCell component
+   - Integrates with AppState for bet-free status
+
+2. **Achievement Statistics**
+   - Games resisted counter
+   - Clean weekends tracker
+   - Urges overcome display
+   - High-risk days survived
+
+3. **Implementation Notes**
+   - Always use `SwiftUI.ProgressView` for progress indicators to avoid naming conflicts
+   - Use Calendar for all date comparisons
+   - Consider timezone handling for date-based features
+
+#### Usage Example
+```swift
+// Initialize CravingManager
+@StateObject private var cravingManager = CravingManager()
+
+// Check for cravings on a specific date
+let hadCraving = cravingManager.hadCravingOn(date)
+
+// Display in weekly calendar
+DayCell(
+    date: date,
+    isClean: appState.wasCleanOn(date),
+    hadCraving: hadCraving
+)
+```
+
+### Important Implementation Patterns
+
+1. **Enum Pattern Matching**
+   ```swift
+   if case let .article(articleId) = resource.action {
+       ArticleView(articleId: articleId)
+   }
+   ```
+
+2. **Date Grouping**
+   ```swift
+   let cravingsByDay = Dictionary(grouping: cravings) { craving in
+       calendar.startOfDay(for: craving.timestamp)
+   }
+   ```
+
+3. **Modern Collection Methods**
+   ```swift
+   let total = items
+       .map { $0.intensity }
+       .reduce(0, +)
+   ```
+
+### Features
 
 ### Savings Tracking
 The savings tracking feature helps users monitor their financial progress in their recovery journey:

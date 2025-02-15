@@ -7,6 +7,7 @@ public struct HomeView: View {
     
     // State for navigation
     @State private var selectedTab: HomeTab = .progress
+    @State private var showingAppBlocking = false
     
     public init() {}
     
@@ -15,6 +16,32 @@ public struct HomeView: View {
             ScrollView {
                 LazyVStack(spacing: 20) {
                     progressCard
+                    
+                    // Block Apps Card
+                    BFCard(style: .elevated) {
+                        Button {
+                            showingAppBlocking = true
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Block Betting Apps")
+                                        .font(BFDesignSystem.Typography.titleMedium)
+                                        .foregroundColor(BFDesignSystem.Colors.textPrimary)
+                                    
+                                    Text("Set up app restrictions")
+                                        .font(BFDesignSystem.Typography.bodyMedium)
+                                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                                }
+                                
+                                Spacer()
+                                
+                                Image(systemName: "hand.raised.fill")
+                                    .font(.title2)
+                                    .foregroundColor(BFDesignSystem.Colors.primary)
+                            }
+                            .padding()
+                        }
+                    }
                     
                     if let riskInfo = todayRiskInfo {
                         riskAlertCard(riskInfo: riskInfo)
@@ -25,6 +52,9 @@ public struct HomeView: View {
                 .padding()
             }
             .navigationTitle("BetFree")
+            .sheet(isPresented: $showingAppBlocking) {
+                AppBlockingView()
+            }
         }
     }
     

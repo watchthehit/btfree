@@ -5,22 +5,16 @@ public struct MainTabView: View {
     
     public var body: some View {
         TabView {
-            HomeView()
+            TodayView()
                 .tabItem {
-                    Image(systemName: "house.fill")
-                    Text("Home")
+                    Image(systemName: "sun.max.fill")
+                    Text("Today")
                 }
             
-            ProgressView()
+            BFProgressView()
                 .tabItem {
                     Image(systemName: "chart.bar.fill")
                     Text("Progress")
-                }
-            
-            TransactionsView()
-                .tabItem {
-                    Image(systemName: "list.bullet")
-                    Text("Transactions")
                 }
         }
     }

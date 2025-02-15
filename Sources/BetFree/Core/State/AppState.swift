@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import Combine
 
 @MainActor
 public class AppState: ObservableObject {
@@ -31,52 +32,83 @@ public class AppState: ObservableObject {
     }
     
     @Published public var dailyLimit: Double {
-        didSet { 
-            try? dataManager.createOrUpdateUser(name: username, email: (nil as String?), dailyLimit: dailyLimit)
+        didSet {
             saveSettings()
         }
     }
     
     @Published public var isOnboarded: Bool {
-        didSet { saveSettings() }
+        didSet {
+            saveSettings()
+        }
     }
     
     @Published public var selectedTab: Int {
-        didSet { saveSettings() }
+        didSet {
+            saveSettings()
+        }
     }
+    
+    @Published public var hasBlockedApps: Bool {
+        didSet {
+            saveSettings()
+        }
+    }
+    
+    @Published public var typicalBetAmount: Double {
+        didSet {
+            saveSettings()
+        }
+    }
+    
+    @Published public var preferredSports: [String] {
+        didSet {
+            saveSettings()
+        }
+    }
+    
+    @Published public var savings: [Saving] = []
     
     // Computed properties for UI
     public var streak: Int { currentStreak }
-    public var savings: Double { totalSavings }
+    public var savingsAmount: Double { totalSavings }
+    
+    private let defaults = UserDefaults.standard
+    private let usernameKey = "BFUsername"
+    private let streakKey = "BFStreak"
+    private let savingsKey = "BFSavings"
+    private let dailyLimitKey = "BFDailyLimit"
+    private let isOnboardedKey = "BFIsOnboarded"
+    private let selectedTabKey = "BFSelectedTab"
+    private let hasBlockedAppsKey = "BFHasBlockedApps"
+    private let typicalBetAmountKey = "BFTypicalBetAmount"
+    private let preferredSportsKey = "BFPreferredSports"
     
     public init(dataManager: BetFreeDataManager? = nil) async throws {
         let dataManager = dataManager ?? CoreDataManager.shared
         self.dataManager = dataManager
         
-        // Initialize basic state
-        self.isOnboarded = UserDefaults.standard.bool(forKey: "isOnboarded")
-        self.selectedTab = UserDefaults.standard.integer(forKey: "selectedTab")
-        self.username = UserDefaults.standard.string(forKey: "username") ?? "User"
-        self.currentStreak = UserDefaults.standard.integer(forKey: "currentStreak")
-        self.totalSavings = UserDefaults.standard.double(forKey: "totalSavings")
-        self.dailyLimit = UserDefaults.standard.double(forKey: "dailyLimit")
+        // Initialize from UserDefaults
+        self.username = defaults.string(forKey: usernameKey) ?? ""
+        self.isOnboarded = defaults.bool(forKey: isOnboardedKey)
+        self.selectedTab = defaults.integer(forKey: selectedTabKey)
+        self.currentStreak = defaults.integer(forKey: streakKey)
+        self.totalSavings = defaults.double(forKey: savingsKey)
+        self.dailyLimit = defaults.double(forKey: dailyLimitKey)
+        self.typicalBetAmount = defaults.double(forKey: typicalBetAmountKey)
+        self.preferredSports = defaults.stringArray(forKey: preferredSportsKey) ?? []
+        self.hasBlockedApps = defaults.bool(forKey: hasBlockedAppsKey)
         
         // Initialize from Core Data if available
         if let user = dataManager.getCurrentUser() {
-            self.username = user.name.isEmpty ? "User" : user.name
-            self.currentStreak = Int(user.streak)
-            self.totalSavings = user.totalSavings
+            self.username = user.name
             self.dailyLimit = user.dailyLimit
+            self.isOnboarded = true
         } else {
-            try dataManager.createOrUpdateUser(name: username, email: (nil as String?), dailyLimit: dailyLimit)
-
-            guard let _ = dataManager.getCurrentUser() else {
-                throw AppStateError.userProfileCreationFailed
-            }
+            throw AppStateError.userProfileCreationFailed
         }
     }
     
-    // New public initializer for previews
     public init(syncDataManager: BetFreeDataManager) {
         self.dataManager = syncDataManager
         self.username = "Preview User"
@@ -85,6 +117,9 @@ public class AppState: ObservableObject {
         self.dailyLimit = 50.0
         self.isOnboarded = true
         self.selectedTab = 0
+        self.typicalBetAmount = 0.0
+        self.preferredSports = []
+        self.hasBlockedApps = false
     }
     
     // MARK: - Transaction Methods
@@ -104,12 +139,15 @@ public class AppState: ObservableObject {
     // MARK: - Private Methods
     
     private func saveSettings() {
-        UserDefaults.standard.set(username, forKey: "username")
-        UserDefaults.standard.set(currentStreak, forKey: "currentStreak")
-        UserDefaults.standard.set(totalSavings, forKey: "totalSavings")
-        UserDefaults.standard.set(dailyLimit, forKey: "dailyLimit")
-        UserDefaults.standard.set(isOnboarded, forKey: "isOnboarded")
-        UserDefaults.standard.set(selectedTab, forKey: "selectedTab")
+        defaults.set(username, forKey: usernameKey)
+        defaults.set(currentStreak, forKey: streakKey)
+        defaults.set(totalSavings, forKey: savingsKey)
+        defaults.set(dailyLimit, forKey: dailyLimitKey)
+        defaults.set(isOnboarded, forKey: isOnboardedKey)
+        defaults.set(selectedTab, forKey: selectedTabKey)
+        defaults.set(typicalBetAmount, forKey: typicalBetAmountKey)
+        defaults.set(preferredSports, forKey: preferredSportsKey)
+        defaults.set(hasBlockedApps, forKey: hasBlockedAppsKey)
     }
     
     private func handleStreakMilestone() {
@@ -120,14 +158,14 @@ public class AppState: ObservableObject {
             }
             
             // Check for streak milestones
-            if currentStreak == 7 {
-                try? await NotificationService.shared.scheduleMilestoneCelebration(milestone: "a 7-day streak")
-            } else if currentStreak == 30 {
-                try? await NotificationService.shared.scheduleMilestoneCelebration(milestone: "a 30-day streak")
-            } else if currentStreak == 90 {
-                try? await NotificationService.shared.scheduleMilestoneCelebration(milestone: "a 90-day streak")
-            } else if currentStreak == 365 {
-                try? await NotificationService.shared.scheduleMilestoneCelebration(milestone: "a 1-year streak")
+            let milestones = [7, 30, 90, 180, 365]
+            for milestone in milestones {
+                if currentStreak == milestone {
+                    try? await NotificationService.shared.scheduleMilestoneCelebration(
+                        milestone: "\(milestone) days bet-free"
+                    )
+                    break
+                }
             }
         }
     }
@@ -161,15 +199,6 @@ public class AppState: ObservableObject {
         }
     }
     
-    public func updateSavings(_ value: Double) {
-        totalSavings = value
-        do {
-            try dataManager.updateTotalSavings(amount: value)
-        } catch {
-            print("Error updating savings: \(error)")
-        }
-    }
-    
     public func updateDailyLimit(_ value: Double) {
         dailyLimit = value
         do {
@@ -193,7 +222,20 @@ public class AppState: ObservableObject {
         dailyLimit = 0
         isOnboarded = false
         selectedTab = 0
+        typicalBetAmount = 0.0
+        preferredSports = []
+        hasBlockedApps = false
         dataManager.reset()
+    }
+    
+    public func addSaving(_ saving: Saving) {
+        savings.append(saving)
+        totalSavings += saving.amount
+    }
+    
+    public func wasCleanOn(_ date: Date) -> Bool {
+        // Implementation for checking if a specific date was clean
+        return true // Placeholder
     }
     
     public enum AppStateError: LocalizedError {
@@ -202,7 +244,7 @@ public class AppState: ObservableObject {
         public var errorDescription: String? {
             switch self {
             case .userProfileCreationFailed:
-                return "Failed to create user profile"
+                return "Failed to create or retrieve user profile"
             }
         }
     }
@@ -214,6 +256,10 @@ extension UserDefaults {
             return defaultValue
         }
         return bool(forKey: key)
+    }
+    
+    func stringArray(forKey key: String) -> [String]? {
+        return array(forKey: key) as? [String]
     }
 }
 

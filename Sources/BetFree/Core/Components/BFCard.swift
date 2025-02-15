@@ -88,13 +88,21 @@ public struct BFCard<Content: View>: View {
             .scaleEffect(isInteractive ? (isPressed ? 0.98 : 1.0) : 1.0)
             .animation(BFAnimation.Spring.tight, value: isPressed)
             .fadeInOnAppear()
+            .gesture(dragGesture)
     }
     
     @State private var isPressed: Bool = false
     
     private var dragGesture: some Gesture {
         DragGesture(minimumDistance: 0)
-            .onChanged { _ in isPressed = true }
-            .onEnded { _ in isPressed = false }
+            .onChanged { _ in
+                if !isPressed {
+                    isPressed = true
+                    BFHaptics.softTap()
+                }
+            }
+            .onEnded { _ in
+                isPressed = false
+            }
     }
 }
