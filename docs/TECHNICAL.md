@@ -131,6 +131,7 @@ Located in `Sources/BetFree/Core/Data/`
 - Profile
 - Transactions
 - Achievements
+- Craving Management
 
 ### Card System
 
@@ -596,7 +597,8 @@ project/
 │           ├── Resources/
 │           ├── Profile/
 │           ├── Transactions/
-│           └── Achievements/
+│           ├── Achievements/
+│           └── Cravings/
 ├── docs/
 ├── Package.swift
 └── README.md
@@ -829,3 +831,80 @@ When implementing new features, ensure:
    - [ ] Usage examples provided
    - [ ] Testing guidelines included
    - [ ] Best practices noted
+
+## Features
+
+### Savings Tracking
+The savings tracking feature helps users monitor their financial progress in their recovery journey:
+
+- Total savings display with milestone celebrations
+- Daily average calculations
+- Streak tracking for consistent saving
+- Haptic feedback for positive reinforcement
+- Accessibility support with VoiceOver descriptions
+
+Location: `/Sources/BetFree/Features/Savings/`
+
+### Craving Management
+The craving management system helps users track and understand their gambling urges:
+
+#### Core Features
+- Intensity tracking (1-5 scale)
+- Trigger identification
+- Location and emotion tracking
+- Duration monitoring
+- Coping strategy suggestions
+- Outcome recording
+
+#### Analytics
+- Average intensity tracking
+- Trend analysis (increasing/stable/decreasing)
+- Time-based pattern recognition
+- Common trigger identification
+
+#### Implementation Details
+The feature is implemented in two main components:
+
+1. **CravingManager** (`/Sources/BetFree/Features/Cravings/CravingManager.swift`)
+   - Data persistence using UserDefaults
+   - Statistical analysis methods
+   - Haptic feedback integration
+   - Coping strategy suggestions
+
+2. **CravingView** (`/Sources/BetFree/Features/Cravings/CravingView.swift`)
+   - Custom bar chart implementation for iOS compatibility
+   - Intensity visualization with color coding
+   - Form-based data entry
+   - Detail view with custom row components
+   - Full VoiceOver support
+
+#### Accessibility Features
+- Semantic descriptions for all UI elements
+- High contrast support
+- VoiceOver optimization
+- Haptic feedback for actions
+- Reduced motion support
+
+#### iOS Compatibility
+The feature is designed to work across iOS versions:
+- Custom bar chart implementation instead of Charts framework
+- Custom detail row components instead of LabeledContent
+- Consistent styling using BFDesignSystem
+- Proper date formatting for all iOS versions
+
+## User Interface
+
+### Navigation
+The app uses a tab-based navigation system with the following structure:
+
+1. Home - Main dashboard
+2. Savings - Financial progress tracking
+3. Cravings - Urge monitoring and management
+4. Resources - Support and educational content
+5. Settings - App configuration
+
+Each tab is designed with accessibility in mind, featuring:
+- Clear, descriptive labels
+- Semantic meanings and hints
+- VoiceOver support
+- High contrast options
