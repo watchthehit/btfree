@@ -202,6 +202,78 @@ BFCard(style: .default, gradient: gradient) {
 }
 ```
 
+### Animation System
+
+The app uses a structured animation system defined in `BFAnimation` to ensure consistent motion and interactivity.
+
+#### Duration Constants
+```swift
+BFAnimation.Duration
+    .quick      // 100ms - Micro-interactions
+    .standard   // 200ms - Standard interactions
+    .emphasized // 300ms - Emphasized interactions
+    .long       // 500ms - Long animations
+```
+
+#### Spring Configurations
+```swift
+BFAnimation.Spring
+    .default  // Response: 0.3, Damping: 0.7 - Most UI interactions
+    .bouncy   // Response: 0.5, Damping: 0.5 - Playful feedback
+    .tight    // Response: 0.2, Damping: 0.8 - Micro-interactions
+```
+
+#### Easing Curves
+```swift
+BFAnimation.Easing
+    .easeOut   // Elements appearing
+    .easeIn    // Elements disappearing
+    .easeInOut // Smooth transitions
+```
+
+#### Common Transitions
+```swift
+BFAnimation.Transition
+    .fadeIn   // Fade in from 0 opacity
+    .scaleUp  // Scale up from 95% with fade
+    .slideUp  // Slide in from bottom with fade
+```
+
+#### View Modifiers
+Easy-to-use modifiers for common animations:
+```swift
+// Fade in when view appears
+someView.fadeInOnAppear()
+
+// Scale up when view appears
+someView.scaleUpOnAppear()
+
+// Slide up when view appears
+someView.slideUpOnAppear()
+```
+
+#### Implementation Example
+The stats section in HomeView demonstrates proper usage:
+```swift
+LazyVGrid(columns: gridItems, spacing: 16) {
+    ForEach(stats) { stat in
+        BFStatCard(value: stat.value, label: stat.label)
+            .slideUpOnAppear()  // Animate cards sliding up
+    }
+}
+```
+
+Cards use spring animations for touch feedback:
+```swift
+BFCard(isInteractive: true) {
+    Text("Interactive Card")
+}
+// Automatically includes:
+// - Scale animation with tight spring
+// - Opacity change
+// - Fade in on appear
+```
+
 ## Building the Project
 
 ### Prerequisites

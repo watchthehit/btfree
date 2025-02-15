@@ -15,7 +15,7 @@ public struct HomeView: View {
                     welcomeSection
                     
                     // Stats Overview
-                    statsOverview
+                    statsSection
                     
                     // Daily Progress
                     if appState.dailyLimit > 0 {
@@ -54,23 +54,32 @@ public struct HomeView: View {
         .padding(.horizontal)
     }
     
-    private var statsOverview: some View {
-        HStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
-            BFStatCard(
+    private var statsSection: some View {
+        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+            ForEach(Array(zip([BFStatCard(
                 value: "\(appState.streak)",
                 label: "Day Streak",
                 icon: "flame.fill",
                 gradient: .orangeGradient
-            )
-            .transition(.scale.combined(with: .opacity))
-            
-            BFStatCard(
+            ), BFStatCard(
                 value: "$\(Int(appState.savings))",
                 label: "Total Saved",
                 icon: "dollarsign.circle.fill",
                 gradient: .greenGradient
-            )
-            .transition(.scale.combined(with: .opacity))
+            )].indices, [BFStatCard(
+                value: "\(appState.streak)",
+                label: "Day Streak",
+                icon: "flame.fill",
+                gradient: .orangeGradient
+            ), BFStatCard(
+                value: "$\(Int(appState.savings))",
+                label: "Total Saved",
+                icon: "dollarsign.circle.fill",
+                gradient: .greenGradient
+            )])), id: \.0) { index, stat in
+                stat
+                .slideUpOnAppear()
+            }
         }
         .padding(.horizontal)
     }

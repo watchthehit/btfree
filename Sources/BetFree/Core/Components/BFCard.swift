@@ -86,7 +86,8 @@ public struct BFCard<Content: View>: View {
             .contentShape(Rectangle())  // Makes entire card tappable
             .opacity(isInteractive ? (isPressed ? 0.7 : 1.0) : 1.0)
             .scaleEffect(isInteractive ? (isPressed ? 0.98 : 1.0) : 1.0)
-            .animation(.easeOut(duration: 0.2), value: isPressed)
+            .animation(BFAnimation.Spring.tight, value: isPressed)
+            .fadeInOnAppear()
     }
     
     @State private var isPressed: Bool = false
