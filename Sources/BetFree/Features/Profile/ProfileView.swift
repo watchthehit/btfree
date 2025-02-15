@@ -114,5 +114,5 @@ public struct ProfileView: View {
 
 #Preview {
     ProfileView()
-        .environmentObject(AppState.preview())
+        .environmentObject(AppState.preview)
 } 

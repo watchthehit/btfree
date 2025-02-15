@@ -7,42 +7,42 @@ public class AppState: ObservableObject {
     
     @Published public var username: String {
         didSet { 
-            saveToUserDefaults()
             try? dataManager.createOrUpdateUser(name: username, email: (nil as String?), dailyLimit: dailyLimit)
+            saveSettings()
         }
     }
     
     @Published public var currentStreak: Int {
         didSet { 
-            saveToUserDefaults()
             try? dataManager.updateUserStreak()
             handleStreakMilestone()
+            saveSettings()
         }
     }
     
     @Published public var totalSavings: Double {
         willSet {
-            saveToUserDefaults()
             try? dataManager.updateTotalSavings(amount: newValue)
         }
         didSet {
             handleSavingsMilestone(oldValue: oldValue)
+            saveSettings()
         }
     }
     
     @Published public var dailyLimit: Double {
         didSet { 
-            saveToUserDefaults()
             try? dataManager.createOrUpdateUser(name: username, email: (nil as String?), dailyLimit: dailyLimit)
+            saveSettings()
         }
     }
     
     @Published public var isOnboarded: Bool {
-        didSet { saveToUserDefaults() }
+        didSet { saveSettings() }
     }
     
     @Published public var selectedTab: Int {
-        didSet { saveToUserDefaults() }
+        didSet { saveSettings() }
     }
     
     // Computed properties for UI
@@ -79,15 +79,31 @@ public class AppState: ObservableObject {
     // New public initializer for previews
     public init(syncDataManager: BetFreeDataManager) {
         self.dataManager = syncDataManager
-        self.username = ""
-        self.currentStreak = 0
-        self.totalSavings = 0
-        self.dailyLimit = 0
-        self.isOnboarded = false
+        self.username = "Preview User"
+        self.currentStreak = 7
+        self.totalSavings = 1234.56
+        self.dailyLimit = 50.0
+        self.isOnboarded = true
         self.selectedTab = 0
     }
     
-    private func saveToUserDefaults() {
+    // MARK: - Transaction Methods
+    
+    public func getTodaysTransactions() -> [Transaction] {
+        dataManager.getTodaysTransactions()
+    }
+    
+    public func addTransaction(amount: Double, note: String? = nil) throws {
+        try dataManager.addTransaction(amount: amount, note: note)
+    }
+    
+    public func getTotalSpentToday() -> Double {
+        dataManager.getTotalSpentToday()
+    }
+    
+    // MARK: - Private Methods
+    
+    private func saveSettings() {
         UserDefaults.standard.set(username, forKey: "username")
         UserDefaults.standard.set(currentStreak, forKey: "currentStreak")
         UserDefaults.standard.set(totalSavings, forKey: "totalSavings")
@@ -202,14 +218,8 @@ extension UserDefaults {
 }
 
 extension AppState {
-    static func preview() -> AppState {
+    public static var preview: AppState {
         let state = AppState(syncDataManager: MockCoreDataManager.shared)
-        state.username = "Preview User"
-        state.currentStreak = 7
-        state.totalSavings = 500.0
-        state.dailyLimit = 50.0
-        state.isOnboarded = true
-        state.selectedTab = 0
         return state
     }
-} 
+}

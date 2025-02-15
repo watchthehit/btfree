@@ -1,8 +1,11 @@
-import Foundation
 import CoreData
 
-@objc(Transaction)
-public class Transaction: NSManagedObject {
+@objc(TransactionEntity)
+public class TransactionEntity: NSManagedObject, Identifiable {
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<TransactionEntity> {
+        return NSFetchRequest<TransactionEntity>(entityName: "TransactionEntity")
+    }
+
     @NSManaged public var id: UUID
     @NSManaged public var amount: Double
     @NSManaged public var date: Date
@@ -13,12 +16,5 @@ public class Transaction: NSManagedObject {
         super.awakeFromInsert()
         id = UUID()
         date = Date()
-        category = "Expense"
     }
 }
-
-extension Transaction {
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<Transaction> {
-        return NSFetchRequest<Transaction>(entityName: "Transaction")
-    }
-} 

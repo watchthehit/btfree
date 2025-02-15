@@ -68,8 +68,8 @@ public class MockCDManager: BetFreeDataManager {
         
         // Transaction Entity
         let transactionEntity = NSEntityDescription()
-        transactionEntity.name = "Transaction"
-        transactionEntity.managedObjectClassName = "BetFree.Transaction"
+        transactionEntity.name = "TransactionEntity"
+        transactionEntity.managedObjectClassName = "BetFree.TransactionEntity"
         
         let transactionIdAttribute = NSAttributeDescription()
         transactionIdAttribute.name = "id"
@@ -193,13 +193,14 @@ public class MockCDManager: BetFreeDataManager {
     }
     
     public func addTransaction(amount: Double, note: String? = nil) throws {
-        let transaction = Transaction(context: context)
+        let transaction = TransactionEntity(context: context)
         transaction.id = UUID()
         transaction.amount = amount
         transaction.date = Date()
         transaction.note = note
-        transaction.category = amount < 0 ? "Expense" : "Savings"
+        transaction.category = amount < 0 ? "expense" : "saving"
         
+        try updateTotalSavings(amount: amount)
         try context.save()
     }
     
@@ -208,16 +209,25 @@ public class MockCDManager: BetFreeDataManager {
         let startOfDay = calendar.startOfDay(for: Date())
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
         
-        let request: NSFetchRequest<Transaction> = Transaction.fetchRequest()
+        let request = NSFetchRequest<TransactionEntity>(entityName: "TransactionEntity")
         request.predicate = NSPredicate(
             format: "date >= %@ AND date < %@",
             startOfDay as NSDate,
             endOfDay as NSDate
         )
-        request.sortDescriptors = [NSSortDescriptor(keyPath: \Transaction.date, ascending: false)]
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \TransactionEntity.date, ascending: false)]
         
         do {
-            return try context.fetch(request)
+            let entities = try context.fetch(request)
+            return entities.map { entity in
+                Transaction(
+                    id: entity.id,
+                    amount: entity.amount,
+                    date: entity.date,
+                    category: entity.category,
+                    note: entity.note
+                )
+            }
         } catch {
             print("Error fetching today's transactions: \(error)")
             return []
@@ -225,7 +235,9 @@ public class MockCDManager: BetFreeDataManager {
     }
     
     public func getTotalSpentToday() -> Double {
-        getTodaysTransactions().reduce(0) { $0 + $1.amount }
+        getTodaysTransactions()
+            .filter { $0.amount < 0 }
+            .reduce(0) { $0 + abs($1.amount) }
     }
     
     public func save() throws {

@@ -19,14 +19,14 @@ public final class CoreDataManager: BetFreeDataManager {
         #endif
         
         // Create container with in-memory store
-        let container = NSPersistentContainer(name: "BetFreeModel", managedObjectModel: CoreDataModel.createModel())
+        let container = NSPersistentContainer(name: "BetFree", managedObjectModel: CoreDataModel.createModel())
         let description = NSPersistentStoreDescription()
         description.type = NSInMemoryStoreType
         container.persistentStoreDescriptions = [description]
         
         container.loadPersistentStores { description, error in
             if let error = error {
-                fatalError("Unable to load persistent stores: \(error)")
+                print("Unable to load persistent stores: \(error)")
             }
         }
         
@@ -44,7 +44,7 @@ public final class CoreDataManager: BetFreeDataManager {
     // MARK: - User Profile Methods
     
     public func getCurrentUser() -> UserProfileEntity? {
-        let request = NSFetchRequest<UserProfileEntity>(entityName: "BetFree_UserProfile")
+        let request = NSFetchRequest<UserProfileEntity>(entityName: "UserProfileEntity")
         request.fetchLimit = 1
         
         do {
@@ -60,7 +60,7 @@ public final class CoreDataManager: BetFreeDataManager {
         if let existingUser = getCurrentUser() {
             user = existingUser
         } else {
-            let entity = NSEntityDescription.entity(forEntityName: "BetFree_UserProfile", in: context)!
+            let entity = NSEntityDescription.entity(forEntityName: "UserProfileEntity", in: context)!
             user = UserProfileEntity(entity: entity, insertInto: context)
             user.id = UUID()
             user.streak = 0
@@ -101,21 +101,21 @@ public final class CoreDataManager: BetFreeDataManager {
     
     public func updateTotalSavings(amount: Double) throws {
         guard let user = getCurrentUser() else { return }
-        user.totalSavings = amount
+        user.totalSavings += amount
         try context.save()
     }
     
     // MARK: - Transaction Methods
     
     public func addTransaction(amount: Double, note: String? = nil) throws {
-        let entity = NSEntityDescription.entity(forEntityName: "Transaction", in: context)!
-        let transaction = Transaction(entity: entity, insertInto: context)
+        let transaction = TransactionEntity(context: context)
         transaction.id = UUID()
         transaction.amount = amount
         transaction.date = Date()
+        transaction.category = amount < 0 ? "expense" : "saving"
         transaction.note = note
-        transaction.category = amount < 0 ? "Expense" : "Savings"
         
+        try updateTotalSavings(amount: amount)
         try context.save()
     }
     
@@ -124,16 +124,25 @@ public final class CoreDataManager: BetFreeDataManager {
         let startOfDay = calendar.startOfDay(for: Date())
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
         
-        let request: NSFetchRequest<Transaction> = Transaction.fetchRequest()
+        let request = NSFetchRequest<TransactionEntity>(entityName: "TransactionEntity")
         request.predicate = NSPredicate(
             format: "date >= %@ AND date < %@",
             startOfDay as NSDate,
             endOfDay as NSDate
         )
-        request.sortDescriptors = [NSSortDescriptor(keyPath: \Transaction.date, ascending: false)]
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \TransactionEntity.date, ascending: false)]
         
         do {
-            return try context.fetch(request)
+            let entities = try context.fetch(request)
+            return entities.map { entity in
+                Transaction(
+                    id: entity.id,
+                    amount: entity.amount,
+                    date: entity.date,
+                    category: entity.category,
+                    note: entity.note
+                )
+            }
         } catch {
             print("Error fetching today's transactions: \(error)")
             return []
@@ -141,20 +150,36 @@ public final class CoreDataManager: BetFreeDataManager {
     }
     
     public func getTotalSpentToday() -> Double {
-        getTodaysTransactions().reduce(0) { $0 + $1.amount }
+        getTodaysTransactions()
+            .filter { $0.amount < 0 }
+            .reduce(0) { $0 + abs($1.amount) }
     }
+    
+    // MARK: - Utility Methods
     
     public func save() throws {
         try context.save()
     }
     
     public func reset() {
-        let entities = persistentContainer.managedObjectModel.entities
-        entities.compactMap { $0.name }.forEach { entityName in
-            let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: entityName)
-            let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
-            try? context.execute(deleteRequest)
+        // Delete all transactions
+        let transactionFetch = NSFetchRequest<NSFetchRequestResult>(entityName: "TransactionEntity")
+        let userFetch = NSFetchRequest<NSFetchRequestResult>(entityName: "UserProfileEntity")
+        
+        do {
+            // Delete transactions
+            if let transactions = try context.fetch(transactionFetch) as? [TransactionEntity] {
+                transactions.forEach { context.delete($0) }
+            }
+            
+            // Delete user profiles
+            if let users = try context.fetch(userFetch) as? [UserProfileEntity] {
+                users.forEach { context.delete($0) }
+            }
+            
+            try context.save()
+        } catch {
+            print("Error resetting Core Data: \(error)")
         }
-        try? context.save()
     }
 }

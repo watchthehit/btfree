@@ -115,8 +115,8 @@ struct ResourceItemView: View {
 }
 
 #Preview {
-    PreviewAppState { appState in
+    NavigationView {
         ResourcesView()
-            .environmentObject(appState)
+            .environmentObject(AppState.preview)
     }
-} 
+}

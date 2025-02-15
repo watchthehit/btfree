@@ -809,5 +809,5 @@ private struct OnboardingToolbarModifier: ViewModifier {
 
 #Preview {
     OnboardingView()
-        .environmentObject(AppState.preview())
-} 
+        .environmentObject(AppState.preview)
+}

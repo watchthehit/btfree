@@ -90,8 +90,8 @@ public struct HomeView: View {
             .background(Color(.systemGroupedBackground))
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showingAddTransaction) {
-                // TODO: Add transaction view
-                Text("Add Transaction")
+                AddTransactionView()
+                    .environment(\.managedObjectContext, context)
             }
         }
     }

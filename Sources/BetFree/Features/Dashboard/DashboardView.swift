@@ -187,7 +187,7 @@ struct TransactionListView: View {
             .offset(y: isAnimated ? 0 : 20)
             .animation(.spring(response: 0.6).delay(0.3), value: isAnimated)
             
-            let transactions = CoreDataManager.shared.getTodaysTransactions()
+            let transactions = appState.getTodaysTransactions()
             
             if transactions.isEmpty {
                 EmptyTransactionView()
@@ -302,5 +302,5 @@ struct TransactionRow: View {
 
 #Preview {
     DashboardView()
-        .environmentObject(AppState.preview())
+        .environmentObject(AppState.preview)
 } 

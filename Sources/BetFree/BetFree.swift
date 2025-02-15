@@ -4,35 +4,53 @@ import ComposableArchitecture
 public struct BetFreeRootView: View {
     @EnvironmentObject var appState: AppState
     
+    public init() {}
+    
     public var body: some View {
-        ZStack {
-            BFDesignSystem.Colors.background
-                .ignoresSafeArea()
-            
+        Group {
             if !appState.isOnboarded {
                 OnboardingView()
-                    .environmentObject(appState)
             } else {
-                MainTabView()
-                    .environmentObject(appState)
+                TabView(selection: $appState.selectedTab) {
+                    DashboardView()
+                        .tabItem {
+                            Label("Dashboard", systemImage: "chart.bar.fill")
+                        }
+                        .tag(0)
+                    
+                    ProfileView()
+                        .tabItem {
+                            Label("Profile", systemImage: "person.fill")
+                        }
+                        .tag(1)
+                }
             }
         }
     }
+}
+
+// MARK: - Preview Support
+public struct BetFreePreview: View {
+    @StateObject private var appState = AppState.preview
     
-    public init() {
-        // Initialize Core Data
-        _ = CoreDataManager.shared
-        
-        // Set navigation bar appearance
-        #if canImport(UIKit)
-        let appearance = UINavigationBarAppearance()
-        appearance.configureWithTransparentBackground()
-        appearance.backgroundColor = .clear
-        UINavigationBar.appearance().standardAppearance = appearance
-        UINavigationBar.appearance().compactAppearance = appearance
-        UINavigationBar.appearance().scrollEdgeAppearance = appearance
-        #endif
+    public var body: some View {
+        BetFreeRootView()
+            .environmentObject(appState)
     }
+}
+
+#Preview("Root View") {
+    BetFreePreview()
+}
+
+#Preview("Dashboard") {
+    DashboardView()
+        .environmentObject(AppState.preview)
+}
+
+#Preview("Profile") {
+    ProfileView()
+        .environmentObject(AppState.preview)
 }
 
 public struct AppFeature: Reducer {
@@ -81,46 +99,11 @@ struct BetFreeLibraryPreviewApp: App {
                 }
             }
             .task {
-                self.appState = AppState.preview()
+                self.appState = AppState.preview
                 isLoading = false
             }
         }
     }
-}
-
-struct PreviewAppState: View {
-    @State private var appState: AppState?
-    @State private var isLoading = true
-    let content: (AppState) -> any View
-    
-    init(@ViewBuilder content: @escaping (AppState) -> any View) {
-        self.content = content
-    }
-    
-    var body: some View {
-        Group {
-            if let appState = appState {
-                AnyView(content(appState))
-            } else if isLoading {
-                SwiftUI.ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle())
-            } else {
-                Text("Failed to initialize preview state")
-            }
-        }
-        .task {
-            self.appState = AppState.preview()
-            isLoading = false
-        }
-    }
-}
-
-#Preview("Onboarding") {
-    BetFreeRootView()
-}
-
-#Preview("Dashboard") {
-    BetFreeRootView()
 }
 
 @MainActor
@@ -130,16 +113,10 @@ public struct BetFree {
 
 @MainActor
 public var previewContent: some View {
-    PreviewAppState { appState in
-        BetFreeRootView()
-            .environmentObject(appState)
-    }
+    BetFreePreview()
 }
 
 @MainActor
-public var previewContentOnboarded: some View {
-    PreviewAppState { appState in
-        BetFreeRootView()
-            .environmentObject(appState)
-    }
-} 
+public var content: some View {
+    BetFreePreview()
+}

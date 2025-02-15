@@ -167,8 +167,6 @@ public struct NotificationSettingsView: View {
 }
 
 #Preview {
-    NavigationView {
-        NotificationSettingsView()
-            .environmentObject(AppState.preview())
-    }
+    NotificationSettingsView()
+        .environmentObject(AppState.preview)
 } 
