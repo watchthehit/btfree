@@ -91,12 +91,6 @@
 - Transaction History
 - Daily Spending Summary
 
-### Resource Center
-- Educational Content
-- Support Resources
-- Success Stories
-- Emergency Contacts
-
 ### Profile Management
 - Personal Information
 - Notification Settings

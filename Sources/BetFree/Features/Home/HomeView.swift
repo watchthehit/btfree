@@ -9,7 +9,6 @@ public struct HomeView: View {
     ) private var users: FetchedResults<UserProfileEntity>
     
     @State private var showingAddTransaction = false
-    @State private var showingHelp = false
     
     private var user: UserProfileEntity? {
         users.first
@@ -58,22 +57,19 @@ public struct HomeView: View {
                             .font(.headline)
                             .padding(.horizontal)
                         
-                        HStack(spacing: 16) {
-                            ActionCard(
-                                title: "Add Transaction",
-                                icon: "plus.circle.fill",
-                                color: .blue
-                            ) {
-                                showingAddTransaction = true
+                        // Add Transaction Button
+                        Button(action: { showingAddTransaction = true }) {
+                            HStack {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 24))
+                                Text("Add Transaction")
+                                    .font(.body)
                             }
-                            
-                            ActionCard(
-                                title: "Get Help",
-                                icon: "questionmark.circle.fill",
-                                color: .purple
-                            ) {
-                                showingHelp = true
-                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color(.systemBackground))
+                            .cornerRadius(12)
+                            .shadow(radius: 2)
                         }
                         .padding(.horizontal)
                     }
@@ -96,10 +92,6 @@ public struct HomeView: View {
             .sheet(isPresented: $showingAddTransaction) {
                 // TODO: Add transaction view
                 Text("Add Transaction")
-            }
-            .sheet(isPresented: $showingHelp) {
-                // TODO: Help view
-                Text("Help & Resources")
             }
         }
     }
