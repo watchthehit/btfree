@@ -55,23 +55,78 @@ public struct CravingView: View {
     }
     
     private var statsGrid: some View {
-        LazyVGrid(columns: [
-            GridItem(.flexible()),
-            GridItem(.flexible())
-        ], spacing: 16) {
-            statCard(
-                title: "Average Intensity",
-                value: String(format: "%.1f", manager.averageIntensity),
-                icon: "chart.line.uptrend.xyaxis",
-                color: intensityColor(manager.averageIntensity)
-            )
+        VStack(spacing: 20) {
+            LazyVGrid(columns: [
+                GridItem(.flexible()),
+                GridItem(.flexible())
+            ], spacing: 16) {
+                statCard(
+                    title: "Average Intensity",
+                    value: String(format: "%.1f", manager.averageIntensity),
+                    icon: "chart.line.uptrend.xyaxis",
+                    color: intensityColor(manager.averageIntensity)
+                )
+                
+                statCard(
+                    title: "Trend",
+                    value: trendText(manager.getCravingTrend()),
+                    icon: trendIcon(manager.getCravingTrend()),
+                    color: trendColor(manager.getCravingTrend())
+                )
+            }
             
-            statCard(
-                title: "Trend",
-                value: trendText(manager.getCravingTrend()),
-                icon: trendIcon(manager.getCravingTrend()),
-                color: trendColor(manager.getCravingTrend())
-            )
+            // Progress Insights
+            ForEach(manager.getProgressInsights(), id: \.self) { insight in
+                BFCard(style: .elevated) {
+                    HStack {
+                        Image(systemName: "lightbulb.fill")
+                            .foregroundColor(BFDesignSystem.Colors.warning)
+                        Text(insight)
+                            .font(BFDesignSystem.Typography.bodyMedium)
+                            .foregroundColor(BFDesignSystem.Colors.textPrimary)
+                    }
+                    .padding()
+                }
+                .semanticMeaning("Insight Card")
+                .semanticValue(insight)
+                .semanticHint("Progress insight based on your data")
+            }
+            
+            // Risk Level Alert
+            if let situation = CravingManager.riskySituations.first(where: { _ in 
+                Calendar.current.isDateInToday(Date())
+            }) {
+                let riskLevel = CravingManager.getRiskLevel(for: situation)
+                let safetyPlan = manager.getSafetyPlan(for: riskLevel)
+                
+                BFCard(style: .elevated) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(BFDesignSystem.Colors.error)
+                            Text("High Risk Day: \(situation)")
+                                .font(BFDesignSystem.Typography.titleMedium)
+                                .foregroundColor(BFDesignSystem.Colors.error)
+                        }
+                        
+                        Text("Your Safety Plan:")
+                            .font(BFDesignSystem.Typography.labelLarge)
+                        
+                        ForEach(safetyPlan, id: \.self) { step in
+                            HStack(alignment: .top) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(BFDesignSystem.Colors.success)
+                                Text(step)
+                                    .font(BFDesignSystem.Typography.bodyMedium)
+                            }
+                        }
+                    }
+                    .padding()
+                }
+                .semanticMeaning("Risk Alert Card")
+                .semanticValue("High risk situation: \(situation)")
+                .semanticHint("Shows your safety plan for today")
+            }
         }
     }
     
@@ -174,12 +229,28 @@ public struct CravingView: View {
                     .semanticValue("\(intensity) out of 5")
                 }
                 
-                Section("Details") {
-                    TextField("What triggered it?", text: $trigger)
-                        .semanticHint("Enter what caused the craving")
+                Section("Trigger") {
+                    Picker("What triggered it?", selection: $trigger) {
+                        Text("Select trigger").tag("")
+                        ForEach(CravingManager.commonTriggers, id: \.self) { trigger in
+                            Text(trigger).tag(trigger)
+                        }
+                    }
+                    .semanticHint("Select what caused the betting urge")
                     
-                    TextField("Where were you?", text: $location)
-                        .semanticHint("Enter your location")
+                    if trigger.isEmpty {
+                        TextField("Or enter custom trigger", text: $trigger)
+                    }
+                }
+                
+                Section("Context") {
+                    Picker("Where were you?", selection: $location) {
+                        Text("Select location").tag("")
+                        ForEach(CravingManager.commonLocations, id: \.self) { location in
+                            Text(location).tag(location)
+                        }
+                    }
+                    .semanticHint("Select where you were")
                     
                     Picker("How did you feel?", selection: $emotion) {
                         Text("Select emotion").tag("")
@@ -187,6 +258,7 @@ public struct CravingView: View {
                             Text(emotion).tag(emotion)
                         }
                     }
+                    .semanticHint("Select your emotional state")
                 }
                 
                 Section("Duration") {
@@ -209,11 +281,11 @@ public struct CravingView: View {
                     }
                     
                     TextField("Outcome", text: $outcome)
-                        .semanticHint("Enter what happened")
+                        .semanticHint("Enter what happened after using the strategy")
                 }
                 
                 Section {
-                    Button("Log Craving") {
+                    Button("Log Urge") {
                         let craving = Craving(
                             intensity: intensity,
                             trigger: trigger,
@@ -230,7 +302,7 @@ public struct CravingView: View {
                     .disabled(trigger.isEmpty)
                 }
             }
-            .navigationTitle("Log Craving")
+            .navigationTitle("Log Betting Urge")
             .navigationBarItems(trailing: Button("Cancel") {
                 showingAddSheet = false
                 BFHaptics.error()
