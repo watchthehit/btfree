@@ -66,7 +66,7 @@ public struct HomeView: View {
             VStack(alignment: .trailing) {
                 Text("Money Saved")
                     .font(BFDesignSystem.Typography.labelLarge)
-                Text("$\(Int(savingsManager.totalSavings))")
+                Text("$\(savingsManager.totalSaved)")
                     .font(BFDesignSystem.Typography.displaySmall)
                     .foregroundColor(BFDesignSystem.Colors.primary)
             }
@@ -80,7 +80,7 @@ public struct HomeView: View {
     }
     
     private var weeklyProgressValue: Double {
-        Double(appState.currentStreak.remainder(dividingBy: 7)) / 7.0
+        Double(appState.currentStreak % 7) / 7.0
     }
     
     // MARK: - Risk Alert
