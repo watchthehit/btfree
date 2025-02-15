@@ -23,6 +23,12 @@ public struct BetFreeRootView: View {
                             Label("Profile", systemImage: "person.fill")
                         }
                         .tag(1)
+                    
+                    SavingsView()
+                        .tabItem {
+                            Label("Savings", systemImage: "dollarsign.circle.fill")
+                        }
+                        .tag(2)
                 }
             }
         }
@@ -50,6 +56,11 @@ public struct BetFreePreview: View {
 
 #Preview("Profile") {
     ProfileView()
+        .environmentObject(AppState.preview)
+}
+
+#Preview("Savings") {
+    SavingsView()
         .environmentObject(AppState.preview)
 }
 

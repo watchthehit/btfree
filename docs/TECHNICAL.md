@@ -339,6 +339,52 @@ progressSection
     }
 ```
 
+### Haptic Feedback Patterns
+
+The app uses consistent haptic feedback patterns to provide clear tactile responses:
+
+1. **Success Feedback**
+   - Achievement milestones
+   - Task completion
+   - Positive actions
+   ```swift
+   BFHaptics.success()  // Positive completion
+   ```
+
+2. **Warning Feedback**
+   - Important actions
+   - State changes
+   - User attention needed
+   ```swift
+   BFHaptics.warning()  // Important action
+   ```
+
+3. **Error Feedback**
+   - Cancellations
+   - Invalid input
+   - Error states
+   ```swift
+   BFHaptics.error()  // Negative action
+   ```
+
+Example implementation in SavingsView:
+```swift
+// Milestone achieved
+BFHaptics.success()  // Celebration feedback
+
+// Important action
+Button("Add Savings") {
+    BFHaptics.warning()  // Draw attention
+    showAddSheet()
+}
+
+// Cancellation
+Button("Cancel") {
+    BFHaptics.error()  // Clear negative feedback
+    dismiss()
+}
+```
+
 ### Accessibility System
 
 The app uses a comprehensive accessibility system defined in `BFAccessibility` to ensure the app is usable by everyone.
@@ -491,7 +537,7 @@ The BetFree app uses a comprehensive design system with several key components:
 2. **Interaction**
    - Ensure large touch targets
    - Provide multiple feedback types
-   - Support keyboard navigation
+   - Support both touch and VoiceOver navigation
 
 3. **Motion**
    - Respect reduced motion
