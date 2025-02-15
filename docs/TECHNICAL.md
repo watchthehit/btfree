@@ -32,6 +32,58 @@ dependencies: [
   - Spacing
   - Corner Radius
 
+### Typography System
+
+The app uses a hierarchical typography system defined in `BFDesignSystem.Typography`:
+
+```swift
+// Display - Large headlines and hero text
+displayLarge   // 34pt bold
+displayMedium  // 28pt semibold
+displaySmall   // 24pt semibold
+
+// Title - Section headers and important text
+titleLarge    // 22pt semibold
+titleMedium   // 20pt semibold
+titleSmall    // 18pt medium
+
+// Body - Primary content text
+bodyLarge     // 17pt regular
+bodyMedium    // 15pt regular
+bodySmall     // 13pt regular
+
+// Label - Supporting text and annotations
+labelLarge    // 14pt medium
+labelMedium   // 12pt medium
+labelSmall    // 11pt medium
+```
+
+#### Legacy Support
+For backward compatibility, the following styles are maintained:
+```swift
+caption         // 13pt regular (equivalent to bodySmall)
+button         // 17pt semibold (equivalent to bodyLarge with semibold)
+body           // 15pt regular (equivalent to bodyMedium)
+display        // 34pt bold (equivalent to displayLarge)
+bodyLargeMedium // 17pt medium (equivalent to bodyLarge with medium weight)
+```
+
+#### Accessibility
+For dynamic type support, use the scaling helpers:
+```swift
+Typography.scaledDisplay(size: CGFloat, weight: .bold)
+Typography.scaledBody(size: CGFloat, weight: .regular)
+```
+
+#### Usage Example
+```swift
+Text("Header")
+    .font(BFDesignSystem.Typography.titleLarge)
+    
+Text("Body text")
+    .font(BFDesignSystem.Typography.bodyMedium)
+```
+
 ### Navigation
 - Tab-based main navigation
 - Uses SwiftUI navigation
@@ -178,6 +230,31 @@ struct FeatureView: View {
         // View implementation
     }
 }
+```
+
+## Troubleshooting
+
+### SwiftUI ProgressView Naming Conflict
+When using SwiftUI's ProgressView, you must use the explicit namespace `SwiftUI.ProgressView` due to a naming conflict with our custom ProgressView component:
+
+```swift
+// ❌ Will not compile - naming conflict with custom ProgressView
+ProgressView(value: progressValue)
+
+// ✅ Correct usage with explicit namespace
+SwiftUI.ProgressView(value: progressValue)
+```
+
+This is necessary because we have a custom `ProgressView` component in `/Sources/BetFree/Features/Progress/ProgressView.swift`.
+
+Examples of correct usage in our codebase:
+```swift
+// Basic usage
+SwiftUI.ProgressView(value: progressValue)
+
+// With styling
+SwiftUI.ProgressView()
+    .progressViewStyle(CircularProgressViewStyle())
 ```
 
 ## Testing

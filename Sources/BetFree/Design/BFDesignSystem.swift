@@ -67,16 +67,41 @@ public enum BFDesignSystem {
     }
     
     public enum Typography {
-        public static let display: Font = .system(size: 34, weight: .bold)
-        public static let titleLarge: Font = .system(size: 28, weight: .bold)
-        public static let titleMedium: Font = .system(size: 24, weight: .bold)
-        public static let titleSmall: Font = .system(size: 20, weight: .semibold)
-        public static let bodyLargeMedium: Font = .system(size: 17, weight: .medium)
-        public static let bodyMedium: Font = .system(size: 15, weight: .medium)
-        public static let bodyLarge: Font = .system(size: 17, weight: .regular)
-        public static let body: Font = .system(size: 15, weight: .regular)
-        public static let caption: Font = .system(size: 13, weight: .regular)
-        public static let button: Font = .system(size: 17, weight: .semibold)
+        // Display
+        public static let displayLarge = Font.system(size: 34, weight: .bold)
+        public static let displayMedium = Font.system(size: 28, weight: .semibold)
+        public static let displaySmall = Font.system(size: 24, weight: .semibold)
+        
+        // Title
+        public static let titleLarge = Font.system(size: 22, weight: .semibold)
+        public static let titleMedium = Font.system(size: 20, weight: .semibold)
+        public static let titleSmall = Font.system(size: 18, weight: .medium)
+        
+        // Body
+        public static let bodyLarge = Font.system(size: 17, weight: .regular)
+        public static let bodyMedium = Font.system(size: 15, weight: .regular)
+        public static let bodySmall = Font.system(size: 13, weight: .regular)
+        
+        // Label
+        public static let labelLarge = Font.system(size: 14, weight: .medium)
+        public static let labelMedium = Font.system(size: 12, weight: .medium)
+        public static let labelSmall = Font.system(size: 11, weight: .medium)
+        
+        // Legacy support (maintain compatibility with existing components)
+        public static let caption = Font.system(size: 13, weight: .regular)  // Same as bodySmall
+        public static let button = Font.system(size: 17, weight: .semibold)  // Same as bodyLarge with semibold
+        public static let body = Font.system(size: 15, weight: .regular)     // Same as bodyMedium
+        public static let display = Font.system(size: 34, weight: .bold)     // Same as displayLarge
+        public static let bodyLargeMedium = Font.system(size: 17, weight: .medium)  // Same as bodyLarge with medium weight
+        
+        // Accessibility optimized fonts
+        public static func scaledDisplay(size: CGFloat, weight: Font.Weight = .bold) -> Font {
+            Font.system(size: size, weight: weight, design: .rounded)
+        }
+        
+        public static func scaledBody(size: CGFloat, weight: Font.Weight = .regular) -> Font {
+            Font.system(size: size, weight: weight, design: .rounded)
+        }
     }
     
     public enum Layout {
@@ -185,4 +210,4 @@ extension Color {
         return nil
         #endif
     }
-} 
+}
