@@ -50,7 +50,7 @@ titleSmall    // 18pt medium
 // Body - Primary content text
 bodyLarge     // 17pt regular
 bodyMedium    // 15pt regular
-bodySmall     // 13pt regular
+bodySmall    // 13pt regular
 
 // Label - Supporting text and annotations
 labelLarge    // 14pt medium
@@ -831,6 +831,239 @@ When implementing new features, ensure:
    - [ ] Usage examples provided
    - [ ] Testing guidelines included
    - [ ] Best practices noted
+
+## Code Examples
+
+### Craving Management
+
+#### 1. Tracking a New Craving
+
+```swift
+// Create a new craving instance
+let craving = Craving(
+    intensity: 4,
+    trigger: "Sports advertisement",
+    location: "Living room",
+    emotion: "Excited",
+    duration: 600, // 10 minutes
+    copingStrategy: "Deep breathing",
+    outcome: "Used breathing technique and urge passed"
+)
+
+// Add it to the manager
+@StateObject private var manager = CravingManager()
+manager.add(craving)
+```
+
+#### 2. Custom Bar Chart Implementation
+
+```swift
+struct TimeBarChart: View {
+    let data: [(hour: Int, count: Int)]
+    
+    private var maxCount: Int {
+        data.map(\.count).max() ?? 1
+    }
+    
+    var body: some View {
+        GeometryReader { geometry in
+            HStack(alignment: .bottom, spacing: 4) {
+                ForEach(data, id: \.hour) { hourData in
+                    VStack {
+                        let height = getBarHeight(
+                            count: hourData.count,
+                            maxCount: maxCount,
+                            availableHeight: geometry.size.height - 40
+                        )
+                        
+                        Rectangle()
+                            .fill(BFDesignSystem.Colors.primary)
+                            .frame(height: height)
+                        
+                        // Show hour label every 6 hours
+                        if hourData.hour % 6 == 0 {
+                            Text("\(hourData.hour)")
+                                .font(BFDesignSystem.Typography.labelSmall)
+                                .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                        }
+                    }
+                    .frame(width: (geometry.size.width - 100) / 24)
+                }
+            }
+            .padding(.horizontal)
+        }
+    }
+    
+    private func getBarHeight(count: Int, maxCount: Int, availableHeight: CGFloat) -> CGFloat {
+        guard maxCount > 0 else { return 0 }
+        return (CGFloat(count) / CGFloat(maxCount)) * availableHeight
+    }
+}
+```
+
+#### 3. Accessible Detail Row
+
+```swift
+struct DetailRow: View {
+    let label: String
+    let value: String
+    
+    var body: some View {
+        HStack {
+            Text(label)
+                .foregroundColor(BFDesignSystem.Colors.textSecondary)
+            Spacer()
+            Text(value)
+                .foregroundColor(BFDesignSystem.Colors.textPrimary)
+        }
+        .semanticMeaning("\(label) Row")
+        .semanticValue(value)
+        .semanticHint("Shows \(label.lowercased())")
+    }
+}
+
+// Usage example
+DetailRow(label: "Intensity", value: "4/5")
+```
+
+### Savings Tracking
+
+#### 1. Adding a New Savings Entry
+
+```swift
+// Track a new savings amount
+let amount = 50.0
+let manager = SavingsManager()
+
+manager.add(amount) { result in
+    switch result {
+    case .success(let milestone):
+        if let milestone = milestone {
+            // Celebrate milestone
+            BFHaptics.success()
+        }
+    case .failure(let error):
+        // Handle error
+        BFHaptics.error()
+    }
+}
+```
+
+#### 2. Accessible Stats Card
+
+```swift
+struct StatsCard: View {
+    let title: String
+    let value: String
+    let icon: String
+    let color: Color
+    
+    var body: some View {
+        BFCard(style: .default) {
+            VStack(alignment: .center, spacing: 8) {
+                HStack {
+                    Image(systemName: icon)
+                        .foregroundColor(color)
+                    Text(title)
+                        .font(BFDesignSystem.Typography.labelMedium)
+                }
+                
+                Text(value)
+                    .font(BFDesignSystem.Typography.titleLarge)
+                    .foregroundColor(color)
+            }
+            .padding()
+            .frame(maxWidth: .infinity)
+        }
+        .semanticMeaning("\(title) Card")
+        .semanticValue(value)
+        .semanticHint("Shows \(title.lowercased())")
+    }
+}
+
+// Usage example
+StatsCard(
+    title: "Total Savings",
+    value: "$1,250",
+    icon: "dollarsign.circle.fill",
+    color: BFDesignSystem.Colors.success
+)
+```
+
+#### 3. Haptic Feedback Integration
+
+```swift
+enum BFHaptics {
+    static func success() {
+        UINotificationFeedbackGenerator()
+            .notificationOccurred(.success)
+    }
+    
+    static func warning() {
+        UINotificationFeedbackGenerator()
+            .notificationOccurred(.warning)
+    }
+    
+    static func error() {
+        UINotificationFeedbackGenerator()
+            .notificationOccurred(.error)
+    }
+}
+
+// Usage examples
+// 1. Milestone achieved
+BFHaptics.success()
+
+// 2. High intensity craving
+BFHaptics.warning()
+
+// 3. Operation cancelled
+BFHaptics.error()
+```
+
+### Best Practices
+
+1. **Accessibility First**
+   ```swift
+   // ❌ Don't
+   Button("Add") { ... }
+   
+   // ✅ Do
+   Button {
+       // action
+   } label: {
+       Image(systemName: "plus")
+   }
+   .semanticMeaning("Add Button")
+   .semanticHint("Double tap to add new entry")
+   ```
+
+2. **Color Usage**
+   ```swift
+   // ❌ Don't
+   Text("High Risk")
+       .foregroundColor(.red)
+   
+   // ✅ Do
+   Text("High Risk")
+       .foregroundColor(BFDesignSystem.Colors.error)
+   ```
+
+3. **Haptic Feedback**
+   ```swift
+   // ❌ Don't
+   @State private var showingSheet = false
+   Button("Add") {
+       showingSheet = true
+   }
+   
+   // ✅ Do
+   @State private var showingSheet = false
+   Button("Add") {
+       BFHaptics.warning()
+       showingSheet = true
+   }
+   ```
 
 ## Features
 
