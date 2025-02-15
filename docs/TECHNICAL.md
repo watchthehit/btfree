@@ -373,12 +373,21 @@ if BFAccessibility.Contrast.isIncreased {
     // Use higher contrast colors
 }
 
+// Apply high contrast modifier to any view
+someView.respectIncreaseContrast()  // Automatically adjusts contrast
+
 // Get contrast-appropriate color
 BFAccessibility.Contrast.color(.blue, increased: .blue.opacity(0.8))
 
 // Get contrast-adjusted opacity
 BFAccessibility.Contrast.opacity(0.7)
 ```
+
+The high contrast mode:
+- Forces dark mode for better contrast
+- Adjusts brightness levels
+- Maintains original appearance when disabled
+- Respects system contrast settings
 
 #### VoiceOver Support
 ```swift
@@ -629,3 +638,148 @@ SwiftUI.ProgressView()
 - In-memory store prevents persistence between test runs
 - Reset store using `reset()` method
 - Inject mock manager through dependency injection
+
+### Progress Indicators
+When using progress indicators, always use the SwiftUI namespace to avoid conflicts:
+
+```swift
+// ❌ Don't use:
+ProgressView(value: progressValue)
+
+// ✅ Do use:
+SwiftUI.ProgressView(value: progressValue)
+```
+
+Example with accessibility:
+```swift
+SwiftUI.ProgressView(value: progress)
+    .tint(progress >= 1.0 ? BFDesignSystem.Colors.error : BFDesignSystem.Colors.primary)
+    .semanticValue("\(Int(progress * 100))% complete")
+    .semanticHint("Shows your daily spending progress")
+    .respectIncreaseContrast()
+```
+
+### Component Integration
+
+#### 1. Cards
+Cards should implement all accessibility features:
+
+```swift
+BFCard(style: .default) {
+    content
+}
+.semanticMeaning("Statistics Card")
+.semanticValue("$100 saved this month")
+.semanticHint("Double tap to view details")
+.respectReducedMotion()
+.respectIncreaseContrast()
+```
+
+#### 2. Progress Sections
+Progress sections should be fully accessible:
+
+```swift
+VStack {
+    Text("Daily Progress")
+        .font(BFDesignSystem.Typography.titleMedium)
+    
+    SwiftUI.ProgressView(value: progress)
+        .tint(getProgressColor(progress))
+}
+.semanticGroup("Daily Progress Section")
+.semanticValue("\(Int(progress * 100))% of daily limit")
+.semanticHint("Shows your spending progress for today")
+.respectReducedMotion()
+.respectIncreaseContrast()
+```
+
+#### 3. Interactive Elements
+All interactive elements should include:
+- Clear semantic meaning
+- Appropriate haptic feedback
+- Motion respect
+- High contrast support
+
+```swift
+Button(action: handleTap) {
+    Text("Add Transaction")
+}
+.withHaptics(style: .medium)
+.semanticMeaning("Add Transaction Button")
+.semanticHint("Double tap to add a new transaction")
+.respectReducedMotion()
+.respectIncreaseContrast()
+```
+
+### Testing Guidelines
+
+#### 1. Accessibility Testing
+Test your components with:
+- VoiceOver enabled
+- Increased contrast mode
+- Reduced motion enabled
+- Different text sizes
+- Different color schemes
+
+#### 2. Haptic Testing
+Verify haptic feedback:
+- Success/error states
+- Progress updates
+- Interactive elements
+- Custom patterns
+
+#### 3. Motion Testing
+Check animations with:
+- Default settings
+- Reduced motion enabled
+- Different device speeds
+- Different animation states
+
+### Best Practices
+
+1. **Typography**
+   - Always use `BFDesignSystem.Typography` for consistent scaling
+   - Test with different dynamic type sizes
+   - Ensure sufficient contrast in all modes
+
+2. **Interaction**
+   - Provide haptic feedback for important actions
+   - Include clear semantic descriptions
+   - Support both touch and VoiceOver navigation
+
+3. **Progress**
+   - Always use `SwiftUI.ProgressView`
+   - Include clear progress values
+   - Provide appropriate haptic feedback
+
+4. **Contrast**
+   - Use `respectIncreaseContrast()` on all views
+   - Test with system contrast settings
+   - Ensure readability in all modes
+
+5. **Motion**
+   - Use `respectReducedMotion()` for animations
+   - Provide static alternatives
+   - Keep animations subtle and purposeful
+
+### Implementation Checklist
+
+When implementing new features, ensure:
+
+1. **Accessibility**
+   - [ ] VoiceOver support added
+   - [ ] Dynamic type implemented
+   - [ ] High contrast support added
+   - [ ] Reduced motion respected
+
+2. **Feedback**
+   - [ ] Appropriate haptics used
+   - [ ] Visual feedback provided
+   - [ ] Clear error states
+   - [ ] Progress indicators
+
+3. **Documentation**
+   - [ ] Accessibility features documented
+   - [ ] Usage examples provided
+   - [ ] Testing guidelines included
+   - [ ] Best practices noted
