@@ -4,6 +4,11 @@ public struct HomeView: View {
     @EnvironmentObject private var appState: AppState
     @State private var showingAddTransaction = false
     @State private var showingTip = true
+    @State private var previousStreak: Int = 0
+    @State private var previousSavings: Double = 0
+    @State private var dailySpentAmount: Double = 0
+    
+    private let hapticEngine = BFHapticEngine()
     
     public init() {}
     
@@ -16,10 +21,18 @@ public struct HomeView: View {
                     
                     // Stats Overview
                     statsSection
+                        .withSuccessHaptics(when: appState.currentStreak > previousStreak)
                     
                     // Daily Progress
                     if appState.dailyLimit > 0 {
-                        dailyProgressSection
+                        progressSection
+                            .onChange(of: dailySpentAmount) { newAmount in
+                                if newAmount >= appState.dailyLimit {
+                                    BFHaptics.error()
+                                } else if newAmount >= appState.dailyLimit * 0.8 {
+                                    BFHaptics.warning()
+                                }
+                            }
                     }
                     
                     // Quick Actions
@@ -37,7 +50,22 @@ public struct HomeView: View {
             .sheet(isPresented: $showingAddTransaction) {
                 AddTransactionView()
             }
+            .onChange(of: appState.totalSavings) { newSavings in
+                if newSavings >= previousSavings + 100 {  // Achievement for every $100 saved
+                    hapticEngine.playAchievementPattern()
+                    previousSavings = newSavings
+                }
+            }
+            .onAppear {
+                previousStreak = appState.currentStreak
+                previousSavings = appState.totalSavings
+                updateDailySpent()
+            }
         }
+    }
+    
+    private func updateDailySpent() {
+        dailySpentAmount = appState.getTotalSpentToday()
     }
     
     private var welcomeSection: some View {
@@ -56,85 +84,53 @@ public struct HomeView: View {
     
     private var statsSection: some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-            ForEach(Array(zip([BFStatCard(
-                value: "\(appState.streak)",
+            BFStatCard(
+                value: "\(appState.currentStreak)",
                 label: "Day Streak",
                 icon: "flame.fill",
                 gradient: .orangeGradient
-            ), BFStatCard(
-                value: "$\(Int(appState.savings))",
+            )
+            
+            BFStatCard(
+                value: "$\(Int(appState.totalSavings))",
                 label: "Total Saved",
                 icon: "dollarsign.circle.fill",
                 gradient: .greenGradient
-            )].indices, [BFStatCard(
-                value: "\(appState.streak)",
-                label: "Day Streak",
-                icon: "flame.fill",
-                gradient: .orangeGradient
-            ), BFStatCard(
-                value: "$\(Int(appState.savings))",
-                label: "Total Saved",
-                icon: "dollarsign.circle.fill",
-                gradient: .greenGradient
-            )])), id: \.0) { index, stat in
-                stat
-                .slideUpOnAppear()
-            }
+            )
         }
         .padding(.horizontal)
     }
     
-    private var dailyProgressSection: some View {
-        let spentToday = appState.getTotalSpentToday()
-        let dailyLimit = appState.dailyLimit
-        let progress = dailyLimit > 0 ? spentToday / dailyLimit : 0
+    private var progressSection: some View {
+        let progress = appState.dailyLimit > 0 ? dailySpentAmount / appState.dailyLimit : 0
         
-        return VStack(alignment: .leading, spacing: 12) {
+        return VStack(alignment: .leading, spacing: 10) {
             Text("Daily Progress")
-                .font(BFDesignSystem.Typography.titleMedium)
+                .font(.headline)
                 .foregroundColor(.primary)
-                .padding(.horizontal)
             
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("Daily Limit:")
-                        .foregroundColor(.secondary)
-                    Text("$\(Int(dailyLimit))")
-                        .fontWeight(.semibold)
-                    Spacer()
-                    Text("Spent: $\(Int(spentToday))")
-                        .foregroundColor(.secondary)
-                }
+            HStack {
+                Text("$\(Int(dailySpentAmount))")
+                    .font(.body)
+                    .foregroundColor(.primary)
                 
-                let progressValue: Double = min(progress, 1.0)
-                SwiftUI.ProgressView(value: progressValue)
+                Text("of")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
                 
-                HStack {
-                    Text("$\(Int(spentToday))")
-                        .font(BFDesignSystem.Typography.displayLarge)
-                        .foregroundColor(.primary)
-                    Text("/ $\(Int(dailyLimit))")
-                        .font(BFDesignSystem.Typography.titleSmall)
-                        .foregroundColor(.secondary)
-                }
+                Text("$\(Int(appState.dailyLimit))")
+                    .font(.body)
+                    .foregroundColor(.primary)
             }
-            .padding()
-            .background(Color(.systemBackground))
-            .cornerRadius(12)
-            .shadow(radius: 2)
-            .padding(.horizontal)
+            
+            SwiftUI.ProgressView(value: progress)
+                .tint(progress >= 1.0 ? .red : .blue)
         }
-    }
-    
-    private func progressColor(_ progress: Double) -> Color {
-        switch progress {
-        case ..<0.5:
-            return .green
-        case 0.5..<0.8:
-            return .orange
-        default:
-            return .red
-        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(radius: 2)
+        .padding(.horizontal)
     }
     
     private var quickActionsSection: some View {
