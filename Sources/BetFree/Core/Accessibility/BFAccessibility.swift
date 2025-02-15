@@ -100,6 +100,21 @@ public extension View {
     
     /// Adjusts the view's contrast based on user settings
     func respectIncreaseContrast() -> some View {
-        self.environment(\.colorSchemeContrast, BFAccessibility.Contrast.isIncreased ? .increased : .standard)
+        self.modifier(HighContrastModifier())
+    }
+}
+
+// MARK: - High Contrast Modifier
+private struct HighContrastModifier: ViewModifier {
+    @Environment(\.colorScheme) var colorScheme
+    
+    func body(content: Content) -> some View {
+        if BFAccessibility.Contrast.isIncreased {
+            content
+                .colorScheme(.dark)  // Force dark mode for better contrast
+                .brightness(-0.1)     // Slightly darken to increase contrast
+        } else {
+            content
+        }
     }
 }
