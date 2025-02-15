@@ -5,7 +5,7 @@ A comprehensive iOS application focused on gambling addiction recovery through p
 ## Quick Start
 
 1. Clone the repository
-2. Open `BetFreeApp/BetFreeApp.xcodeproj` in Xcode
+2. Open `BetFree.xcworkspace` in Xcode
 3. Wait for package dependencies to resolve
 4. Build and run (⌘ + R)
 
@@ -23,6 +23,8 @@ A comprehensive iOS application focused on gambling addiction recovery through p
 - Progress tracking dashboard
 - Professional resources
 - Profile management
+- Transaction tracking
+- Achievement system
 
 ### Onboarding Experience
 - Multi-step feature introduction
@@ -37,10 +39,31 @@ A comprehensive iOS application focused on gambling addiction recovery through p
 - Daily goals tracking
 - Quick action grid
 - Motivational messages
+- Transaction history
+- Achievement tracking
 
 ## Development
 
 See [Technical Documentation](docs/TECHNICAL.md) for detailed development information.
+
+### Core Data Model
+The app uses Core Data for persistent storage with two main entities:
+
+#### UserProfile Entity
+- `id`: UUID (required)
+- `name`: String (required)
+- `email`: String (optional)
+- `streak`: Int32 (required)
+- `totalSavings`: Double (required)
+- `dailyLimit`: Double (required)
+- `lastCheckIn`: Date (optional)
+
+#### Transaction Entity
+- `id`: UUID (required)
+- `amount`: Double (required)
+- `date`: Date (required)
+- `note`: String (optional)
+- `category`: String (optional)
 
 ### Testing Onboarding
 To force the onboarding flow for testing:
@@ -50,21 +73,31 @@ UserDefaults.standard.set(false, forKey: "isOnboarded")
 
 ## Current Status
 
-✅ Working Features:
+ Working Features:
 - Project structure
 - Package dependencies
 - Enhanced onboarding flow
 - Dashboard UI
 - Design system
+- Core Data integration
+- Transaction tracking
+- Achievement system
 
-🚧 In Progress:
+ In Progress:
 - Subscription integration
 - Resource content
 - Profile features
+- Analytics integration
 
 ## Version History
 
-### v0.1.3 (Current)
+### v0.1.4 (Current)
+- Fixed Core Data entity initialization
+- Added transaction tracking
+- Implemented achievement system
+- Improved data persistence
+
+### v0.1.3
 - Enhanced onboarding with feature showcase
 - Added free trial and subscription flow
 - Improved dashboard UI/UX
@@ -81,4 +114,4 @@ UserDefaults.standard.set(false, forKey: "isOnboarded")
 ### v0.1.0
 - Initial project setup
 - Basic navigation structure
-- Design system implementation 
+- Design system implementation

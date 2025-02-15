@@ -6,23 +6,47 @@
 
 #### Streak System
 ```swift
-// Track daily streaks
-@Published var currentStreak: Int
+// Core Data model
+@NSManaged public var streak: Int32
+@NSManaged public var lastCheckIn: Date?
 ```
 - Daily check-in system
 - Streak maintenance
 - Milestone celebrations
 - Progress visualization
+- Persistent storage with Core Data
 
 #### Savings Calculator
 ```swift
-// Track total savings
-@Published var totalSavings: Double
+// Core Data model
+@NSManaged public var totalSavings: Double
+@NSManaged public var dailyLimit: Double
 ```
 - Daily limit tracking
 - Savings visualization
 - Goal progress
 - Historical data
+- Persistent storage
+
+### Transaction Tracking
+
+#### Transaction Model
+```swift
+// Core Data entity
+@NSManaged public var id: UUID
+@NSManaged public var amount: Double
+@NSManaged public var date: Date
+@NSManaged public var note: String?
+@NSManaged public var category: String?
+```
+
+#### Features
+- Add new transactions
+- View transaction history
+- Daily spending summary
+- Category-based tracking
+- Notes and metadata
+- Persistent storage
 
 ### Achievement System
 
@@ -50,6 +74,11 @@
 ### Onboarding Flow
 1. Welcome Screen
 2. Personal Info Collection
+   ```swift
+   // Core Data model
+   @NSManaged public var name: String
+   @NSManaged public var email: String?
+   ```
 3. Goal Setting
 4. Daily Limit Setup
 5. Subscription Options
@@ -59,6 +88,8 @@
 - Total Savings
 - Quick Actions
 - Recent Achievements
+- Transaction History
+- Daily Spending Summary
 
 ### Resource Center
 - Educational Content
@@ -71,6 +102,45 @@
 - Notification Settings
 - Privacy Controls
 - Data Management
+- Transaction History
+- Achievement Progress
+
+## Data Management
+
+### Core Data Integration
+- Persistent storage for all user data
+- Efficient querying and filtering
+- Data consistency
+- Background processing
+- Error handling
+
+### Transaction Management
+```swift
+// Add new transaction
+try CoreDataManager.shared.addTransaction(
+    amount: 50.0,
+    note: "Weekly savings"
+)
+
+// Get today's transactions
+let transactions = CoreDataManager.shared.getTodaysTransactions()
+
+// Calculate total spent
+let total = CoreDataManager.shared.getTotalSpentToday()
+```
+
+### Profile Management
+```swift
+// Create or update user
+try CoreDataManager.shared.createOrUpdateUser(
+    name: "John",
+    email: "john@example.com",
+    dailyLimit: 100.0
+)
+
+// Get current user
+let user = CoreDataManager.shared.getCurrentUser()
+```
 
 ## Monetization
 
@@ -92,12 +162,15 @@
 - Priority Support
 - Custom Goals
 - Extended Resources
+- Detailed Transaction Reports
+- Achievement Tracking
 
 ### Trial System
 - 7-day free trial
 - Full feature access
 - No commitment
 - Easy cancellation
+- Data persistence after subscription
 
 ## Implementation Details
 
@@ -114,11 +187,9 @@ public class AppState: ObservableObject {
 
 ### Data Persistence
 ```swift
-// UserDefaults
-private func saveToUserDefaults() {
-    UserDefaults.standard.set(username, forKey: "username")
-    UserDefaults.standard.set(currentStreak, forKey: "currentStreak")
-    UserDefaults.standard.set(totalSavings, forKey: "totalSavings")
+// Core Data
+private func saveToCoreData() {
+    // Implementation
 }
 ```
 
@@ -197,4 +268,4 @@ struct FeatureFlags {
    - Video content
    - Expert advice
    - Guided exercises
-   - Personal coaching 
+   - Personal coaching

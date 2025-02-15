@@ -2,6 +2,51 @@
 
 ## Common Issues and Solutions
 
+### Core Data Issues
+
+#### 1. Entity Not Found
+**Issue**: "NSEntityDescription could not locate an NSEntityDescription for entity name 'UserProfile'"
+
+**Solution**:
+```swift
+// ❌ Wrong Entity Name
+let request: NSFetchRequest<UserProfileEntity> = UserProfileEntity.fetchRequest()
+request.entityName = "UserProfile"  // Wrong name
+
+// ✅ Correct Entity Name
+let request = NSFetchRequest<UserProfileEntity>(entityName: "BetFree_UserProfile")
+```
+
+#### 2. Invalid NSManagedObject
+**Issue**: "An NSManagedObject of class 'UserProfileEntity' must have a valid NSEntityDescription."
+
+**Solution**:
+```swift
+// ❌ Wrong Initialization
+let user = UserProfileEntity(context: context)  // Missing entity description
+
+// ✅ Correct Initialization
+let entity = NSEntityDescription.entity(forEntityName: "BetFree_UserProfile", in: context)!
+let user = UserProfileEntity(entity: entity, insertInto: context)
+```
+
+#### 3. Core Data Concurrency
+**Issue**: CoreData violations when accessing context from background threads.
+
+**Solution**:
+```swift
+// ❌ Wrong Implementation
+DispatchQueue.global().async {
+    let user = CoreDataManager.shared.getCurrentUser()  // Violation!
+}
+
+// ✅ Correct Implementation
+@MainActor
+func fetchUser() async {
+    let user = CoreDataManager.shared.getCurrentUser()
+}
+```
+
 ### UI Issues
 
 #### 1. Paywall Layout Problems
@@ -44,22 +89,6 @@ ZStack {
     startPoint: .topLeading,
     endPoint: .bottomTrailing
 ))
-```
-
-#### 3. Price Display Issues
-**Issue**: Decimal points in prices appear misaligned or broken.
-
-**Solution**:
-```swift
-// ❌ Wrong
-HStack {
-    Text("$79")
-    Text(".99").baselineOffset(-4)
-}
-
-// ✅ Correct
-Text("$79.99")
-    .font(BFDesignSystem.Typography.titleLarge)
 ```
 
 ### iOS Compatibility

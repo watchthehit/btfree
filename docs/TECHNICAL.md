@@ -40,13 +40,45 @@ dependencies: [
 ### State Management
 - Uses The Composable Architecture (TCA)
 - Global app state managed by `AppState` class
-- Persistent storage through UserDefaults
+- Core Data for persistent storage
+- UserDefaults for app preferences
+
+### Core Data Model
+Located in `Sources/BetFree/Core/Data/`
+
+#### Entities
+1. UserProfile (`BetFree_UserProfile`)
+   - Required Fields:
+     - `id`: UUID
+     - `name`: String
+     - `streak`: Int32
+     - `totalSavings`: Double
+     - `dailyLimit`: Double
+   - Optional Fields:
+     - `email`: String
+     - `lastCheckIn`: Date
+
+2. Transaction
+   - Required Fields:
+     - `id`: UUID
+     - `amount`: Double
+     - `date`: Date
+   - Optional Fields:
+     - `note`: String
+     - `category`: String
+
+#### Core Data Managers
+- `CoreDataManager`: Main persistence manager
+- `MockCDManager`: In-memory store for testing
+- Both conform to `BetFreeDataManager` protocol
 
 ### Features
 - Onboarding
 - Dashboard
 - Resources
 - Profile
+- Transactions
+- Achievements
 
 ## Building the Project
 
@@ -56,7 +88,7 @@ dependencies: [
 3. Swift 5.9+
 
 ### Setup Steps
-1. Open `BetFreeApp/BetFreeApp.xcodeproj`
+1. Open `BetFree.xcworkspace`
 2. Wait for package resolution
 3. Build and run
 
@@ -64,6 +96,7 @@ dependencies: [
 - Package uses local dependencies
 - Resources are processed during build
 - Requires macOS 13+ for development due to TCA requirements
+- Core Data model is created programmatically
 
 ## File Structure
 ```
@@ -75,6 +108,11 @@ project/
 ├── Sources/
 │   └── BetFree/
 │       ├── Core/
+│       │   ├── Data/
+│       │   │   ├── CoreDataManager.swift
+│       │   │   ├── MockCDManager.swift
+│       │   │   └── Models/
+│       │   │       └── CoreDataModel.swift
 │       │   ├── Design/
 │       │   │   └── BFDesignSystem.swift
 │       │   └── State/
@@ -82,7 +120,9 @@ project/
 │       └── Features/
 │           ├── Dashboard/
 │           ├── Resources/
-│           └── Profile/
+│           ├── Profile/
+│           ├── Transactions/
+│           └── Achievements/
 ├── docs/
 ├── Package.swift
 └── README.md
@@ -100,337 +140,48 @@ let package = Package(
         .iOS(.v16),
         .macOS(.v13)
     ],
-    products: [
-        .library(
-            name: "BetFree",
-            targets: ["BetFree"])
-    ],
-    dependencies: [
-        .package(url: "https://github.com/pointfreeco/swift-composable-architecture", exact: "1.7.0")
-    ],
-    targets: [
-        .target(
-            name: "BetFree",
-            dependencies: [
-                .product(name: "ComposableArchitecture", package: "swift-composable-architecture")
-            ],
-            path: "Sources/BetFree",
-            resources: [
-                .process("Resources")
-            ])
-    ]
+    // ... rest of configuration
 )
 ```
 
-## Architecture Overview
-
-### Design System
-The application uses a unified design system (`BFDesignSystem`) that provides:
-- Color tokens
-- Typography scale
-- Spacing system
-- Corner radius definitions
-- Shadow styles
-- Animation presets
-- Layout constants
-- Common view modifiers
-
-### Core Components
-
-#### State Management
-- Uses The Composable Architecture (TCA)
-- Features are defined as reducers
-- State is immutable and predictable
-- Actions define all possible state mutations
-- Effects handle side effects
-
-#### Navigation
-- Tab-based main navigation
-- Coordinator pattern for complex flows
-- Deep linking support
-- State-driven navigation
-
-#### Data Layer
-- UserDefaults for simple persistence
-- Secure storage for sensitive data
-- Offline-first architecture
-- Data synchronization
-
-### Feature Modules
-
-#### Onboarding
-- Multi-step flow with progress tracking
-- Feature introduction:
-  1. Welcome & Overview
-  2. Progress Tracking
-  3. 24/7 Support
-  4. Personalization
-- Profile setup:
-  - Username collection
-  - Daily limit setting
-- Paywall integration:
-  - 7-day free trial
-  - Monthly subscription
-  - Feature highlights
-  - Purchase restoration
-
-#### Dashboard
-Core features focused on personal progress:
-- Progress visualization
-  - Streak tracking (30-day milestone circle)
-  - Financial savings display
-- Daily Goals
-  - Check-in system
-  - Spending limit tracking
-- Quick Actions
-  - Progress logging
-  - Breathing exercises
-  - Goal setting
-  - Statistics view
-- Motivational System
-  - Dynamic messages based on progress
-  - Milestone celebrations
-  - Visual feedback
-
-#### Resources
-- Support materials
-- Emergency contacts
-- Educational content
-- Success stories
-
-#### Profile
-- User settings
-- Privacy controls
-- Data management
-- Support access
-
-### Best Practices
-
-#### Accessibility
-- VoiceOver support
-- Dynamic Type
-- Color contrast
-- Semantic structure
-
-#### Performance
-- Lazy loading
-- Memory management
-- Background operations
-- Caching strategy
-
-#### Security
-- Data encryption
-- Secure storage
-- Privacy protection
-- Authentication
-
-#### Testing
-- Unit tests
-- Integration tests
-- UI tests
-- Performance tests
-
 ## Implementation Guidelines
+
+### Core Data Usage
+```swift
+// Fetching current user
+let user = CoreDataManager.shared.getCurrentUser()
+
+// Creating/updating user
+try CoreDataManager.shared.createOrUpdateUser(
+    name: "John Doe",
+    email: "john@example.com",
+    dailyLimit: 100.0
+)
+
+// Adding transaction
+try CoreDataManager.shared.addTransaction(
+    amount: 50.0,
+    note: "Weekly savings"
+)
+
+// Getting today's transactions
+let transactions = CoreDataManager.shared.getTodaysTransactions()
+```
 
 ### View Implementation
 ```swift
 struct FeatureView: View {
-    let store: StoreOf<FeatureReducer>
+    @Environment(\.managedObjectContext) private var context
+    @StateObject private var viewModel: FeatureViewModel
     
     var body: some View {
-        WithViewStore(store, observe: { $0 }) { viewStore in
-            // View implementation
-        }
+        // View implementation
     }
 }
 ```
 
-### Reducer Implementation
-```swift
-struct FeatureReducer: Reducer {
-    struct State: Equatable {
-        // State properties
-    }
-    
-    enum Action {
-        // Actions
-    }
-    
-    var body: some ReducerOf<Self> {
-        Reduce { state, action in
-            // State mutations and effects
-        }
-    }
-}
-```
-
-### Design System Usage
-```swift
-Text("Title")
-    .font(BFDesignSystem.Typography.title)
-    .foregroundColor(BFDesignSystem.Colors.textPrimary)
-    .padding(BFDesignSystem.Spacing.md)
-```
-
-## Deployment
-
-### Requirements
-- Xcode 14.0+
-- Swift 5.9+
-- macOS 11.0+ / iOS 15.0+
-
-### Dependencies
-- ComposableArchitecture: 1.0.0+
-- Firebase iOS SDK: 10.0.0+
-- Lottie iOS: 4.0.0+
-- Kingfisher: 7.0.0+
-
-### Build Configuration
-- Debug configuration
-- Release configuration
-- TestFlight distribution
-- App Store distribution
-
-## Maintenance
-
-### Version Control
-- Feature branching
-- Pull request workflow
-- Code review process
-- Release tagging
-
-### Quality Assurance
-- Automated testing
-- Code coverage
-- Performance monitoring
-- Crash reporting
-
-### Documentation
-- Code documentation
-- API documentation
-- User guides
-- Release notes
-
-## Error Handling
-
-### Error Types
-```swift
-enum AppError: Error {
-    case networkError(Error)
-    case dataError(String)
-    case authenticationError
-    case validationError([String])
-}
-```
-
-### Error Presentation
-```swift
-struct ErrorView: View {
-    let error: AppError
-    let retry: () -> Void
-    
-    var body: some View {
-        VStack {
-            // Error presentation
-        }
-    }
-}
-```
-
-## Security
-
-### Data Protection
-- Encryption at rest
-- Secure networking
-- Authentication
-- Authorization
-
-### Privacy
-- Data minimization
-- User consent
-- Data deletion
-- Privacy policy
-
-## Performance
-
-### Optimization Techniques
-- View optimization
-- Memory management
-- Network caching
-- Background processing
-
-### Monitoring
-- Performance metrics
-- Usage analytics
-- Error tracking
-- User feedback
-
-## Support
-
-### Resources
-- Developer documentation
-- User documentation
-- Support channels
-- Feedback system
-
-### State Management
-```swift
-// Force onboarding for testing
-UserDefaults.standard.set(false, forKey: "isOnboarded")
-
-// Check onboarding status
-if !appState.isOnboarded {
-    OnboardingView()
-} else {
-    MainTabView()
-}
-```
-
-### UI Components
-
-#### Progress Tracking
-- Circular progress indicators
-- Progress bars for onboarding
-- Achievement badges (planned)
-
-#### Navigation
-- Tab-based main navigation
-- Linear onboarding flow
-- Modal paywall presentation
-
-#### Dashboard
-```swift
-// Progress Circle
-Circle()
-    .trim(from: 0, to: min(CGFloat(streak) / 30.0, 1.0))
-    .stroke(BFDesignSystem.Colors.primary, style: StrokeStyle(lineWidth: 8, lineCap: .round))
-
-// Goal Card
-VStack {
-    Image(systemName: icon)
-    Text(title)
-    Text(status)
-}
-.background(BFDesignSystem.Colors.cardBackground)
-
-// Quick Action Button
-VStack {
-    Image(systemName: systemImage)
-    Text(title)
-}
-.background(BFDesignSystem.Colors.cardBackground)
-.shadow(radius: 2)
-```
-
-## Components
-
-### PaywallView
-The PaywallView is a critical component for user monetization. See detailed documentation in [PAYWALL.md](PAYWALL.md).
-
-Key features:
-- Subscription plan presentation
-- Feature highlighting
-- Visual hierarchy
-- Responsive design
-
-For implementation details and troubleshooting, refer to the dedicated paywall documentation. 
+## Testing
+- Use `MockCDManager` for Core Data testing
+- In-memory store prevents persistence between test runs
+- Reset store using `reset()` method
+- Inject mock manager through dependency injection
