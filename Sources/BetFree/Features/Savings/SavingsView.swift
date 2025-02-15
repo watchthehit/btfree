@@ -25,7 +25,7 @@ public struct SavingsView: View {
             if let milestone = notification.userInfo?["milestone"] as? Int {
                 celebrationMessage = "Congratulations! You've saved \(manager.formatAmount(Double(milestone)))!"
                 showingCelebration = true
-                BFHaptics.achievement()
+                BFHaptics.success()  
             }
         }
         .sheet(isPresented: $showingAddSheet) {
@@ -103,7 +103,7 @@ public struct SavingsView: View {
     private var addButton: some View {
         Button {
             showingAddSheet = true
-            BFHaptics.light()
+            BFHaptics.warning()  
         } label: {
             HStack {
                 Image(systemName: "plus.circle.fill")
@@ -145,7 +145,7 @@ public struct SavingsView: View {
             .navigationTitle("Add Savings")
             .navigationBarItems(trailing: Button("Cancel") {
                 showingAddSheet = false
-                BFHaptics.light()
+                BFHaptics.error()  
             })
         }
     }
