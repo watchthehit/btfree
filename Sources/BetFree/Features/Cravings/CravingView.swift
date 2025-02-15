@@ -1,5 +1,4 @@
 import SwiftUI
-import Charts
 
 public struct CravingView: View {
     @StateObject private var manager = CravingManager()
@@ -25,7 +24,7 @@ public struct CravingView: View {
                     statsGrid
                     
                     // Intensity Chart
-                    intensityChart
+                    timeChart
                         .frame(height: 200)
                     
                     // Recent Cravings
@@ -98,18 +97,32 @@ public struct CravingView: View {
         .semanticHint("Shows \(title.lowercased())")
     }
     
-    private var intensityChart: some View {
+    private var timeChart: some View {
         BFCard(style: .elevated) {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Cravings by Time")
                     .font(BFDesignSystem.Typography.titleMedium)
                 
-                Chart(manager.cravingsByTime, id: \.hour) { hourData in
-                    BarMark(
-                        x: .value("Hour", hourData.hour),
-                        y: .value("Count", hourData.count)
-                    )
-                    .foregroundStyle(BFDesignSystem.Colors.primary)
+                GeometryReader { geometry in
+                    HStack(alignment: .bottom, spacing: 4) {
+                        ForEach(manager.cravingsByTime, id: \.hour) { hourData in
+                            VStack {
+                                let height = getBarHeight(count: hourData.count, maxCount: maxCount, availableHeight: geometry.size.height - 40)
+                                
+                                Rectangle()
+                                    .fill(BFDesignSystem.Colors.primary)
+                                    .frame(height: height)
+                                
+                                if hourData.hour % 6 == 0 {
+                                    Text("\(hourData.hour)")
+                                        .font(BFDesignSystem.Typography.labelSmall)
+                                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                                }
+                            }
+                            .frame(width: (geometry.size.width - 100) / 24)
+                        }
+                    }
+                    .padding(.horizontal)
                 }
             }
             .padding()
@@ -117,6 +130,15 @@ public struct CravingView: View {
         .semanticMeaning("Cravings by Time Chart")
         .semanticValue("\(manager.cravingsByTime.reduce(0) { $0 + $1.count }) cravings recorded")
         .semanticHint("Shows when cravings typically occur")
+    }
+    
+    private var maxCount: Int {
+        manager.cravingsByTime.map(\.count).max() ?? 1
+    }
+    
+    private func getBarHeight(count: Int, maxCount: Int, availableHeight: CGFloat) -> CGFloat {
+        guard maxCount > 0 else { return 0 }
+        return (CGFloat(count) / CGFloat(maxCount)) * availableHeight
     }
     
     private var recentCravingsList: some View {
@@ -220,22 +242,22 @@ public struct CravingView: View {
         NavigationView {
             List {
                 Section("Details") {
-                    LabeledContent("Intensity", value: "\(craving.intensity)/5")
-                    LabeledContent("Trigger", value: craving.trigger)
+                    DetailRow(label: "Intensity", value: "\(craving.intensity)/5")
+                    DetailRow(label: "Trigger", value: craving.trigger)
                     if let location = craving.location {
-                        LabeledContent("Location", value: location)
+                        DetailRow(label: "Location", value: location)
                     }
                     if let emotion = craving.emotion {
-                        LabeledContent("Emotion", value: emotion)
+                        DetailRow(label: "Emotion", value: emotion)
                     }
-                    LabeledContent("Duration", value: manager.formatDuration(craving.duration))
+                    DetailRow(label: "Duration", value: manager.formatDuration(craving.duration))
                 }
                 
                 if let strategy = craving.copingStrategy {
                     Section("Response") {
-                        LabeledContent("Strategy", value: strategy)
+                        DetailRow(label: "Strategy", value: strategy)
                         if let outcome = craving.outcome {
-                            LabeledContent("Outcome", value: outcome)
+                            DetailRow(label: "Outcome", value: outcome)
                         }
                     }
                 }
@@ -302,6 +324,21 @@ public struct CravingView: View {
     }
 }
 
+private struct DetailRow: View {
+    let label: String
+    let value: String
+    
+    var body: some View {
+        HStack {
+            Text(label)
+                .foregroundColor(BFDesignSystem.Colors.textSecondary)
+            Spacer()
+            Text(value)
+                .foregroundColor(BFDesignSystem.Colors.textPrimary)
+        }
+    }
+}
+
 private struct CravingRow: View {
     let craving: Craving
     
@@ -313,7 +350,7 @@ private struct CravingRow: View {
                         .font(BFDesignSystem.Typography.bodyLarge)
                         .foregroundColor(BFDesignSystem.Colors.textPrimary)
                     
-                    Text(craving.timestamp, style: .relative)
+                    Text(craving.timestamp, formatter: DateFormatter())
                         .font(BFDesignSystem.Typography.labelMedium)
                         .foregroundColor(BFDesignSystem.Colors.textSecondary)
                 }
