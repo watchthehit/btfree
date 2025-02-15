@@ -91,6 +91,20 @@ ZStack {
 ))
 ```
 
+#### 3. ProgressView Naming Conflict
+**Issue**: "Argument passed to call that takes no arguments" when using SwiftUI ProgressView
+
+**Solution**:
+```swift
+// ❌ Wrong Usage - Naming conflict with custom ProgressView
+ProgressView(value: progressValue)
+
+// ✅ Correct Usage - Explicit SwiftUI namespace
+SwiftUI.ProgressView(value: progressValue)
+```
+
+This error occurs because we have a custom `ProgressView` component in `/Sources/BetFree/Features/Progress/ProgressView.swift` that conflicts with SwiftUI's built-in ProgressView.
+
 ### iOS Compatibility
 
 #### 1. iOS 17 Compatibility
