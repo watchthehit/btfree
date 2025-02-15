@@ -29,6 +29,12 @@ public struct BetFreeRootView: View {
                             Label("Savings", systemImage: "dollarsign.circle.fill")
                         }
                         .tag(2)
+                    
+                    CravingView()
+                        .tabItem {
+                            Label("Cravings", systemImage: "brain.head.profile")
+                        }
+                        .tag(3)
                 }
             }
         }
@@ -61,6 +67,11 @@ public struct BetFreePreview: View {
 
 #Preview("Savings") {
     SavingsView()
+        .environmentObject(AppState.preview)
+}
+
+#Preview("Cravings") {
+    CravingView()
         .environmentObject(AppState.preview)
 }
 
