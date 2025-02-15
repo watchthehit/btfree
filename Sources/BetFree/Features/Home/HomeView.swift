@@ -2,192 +2,186 @@ import SwiftUI
 
 public struct HomeView: View {
     @EnvironmentObject private var appState: AppState
-    @State private var showingAddTransaction = false
-    @State private var showingTip = true
-    @State private var previousStreak: Int = 0
-    @State private var previousSavings: Double = 0
-    @State private var dailySpentAmount: Double = 0
-    
-    private let hapticEngine = BFHapticEngine()
+    @StateObject private var savingsManager = SavingsManager()
+    @StateObject private var cravingManager = CravingManager()
     
     public init() {}
     
     public var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 24) {
-                    // Header Section with Welcome Message
-                    welcomeSection
-                    
-                    // Stats Overview
-                    statsSection
-                        .withSuccessHaptics(when: appState.currentStreak > previousStreak)
-                    
+                VStack(spacing: 20) {
                     // Daily Progress
-                    if appState.dailyLimit > 0 {
-                        progressSection
-                            .onChange(of: dailySpentAmount) { newAmount in
-                                if newAmount >= appState.dailyLimit {
-                                    BFHaptics.error()
-                                } else if newAmount >= appState.dailyLimit * 0.8 {
-                                    BFHaptics.warning()
+                    BFCard(style: .elevated) {
+                        VStack(spacing: 12) {
+                            HStack {
+                                Text("Daily Progress")
+                                    .font(BFDesignSystem.Typography.titleMedium)
+                                Spacer()
+                                Image(systemName: "star.fill")
+                                    .foregroundColor(BFDesignSystem.Colors.warning)
+                            }
+                            
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    Text("Bet-Free Day")
+                                        .font(BFDesignSystem.Typography.labelLarge)
+                                    Text("\(appState.currentStreak)")
+                                        .font(BFDesignSystem.Typography.displaySmall)
+                                        .foregroundColor(BFDesignSystem.Colors.success)
+                                }
+                                Spacer()
+                                VStack(alignment: .trailing) {
+                                    Text("Money Saved")
+                                        .font(BFDesignSystem.Typography.labelLarge)
+                                    Text("$\(Int(savingsManager.totalSavings))")
+                                        .font(BFDesignSystem.Typography.displaySmall)
+                                        .foregroundColor(BFDesignSystem.Colors.primary)
                                 }
                             }
+                            
+                            SwiftUI.ProgressView(value: Double(appState.currentStreak.remainder(dividingBy: 7)) / 7.0)
+                                .progressViewStyle(.linear)
+                                .tint(BFDesignSystem.Colors.success)
+                        }
+                        .padding()
+                    }
+                    .semanticMeaning("Progress Card")
+                    .semanticValue("\(appState.currentStreak) days bet-free")
+                    
+                    // Today's Games Alert
+                    if let situation = CravingManager.riskySituations.first(where: { Calendar.current.isDateInToday(Date()) }) {
+                        BFCard(style: .elevated) {
+                            VStack(alignment: .leading, spacing: 12) {
+                                HStack {
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                        .foregroundColor(BFDesignSystem.Colors.error)
+                                    Text("High Risk Games Today")
+                                        .font(BFDesignSystem.Typography.titleMedium)
+                                }
+                                
+                                Text(situation)
+                                    .font(BFDesignSystem.Typography.bodyLarge)
+                                    .foregroundColor(BFDesignSystem.Colors.textPrimary)
+                                
+                                Divider()
+                                
+                                Text("Your Safety Plan:")
+                                    .font(BFDesignSystem.Typography.labelLarge)
+                                
+                                ForEach(cravingManager.getSafetyPlan(for: CravingManager.getRiskLevel(for: situation)), id: \.self) { step in
+                                    HStack(alignment: .top) {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundColor(BFDesignSystem.Colors.success)
+                                        Text(step)
+                                            .font(BFDesignSystem.Typography.bodyMedium)
+                                    }
+                                }
+                                
+                                Button {
+                                    // Add emergency contact action
+                                } label: {
+                                    Label("Contact Sponsor", systemImage: "phone.fill")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .tint(BFDesignSystem.Colors.error)
+                            }
+                            .padding()
+                        }
+                        .semanticMeaning("Risk Alert")
+                        .semanticValue("High risk: \(situation)")
                     }
                     
-                    // Quick Actions
-                    quickActionsSection
-                    
-                    // Tips & Insights
-                    if showingTip {
-                        tipSection
+                    // Recent Progress
+                    BFCard(style: .elevated) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Recent Progress")
+                                .font(BFDesignSystem.Typography.titleMedium)
+                            
+                            // Recent Insights
+                            ForEach(cravingManager.getProgressInsights(), id: \.self) { insight in
+                                HStack {
+                                    Image(systemName: "lightbulb.fill")
+                                        .foregroundColor(BFDesignSystem.Colors.warning)
+                                    Text(insight)
+                                        .font(BFDesignSystem.Typography.bodyMedium)
+                                }
+                            }
+                            
+                            Divider()
+                            
+                            // Quick Actions
+                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                                QuickActionButton(
+                                    title: "Log Urge",
+                                    icon: "exclamationmark.triangle",
+                                    color: BFDesignSystem.Colors.warning
+                                ) {
+                                    // Navigate to CravingView
+                                }
+                                
+                                QuickActionButton(
+                                    title: "Add Savings",
+                                    icon: "dollarsign.circle",
+                                    color: BFDesignSystem.Colors.success
+                                ) {
+                                    // Navigate to SavingsView
+                                }
+                                
+                                QuickActionButton(
+                                    title: "Get Support",
+                                    icon: "person.2.fill",
+                                    color: BFDesignSystem.Colors.primary
+                                ) {
+                                    // Navigate to ResourcesView
+                                }
+                                
+                                QuickActionButton(
+                                    title: "View Stats",
+                                    icon: "chart.bar.fill",
+                                    color: BFDesignSystem.Colors.secondary
+                                ) {
+                                    // Navigate to StatsView
+                                }
+                            }
+                        }
+                        .padding()
                     }
-                }
-                .padding(.vertical)
-            }
-            .background(Color(.systemGroupedBackground))
-            .navigationBarTitleDisplayMode(.inline)
-            .sheet(isPresented: $showingAddTransaction) {
-                AddTransactionView()
-            }
-            .onChange(of: appState.totalSavings) { newSavings in
-                if newSavings >= previousSavings + 100 {  // Achievement for every $100 saved
-                    hapticEngine.playAchievementPattern()
-                    previousSavings = newSavings
-                }
-            }
-            .onAppear {
-                previousStreak = appState.currentStreak
-                previousSavings = appState.totalSavings
-                updateDailySpent()
-            }
-        }
-    }
-    
-    private func updateDailySpent() {
-        dailySpentAmount = appState.getTotalSpentToday()
-    }
-    
-    private var welcomeSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Welcome\(appState.username.isEmpty ? "" : ", \(appState.username)")")
-                .font(.title)
-                .fontWeight(.bold)
-            
-            Text("Let's make today count!")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal)
-    }
-    
-    private var statsSection: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-            BFStatCard(
-                value: "\(appState.currentStreak)",
-                label: "Day Streak",
-                icon: "flame.fill",
-                gradient: .orangeGradient
-            )
-            
-            BFStatCard(
-                value: "$\(Int(appState.totalSavings))",
-                label: "Total Saved",
-                icon: "dollarsign.circle.fill",
-                gradient: .greenGradient
-            )
-        }
-        .padding(.horizontal)
-    }
-    
-    private var progressSection: some View {
-        let progress = appState.dailyLimit > 0 ? dailySpentAmount / appState.dailyLimit : 0
-        
-        return VStack(alignment: .leading, spacing: 10) {
-            Text("Daily Progress")
-                .font(.headline)
-                .foregroundColor(.primary)
-            
-            HStack {
-                Text("$\(Int(dailySpentAmount))")
-                    .font(.body)
-                    .foregroundColor(.primary)
-                
-                Text("of")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                
-                Text("$\(Int(appState.dailyLimit))")
-                    .font(.body)
-                    .foregroundColor(.primary)
-            }
-            
-            SwiftUI.ProgressView(value: progress)
-                .tint(progress >= 1.0 ? .red : .blue)
-        }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(radius: 2)
-        .padding(.horizontal)
-    }
-    
-    private var quickActionsSection: some View {
-        VStack(alignment: .leading, spacing: 15) {
-            Text("Quick Actions")
-                .font(.headline)
-                .padding(.horizontal)
-            
-            Button(action: { showingAddTransaction = true }) {
-                HStack {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 24))
-                        .foregroundColor(.green)
-                    Text("Add Transaction")
-                        .font(.body)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(.secondary)
                 }
                 .padding()
-                .background(Color(.systemBackground))
-                .cornerRadius(12)
-                .shadow(radius: 2)
             }
-            .buttonStyle(PlainButtonStyle())
-            .padding(.horizontal)
+            .navigationTitle("BetFree")
         }
     }
+}
+
+private struct QuickActionButton: View {
+    let title: String
+    let icon: String
+    let color: Color
+    let action: () -> Void
     
-    private var tipSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("💡 Tip of the Day")
-                    .font(.headline)
-                Spacer()
-                Button(action: { withAnimation { showingTip = false } }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.secondary)
-                }
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.title2)
+                Text(title)
+                    .font(BFDesignSystem.Typography.labelMedium)
             }
-            
-            Text("Track your daily spending to stay within your budget. Small savings add up to big results!")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(color.opacity(0.1))
+            .foregroundColor(color)
+            .cornerRadius(12)
         }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(radius: 2)
-        .padding(.horizontal)
-        .transition(.move(edge: .bottom).combined(with: .opacity))
+        .semanticMeaning("\(title) Button")
+        .semanticHint("Double tap to \(title.lowercased())")
     }
 }
 
 #Preview {
-    NavigationView {
-        HomeView()
-            .environmentObject(AppState.preview)
-    }
+    HomeView()
+        .environmentObject(AppState.preview)
 }
