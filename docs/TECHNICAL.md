@@ -540,20 +540,212 @@ The BetFree app uses a comprehensive design system with several key components:
    - Provide multiple feedback types
    - Support both touch and VoiceOver navigation
 
-3. **Motion**
+3. **Progress**
+   - Always use `SwiftUI.ProgressView`
+   - Include clear progress values
+   - Provide appropriate haptic feedback
+
+4. **Contrast**
+   - Ensure sufficient contrast
+   - Don't rely solely on color
+   - Support dark mode
+
+5. **Motion**
    - Respect reduced motion
    - Keep animations optional
    - Provide static alternatives
 
-4. **VoiceOver**
-   - Write clear labels
-   - Group related content
-   - Provide context and hints
+### Implementation Checklist
 
-5. **Color**
-   - Ensure sufficient contrast
-   - Don't rely solely on color
-   - Support dark mode
+When implementing new features, ensure:
+
+1. **Accessibility**
+   - [ ] VoiceOver support added
+   - [ ] Dynamic type implemented
+   - [ ] High contrast support added
+   - [ ] Reduced motion respected
+
+2. **Feedback**
+   - [ ] Appropriate haptics used
+   - [ ] Visual feedback provided
+   - [ ] Clear error states
+   - [ ] Progress indicators
+
+3. **Documentation**
+   - [ ] Accessibility features documented
+   - [ ] Usage examples provided
+   - [ ] Testing guidelines included
+   - [ ] Best practices noted
+
+## Paywall & Subscription
+
+### Overview
+BetFree uses a hard paywall with a 7-day free trial. The paywall is presented during onboarding after the user enters their initial information but before they can access the main app.
+
+### Implementation
+
+#### 1. Subscription Products
+```swift
+enum BFSubscriptionProduct: String {
+    case monthly = "com.betfree.subscription.monthly"
+    case yearly = "com.betfree.subscription.yearly"
+    
+    var id: String { rawValue }
+    var period: String {
+        switch self {
+        case .monthly: return "month"
+        case .yearly: return "year"
+        }
+    }
+}
+```
+
+#### 2. Trial Period
+- 7-day free trial for all new users
+- Full app access during trial
+- Automatic conversion to paid subscription after trial
+- Trial status persisted in UserDefaults and verified with receipt
+
+#### 3. Paywall Presentation
+The paywall is shown:
+1. During onboarding (after user info collection)
+2. When trial expires
+3. When subscription expires
+4. When trying to access premium features without subscription
+
+#### 4. User States
+```swift
+enum BFUserState {
+    case trial(endDate: Date)
+    case subscribed(expiryDate: Date)
+    case expired
+    case needsRestore
+}
+```
+
+#### 5. Receipt Validation
+- Local receipt validation for basic checks
+- Server-side validation for security
+- Periodic validation checks
+
+### Security Measures
+
+1. **Receipt Validation**
+```swift
+class ReceiptValidator {
+    func validateReceipt() async throws -> ReceiptValidationResult
+    func verifyTrialEligibility() async throws -> Bool
+    func validateSubscriptionStatus() async throws -> BFUserState
+}
+```
+
+2. **Anti-Tampering**
+- Cryptographic verification of local data
+- Server-side state verification
+- Secure storage of subscription status
+
+### User Flow
+
+1. **New User**
+```
+Onboarding Start
+└── User Info Collection
+    └── Trial Offer
+        ├── Accept Trial
+        │   └── Main App (7 days)
+        │       └── Paywall
+        └── Skip Trial
+            └── Paywall
+```
+
+2. **Trial User**
+```
+App Launch
+└── Check Trial Status
+    ├── Active
+    │   └── Main App
+    └── Expired
+        └── Paywall
+```
+
+3. **Subscribed User**
+```
+App Launch
+└── Validate Receipt
+    ├── Valid
+    │   └── Main App
+    └── Invalid/Expired
+        └── Paywall
+```
+
+### StoreKit Integration
+
+1. **Product Loading**
+```swift
+class StoreManager {
+    func loadProducts() async throws -> [Product]
+    func purchase(_ product: Product) async throws -> PurchaseResult
+    func restorePurchases() async throws
+    func checkTrialEligibility() async throws -> Bool
+}
+```
+
+2. **Transaction Handling**
+```swift
+extension StoreManager {
+    func handlePurchaseResult(_ result: PurchaseResult) async
+    func handleVerificationResult(_ result: VerificationResult)
+    func updateSubscriptionStatus()
+}
+```
+
+### Error Handling
+
+1. **Purchase Errors**
+```swift
+enum PurchaseError: Error {
+    case productNotFound
+    case purchaseFailed(reason: String)
+    case receiptValidationFailed
+    case networkError
+    case userCancelled
+}
+```
+
+2. **Recovery Actions**
+```swift
+extension StoreManager {
+    func retryFailedTransaction()
+    func refreshReceipt()
+    func syncSubscriptionStatus()
+}
+```
+
+### Testing
+
+1. **StoreKit Configuration**
+- Use StoreKit configuration file for testing
+- Test various subscription states
+- Simulate receipt validation scenarios
+
+2. **Test Cases**
+```swift
+class SubscriptionTests: XCTestCase {
+    func testTrialEligibility()
+    func testExpiredSubscription()
+    func testRestorePurchases()
+    func testReceiptValidation()
+}
+```
+
+### Analytics
+
+Track key subscription events:
+- Trial starts/conversions
+- Subscription purchases
+- Cancellations
+- Renewal failures
+- Restore purchases
 
 ## Building the Project
 
@@ -1247,20 +1439,3 @@ The feature is designed to work across iOS versions:
 - Custom detail row components instead of LabeledContent
 - Consistent styling using BFDesignSystem
 - Proper date formatting for all iOS versions
-
-## User Interface
-
-### Navigation
-The app uses a tab-based navigation system with the following structure:
-
-1. Home - Main dashboard
-2. Savings - Financial progress tracking
-3. Cravings - Urge monitoring and management
-4. Resources - Support and educational content
-5. Settings - App configuration
-
-Each tab is designed with accessibility in mind, featuring:
-- Clear, descriptive labels
-- Semantic meanings and hints
-- VoiceOver support
-- High contrast options
