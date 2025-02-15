@@ -19,34 +19,24 @@ public struct BFStatCard: View {
     }
     
     public var body: some View {
-        VStack(spacing: BFDesignSystem.Layout.Spacing.small) {
-            if let icon = icon {
-                Image(systemName: icon)
-                    .font(.system(size: 28))
-                    .foregroundColor(gradient == nil ? BFDesignSystem.Colors.primary : .white)
-            }
-            
-            Text(value)
-                .font(BFDesignSystem.Typography.titleLarge)
-                .foregroundColor(gradient == nil ? BFDesignSystem.Colors.primary : .white)
-            
-            Text(label)
-                .font(BFDesignSystem.Typography.caption)
-                .foregroundColor(gradient == nil ? BFDesignSystem.Colors.textSecondary : .white.opacity(0.9))
-        }
-        .padding()
-        .frame(maxWidth: .infinity)
-        .background(
-            Group {
-                if let gradient = gradient {
-                    gradient
-                } else {
-                    BFDesignSystem.Colors.cardBackground
+        BFCard(style: .default, gradient: gradient) {
+            VStack(spacing: BFDesignSystem.Layout.Spacing.small) {
+                if let icon = icon {
+                    Image(systemName: icon)
+                        .font(.system(size: 28))
+                        .foregroundColor(gradient == nil ? BFDesignSystem.Colors.primary : .white)
                 }
+                
+                Text(value)
+                    .font(BFDesignSystem.Typography.titleLarge)
+                    .foregroundColor(gradient == nil ? BFDesignSystem.Colors.primary : .white)
+                
+                Text(label)
+                    .font(BFDesignSystem.Typography.bodyMedium)
+                    .foregroundColor(gradient == nil ? BFDesignSystem.Colors.textSecondary : .white.opacity(0.8))
             }
-        )
-        .cornerRadius(BFDesignSystem.Layout.CornerRadius.medium)
-        .withShadow(BFDesignSystem.Layout.Shadow.small)
+            .multilineTextAlignment(.center)
+        }
     }
 }
 

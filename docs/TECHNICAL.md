@@ -132,6 +132,76 @@ Located in `Sources/BetFree/Core/Data/`
 - Transactions
 - Achievements
 
+### Card System
+
+The app uses a flexible card system based on the `BFCard` component. All card-based UI elements should use this as their foundation.
+
+#### Card Styles
+Three predefined styles are available:
+```swift
+// Default - Standard card with medium elevation
+BFCardStyle.default
+    cornerRadius: 12
+    shadowRadius: 8
+    shadowOpacity: 0.1
+    
+// Compact - Smaller padding, reduced elevation
+BFCardStyle.compact
+    cornerRadius: 8
+    shadowRadius: 4
+    shadowOpacity: 0.05
+    
+// Elevated - Larger padding, increased elevation
+BFCardStyle.elevated
+    cornerRadius: 16
+    shadowRadius: 12
+    shadowOpacity: 0.15
+```
+
+#### Basic Usage
+```swift
+BFCard(style: .default) {
+    // Your content here
+    Text("Card Content")
+}
+```
+
+#### Advanced Features
+1. Gradient Background:
+```swift
+BFCard(
+    style: .default,
+    gradient: BFDesignSystem.Colors.calmingGradient
+) {
+    Text("Gradient Card")
+}
+```
+
+2. Interactive Cards:
+```swift
+BFCard(
+    style: .default,
+    isInteractive: true
+) {
+    Text("Tap me!")
+}
+// Includes touch feedback and scale animation
+```
+
+#### Implementation Example
+The `BFStatCard` demonstrates proper usage:
+```swift
+BFCard(style: .default, gradient: gradient) {
+    VStack(spacing: BFDesignSystem.Layout.Spacing.small) {
+        // Card content with proper typography
+        Text(value)
+            .font(BFDesignSystem.Typography.titleLarge)
+        Text(label)
+            .font(BFDesignSystem.Typography.bodyMedium)
+    }
+}
+```
+
 ## Building the Project
 
 ### Prerequisites
