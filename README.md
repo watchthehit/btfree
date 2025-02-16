@@ -83,17 +83,27 @@ UserDefaults.standard.set(false, forKey: "isOnboarded")
 - Core Data integration
 - Transaction tracking
 - Achievement system
+- Craving management system
+- User profile management
+- Consistent data type handling
 
  In Progress:
 - Subscription integration
 - Resource content
-- Profile features
 - Analytics integration
 - Accessibility improvements
 
 ## Version History
 
-### v0.1.6 (Current)
+### v0.1.7 (Current)
+- Fixed type consistency in Craving duration handling
+- Standardized UserProfile parameter ordering
+- Enhanced MockCDManager implementation
+- Improved Core Data manager consistency
+- Added comprehensive craving management
+- Fixed transaction mapping in dashboard
+
+### v0.1.6
 - Resolved ResourcesView redeclaration issue
 - Enhanced Settings module documentation
 - Improved crisis support accessibility

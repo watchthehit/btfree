@@ -27,14 +27,26 @@ public final class CoreDataManager: BetFreeDataManager {
     
     public init() {}
     
-    public func getCurrentUser() -> UserProfileEntity? {
+    private func getCurrentUserEntity() -> UserProfileEntity? {
         let request = NSFetchRequest<UserProfileEntity>(entityName: "UserProfileEntity")
         request.fetchLimit = 1
         return try? context.fetch(request).first
     }
     
+    public func getCurrentUser() -> UserProfile? {
+        guard let entity = getCurrentUserEntity() else { return nil }
+        return UserProfile(
+            name: entity.name ?? "",
+            email: entity.email,
+            streak: Int(entity.streak),
+            totalSavings: entity.totalSavings,
+            dailyLimit: entity.dailyLimit,
+            lastCheckIn: entity.lastCheckIn
+        )
+    }
+    
     public func createOrUpdateUser(name: String, email: String?, dailyLimit: Double) throws {
-        if let existingUser = getCurrentUser() {
+        if let existingUser = getCurrentUserEntity() {
             existingUser.name = name
             existingUser.email = email
             existingUser.dailyLimit = dailyLimit
@@ -53,7 +65,7 @@ public final class CoreDataManager: BetFreeDataManager {
     }
     
     public func updateUserStreak() throws {
-        guard let user = getCurrentUser() else { return }
+        guard let user = getCurrentUserEntity() else { return }
         
         let calendar = Calendar.current
         let now = Date()
@@ -87,7 +99,7 @@ public final class CoreDataManager: BetFreeDataManager {
         entity.date = transaction.date
         entity.note = transaction.note
         
-        if let user = getCurrentUser() {
+        if let user = getCurrentUserEntity() {
             user.totalSavings += transaction.amount
         }
         
@@ -100,7 +112,7 @@ public final class CoreDataManager: BetFreeDataManager {
         request.fetchLimit = 1
         
         if let entity = try context.fetch(request).first {
-            if let user = getCurrentUser() {
+            if let user = getCurrentUserEntity() {
                 user.totalSavings -= entity.amount
             }
             
@@ -116,7 +128,7 @@ public final class CoreDataManager: BetFreeDataManager {
         
         do {
             // Fetch and delete all entities
-            let entityNames = ["UserProfileEntity", "TransactionEntity"]
+            let entityNames = ["UserProfileEntity", "TransactionEntity", "CravingEntity"]
             
             for entityName in entityNames {
                 let fetchRequest: NSFetchRequest<NSManagedObject> = NSFetchRequest(entityName: entityName)
@@ -162,6 +174,78 @@ public final class CoreDataManager: BetFreeDataManager {
                     print("Unable to load persistent stores: \(error)")
                 }
             }
+        }
+    }
+    
+    // MARK: - Craving Management
+    
+    public func createCraving(intensity: Int, triggers: String, strategies: String, timestamp: Date, duration: Int) async throws -> Craving {
+        let entity = CravingEntity(context: context)
+        entity.id = UUID()
+        entity.intensity = Int32(intensity)
+        entity.triggers = triggers
+        entity.strategies = strategies
+        entity.timestamp = timestamp
+        entity.duration = Int32(duration)
+        
+        try context.save()
+        
+        return Craving(
+            id: entity.id!,
+            intensity: Int(entity.intensity),
+            trigger: triggers,
+            location: nil,
+            emotion: nil,
+            duration: TimeInterval(duration),
+            copingStrategy: strategies,
+            outcome: nil
+        )
+    }
+    
+    public func getCravings() async throws -> [Craving] {
+        let request = CravingEntity.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \CravingEntity.timestamp, ascending: false)]
+        
+        let entities = try context.fetch(request)
+        return entities.map { entity in
+            Craving(
+                id: entity.id!,
+                intensity: Int(entity.intensity),
+                trigger: entity.triggers ?? "",
+                location: nil,
+                emotion: nil,
+                duration: TimeInterval(entity.duration),
+                copingStrategy: entity.strategies,
+                outcome: nil
+            )
+        }
+    }
+    
+    public func deleteCraving(id: UUID) async throws {
+        let request = CravingEntity.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        
+        if let entity = try context.fetch(request).first {
+            context.delete(entity)
+            try context.save()
+        }
+    }
+    
+    // MARK: - Transaction Management
+    
+    public func getAllTransactions() -> [Transaction] {
+        let request = NSFetchRequest<TransactionEntity>(entityName: "TransactionEntity")
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \TransactionEntity.date, ascending: false)]
+        let entities = (try? context.fetch(request)) ?? []
+        
+        return entities.map { entity in
+            Transaction(
+                id: UUID(uuidString: entity.idString ?? "") ?? UUID(),
+                amount: entity.amount,
+                category: TransactionCategory(rawValue: entity.category ?? "") ?? .other,
+                date: entity.date ?? Date(),
+                note: entity.note
+            )
         }
     }
 }
