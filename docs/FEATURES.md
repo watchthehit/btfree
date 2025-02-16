@@ -72,35 +72,50 @@
 ## User Experience
 
 ### Onboarding Flow
-1. Welcome Screen
-2. Sign Up
-   ```swift
-   // Core Data model
-   @NSManaged public var idString: String  // Unique identifier
-   @NSManaged public var name: String
-   @NSManaged public var email: String?
-   ```
-   - Sign in with Apple
-   - Email signup with password
-   - Secure authentication
-3. Daily Limit Setup
-   - Customizable spending limit
-   - Adjustable in settings
-4. Goal Setting
-   - Multiple personal goals
-   - Progress tracking
-5. Sports Selection
-   - Personalized sports preferences
-   - Betting history analysis
-6. Feature Overview
-   - Progress tracking
-   - Craving management
-   - Savings calculator
-   - Achievement system
-7. Trial Activation
-   - 7-day free trial
-   - Premium features preview
-   - Subscription options
+The onboarding process consists of 7 carefully designed steps to maximize user engagement and success:
+
+1. **Welcome Screen**
+   - Animated logo with pulsing effect
+   - Success story showcase
+   - Key statistics display (89% success rate, 50K+ users, $2.5M saved)
+   - Engaging welcome message
+
+2. **Sign Up**
+   - Sign in with Apple integration
+   - Email-based signup option
+   - Trust badges (Privacy First, Secure, No Gambling Ads)
+   - Clear privacy policy and terms of service
+
+3. **Daily Limit Setup**
+   - Interactive slider for limit selection ($1-$1000)
+   - Quick preset options ($50, $100, $200, $500)
+   - Visual savings projections (1 month, 6 months, 1 year)
+   - Adjustable settings reminder
+
+4. **Goal Setting**
+   - Multiple goal input (up to 3 goals)
+   - Smart suggestions based on common objectives
+   - Timeline-based milestones
+   - Motivational quotes
+   - Progress visualization
+
+5. **Sports Selection**
+   - Visual sport selection grid
+   - Common betting sports included
+   - Toggle selection interface
+   - Sport-specific icons
+
+6. **Feature Overview**
+   - Progress tracking explanation
+   - Craving management tools
+   - Savings calculator demo
+   - Achievement system preview
+
+7. **Trial Activation**
+   - Premium features showcase
+   - 7-day free trial offer
+   - Clear value proposition
+   - Immediate access to all features
 
 ### Dashboard
 - Current Streak Display

@@ -31,8 +31,18 @@ public struct AddSavingView: View {
                 }
                 
                 Section {
-                    Button("Save") {
-                        viewModel.save()
+                    Button(action: {
+                        guard let amount = Double(viewModel.amount) else { return }
+                        viewModel.addSaving(amount: amount, note: viewModel.notes)
+                        dismiss()
+                    }) {
+                        Text("Add Saving")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .cornerRadius(10)
                     }
                     .disabled(viewModel.isSaving)
                 }
@@ -102,6 +112,31 @@ final class AddSavingViewModel: ObservableObject {
                 self.showError = true
             } else {
                 self.showSuccess = true
+            }
+        }
+    }
+    
+    func addSaving(amount: Double, note: String) {
+        isSaving = true
+        
+        Task {
+            do {
+                // Simulate network delay
+                try await Task.sleep(nanoseconds: 1_000_000_000)
+                
+                // TODO: Implement actual saving logic
+                print("Adding saving: $\(amount) with note: \(note)")
+                
+                await MainActor.run {
+                    self.showSuccess = true
+                    self.isSaving = false
+                }
+            } catch {
+                await MainActor.run {
+                    self.error = error.localizedDescription
+                    self.showError = true
+                    self.isSaving = false
+                }
             }
         }
     }

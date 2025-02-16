@@ -1705,72 +1705,98 @@ When modifying the Core Data model:
 
 ### Onboarding Implementation
 
-#### OnboardingView Structure
+#### View Structure
+The onboarding flow is implemented using SwiftUI and follows the MVVM pattern:
+
 ```swift
-struct OnboardingView {
-    // State
-    @StateObject private var viewModel = OnboardingViewModel()
+public struct OnboardingView: View {
     @EnvironmentObject private var appState: AppState
-    
-    // Steps
-    private var welcomeStep: some View
-    private var signUpStep: some View      // Sign in with Apple or Email
-    private var dailyLimitStep: some View  // Spending limit setup
-    private var goalsStep: some View       // Personal goals
-    private var sportsStep: some View      // Sports selection
-    private var featuresStep: some View    // Feature showcase
-    private var trialStep: some View       // Trial activation
+    @StateObject private var viewModel = OnboardingViewModel()
 }
 ```
 
-#### Authentication Flow
-```swift
-@MainActor
-final class OnboardingViewModel: ObservableObject {
-    // Authentication State
-    @Published var name = ""
-    @Published var email = ""
-    @Published var password = ""
-    @Published var isLoading = false
-    @Published var error: String?
-    
-    // Sign in with Apple
-    func signInWithApple() async {
-        isLoading = true
-        do {
-            // Handle Apple authentication
-            await MainActor.run {
-                isLoading = false
-                nextStep()
-            }
-        } catch {
-            await MainActor.run {
-                self.error = error.localizedDescription
-                isLoading = false
-            }
-        }
-    }
-    
-    // Email Sign Up
-    func signUpWithEmail() async {
-        isLoading = true
-        do {
-            // Validate input
-            guard !email.isEmpty, !password.isEmpty else {
-                throw AuthError.invalidInput
-            }
-            
-            // Create account
-            await MainActor.run {
-                isLoading = false
-                nextStep()
-            }
-        } catch {
-            await MainActor.run {
-                self.error = error.localizedDescription
-                isLoading = false
-            }
-        }
-    }
-}
-```
+#### Key Components
+
+1. **Navigation System**
+   - TabView with custom page style
+   - Progress indicator using dynamic dots
+   - Animated transitions between steps
+   - Custom back/continue navigation
+
+2. **Authentication**
+   - Sign in with Apple integration
+   - Email/password authentication
+   - Secure password handling
+   - Loading state management
+   - Error handling and display
+
+3. **Daily Limit Implementation**
+   - Custom slider component
+   - Real-time value updates
+   - Savings projection calculations
+   - Preset value handling
+   ```swift
+   struct CustomSlider: View {
+       @Binding var value: Double
+       let range: ClosedRange<Double>
+       // Custom implementation for smooth sliding
+   }
+   ```
+
+4. **Goal Management**
+   - Dynamic goal addition (up to 3)
+   - Suggestion system
+   - Timeline-based milestone tracking
+   ```swift
+   struct GoalInputRow: View {
+       @Binding var goal: String
+       let suggestions: [String]
+       // Smart suggestion handling
+   }
+   ```
+
+5. **Sports Selection**
+   - Grid-based layout
+   - Toggle state management
+   - Custom sport button component
+   ```swift
+   struct SportButton: View {
+       let sport: Sport
+       let isSelected: Bool
+       // Visual feedback implementation
+   }
+   ```
+
+6. **UI Components**
+   - Custom text field style
+   - Trust badge component
+   - Feature row component
+   - Premium feature row
+   - Savings projection view
+
+7. **State Management**
+   ```swift
+   @MainActor
+   final class OnboardingViewModel: ObservableObject {
+       @Published var currentStep: OnboardingStep
+       @Published var name: String
+       @Published var email: String
+       @Published var password: String
+       @Published var dailyLimitDouble: Double
+       @Published var goals: [String]
+       @Published var selectedSports: Set<Sport>
+       // State management implementation
+   }
+   ```
+
+### Data Flow
+1. User input validation
+2. Secure data storage
+3. Step progression logic
+4. Completion handling
+
+### Animations
+- Scale effects
+- Opacity transitions
+- Sliding transitions
+- Custom timing curves

@@ -4,6 +4,7 @@ import BetFreeUI
 @available(macOS 10.15, iOS 13.0, *)
 public struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var viewModel = PaywallViewModel()
     @State private var selectedPlan: Plan?
     @State private var isPurchasing = false
     
@@ -68,17 +69,24 @@ public struct PaywallView: View {
                     Button(action: {
                         guard let selectedPlan = selectedPlan else { return }
                         isPurchasing = true
-                        // Implement purchase logic
+                        Task {
+                            await viewModel.purchase(plan: selectedPlan)
+                            isPurchasing = false
+                            if viewModel.purchaseSuccessful {
+                                dismiss()
+                            }
+                        }
                     }) {
                         if isPurchasing {
                             SwiftUI.ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle())
-                                .tint(BFDesignSystem.Colors.primary)
+                                .tint(.white)
                         } else {
-                            Text("Continue")
-                                .font(BFDesignSystem.Typography.titleMedium)
+                            Text("Subscribe Now")
+                                .font(.title2)
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
+                                .padding()
                         }
                     }
                     .frame(maxWidth: .infinity)
@@ -196,16 +204,33 @@ private struct PlanCard: View {
     }
 }
 
-private struct Feature: Identifiable {
+fileprivate struct Feature: Identifiable {
     let id = UUID()
     let icon: String
     let title: String
     let description: String
 }
 
-private struct Plan: Identifiable {
+fileprivate struct Plan: Identifiable {
     let id: Int
     let title: String
     let description: String
     let price: String
+}
+
+@MainActor
+fileprivate final class PaywallViewModel: ObservableObject {
+    @Published private(set) var purchaseSuccessful = false
+    @Published private(set) var error: Error?
+    
+    fileprivate func purchase(plan: Plan) async {
+        do {
+            // TODO: Implement actual purchase logic
+            try await Task.sleep(nanoseconds: 2 * 1_000_000_000) // Simulate network request
+            purchaseSuccessful = true
+        } catch {
+            self.error = error
+            purchaseSuccessful = false
+        }
+    }
 }
