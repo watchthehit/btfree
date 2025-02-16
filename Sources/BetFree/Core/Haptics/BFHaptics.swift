@@ -60,6 +60,13 @@ public enum BFHaptics {
         generator.notificationOccurred(.warning)
         #endif
     }
+    
+    @MainActor
+    public static func fireAndForget() {
+        Task { @MainActor in
+            mediumTap()
+        }
+    }
 }
 
 public extension View {

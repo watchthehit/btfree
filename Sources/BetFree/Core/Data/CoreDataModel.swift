@@ -1,109 +1,111 @@
+import Foundation
 import CoreData
+import BetFreeModels
 
-enum CoreDataModel {
-    static let model: NSManagedObjectModel = {
-        return createModel()
-    }()
+public final class CoreDataModel {
+    public static let shared = CoreDataModel()
     
-    static let schema: NSPersistentStoreDescription = {
-        let schema = NSPersistentStoreDescription()
-        schema.type = NSSQLiteStoreType
-        schema.configuration = "Default"
-        return schema
-    }()
+    private init() {}
     
-    static func createModel() -> NSManagedObjectModel {
+    public func createModel() -> NSManagedObjectModel {
         let model = NSManagedObjectModel()
+        
+        // User Profile Entity
+        let userEntity = NSEntityDescription()
+        userEntity.name = "UserProfileEntity"
+        userEntity.managedObjectClassName = NSStringFromClass(UserProfileEntity.self)
+        
+        let idStringAttribute = NSAttributeDescription()
+        idStringAttribute.name = "idString"
+        idStringAttribute.attributeType = .stringAttributeType
+        idStringAttribute.isOptional = false
+        
+        let nameAttribute = NSAttributeDescription()
+        nameAttribute.name = "name"
+        nameAttribute.attributeType = .stringAttributeType
+        nameAttribute.isOptional = false
+        nameAttribute.defaultValue = ""
+        
+        let emailAttribute = NSAttributeDescription()
+        emailAttribute.name = "email"
+        emailAttribute.attributeType = .stringAttributeType
+        emailAttribute.isOptional = true
+        
+        let dailyLimitAttribute = NSAttributeDescription()
+        dailyLimitAttribute.name = "dailyLimit"
+        dailyLimitAttribute.attributeType = .doubleAttributeType
+        dailyLimitAttribute.isOptional = false
+        dailyLimitAttribute.defaultValue = 0.0
+        
+        let streakAttribute = NSAttributeDescription()
+        streakAttribute.name = "streak"
+        streakAttribute.attributeType = .integer32AttributeType
+        streakAttribute.isOptional = false
+        streakAttribute.defaultValue = 0
+        
+        let lastCheckInAttribute = NSAttributeDescription()
+        lastCheckInAttribute.name = "lastCheckIn"
+        lastCheckInAttribute.attributeType = .dateAttributeType
+        lastCheckInAttribute.isOptional = true
+        
+        let totalSavingsAttribute = NSAttributeDescription()
+        totalSavingsAttribute.name = "totalSavings"
+        totalSavingsAttribute.attributeType = .doubleAttributeType
+        totalSavingsAttribute.isOptional = false
+        totalSavingsAttribute.defaultValue = 0.0
+        
+        userEntity.properties = [
+            idStringAttribute,
+            nameAttribute,
+            emailAttribute,
+            dailyLimitAttribute,
+            streakAttribute,
+            lastCheckInAttribute,
+            totalSavingsAttribute
+        ]
         
         // Transaction Entity
         let transactionEntity = NSEntityDescription()
         transactionEntity.name = "TransactionEntity"
-        transactionEntity.managedObjectClassName = "TransactionEntity"
+        transactionEntity.managedObjectClassName = NSStringFromClass(TransactionEntity.self)
         
-        let idAttribute = NSAttributeDescription()
-        idAttribute.name = "id"
-        idAttribute.type = .uuid
-        idAttribute.isOptional = false
+        let transactionIdStringAttribute = NSAttributeDescription()
+        transactionIdStringAttribute.name = "idString"
+        transactionIdStringAttribute.attributeType = .stringAttributeType
+        transactionIdStringAttribute.isOptional = false
         
         let amountAttribute = NSAttributeDescription()
         amountAttribute.name = "amount"
-        amountAttribute.type = .double
+        amountAttribute.attributeType = .doubleAttributeType
         amountAttribute.isOptional = false
-        
-        let dateAttribute = NSAttributeDescription()
-        dateAttribute.name = "date"
-        dateAttribute.type = .date
-        dateAttribute.isOptional = false
+        amountAttribute.defaultValue = 0.0
         
         let categoryAttribute = NSAttributeDescription()
         categoryAttribute.name = "category"
-        categoryAttribute.type = .string
+        categoryAttribute.attributeType = .stringAttributeType
         categoryAttribute.isOptional = false
+        categoryAttribute.defaultValue = TransactionCategory.other.rawValue
+        
+        let dateAttribute = NSAttributeDescription()
+        dateAttribute.name = "date"
+        dateAttribute.attributeType = .dateAttributeType
+        dateAttribute.isOptional = false
+        dateAttribute.defaultValue = Date()
         
         let noteAttribute = NSAttributeDescription()
         noteAttribute.name = "note"
-        noteAttribute.type = .string
+        noteAttribute.attributeType = .stringAttributeType
         noteAttribute.isOptional = true
         
         transactionEntity.properties = [
-            idAttribute,
+            transactionIdStringAttribute,
             amountAttribute,
-            dateAttribute,
             categoryAttribute,
+            dateAttribute,
             noteAttribute
         ]
         
-        // User Profile Entity
-        let userProfileEntity = NSEntityDescription()
-        userProfileEntity.name = "UserProfileEntity"
-        userProfileEntity.managedObjectClassName = "UserProfileEntity"
-        
-        let userIdAttribute = NSAttributeDescription()
-        userIdAttribute.name = "id"
-        userIdAttribute.type = .uuid
-        userIdAttribute.isOptional = false
-        
-        let nameAttribute = NSAttributeDescription()
-        nameAttribute.name = "name"
-        nameAttribute.type = .string
-        nameAttribute.isOptional = false
-        
-        let emailAttribute = NSAttributeDescription()
-        emailAttribute.name = "email"
-        emailAttribute.type = .string
-        emailAttribute.isOptional = true
-        
-        let streakAttribute = NSAttributeDescription()
-        streakAttribute.name = "streak"
-        streakAttribute.type = .integer32
-        streakAttribute.isOptional = false
-        
-        let totalSavingsAttribute = NSAttributeDescription()
-        totalSavingsAttribute.name = "totalSavings"
-        totalSavingsAttribute.type = .double
-        totalSavingsAttribute.isOptional = false
-        
-        let dailyLimitAttribute = NSAttributeDescription()
-        dailyLimitAttribute.name = "dailyLimit"
-        dailyLimitAttribute.type = .double
-        dailyLimitAttribute.isOptional = false
-        
-        let lastCheckInAttribute = NSAttributeDescription()
-        lastCheckInAttribute.name = "lastCheckIn"
-        lastCheckInAttribute.type = .date
-        lastCheckInAttribute.isOptional = true
-        
-        userProfileEntity.properties = [
-            userIdAttribute,
-            nameAttribute,
-            emailAttribute,
-            streakAttribute,
-            totalSavingsAttribute,
-            dailyLimitAttribute,
-            lastCheckInAttribute
-        ]
-        
-        model.entities = [transactionEntity, userProfileEntity]
+        model.entities = [userEntity, transactionEntity]
         return model
     }
 }

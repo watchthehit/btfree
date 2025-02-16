@@ -6,14 +6,14 @@ public struct BFTextFieldStyle: TextFieldStyle {
     
     public func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
-            .font(BFDesignSystem.bodyMediumFont)
+            .font(BFDesignSystem.Typography.bodyMedium)
             .padding()
             .background(
-                RoundedRectangle(cornerRadius: BFDesignSystem.cornerRadiusMedium)
-                    .fill(BFDesignSystem.surfaceColor)
+                RoundedRectangle(cornerRadius: BFDesignSystem.Radius.medium)
+                    .fill(.background)
                     .overlay(
-                        RoundedRectangle(cornerRadius: BFDesignSystem.cornerRadiusMedium)
-                            .stroke(BFDesignSystem.borderColor, lineWidth: BFDesignSystem.borderWidthThin)
+                        RoundedRectangle(cornerRadius: BFDesignSystem.Radius.medium)
+                            .stroke(BFDesignSystem.Colors.border, lineWidth: BFDesignSystem.borderWidthThin)
                     )
             )
     }

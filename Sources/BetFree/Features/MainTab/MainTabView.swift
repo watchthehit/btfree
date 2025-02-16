@@ -1,21 +1,37 @@
 import SwiftUI
+import BetFreeUI
 
 public struct MainTabView: View {
+    @EnvironmentObject private var appState: AppState
+    
     public init() {}
     
     public var body: some View {
-        TabView {
+        TabView(selection: $appState.selectedTab) {
             TodayView()
                 .tabItem {
-                    Image(systemName: "sun.max.fill")
-                    Text("Today")
+                    Label("Today", systemImage: "sun.max.fill")
                 }
+                .tag(0)
             
-            BFProgressView()
+            TransactionsView()
                 .tabItem {
-                    Image(systemName: "chart.bar.fill")
-                    Text("Progress")
+                    Label("Transactions", systemImage: "list.bullet.rectangle.fill")
                 }
+                .tag(1)
+            
+            ProgressTrackingView()
+                .tabItem {
+                    Label("Progress", systemImage: "chart.line.uptrend.xyaxis")
+                }
+                .tag(2)
+            
+            SettingsView()
+                .tabItem {
+                    Label("Settings", systemImage: "gearshape.fill")
+                }
+                .tag(3)
         }
+        .tint(BFDesignSystem.Colors.primary)
     }
 }

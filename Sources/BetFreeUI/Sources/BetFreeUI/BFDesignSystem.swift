@@ -1,96 +1,52 @@
 import SwiftUI
-#if canImport(UIKit)
-import UIKit
-#elseif canImport(AppKit)
-import AppKit
-#endif
 
 @available(macOS 10.15, iOS 13.0, *)
 public enum BFDesignSystem {
     // MARK: - Colors
-    public static let primaryColor = Color.blue
-    public static let backgroundColor = Color.white
-    public static let surfaceColor = Color.gray.opacity(0.1)
-    public static let primaryTextColor = Color.black
-    public static let secondaryTextColor = Color.gray
-    public static let shadowColor = Color.black.opacity(0.1)
-    public static let borderColor = Color.gray.opacity(0.5)
-    public static let errorColor = Color.red
-    public static let successColor = Color.green
-    public static let warningColor = Color.yellow
-    public static let infoColor = Color.blue
-    public static let primaryOnColor = Color.white
-    public static let secondaryOnColor = Color.black
-    public static let backgroundOnColor = Color.black
-    public static let surfaceOnColor = Color.black
-    public static let errorOnColor = Color.white
-    public static let successOnColor = Color.black
-    public static let warningOnColor = Color.black
-    public static let infoOnColor = Color.white
-    
-    #if canImport(UIKit)
-    public static let backgroundUIKitColor = Color(UIColor.systemBackground)
-    public static let surfaceUIKitColor = Color(UIColor.secondarySystemBackground)
-    public static let primaryTextUIKitColor = Color(UIColor.label)
-    public static let secondaryTextUIKitColor = Color(UIColor.secondaryLabel)
-    public static let borderUIKitColor = Color(UIColor.separator)
-    #elseif canImport(AppKit)
-    public static let backgroundAppKitColor = Color(NSColor.windowBackgroundColor)
-    public static let surfaceAppKitColor = Color(NSColor.controlBackgroundColor)
-    public static let primaryTextAppKitColor = Color(NSColor.labelColor)
-    public static let secondaryTextAppKitColor = Color(NSColor.secondaryLabelColor)
-    public static let borderAppKitColor = Color(NSColor.separatorColor)
-    #endif
+    public enum Colors {
+        public static let primary = Color("Primary", bundle: .module)
+        public static let success = Color("Success", bundle: .module)
+        public static let error = Color("Error", bundle: .module)
+        public static let border = Color("Border", bundle: .module)
+        public static let textPrimary = Color("TextPrimary", bundle: .module)
+        public static let textSecondary = Color("TextSecondary", bundle: .module)
+    }
     
     // MARK: - Typography
-    public static let titleLargeFont = Font.title
-    #if os(macOS)
-    @available(macOS 11.0, *)
-    public static let titleMediumFont = Font.title2
-    @available(macOS 11.0, *)
-    public static let titleSmallFont = Font.title3
-    #else
-    public static let titleMediumFont = Font.title2
-    public static let titleSmallFont = Font.title3
-    #endif
-    public static let bodyLargeFont = Font.body
-    public static let bodyMediumFont = Font.callout
-    public static let bodySmallFont = Font.footnote
-    public static let displayLargeFont = Font.system(size: 34, weight: .bold)
-    public static let displayMediumFont = Font.system(size: 28, weight: .bold)
-    public static let displaySmallFont = Font.system(size: 24, weight: .bold)
-    public static let labelLargeFont = Font.system(size: 15, weight: .medium)
-    public static let labelMediumFont = Font.system(size: 13, weight: .medium)
-    public static let labelSmallFont = Font.system(size: 11, weight: .medium)
-    public static let captionFont = Font.system(size: 10, weight: .regular)
+    public enum Typography {
+        public static let titleLarge = Font.title
+        public static let titleMedium = Font.title2
+        public static let titleSmall = Font.title3
+        public static let bodyLarge = Font.body.weight(.medium)
+        public static let bodyMedium = Font.body
+        public static let bodySmall = Font.footnote
+        public static let labelLarge = Font.callout.weight(.medium)
+        public static let labelMedium = Font.callout
+        public static let labelSmall = Font.caption
+    }
     
     // MARK: - Spacing
-    public static let spacingSmall: CGFloat = 8
-    public static let spacingMedium: CGFloat = 16
-    public static let spacingLarge: CGFloat = 24
-    
-    public static let horizontalEdge = Edge.Set.horizontal
-    public static let verticalEdge = Edge.Set.vertical
-    public static let allEdges = Edge.Set.all
+    public enum Spacing {
+        public static let small: CGFloat = 8
+        public static let medium: CGFloat = 16
+        public static let large: CGFloat = 24
+        public static let extraLarge: CGFloat = 32
+    }
     
     // MARK: - Corner Radius
-    public static let cornerRadiusSmall: CGFloat = 4
-    public static let cornerRadiusMedium: CGFloat = 8
-    public static let cornerRadiusLarge: CGFloat = 12
+    public enum Radius {
+        public static let small: CGFloat = 8
+        public static let medium: CGFloat = 12
+        public static let large: CGFloat = 16
+        public static let extraLarge: CGFloat = 24
+    }
     
     // MARK: - Shadows
-    public static let shadowSmall: CGFloat = 4
-    public static let shadowMedium: CGFloat = 8
-    public static let shadowLarge: CGFloat = 16
-    
-    public static let shadowSmallYOffset: CGFloat = 2
-    public static let shadowMediumYOffset: CGFloat = 4
-    public static let shadowLargeYOffset: CGFloat = 8
-    
-    // MARK: - Border Widths
-    public static let borderWidthThin: CGFloat = 1
-    public static let borderWidthMedium: CGFloat = 2
-    public static let borderWidthThick: CGFloat = 4
+    public enum Shadow {
+        public static let small = Color.black.opacity(0.1)
+        public static let medium = Color.black.opacity(0.15)
+        public static let large = Color.black.opacity(0.2)
+    }
     
     // MARK: - Animations
     public static let animationDefault: Double = 0.3
@@ -134,4 +90,14 @@ public enum BFDesignSystem {
     public static let fontWeightLight = Font.Weight.light
     public static let fontWeightHeavy = Font.Weight.heavy
     public static let fontWeightBlack = Font.Weight.black
+    
+    // MARK: - Edges
+    public static let horizontalEdge = Edge.Set.horizontal
+    public static let verticalEdge = Edge.Set.vertical
+    public static let allEdges = Edge.Set.all
+    
+    // MARK: - Border Widths
+    public static let borderWidthThin: CGFloat = 1
+    public static let borderWidthMedium: CGFloat = 2
+    public static let borderWidthThick: CGFloat = 4
 }

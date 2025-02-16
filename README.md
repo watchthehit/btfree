@@ -93,7 +93,14 @@ UserDefaults.standard.set(false, forKey: "isOnboarded")
 
 ## Version History
 
-### v0.1.5 (Current)
+### v0.1.6 (Current)
+- Resolved ResourcesView redeclaration issue
+- Enhanced Settings module documentation
+- Improved crisis support accessibility
+- Standardized email handling in ContactView
+- Updated technical documentation
+
+### v0.1.5
 - Improved cross-platform compatibility
 - Migrated to standard SwiftUI styling
 - Fixed sheet presentation on macOS

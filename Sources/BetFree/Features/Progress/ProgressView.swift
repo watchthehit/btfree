@@ -1,6 +1,6 @@
 import SwiftUI
 
-public struct BFProgressView: View {
+public struct ProgressTrackingView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var savingsManager = SavingsManager()
     @State private var selectedTimeframe: Timeframe = .week
@@ -46,99 +46,105 @@ public struct BFProgressView: View {
                                 icon: "dollarsign.circle.fill",
                                 color: BFDesignSystem.Colors.primary
                             )
+                            
+                            if savingsInPeriod > 0 {
+                                Divider()
+                                
+                                HStack {
+                                    SwiftUI.ProgressView(value: savingsInPeriod, total: dailyLimit)
+                                        .progressViewStyle(.linear)
+                                        .tint(BFDesignSystem.Colors.success)
+                                }
+                                .padding(.top, 8)
+                            }
                         }
                         .padding()
                     }
                     .padding(.horizontal)
                     
-                    // Achievements
-                    if !achievements.isEmpty {
-                        achievementsSection
+                    // Streak Info
+                    BFCard(style: .elevated) {
+                        VStack(spacing: 16) {
+                            StatRow(
+                                title: "Current Streak",
+                                value: "\(appState.currentStreak) days",
+                                icon: "flame.fill",
+                                color: BFDesignSystem.Colors.success
+                            )
+                            
+                            if let nextMilestone = nextStreakMilestone {
+                                Divider()
+                                
+                                StatRow(
+                                    title: "Next Milestone",
+                                    value: "\(nextMilestone) days",
+                                    icon: "flag.fill",
+                                    color: BFDesignSystem.Colors.primary
+                                )
+                            }
+                        }
+                        .padding()
                     }
+                    .padding(.horizontal)
                 }
+                .padding(.vertical)
             }
             .navigationTitle("Progress")
         }
     }
     
     private var weekView: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 8) {
-            ForEach(weekDays, id: \.self) { date in
-                DayCell(
-                    date: date,
-                    isClean: appState.wasCleanOn(date),
-                    amount: savingsManager.savings(for: date)
-                )
+        VStack(spacing: 16) {
+            HStack {
+                ForEach(weekDays, id: \.self) { date in
+                    DayProgressView(
+                        date: date,
+                        isClean: savingsManager.savings(for: date) > 0,
+                        savings: savingsManager.savings(for: date)
+                    )
+                }
             }
+            .padding(.horizontal)
         }
-        .padding(.horizontal)
     }
     
     private var monthView: some View {
         VStack(spacing: 16) {
-            ForEach(monthWeeks, id: \.self) { week in
-                HStack(spacing: 8) {
-                    ForEach(week, id: \.self) { date in
-                        DayCell(
-                            date: date,
-                            isClean: appState.wasCleanOn(date),
-                            amount: savingsManager.savings(for: date)
-                        )
-                    }
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7)) {
+                ForEach(monthDays, id: \.self) { date in
+                    DayProgressView(
+                        date: date,
+                        isClean: savingsManager.savings(for: date) > 0,
+                        savings: savingsManager.savings(for: date)
+                    )
                 }
             }
-        }
-        .padding(.horizontal)
-    }
-    
-    private var achievementsSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Achievements")
-                .font(BFDesignSystem.Typography.titleMedium)
-                .padding(.horizontal)
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 16) {
-                    ForEach(achievements) { achievement in
-                        AchievementCard(achievement: achievement)
-                    }
-                }
-                .padding(.horizontal)
-            }
+            .padding(.horizontal)
         }
     }
-    
-    // MARK: - Helper Properties
     
     private var weekDays: [Date] {
         let calendar = Calendar.current
         let today = Date()
-        return (0..<7).map { days in
-            calendar.date(byAdding: .day, value: -days, to: today) ?? today
+        return (0..<7).compactMap { dayOffset in
+            calendar.date(byAdding: .day, value: -dayOffset, to: today)
         }.reversed()
     }
     
     private var monthDays: [Date] {
         let calendar = Calendar.current
         let today = Date()
-        return (0..<30).map { days in
-            calendar.date(byAdding: .day, value: -days, to: today) ?? today
+        return (0..<30).compactMap { dayOffset in
+            calendar.date(byAdding: .day, value: -dayOffset, to: today)
         }.reversed()
-    }
-    
-    private var monthWeeks: [[Date]] {
-        let days = monthDays
-        return stride(from: 0, to: days.count, by: 7).map {
-            Array(days[days.index(days.startIndex, offsetBy: $0)..<min(days.index(days.startIndex, offsetBy: $0+7), days.endIndex)])
-        }
     }
     
     private var cleanDays: Int {
         switch selectedTimeframe {
         case .week:
-            return weekDays.filter { appState.wasCleanOn($0) }.count
+            return weekDays.filter { savingsManager.savings(for: $0) > 0 }.count
         case .month:
-            return monthDays.filter { appState.wasCleanOn($0) }.count
+            return monthDays.filter { savingsManager.savings(for: $0) > 0 }.count
         }
     }
     
@@ -151,43 +157,14 @@ public struct BFProgressView: View {
         }
     }
     
-    private var achievements: [Achievement] {
-        var result: [Achievement] = []
-        
-        // Week achievements
-        if appState.currentStreak >= 7 {
-            result.append(Achievement(
-                id: "week",
-                title: "First Week",
-                description: "Completed first week bet-free",
-                icon: "star.fill",
-                color: BFDesignSystem.Colors.success
-            ))
-        }
-        
-        // Month achievements
-        if appState.currentStreak >= 30 {
-            result.append(Achievement(
-                id: "month",
-                title: "First Month",
-                description: "Completed first month bet-free",
-                icon: "star.circle.fill",
-                color: BFDesignSystem.Colors.primary
-            ))
-        }
-        
-        // Savings achievements
-        if savingsManager.totalSaved >= 1000 {
-            result.append(Achievement(
-                id: "savings1k",
-                title: "$1,000 Saved",
-                description: "Saved your first thousand",
-                icon: "dollarsign.circle.fill",
-                color: BFDesignSystem.Colors.success
-            ))
-        }
-        
-        return result
+    private var nextStreakMilestone: Int? {
+        let streak = appState.currentStreak
+        let milestones = [7, 14, 30, 60, 90, 180, 365]
+        return milestones.first { $0 > streak }
+    }
+    
+    private var dailyLimit: Double {
+        appState.dailyLimit
     }
 }
 
@@ -201,8 +178,55 @@ private enum Timeframe: String, CaseIterable, Identifiable {
     
     var title: String {
         switch self {
-        case .week: return "Week"
-        case .month: return "Month"
+        case .week:
+            return "Week"
+        case .month:
+            return "Month"
+        }
+    }
+}
+
+private struct DayProgressView: View {
+    let date: Date
+    let isClean: Bool
+    let savings: Double
+    
+    private var dayOfWeek: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "E"
+        return formatter.string(from: date)
+    }
+    
+    private var dayOfMonth: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "d"
+        return formatter.string(from: date)
+    }
+    
+    var body: some View {
+        VStack(spacing: 4) {
+            Text(dayOfWeek)
+                .font(BFDesignSystem.Typography.labelSmall)
+                .foregroundColor(BFDesignSystem.Colors.textSecondary)
+            
+            Circle()
+                .fill(isClean ? BFDesignSystem.Colors.success : Color.gray.opacity(0.2))
+                .frame(width: 32, height: 32)
+                .overlay {
+                    Text(dayOfMonth)
+                        .font(BFDesignSystem.Typography.labelMedium)
+                        .foregroundColor(isClean ? .white : BFDesignSystem.Colors.textSecondary)
+                }
+            
+            if savings > 0 {
+                Text("$\(Int(savings))")
+                    .font(BFDesignSystem.Typography.labelSmall)
+                    .foregroundColor(BFDesignSystem.Colors.success)
+            } else {
+                Text("-")
+                    .font(BFDesignSystem.Typography.labelSmall)
+                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
+            }
         }
     }
 }
@@ -216,8 +240,8 @@ private struct StatRow: View {
     var body: some View {
         HStack {
             Image(systemName: icon)
-                .font(.title2)
                 .foregroundColor(color)
+                .font(.title2)
             
             Text(title)
                 .font(BFDesignSystem.Typography.bodyMedium)
@@ -226,72 +250,8 @@ private struct StatRow: View {
             Spacer()
             
             Text(value)
-                .font(BFDesignSystem.Typography.titleMedium)
+                .font(BFDesignSystem.Typography.bodyLarge)
                 .foregroundColor(BFDesignSystem.Colors.textPrimary)
-        }
-    }
-}
-
-private struct AchievementCard: View {
-    let achievement: Achievement
-    
-    var body: some View {
-        BFCard(style: .elevated) {
-            VStack(spacing: 8) {
-                Image(systemName: achievement.icon)
-                    .font(.title)
-                    .foregroundColor(achievement.color)
-                
-                Text(achievement.title)
-                    .font(BFDesignSystem.Typography.labelLarge)
-                
-                Text(achievement.description)
-                    .font(BFDesignSystem.Typography.bodySmall)
-                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
-                    .multilineTextAlignment(.center)
-            }
-            .frame(width: 120)
-            .padding()
-        }
-    }
-}
-
-private struct Achievement: Identifiable {
-    let id: String
-    let title: String
-    let description: String
-    let icon: String
-    let color: Color
-}
-
-private struct DayCell: View {
-    let date: Date
-    let isClean: Bool
-    let amount: Double
-    
-    var body: some View {
-        VStack(spacing: 4) {
-            Text(date, format: .dateTime.weekday(.narrow))
-                .font(BFDesignSystem.Typography.labelSmall)
-            
-            Circle()
-                .fill(backgroundColor)
-                .frame(width: 32, height: 32)
-                .overlay {
-                    if amount > 0 {
-                        Image(systemName: "dollarsign.circle.fill")
-                            .font(.caption)
-                            .foregroundColor(.white)
-                    }
-                }
-        }
-    }
-    
-    private var backgroundColor: Color {
-        if !isClean {
-            return BFDesignSystem.Colors.error
-        } else {
-            return BFDesignSystem.Colors.success
         }
     }
 }

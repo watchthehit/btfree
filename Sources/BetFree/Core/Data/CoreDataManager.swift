@@ -1,28 +1,13 @@
 import CoreData
 import Foundation
+import BetFreeModels
 
 @MainActor
 public final class CoreDataManager: BetFreeDataManager {
-    public static var shared: BetFreeDataManager = DataManagerFactory.createDataManager()
+    public static let shared = CoreDataManager()
     
-    public init() {
-        // Load the model immediately to catch any initialization errors
-        _ = persistentContainer
-    }
-    
-    public lazy var persistentContainer: NSPersistentContainer = {
-        #if DEBUG
-        if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil {
-            // Running in tests, use in-memory store
-            return MockCDManager.shared.persistentContainer
-        }
-        #endif
-        
-        // Create container with in-memory store
-        let container = NSPersistentContainer(name: "BetFree", managedObjectModel: CoreDataModel.createModel())
-        let description = NSPersistentStoreDescription()
-        description.type = NSInMemoryStoreType
-        container.persistentStoreDescriptions = [description]
+    private lazy var persistentContainer: NSPersistentContainer = {
+        let container = NSPersistentContainer(name: "BetFreeModel")
         
         container.loadPersistentStores { description, error in
             if let error = error {
@@ -30,7 +15,6 @@ public final class CoreDataManager: BetFreeDataManager {
             }
         }
         
-        // Configure the container
         container.viewContext.automaticallyMergesChangesFromParent = true
         container.viewContext.mergePolicy = NSMergePolicy(merge: .mergeByPropertyObjectTrumpMergePolicyType)
         
@@ -41,36 +25,30 @@ public final class CoreDataManager: BetFreeDataManager {
         persistentContainer.viewContext
     }
     
-    // MARK: - User Profile Methods
+    public init() {}
     
     public func getCurrentUser() -> UserProfileEntity? {
         let request = NSFetchRequest<UserProfileEntity>(entityName: "UserProfileEntity")
         request.fetchLimit = 1
-        
-        do {
-            return try context.fetch(request).first
-        } catch {
-            print("Error fetching user profile: \(error)")
-            return nil
-        }
+        return try? context.fetch(request).first
     }
     
-    public func createOrUpdateUser(name: String?, email: String?, dailyLimit: Double) throws {
-        let user: UserProfileEntity
+    public func createOrUpdateUser(name: String, email: String?, dailyLimit: Double) throws {
         if let existingUser = getCurrentUser() {
-            user = existingUser
+            existingUser.name = name
+            existingUser.email = email
+            existingUser.dailyLimit = dailyLimit
+            existingUser.idString = name
         } else {
-            let entity = NSEntityDescription.entity(forEntityName: "UserProfileEntity", in: context)!
-            user = UserProfileEntity(entity: entity, insertInto: context)
-            user.id = UUID()
+            let user = UserProfileEntity(context: context)
+            user.idString = name
+            user.name = name
+            user.email = email
+            user.dailyLimit = dailyLimit
             user.streak = 0
             user.totalSavings = 0
+            user.lastCheckIn = Date()
         }
-        
-        user.name = name ?? ""
-        user.email = email
-        user.dailyLimit = dailyLimit
-        
         try context.save()
     }
     
@@ -81,105 +59,67 @@ public final class CoreDataManager: BetFreeDataManager {
         let now = Date()
         
         if let lastCheckIn = user.lastCheckIn {
-            let daysSinceLastCheckIn = calendar.dateComponents([.day], from: lastCheckIn, to: now).day ?? 0
+            let isNextDay = calendar.isDate(now, inSameDayAs: calendar.date(byAdding: .day, value: 1, to: lastCheckIn) ?? now)
+            let isToday = calendar.isDateInToday(lastCheckIn)
             
-            if daysSinceLastCheckIn == 1 {
-                // Consecutive day
+            if isNextDay {
                 user.streak += 1
-            } else if daysSinceLastCheckIn > 1 {
-                // Streak broken
-                user.streak = 1
+            } else if !isToday {
+                user.streak = 0
             }
-        } else {
-            // First check-in
-            user.streak = 1
         }
         
         user.lastCheckIn = now
         try context.save()
     }
     
-    public func updateTotalSavings(amount: Double) throws {
-        guard let user = getCurrentUser() else { return }
-        user.totalSavings += amount
-        try context.save()
-    }
-    
-    // MARK: - Transaction Methods
-    
-    public func addTransaction(amount: Double, note: String? = nil) throws {
-        let transaction = TransactionEntity(context: context)
-        transaction.id = UUID()
-        transaction.amount = amount
-        transaction.date = Date()
-        transaction.category = amount < 0 ? "expense" : "saving"
-        transaction.note = note
-        
-        try updateTotalSavings(amount: amount)
-        try context.save()
-    }
-    
-    public func getTodaysTransactions() -> [Transaction] {
-        let calendar = Calendar.current
-        let startOfDay = calendar.startOfDay(for: Date())
-        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
-        
+    public func getAllTransactions() -> [TransactionEntity] {
         let request = NSFetchRequest<TransactionEntity>(entityName: "TransactionEntity")
-        request.predicate = NSPredicate(
-            format: "date >= %@ AND date < %@",
-            startOfDay as NSDate,
-            endOfDay as NSDate
-        )
         request.sortDescriptors = [NSSortDescriptor(keyPath: \TransactionEntity.date, ascending: false)]
+        return (try? context.fetch(request)) ?? []
+    }
+    
+    public func addTransaction(_ transaction: Transaction) throws {
+        let entity = TransactionEntity(context: context)
+        entity.idString = transaction.id.uuidString
+        entity.amount = transaction.amount
+        entity.category = transaction.category.rawValue
+        entity.date = transaction.date
+        entity.note = transaction.note
         
-        do {
-            let entities = try context.fetch(request)
-            return entities.map { entity in
-                Transaction(
-                    id: entity.id,
-                    amount: entity.amount,
-                    date: entity.date,
-                    category: entity.category,
-                    note: entity.note
-                )
-            }
-        } catch {
-            print("Error fetching today's transactions: \(error)")
-            return []
+        if let user = getCurrentUser() {
+            user.totalSavings += transaction.amount
         }
-    }
-    
-    public func getTotalSpentToday() -> Double {
-        getTodaysTransactions()
-            .filter { $0.amount < 0 }
-            .reduce(0) { $0 + abs($1.amount) }
-    }
-    
-    // MARK: - Utility Methods
-    
-    public func save() throws {
+        
         try context.save()
+    }
+    
+    public func deleteTransaction(_ transaction: Transaction) throws {
+        let request = NSFetchRequest<TransactionEntity>(entityName: "TransactionEntity")
+        request.predicate = NSPredicate(format: "idString == %@", transaction.id.uuidString)
+        request.fetchLimit = 1
+        
+        if let entity = try context.fetch(request).first {
+            if let user = getCurrentUser() {
+                user.totalSavings -= entity.amount
+            }
+            
+            context.delete(entity)
+            try context.save()
+        }
     }
     
     public func reset() {
-        // Delete all transactions
-        let transactionFetch = NSFetchRequest<NSFetchRequestResult>(entityName: "TransactionEntity")
-        let userFetch = NSFetchRequest<NSFetchRequestResult>(entityName: "UserProfileEntity")
+        let fetchRequests = [
+            NSFetchRequest<NSFetchRequestResult>(entityName: "UserProfileEntity"),
+            NSFetchRequest<NSFetchRequestResult>(entityName: "TransactionEntity")
+        ]
         
-        do {
-            // Delete transactions
-            if let transactions = try context.fetch(transactionFetch) as? [TransactionEntity] {
-                transactions.forEach { context.delete($0) }
-            }
-            
-            // Delete user profiles
-            if let users = try context.fetch(userFetch) as? [UserProfileEntity] {
-                users.forEach { context.delete($0) }
-            }
-            
-            try context.save()
-        } catch {
-            print("Error resetting Core Data: \(error)")
+        for request in fetchRequests {
+            let deleteRequest = NSBatchDeleteRequest(fetchRequest: request)
+            try? context.execute(deleteRequest)
         }
+        
+        try? context.save()
     }
 }

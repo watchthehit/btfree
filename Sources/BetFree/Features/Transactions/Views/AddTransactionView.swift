@@ -1,6 +1,7 @@
 import SwiftUI
 import CoreData
 import BetFreeUI
+import BetFreeModels
 
 @available(macOS 10.15, iOS 13.0, *)
 public struct AddTransactionView: View {
@@ -12,12 +13,24 @@ public struct AddTransactionView: View {
     @State private var category: TransactionCategory = .other
     @State private var showingAlert = false
     @State private var alertMessage = ""
+    @State private var isLoading = false
     
     public init() {}
     
     public var body: some View {
         NavigationView {
             Form {
+                if isLoading {
+                    Section {
+                        HStack {
+                            Spacer()
+                            SwiftUI.ProgressView()
+                                .progressViewStyle(.circular)
+                            Spacer()
+                        }
+                    }
+                }
+                
                 // Amount Section
                 Section {
                     VStack(alignment: .leading) {
@@ -25,9 +38,7 @@ public struct AddTransactionView: View {
                             .font(BFDesignSystem.Typography.labelMedium)
                             .foregroundColor(BFDesignSystem.Colors.textSecondary)
                         TextField("Amount", text: $amount)
-                        #if os(iOS)
-                        .keyboardType(.decimalPad)
-                        #endif
+                            .keyboardType(.decimalPad)
                     }
                 } header: {
                     Text("Transaction Details")
@@ -37,8 +48,11 @@ public struct AddTransactionView: View {
                 Section {
                     Picker("Category", selection: $category) {
                         ForEach(TransactionCategory.allCases) { category in
-                            Label(category.name, systemImage: category.icon)
-                                .tag(category)
+                            HStack {
+                                Text(category.icon)
+                                Text(category.rawValue)
+                            }
+                            .tag(category)
                         }
                     }
                 } header: {
@@ -48,54 +62,41 @@ public struct AddTransactionView: View {
                 // Note Section
                 Section {
                     VStack(alignment: .leading) {
-                        Text("Note")
+                        Text("Note (Optional)")
                             .font(BFDesignSystem.Typography.labelMedium)
                             .foregroundColor(BFDesignSystem.Colors.textSecondary)
-                        TextField("Optional note", text: $note)
+                        TextField("Add a note", text: $note)
                     }
-                    
+                } header: {
+                    Text("Additional Details")
+                }
+                
+                // Date Section
+                Section {
                     DatePicker(
                         "Date",
                         selection: $date,
-                        displayedComponents: [.date]
+                        displayedComponents: [.date, .hourAndMinute]
                     )
-                }
-                
-                Section {
-                    Button {
-                        saveTransaction()
-                    } label: {
-                        Text("Save Transaction")
-                            .font(BFDesignSystem.Typography.bodyLarge)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(BFDesignSystem.Colors.primary)
-                            .cornerRadius(8)
-                    }
                 }
             }
             .navigationTitle("Add Transaction")
-            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
-            #endif
             .toolbar {
-                #if os(iOS)
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Cancel") {
-                        dismiss()
+                    Button("Save") {
+                        saveTransaction()
                     }
+                    .disabled(amount.isEmpty || isLoading)
                 }
-                #else
-                ToolbarItem(placement: .automatic) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-                #endif
             }
             .alert("Error", isPresented: $showingAlert) {
-                Button("OK") {}
+                Button("OK", role: .cancel) {}
             } message: {
                 Text(alertMessage)
             }
@@ -103,24 +104,37 @@ public struct AddTransactionView: View {
     }
     
     private func saveTransaction() {
-        guard let amountValue = Double(amount.trimmingCharacters(in: .whitespaces)) else {
+        guard let amountValue = Double(amount) else {
             alertMessage = "Please enter a valid amount"
             showingAlert = true
             return
         }
         
-        guard amountValue > 0 else {
-            alertMessage = "Amount must be greater than zero"
-            showingAlert = true
-            return
-        }
+        isLoading = true
         
-        do {
-            try appState.addTransaction(amount: amountValue, note: note.isEmpty ? nil : note)
-            dismiss()
-        } catch {
-            alertMessage = "Failed to save transaction: \(error.localizedDescription)"
-            showingAlert = true
+        Task {
+            do {
+                let transaction = Transaction(
+                    amount: amountValue,
+                    category: category,
+                    date: date,
+                    note: note.isEmpty ? nil : note
+                )
+                
+                try await MockCDManager.shared.addTransaction(transaction)
+                await MainActor.run {
+                    dismiss()
+                }
+            } catch {
+                await MainActor.run {
+                    alertMessage = "Failed to save transaction: \(error.localizedDescription)"
+                    showingAlert = true
+                }
+            }
+            
+            await MainActor.run {
+                isLoading = false
+            }
         }
     }
 }

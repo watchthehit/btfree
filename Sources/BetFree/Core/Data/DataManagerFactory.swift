@@ -1,14 +1,16 @@
 import Foundation
+import CoreData
+import BetFreeModels
 
 @MainActor
-public enum DataManagerFactory {
+public class DataManagerFactory {
     public static func createDataManager() -> BetFreeDataManager {
         #if DEBUG
-        if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil {
-            // Running in tests
-            return MockCoreDataManager.shared
+        if CommandLine.arguments.contains("--uitesting") {
+            return MockCDManager()
         }
         #endif
-        return CoreDataManager()
+        
+        return CoreDataManager.shared
     }
-} 
+}

@@ -19,6 +19,17 @@ public struct NotificationSettingsView: View {
     
     public var body: some View {
         Form {
+            if isLoading {
+                Section {
+                    HStack {
+                        Spacer()
+                        SwiftUI.ProgressView()
+                            .progressViewStyle(.circular)
+                        Spacer()
+                    }
+                }
+            }
+            
             Section {
                 Toggle("Enable Daily Check-In", isOn: Binding(
                     get: { dailyCheckInEnabled },
@@ -55,22 +66,21 @@ public struct NotificationSettingsView: View {
                     set: { 
                         progressUpdatesEnabled = $0
                         UserDefaults.standard.set($0, forKey: "progressUpdatesEnabled")
-                        checkAndUpdatePermissions()
+                        updateProgressUpdates(enabled: $0)
                     }
                 ))
-                
                 Toggle("Milestone Alerts", isOn: Binding(
                     get: { milestoneAlertsEnabled },
                     set: { 
                         milestoneAlertsEnabled = $0
                         UserDefaults.standard.set($0, forKey: "milestoneAlertsEnabled")
-                        checkAndUpdatePermissions()
+                        updateMilestoneAlerts(enabled: $0)
                     }
                 ))
             } header: {
                 Text("Other Notifications")
             } footer: {
-                Text("Stay motivated with progress updates and milestone celebrations.")
+                Text("Stay motivated with updates about your progress and achievements.")
             }
             
             Section {
@@ -87,40 +97,31 @@ public struct NotificationSettingsView: View {
             }
         }
         .navigationTitle("Notifications")
+        .onAppear {
+            checkAndUpdatePermissions()
+        }
         .alert("Enable Notifications", isPresented: $showingPermissionAlert) {
-            Button("Cancel", role: .cancel) { }
             Button("Settings") {
-                openSystemSettings()
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
             }
+            Button("Cancel", role: .cancel) {}
         } message: {
             Text("Please enable notifications in Settings to receive reminders and updates.")
         }
-        .overlay {
-            if isLoading {
-                SwiftUI.ProgressView()
-                    .scaleEffect(1.5)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color.black.opacity(0.2))
-            }
-        }
-        .onAppear {
-            checkPermissionStatus()
-        }
     }
     
-    private func checkPermissionStatus() {
-        Task {
-            permissionStatus = await NotificationService.shared.checkPermissionStatus()
-            updateTogglesBasedOnPermission()
-        }
+    private func updateDailyCheckIn(enabled: Bool? = nil, time: Date? = nil) {
+        // TODO: Implement notification scheduling
     }
     
-    private func updateTogglesBasedOnPermission() {
-        if permissionStatus != .authorized {
-            dailyCheckInEnabled = false
-            progressUpdatesEnabled = false
-            milestoneAlertsEnabled = false
-        }
+    private func updateProgressUpdates(enabled: Bool) {
+        // TODO: Implement notification scheduling
+    }
+    
+    private func updateMilestoneAlerts(enabled: Bool) {
+        // TODO: Implement notification scheduling
     }
     
     private func checkAndUpdatePermissions() {
@@ -128,27 +129,31 @@ public struct NotificationSettingsView: View {
             isLoading = true
             defer { isLoading = false }
             
-            let status = await NotificationService.shared.checkPermissionStatus()
-            if status != .authorized {
-                showingPermissionAlert = true
-                updateTogglesBasedOnPermission()
+            let center = UNUserNotificationCenter.current()
+            let status = await center.notificationSettings().authorizationStatus
+            
+            await MainActor.run {
+                permissionStatus = status
+                
+                if status == .denied {
+                    showingPermissionAlert = true
+                } else if status == .notDetermined {
+                    requestPermissions()
+                }
             }
         }
     }
     
-    private func updateDailyCheckIn(enabled: Bool? = nil, time: Date? = nil) {
+    private func requestPermissions() {
         Task {
+            let center = UNUserNotificationCenter.current()
             do {
-                if let enabled = enabled, !enabled {
-                    NotificationService.shared.cancelNotification(withIdentifier: "dailyCheckIn")
-                    return
-                }
-                
-                if dailyCheckInEnabled {
-                    try await NotificationService.shared.scheduleDailyCheckIn(at: time ?? notificationTime)
+                let granted = try await center.requestAuthorization(options: [.alert, .sound, .badge])
+                if !granted {
+                    showingPermissionAlert = true
                 }
             } catch {
-                print("Error updating daily check-in: \(error)")
+                print("Error requesting notification permissions: \(error)")
             }
         }
     }
@@ -169,4 +174,4 @@ public struct NotificationSettingsView: View {
 #Preview {
     NotificationSettingsView()
         .environmentObject(AppState.preview)
-} 
+}

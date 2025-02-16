@@ -10,31 +10,33 @@ public class AppState: ObservableObject {
     
     @Published public var username: String {
         didSet { 
-            try? dataManager.createOrUpdateUser(name: username, email: (nil as String?), dailyLimit: dailyLimit)
+            try? dataManager.createOrUpdateUser(name: username, email: nil, dailyLimit: dailyLimit)
             saveSettings()
         }
     }
     
     @Published public var currentStreak: Int {
         didSet { 
-            try? dataManager.updateUserStreak()
-            handleStreakMilestone()
-            saveSettings()
+            do {
+                try dataManager.updateUserStreak()
+                saveSettings()
+                handleStreakMilestone()
+            } catch {
+                print("Error updating streak: \(error)")
+            }
         }
     }
     
     @Published public var totalSavings: Double {
-        willSet {
-            try? dataManager.updateTotalSavings(amount: newValue)
-        }
         didSet {
-            handleSavingsMilestone(oldValue: oldValue)
             saveSettings()
+            handleSavingsMilestone(oldValue: oldValue)
         }
     }
     
     @Published public var dailyLimit: Double {
         didSet {
+            try? dataManager.createOrUpdateUser(name: username, email: nil, dailyLimit: dailyLimit)
             saveSettings()
         }
     }
@@ -97,20 +99,38 @@ public class AppState: ObservableObject {
     private let preferredSportsKey = "BFPreferredSports"
     private let subscriptionStatusKey = "BFSubscriptionStatus"
     
-    public init(dataManager: BetFreeDataManager? = nil) async throws {
-        let dataManager = dataManager ?? CoreDataManager.shared
+    public static let preview: AppState = {
+        let state = AppState(dataManager: MockCDManager.shared)
+        state.username = "Preview User"
+        state.currentStreak = 7
+        state.totalSavings = 1234.56
+        state.dailyLimit = 100
+        state.isOnboarded = true
+        state.hasBlockedApps = true
+        return state
+    }()
+    
+    public init(dataManager: BetFreeDataManager) {
         self.dataManager = dataManager
         
-        // Initialize from UserDefaults
+        // Load saved settings
         self.username = defaults.string(forKey: usernameKey) ?? ""
-        self.isOnboarded = defaults.bool(forKey: isOnboardedKey)
-        self.selectedTab = defaults.integer(forKey: selectedTabKey)
         self.currentStreak = defaults.integer(forKey: streakKey)
         self.totalSavings = defaults.double(forKey: savingsKey)
         self.dailyLimit = defaults.double(forKey: dailyLimitKey)
+        self.isOnboarded = defaults.bool(forKey: isOnboardedKey, defaultValue: false)
+        self.selectedTab = defaults.integer(forKey: selectedTabKey)
+        self.hasBlockedApps = defaults.bool(forKey: hasBlockedAppsKey, defaultValue: false)
         self.typicalBetAmount = defaults.double(forKey: typicalBetAmountKey)
         self.preferredSports = defaults.stringArray(forKey: preferredSportsKey) ?? []
-        self.hasBlockedApps = defaults.bool(forKey: hasBlockedAppsKey)
+        
+        // Load user profile from Core Data
+        if let user = dataManager.getCurrentUser() {
+            self.username = user.name ?? ""
+            self.currentStreak = Int(user.streak)
+            self.totalSavings = user.totalSavings
+            self.dailyLimit = user.dailyLimit
+        }
         
         // Load subscription status
         if let statusData = defaults.data(forKey: subscriptionStatusKey),
@@ -119,48 +139,7 @@ public class AppState: ObservableObject {
         } else {
             self.subscriptionStatus = .expired
         }
-        
-        // Initialize from Core Data if available
-        if let user = dataManager.getCurrentUser() {
-            self.username = user.name
-            self.currentStreak = Int(user.streak)
-            self.totalSavings = user.totalSavings
-            self.dailyLimit = user.dailyLimit
-            self.isOnboarded = true
-        } else {
-            throw AppStateError.userProfileCreationFailed
-        }
     }
-    
-    public init(syncDataManager: BetFreeDataManager) {
-        self.dataManager = syncDataManager
-        self.username = "Preview User"
-        self.currentStreak = 7
-        self.totalSavings = 1234.56
-        self.dailyLimit = 50.0
-        self.isOnboarded = true
-        self.selectedTab = 0
-        self.typicalBetAmount = 0.0
-        self.preferredSports = []
-        self.hasBlockedApps = false
-        self.subscriptionStatus = .expired
-    }
-    
-    // MARK: - Transaction Methods
-    
-    public func getTodaysTransactions() -> [Transaction] {
-        dataManager.getTodaysTransactions()
-    }
-    
-    public func addTransaction(amount: Double, note: String? = nil) throws {
-        try dataManager.addTransaction(amount: amount, note: note)
-    }
-    
-    public func getTotalSpentToday() -> Double {
-        dataManager.getTotalSpentToday()
-    }
-    
-    // MARK: - Private Methods
     
     private func saveSettings() {
         defaults.set(username, forKey: usernameKey)
@@ -206,7 +185,7 @@ public class AppState: ObservableObject {
     private func handleStreakMilestone() {
         Task {
             // Check if notifications are enabled
-            guard UserDefaults.standard.bool(forKey: "milestoneAlertsEnabled", defaultValue: true) else {
+            guard defaults.bool(forKey: "milestoneAlertsEnabled", defaultValue: true) else {
                 return
             }
             
@@ -226,14 +205,14 @@ public class AppState: ObservableObject {
     private func handleSavingsMilestone(oldValue: Double) {
         Task {
             // Check if notifications are enabled
-            guard UserDefaults.standard.bool(forKey: "milestoneAlertsEnabled", defaultValue: true) else {
+            guard defaults.bool(forKey: "milestoneAlertsEnabled", defaultValue: true) else {
                 return
             }
             
             // Check for savings milestones
             let milestones = [100, 500, 1000, 5000, 10000]
             for milestone in milestones {
-                if totalSavings >= Double(milestone) && totalSavings - oldValue < Double(milestone) {
+                if totalSavings >= Double(milestone) && oldValue < Double(milestone) {
                     try? await NotificationService.shared.scheduleMilestoneCelebration(
                         milestone: "saving $\(milestone)"
                     )
@@ -245,17 +224,12 @@ public class AppState: ObservableObject {
     
     public func updateStreak(_ value: Int) {
         currentStreak = value
-        do {
-            try dataManager.updateUserStreak()
-        } catch {
-            print("Error updating streak: \(error)")
-        }
     }
     
     public func updateDailyLimit(_ value: Double) {
         dailyLimit = value
         do {
-            try dataManager.createOrUpdateUser(name: username, email: (nil as String?), dailyLimit: value)
+            try dataManager.createOrUpdateUser(name: username, email: nil, dailyLimit: value)
         } catch {
             print("Error updating daily limit: \(error)")
         }
@@ -279,7 +253,15 @@ public class AppState: ObservableObject {
         preferredSports = []
         hasBlockedApps = false
         subscriptionStatus = .expired
-        dataManager.reset()
+        
+        // Clear user defaults
+        for key in [
+            usernameKey, streakKey, savingsKey, dailyLimitKey,
+            isOnboardedKey, selectedTabKey, hasBlockedAppsKey,
+            typicalBetAmountKey, preferredSportsKey, subscriptionStatusKey
+        ] {
+            defaults.removeObject(forKey: key)
+        }
     }
     
     public func addSaving(_ saving: Saving) {
@@ -307,19 +289,12 @@ public class AppState: ObservableObject {
 extension UserDefaults {
     func bool(forKey key: String, defaultValue: Bool) -> Bool {
         if object(forKey: key) == nil {
-            return defaultValue
+            set(defaultValue, forKey: key)
         }
         return bool(forKey: key)
     }
     
     func stringArray(forKey key: String) -> [String]? {
         return array(forKey: key) as? [String]
-    }
-}
-
-extension AppState {
-    public static var preview: AppState {
-        let state = AppState(syncDataManager: MockCoreDataManager.shared)
-        return state
     }
 }

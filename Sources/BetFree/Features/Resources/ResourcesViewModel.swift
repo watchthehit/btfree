@@ -2,11 +2,11 @@ import SwiftUI
 
 @MainActor
 public class ResourcesViewModel: ObservableObject {
-    @Published var resources: [Resource] = []
-    @Published var isLoading = false
-    @Published var error: String?
+    @Published public var resources: [Resource] = []
+    @Published public var isLoading = false
+    @Published public var error: String?
     
-    init() {
+    public init() {
         loadResources()
     }
     

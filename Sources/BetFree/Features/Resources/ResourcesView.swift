@@ -1,4 +1,5 @@
 import SwiftUI
+import BetFreeUI
 
 public struct ResourcesView: View {
     @StateObject private var viewModel = ResourcesViewModel()
@@ -6,6 +7,8 @@ public struct ResourcesView: View {
     @State private var showArticle = false
     @State private var showEmergencyContact = false
     @State private var showChatView = false
+    
+    public init() {}
     
     public var body: some View {
         NavigationView {

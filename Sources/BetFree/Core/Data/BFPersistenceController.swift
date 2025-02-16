@@ -1,5 +1,9 @@
 import CoreData
 
+public enum BFPersistenceError: Error {
+    case failedToLoadStore(Error)
+}
+
 public class BFPersistenceController {
     public static let shared = BFPersistenceController()
     
@@ -25,22 +29,54 @@ public class BFPersistenceController {
     }()
     
     public let container: NSPersistentContainer
+    private var loadError: Error?
     
     public init(inMemory: Bool = false) {
-        container = NSPersistentContainer(name: "BetFree")
+        print("Initializing BFPersistenceController")
         
-        if inMemory {
-            container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
+        // Use the model from the main bundle
+        guard let modelURL = Bundle.module.url(forResource: "BetFree", withExtension: "momd"),
+              let model = NSManagedObjectModel(contentsOf: modelURL) else {
+            fatalError("Failed to load Core Data model")
         }
         
-        container.loadPersistentStores { description, error in
-            if let error = error {
-                print("Core Data failed to load: \(error.localizedDescription)")
+        container = NSPersistentContainer(name: "BetFree", managedObjectModel: model)
+        
+        if inMemory {
+            print("Using in-memory store")
+            container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
+        } else {
+            print("Using persistent store")
+            if let storeURL = container.persistentStoreDescriptions.first?.url {
+                print("Store URL: \(storeURL)")
             }
+        }
+        
+        var loadError: Error?
+        let group = DispatchGroup()
+        group.enter()
+        
+        container.loadPersistentStores { description, error in
+            defer { group.leave() }
+            if let error = error {
+                print(" Core Data failed to load: \(error.localizedDescription)")
+                print("Store description: \(description)")
+                loadError = error
+            } else {
+                print(" Core Data store loaded successfully")
+            }
+        }
+        
+        group.wait()
+        
+        if let error = loadError {
+            print("Fatal error: Failed to load Core Data store")
+            fatalError(error.localizedDescription)
         }
         
         container.viewContext.automaticallyMergesChangesFromParent = true
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        print("Core Data configuration complete")
     }
     
     public func save() {
@@ -49,8 +85,9 @@ public class BFPersistenceController {
         if context.hasChanges {
             do {
                 try context.save()
+                print(" Core Data context saved successfully")
             } catch {
-                print("Error saving context: \(error)")
+                print(" Error saving Core Data context: \(error)")
             }
         }
     }

@@ -10,11 +10,11 @@ public struct BFPrimaryButtonStyle: ButtonStyle {
     
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(BFDesignSystem.bodyMediumFont)
+            .font(BFDesignSystem.Typography.bodyMedium)
             .foregroundColor(.white)
             .frame(maxWidth: .infinity, minHeight: 48)
-            .background(isEnabled ? BFDesignSystem.primaryColor : BFDesignSystem.primaryColor.opacity(0.5))
-            .cornerRadius(BFDesignSystem.cornerRadiusMedium)
+            .background(isEnabled ? BFDesignSystem.Colors.primary : BFDesignSystem.Colors.primary.opacity(0.5))
+            .cornerRadius(BFDesignSystem.Radius.medium)
             .opacity(configuration.isPressed ? 0.8 : 1.0)
     }
 }
@@ -27,14 +27,14 @@ public struct BFSecondaryButtonStyle: ButtonStyle {
     
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(BFDesignSystem.bodyMediumFont)
-            .foregroundColor(BFDesignSystem.primaryColor)
+            .font(BFDesignSystem.Typography.bodyMedium)
+            .foregroundColor(BFDesignSystem.Colors.primary)
             .frame(maxWidth: .infinity, minHeight: 48)
-            .background(BFDesignSystem.surfaceColor)
-            .cornerRadius(BFDesignSystem.cornerRadiusMedium)
+            .background(.background)
+            .cornerRadius(BFDesignSystem.Radius.medium)
             .overlay(
-                RoundedRectangle(cornerRadius: BFDesignSystem.cornerRadiusMedium)
-                    .stroke(BFDesignSystem.primaryColor, lineWidth: BFDesignSystem.borderWidthThin)
+                RoundedRectangle(cornerRadius: BFDesignSystem.Radius.medium)
+                    .stroke(BFDesignSystem.Colors.primary, lineWidth: BFDesignSystem.borderWidthThin)
             )
             .opacity(configuration.isPressed ? 0.8 : 1.0)
     }

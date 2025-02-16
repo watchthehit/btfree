@@ -1534,3 +1534,44 @@ The feature is designed to work across iOS versions:
 - Custom detail row components instead of LabeledContent
 - Consistent styling using BFDesignSystem
 - Proper date formatting for all iOS versions
+
+### Settings Module
+Located in `Sources/BetFree/Features/Settings/`
+
+#### SettingsView
+Main settings interface with the following sections:
+```swift
+// Profile Section
+- Name input (TextField)
+- Daily limit management (TextField with decimal keyboard)
+
+// Notifications Section
+- Daily check-in reminder toggle
+- Milestone alerts toggle
+- Weekly progress report toggle
+
+// Support Section
+- Crisis Support (NavigationLink to CrisisView)
+- Resources (NavigationLink to ResourcesView)
+- Contact Us (NavigationLink to ContactView)
+
+// Account Section
+- Log Out (Destructive button with confirmation)
+- Reset All Data (Destructive button with confirmation)
+
+// About Section
+- Version information
+```
+
+#### Supporting Views
+1. CrisisView
+   - Emergency contact information
+   - Direct call links
+   - Online resources
+   - 24/7 helpline access
+
+2. ContactView
+   - Email form interface
+   - Subject and message input
+   - Mail composition handling
+   - Error handling for mail setup

@@ -1,5 +1,6 @@
 import SwiftUI
 import ComposableArchitecture
+import BetFreeModels
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -31,7 +32,7 @@ struct DashboardHeaderView: View {
                 
                 StatCard(
                     title: "Savings",
-                    value: "$\(String(format: "%.2f", appState.savings))",
+                    value: "$\(String(format: "%.2f", appState.totalSavings))",
                     icon: "dollarsign.circle.fill",
                     gradient: BFDesignSystem.Colors.mindfulGradient
                 )
@@ -93,6 +94,7 @@ public struct DashboardView: View {
     @State private var showingTransactionSheet = false
     @State private var showingErrorAlert = false
     @State private var errorMessage = ""
+    @State private var transactions: [BetFreeModels.Transaction] = []
     
     public init() {}
     
@@ -107,7 +109,7 @@ public struct DashboardView: View {
                         DashboardHeaderView(appState: appState)
                             .padding(.bottom, BFDesignSystem.Layout.Spacing.medium)
                         
-                        TransactionListView(appState: appState)
+                        TransactionListView(transactions: transactions)
                     }
                     .refreshable {
                         await refresh()
@@ -127,6 +129,9 @@ public struct DashboardView: View {
                 Button("OK", role: .cancel) { }
             } message: {
                 Text(errorMessage)
+            }
+            .onAppear {
+                loadTransactions()
             }
         }
     }
@@ -148,6 +153,7 @@ public struct DashboardView: View {
         
         do {
             try await Task.sleep(nanoseconds: 1_000_000_000)
+            loadTransactions()
             HapticFeedback.fireAndForget()
         } catch {
             errorMessage = error.localizedDescription
@@ -157,11 +163,16 @@ public struct DashboardView: View {
         
         isRefreshing = false
     }
+    
+    private func loadTransactions() {
+        let manager = DataManagerFactory.createDataManager()
+        transactions = manager.getAllTransactions().map(\.transaction)
+    }
 }
 
 struct TransactionListView: View {
-    @ObservedObject var appState: AppState
-    @State private var selectedTransaction: Transaction?
+    let transactions: [BetFreeModels.Transaction]
+    @State private var selectedTransaction: BetFreeModels.Transaction?
     @State private var isAnimated = false
     
     var body: some View {
@@ -186,8 +197,6 @@ struct TransactionListView: View {
             .opacity(isAnimated ? 1 : 0)
             .offset(y: isAnimated ? 0 : 20)
             .animation(.spring(response: 0.6).delay(0.3), value: isAnimated)
-            
-            let transactions = appState.getTodaysTransactions()
             
             if transactions.isEmpty {
                 EmptyTransactionView()
@@ -245,62 +254,73 @@ struct EmptyTransactionView: View {
 }
 
 struct TransactionRow: View {
-    let transaction: Transaction
+    let transaction: BetFreeModels.Transaction
     @State private var isHovered = false
     
     var body: some View {
         HStack(spacing: BFDesignSystem.Layout.Spacing.medium) {
-            // Transaction Icon
-            ZStack {
-                Circle()
-                    .fill(transaction.amount < 0 ? 
-                          BFDesignSystem.Colors.error.opacity(0.1) :
-                          BFDesignSystem.Colors.success.opacity(0.1))
-                    .frame(width: BFDesignSystem.Layout.Size.iconXLarge, 
-                           height: BFDesignSystem.Layout.Size.iconXLarge)
-                
-                Image(systemName: transaction.amount < 0 ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
-                    .font(.system(size: BFDesignSystem.Layout.Size.iconLarge))
-                    .foregroundColor(transaction.amount < 0 ? 
-                                   BFDesignSystem.Colors.error :
-                                   BFDesignSystem.Colors.success)
-                    .scaleEffect(isHovered ? 1.1 : 1.0)
-                    .animation(.spring(response: 0.3), value: isHovered)
-            }
+            Circle()
+                .fill(transaction.amount > 0 ? BFDesignSystem.Colors.success : BFDesignSystem.Colors.error)
+                .frame(width: 40, height: 40)
+                .overlay {
+                    Image(systemName: transaction.amount > 0 ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
+                        .foregroundColor(.white)
+                }
             
-            // Transaction Details
-            VStack(alignment: .leading, spacing: BFDesignSystem.Layout.Spacing.xxSmall) {
-                Text(transaction.note ?? "No note")
-                    .font(BFDesignSystem.Typography.bodyLarge)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(transaction.category.rawValue)
+                    .font(BFDesignSystem.Typography.bodyMedium)
                     .foregroundColor(BFDesignSystem.Colors.textPrimary)
                 
-                Text(transaction.category)
-                    .font(BFDesignSystem.Typography.caption)
-                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                if let note = transaction.note {
+                    Text(note)
+                        .font(BFDesignSystem.Typography.bodySmall)
+                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                }
             }
             
             Spacer()
             
-            // Amount
-            Text("$\(String(format: "%.2f", abs(transaction.amount)))")
-                .font(BFDesignSystem.Typography.bodyLargeMedium)
-                .foregroundColor(transaction.amount < 0 ? 
-                               BFDesignSystem.Colors.error :
-                               BFDesignSystem.Colors.success)
+            Text(formatAmount(transaction.amount))
+                .font(BFDesignSystem.Typography.bodyLarge)
+                .foregroundColor(transaction.amount > 0 ? BFDesignSystem.Colors.success : BFDesignSystem.Colors.error)
         }
         .padding()
         .background(BFDesignSystem.Colors.cardBackground)
         .cornerRadius(BFDesignSystem.Layout.CornerRadius.card)
-        .withShadow(isHovered ? BFDesignSystem.Layout.Shadow.medium : BFDesignSystem.Layout.Shadow.card)
+        .withShadow(isHovered ? BFDesignSystem.Layout.Shadow.large : BFDesignSystem.Layout.Shadow.card)
         .scaleEffect(isHovered ? 1.02 : 1.0)
         .animation(.spring(response: 0.3), value: isHovered)
         .onHover { hovering in
             isHovered = hovering
         }
     }
+    
+    private func formatAmount(_ amount: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = "USD"
+        return formatter.string(from: NSNumber(value: abs(amount))) ?? "$\(abs(amount))"
+    }
 }
 
 #Preview {
     DashboardView()
         .environmentObject(AppState.preview)
-} 
+}
+
+// MARK: - Helper Views and Extensions
+extension View {
+    func withShadow(_ shadow: Color) -> some View {
+        self.shadow(color: shadow, radius: 8, x: 0, y: 4)
+    }
+}
+
+#if canImport(UIKit)
+enum HapticFeedback {
+    static func fireAndForget() {
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+    }
+}
+#endif 

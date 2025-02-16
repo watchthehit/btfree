@@ -32,9 +32,12 @@ let package = Package(
                 "BetFreeModels"
             ],
             path: "Sources/BetFree",
+            exclude: [
+                "Core/Data/BetFree.xcdatamodeld/BetFree.xcdatamodel/contents"
+            ],
             resources: [
                 .process("Resources"),
-                .copy("Core/Data/Resources/CoreData/BetFreeModel.xcdatamodeld")
+                .process("Core/Data/BetFree.xcdatamodeld")
             ]
         ),
         .testTarget(

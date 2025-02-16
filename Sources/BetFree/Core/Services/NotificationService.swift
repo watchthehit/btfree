@@ -6,6 +6,11 @@ public protocol NotificationServiceType {
     func scheduleMilestoneCelebration(milestone: String) async throws
     func checkPermissionStatus() async -> UNAuthorizationStatus
     func requestPermissions() async throws -> Bool
+    func scheduleDailyCheckIn(at date: Date) async throws
+    func scheduleProgressUpdate(title: String, message: String, at date: Date) async throws
+    func cancelAllNotifications()
+    func cancelNotification(withIdentifier identifier: String)
+    func setupNotificationCategories()
 }
 
 @MainActor

@@ -7,6 +7,8 @@ public struct OnboardingView: View {
     @StateObject private var viewModel = OnboardingViewModel()
     @State private var showPaywall = false
     
+    public init() {}
+    
     public var body: some View {
         NavigationView {
             VStack(spacing: 24) {
