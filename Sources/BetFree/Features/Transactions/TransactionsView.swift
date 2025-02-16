@@ -36,7 +36,13 @@ public struct TransactionsView: View {
                         TransactionRowView(transaction: transaction)
                             .swipeActions {
                                 Button(role: .destructive) {
-                                    deleteTransaction(transaction)
+                                    Task {
+                                        do {
+                                            try await deleteTransaction(transaction)
+                                        } catch {
+                                            print("Error deleting transaction: \(error)")
+                                        }
+                                    }
                                 } label: {
                                     Label("Delete", systemImage: "trash")
                                 }
@@ -60,56 +66,46 @@ public struct TransactionsView: View {
             }
             .onAppear {
                 Task {
-                    await loadTransactions()
+                    do {
+                        try await loadTransactions()
+                    } catch {
+                        print("Error loading transactions: \(error)")
+                    }
                 }
             }
             .refreshable {
-                await loadTransactions()
+                await loadTransactionsWithErrorHandling()
             }
         }
     }
     
-    private func loadTransactions() async {
-        await MainActor.run {
-            isLoading = true
-        }
-        
+    @MainActor
+    private func loadTransactionsWithErrorHandling() async {
         do {
-            let manager = MockCDManager.shared
-            // Simulate network delay
-            try await Task.sleep(nanoseconds: 1_000_000_000)
-            let fetchedTransactions = try await manager.getAllTransactions()
-            
-            await MainActor.run {
-                self.transactions = fetchedTransactions.map(\.transaction)
-                self.isLoading = false
-            }
+            try await loadTransactions()
         } catch {
-            print("Error loading transactions: \(error)")
-            await MainActor.run {
-                self.isLoading = false
-            }
+            print("Error refreshing transactions: \(error)")
         }
     }
     
-    private func deleteTransaction(_ transaction: BetFreeModels.Transaction) {
-        Task {
-            await MainActor.run {
-                isLoading = true
-            }
-            
-            do {
-                let manager = MockCDManager.shared
-                try await Task.sleep(nanoseconds: 1_000_000_000)  // Simulate network delay
-                try await manager.deleteTransaction(transaction)
-                await loadTransactions()
-            } catch {
-                print("Error deleting transaction: \(error)")
-                await MainActor.run {
-                    isLoading = false
-                }
-            }
-        }
+    @MainActor
+    private func loadTransactions() async throws {
+        isLoading = true
+        defer { isLoading = false }
+        
+        let manager = MockCDManager.shared
+        let fetchedTransactions = manager.getAllTransactions()
+        self.transactions = fetchedTransactions.map(\.transaction)
+    }
+    
+    @MainActor
+    private func deleteTransaction(_ transaction: BetFreeModels.Transaction) async throws {
+        isLoading = true
+        defer { isLoading = false }
+        
+        let manager = MockCDManager.shared
+        try manager.deleteTransaction(transaction)
+        try await loadTransactions()
     }
 }
 

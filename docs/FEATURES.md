@@ -76,7 +76,9 @@
 #### 1. Welcome Screen
 - Animated welcome message with smooth transitions
 - Clear value proposition
-- Optimized layout with proper spacing and safe area handling
+- Success stories with real user testimonials
+- Key statistics display
+- Optimized layout with proper spacing
 - Progress indicator showing onboarding steps
 
 #### 2. Sign Up Process
@@ -84,18 +86,26 @@
 - Clean form layout with proper keyboard handling
 - Real-time validation feedback
 - Secure authentication flow
+- Scrollable content for all screen sizes
+- Trust badges for security and privacy
+- Clear terms and conditions visibility
+- Proper spacing and padding throughout
 
 #### 3. Daily Limit Setup
 - Interactive slider with haptic feedback
 - Visual representation of limit amount
 - Smart suggestions based on user input
 - Clear confirmation of selected limit
+- Preset quick-select buttons
+- Savings projections for different timeframes
 
 #### 4. Goal Setting
 - Intelligent goal suggestions
 - Interactive input validation
 - Clear progress visualization
 - Motivational feedback messages
+- Milestone preview with timeframes
+- Add multiple goals functionality
 
 #### 5. Sports Selection
 - Scrollable grid layout of available sports
@@ -103,18 +113,15 @@
 - Multi-select capability
 - Search and filter options
 - Proper spacing and touch targets
+- Dynamic icons for each sport
 
 #### 6. Features Overview
 - Clear value proposition for each feature
 - Organized content sections
 - Proper content scrolling
 - Visual hierarchy with icons and descriptions
-
-#### 7. Trial Activation
-- Clear pricing display
-- Monthly and yearly options with savings calculation
-- Prominent trial activation button
-- Terms and conditions accessibility
+- Pricing plans comparison
+- Trial activation section
 
 ### Navigation & Progress
 - Progress indicator dots at the top
@@ -122,6 +129,7 @@
 - Smooth transitions between steps
 - Proper spacing to avoid content overlap
 - Clear visual feedback for current step
+- Keyboard-aware adjustments
 
 ### Layout System
 - Consistent padding and spacing
@@ -129,6 +137,8 @@
 - Safe area awareness
 - Optimized for all screen sizes
 - Clear visual hierarchy
+- Keyboard avoidance handling
+- Proper content overflow management
 
 ### Dashboard
 - Current Streak Display

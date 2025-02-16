@@ -463,3 +463,149 @@ This ensures:
 2. In-memory objects are cleaned up
 3. Context is in a clean state
 4. No dangling references remain
+
+### Common Scroll View Issues
+**Issue**: Content not scrollable or cut off
+**Solution**: Wrap content in ScrollView and ensure proper layout
+```swift
+// ❌ Content might be cut off
+VStack {
+    // Long content...
+}
+
+// ✅ Content is scrollable
+ScrollView(showsIndicators: false) {
+    VStack {
+        // Long content...
+    }
+}
+```
+
+### Keyboard Handling
+**Issue**: Keyboard covers input fields
+**Solution**: Use proper keyboard handling and scroll adjustment
+```swift
+// ❌ Keyboard might cover fields
+TextField("Email", text: $email)
+
+// ✅ Proper keyboard handling
+ScrollView {
+    VStack {
+        TextField("Email", text: $email)
+            .textFieldStyle(OnboardingTextFieldStyle())
+    }
+    .padding(.bottom, 32) // Extra padding for keyboard
+}
+```
+
+### Layout Issues
+**Issue**: Content overlapping with safe areas
+**Solution**: Respect safe area insets and use proper padding
+```swift
+// ❌ Content might overlap with safe areas
+VStack {
+    Text("Title")
+}
+
+// ✅ Proper safe area handling
+GeometryReader { geometry in
+    VStack {
+        Text("Title")
+            .padding(.top, geometry.safeAreaInsets.top + 16)
+    }
+}
+```
+
+### Content Visibility
+**Issue**: Important content not visible or accessible
+**Solution**: Ensure proper spacing and scrolling
+```swift
+// ❌ Terms might be hidden
+VStack {
+    // Form fields...
+    Text("Terms and Conditions")
+}
+
+// ✅ Terms always visible
+ScrollView {
+    VStack {
+        // Form fields...
+        Text("Terms and Conditions")
+            .padding(.bottom, 32)
+    }
+}
+```
+
+## Common Issues and Solutions
+
+### Design System
+
+#### Shadow Usage
+**Issue**: Cannot convert value of type 'ViewShadow' to expected argument type 'Color'
+```swift
+.withShadow(BFDesignSystem.Layout.Shadow.card) // ❌ Wrong
+```
+
+**Solution**: Use the `withViewShadow` modifier instead:
+```swift
+.withViewShadow(BFDesignSystem.Layout.Shadow.card) // ✅ Correct
+```
+
+#### Color Usage
+**Issue**: Type 'BFDesignSystem.Colors' has no member 'secondary'
+```swift
+.foregroundColor(BFDesignSystem.Colors.secondary) // ❌ Wrong
+```
+
+**Solution**: Use `textSecondary` for secondary text colors:
+```swift
+.foregroundColor(BFDesignSystem.Colors.textSecondary) // ✅ Correct
+```
+
+#### Typography Usage
+**Issue**: Type 'BFDesignSystem.Typography' has no member 'body'
+```swift
+.font(BFDesignSystem.Typography.body) // ❌ Wrong
+```
+
+**Solution**: Use the appropriate typography scale:
+```swift
+.font(BFDesignSystem.Typography.bodyMedium) // ✅ Correct
+```
+
+### Swift 6 Compatibility
+
+#### Optional Enum Handling
+**Issue**: Switch covers known cases, but enum may have additional unknown values
+```swift
+switch colorScheme {
+case .dark: // ...
+case .light: // ...
+case .none: // ...
+} // ❌ Wrong
+```
+
+**Solution**: Add a catch-all case for future values:
+```swift
+switch colorScheme {
+case .dark: // ...
+case .light: // ...
+case .none: // ...
+case .some(_): // Handle future cases
+} // ✅ Correct
+```
+
+### Best Practices
+
+1. Always use design system colors instead of hard-coded values
+2. Use semantic color names (e.g., `textSecondary` instead of `secondary`)
+3. Use the typography scale for consistent text styling
+4. Handle future enum cases for Swift 6 compatibility
+5. Use proper shadow modifiers with ViewShadow type
+
+### Common Warnings
+
+1. "Use of 'Color' refers to instance method rather than struct": Use proper color helpers
+2. "Cannot convert ViewShadow to Color": Use withViewShadow modifier
+3. "Type has no member": Check design system documentation for correct property names
+4. "Switch must be exhaustive": Add catch-all case for future enum values

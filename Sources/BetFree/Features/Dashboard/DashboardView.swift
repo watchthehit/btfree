@@ -79,7 +79,7 @@ struct StatCard: View {
         .padding(BFDesignSystem.Layout.Spacing.large)
         .background(BFDesignSystem.Colors.cardBackground)
         .cornerRadius(BFDesignSystem.Layout.CornerRadius.card)
-        .withShadow(isHovered ? BFDesignSystem.Layout.Shadow.large : BFDesignSystem.Layout.Shadow.card)
+        .withViewShadow(isHovered ? BFDesignSystem.Layout.Shadow.large : BFDesignSystem.Layout.Shadow.card)
         .scaleEffect(isHovered ? 1.02 : 1.0)
         .animation(.spring(response: 0.3), value: isHovered)
         .onHover { hovering in
@@ -240,7 +240,7 @@ struct EmptyTransactionView: View {
                 .foregroundColor(BFDesignSystem.Colors.textPrimary)
             
             Text("Add your first transaction using the + button")
-                .font(BFDesignSystem.Typography.body)
+                .font(BFDesignSystem.Typography.bodyMedium)
                 .foregroundColor(BFDesignSystem.Colors.textSecondary)
                 .multilineTextAlignment(.center)
         }
@@ -248,8 +248,7 @@ struct EmptyTransactionView: View {
         .padding(BFDesignSystem.Layout.Spacing.xxLarge)
         .background(BFDesignSystem.Colors.cardBackground)
         .cornerRadius(BFDesignSystem.Layout.CornerRadius.card)
-        .withShadow(BFDesignSystem.Layout.Shadow.card)
-        .padding(.horizontal)
+        .withViewShadow(BFDesignSystem.Layout.Shadow.card)
     }
 }
 
@@ -288,7 +287,7 @@ struct TransactionRow: View {
         .padding()
         .background(BFDesignSystem.Colors.cardBackground)
         .cornerRadius(BFDesignSystem.Layout.CornerRadius.card)
-        .withShadow(isHovered ? BFDesignSystem.Layout.Shadow.large : BFDesignSystem.Layout.Shadow.card)
+        .withViewShadow(isHovered ? BFDesignSystem.Layout.Shadow.large : BFDesignSystem.Layout.Shadow.card)
         .scaleEffect(isHovered ? 1.02 : 1.0)
         .animation(.spring(response: 0.3), value: isHovered)
         .onHover { hovering in
@@ -307,13 +306,6 @@ struct TransactionRow: View {
 #Preview {
     DashboardView()
         .environmentObject(AppState.preview)
-}
-
-// MARK: - Helper Views and Extensions
-extension View {
-    func withShadow(_ shadow: Color) -> some View {
-        self.shadow(color: shadow, radius: 8, x: 0, y: 4)
-    }
 }
 
 #if canImport(UIKit)

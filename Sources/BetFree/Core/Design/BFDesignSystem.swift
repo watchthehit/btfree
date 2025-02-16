@@ -3,47 +3,59 @@ import SwiftUI
 import UIKit
 #endif
 
+public struct ViewShadow {
+    let radius: CGFloat
+    let y: CGFloat
+    let opacity: Double
+    
+    public init(radius: CGFloat, y: CGFloat, opacity: Double) {
+        self.radius = radius
+        self.y = y
+        self.opacity = opacity
+    }
+}
+
 public enum BFDesignSystem {
     public enum Colors {
         // Base colors that adapt to color scheme
         public static var primary: Color {
-            Color(light: Color(hex: "007AFF"), dark: Color(hex: "0A84FF"))
+            adaptiveColor(light: colorFromHex("007AFF"), dark: colorFromHex("0A84FF"))
         }
         
         public static var success: Color {
-            Color(light: Color(hex: "34C759"), dark: Color(hex: "30D158"))
+            adaptiveColor(light: colorFromHex("34C759"), dark: colorFromHex("30D158"))
         }
         
         public static var warning: Color {
-            Color(light: Color(hex: "FF9500"), dark: Color(hex: "FFB340"))
+            adaptiveColor(light: colorFromHex("FF9500"), dark: colorFromHex("FFB340"))
         }
         
         public static var error: Color {
-            Color(light: Color(hex: "FF3B30"), dark: Color(hex: "FF453A"))
+            adaptiveColor(light: colorFromHex("FF3B30"), dark: colorFromHex("FF453A"))
         }
         
         public static var background: Color {
-            Color(light: .white, dark: Color(hex: "1C1C1E"))
+            adaptiveColor(light: .white, dark: colorFromHex("1C1C1E"))
         }
         
         public static var secondaryBackground: Color {
-            Color(light: Color(hex: "F2F2F7"), dark: Color(hex: "2C2C2E"))
+            adaptiveColor(light: colorFromHex("F2F2F7"), dark: colorFromHex("2C2C2E"))
         }
         
         public static var cardBackground: Color {
-            Color(light: .white, dark: Color(hex: "2C2C2E"))
+            adaptiveColor(light: .white, dark: colorFromHex("2C2C2E"))
         }
         
         public static var textPrimary: Color {
-            Color(light: Color(hex: "000000"), dark: .white)
+            adaptiveColor(light: colorFromHex("000000"), dark: .white)
         }
         
         public static var textSecondary: Color {
-            Color(light: Color(hex: "6C6C6C"), dark: Color(hex: "EBEBF5").opacity(0.6))
+            adaptiveColor(light: colorFromHex("6C6C6C"), dark: colorFromHex("EBEBF5").opacity(0.6))
         }
         
         public static var border: Color {
-            Color(light: Color(hex: "E5E5EA"), dark: Color(hex: "38383A"))
+            adaptiveColor(light: colorFromHex("E5E5EA"), dark: colorFromHex("38383A"))
         }
         
         // Gradients
@@ -143,8 +155,29 @@ public enum BFDesignSystem {
         }
     }
     
+    public enum Typography {
+        public static let displayLarge = Font.system(size: 34, weight: .bold)
+        public static let displayMedium = Font.system(size: 28, weight: .bold)
+        public static let displaySmall = Font.system(size: 24, weight: .bold)
+        
+        public static let titleLarge = Font.title
+        public static let titleMedium = Font.title2
+        public static let titleSmall = Font.title3
+        
+        public static let bodyLarge = Font.body.weight(.medium)
+        public static let bodyMedium = Font.body
+        public static let bodySmall = Font.footnote
+        
+        public static let labelLarge = Font.callout.weight(.medium)
+        public static let labelMedium = Font.callout
+        public static let labelSmall = Font.caption
+        
+        public static let caption = Font.caption
+        public static let captionSmall = Font.caption2
+    }
+    
     // Helper to create color variants
-    private static func Color(light: Color, dark: Color) -> Color {
+    private static func adaptiveColor(light: Color, dark: Color) -> Color {
         return Color(uiColor: UIColor { traitCollection in
             switch traitCollection.userInterfaceStyle {
             case .dark:
@@ -156,7 +189,7 @@ public enum BFDesignSystem {
     }
     
     // Helper to create color from hex
-    private static func Color(hex: String) -> Color {
+    private static func colorFromHex(_ hex: String) -> Color {
         var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
         hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
         
@@ -171,4 +204,15 @@ public enum BFDesignSystem {
     }
     
     // ... rest of the file ...
+}
+
+public extension View {
+    func withViewShadow(_ shadow: ViewShadow) -> some View {
+        self.shadow(
+            color: BFDesignSystem.Colors.textPrimary.opacity(shadow.opacity),
+            radius: shadow.radius,
+            x: 0,
+            y: shadow.y
+        )
+    }
 } 

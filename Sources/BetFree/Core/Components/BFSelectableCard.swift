@@ -32,7 +32,7 @@ public struct BFSelectableCard: View {
                     .fill(BFDesignSystem.Colors.cardBackground)
                     .overlay(
                         RoundedRectangle(cornerRadius: BFDesignSystem.Layout.CornerRadius.medium)
-                            .stroke(isSelected ? BFDesignSystem.Colors.primary : BFDesignSystem.Colors.separator, lineWidth: 2)
+                            .stroke(isSelected ? BFDesignSystem.Colors.primary : BFDesignSystem.Colors.border, lineWidth: 2)
                     )
             )
         }

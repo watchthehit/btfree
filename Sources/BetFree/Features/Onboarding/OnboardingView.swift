@@ -4,10 +4,16 @@ import BetFreeModels
 
 public struct OnboardingView: View {
     @EnvironmentObject private var appState: AppState
-    @StateObject private var viewModel = OnboardingViewModel()
+    @StateObject private var viewModel: OnboardingViewModel
     @State private var showPaywall = false
     
-    public init() {}
+    @MainActor
+    public init() {
+        print("Initializing OnboardingView...")
+        let dataManager = MockCDManager.shared
+        _viewModel = StateObject(wrappedValue: OnboardingViewModel(dataManager: dataManager))
+        print("OnboardingView initialized with viewModel")
+    }
     
     public var body: some View {
         GeometryReader { geometry in
@@ -70,6 +76,20 @@ public struct OnboardingView: View {
             }
         }
         .preferredColorScheme(.light)
+        .onAppear {
+            print("OnboardingView appeared, updating AppState...")
+            viewModel.updateAppState(appState)
+            print("AppState updated in viewModel")
+        }
+        .alert("Error", isPresented: $viewModel.showError) {
+            Button("OK", role: .cancel) {
+                viewModel.error = nil
+            }
+        } message: {
+            if let error = viewModel.error {
+                Text(error)
+            }
+        }
     }
     
     private var welcomeStep: some View {
@@ -181,7 +201,16 @@ public struct OnboardingView: View {
                     }
                     
                     // Sign in with Apple button
-                    Button(action: { viewModel.signInWithApple() }) {
+                    Button(action: {
+                        Task {
+                            do {
+                                try await viewModel.signInWithApple()
+                            } catch {
+                                viewModel.error = error.localizedDescription
+                                viewModel.showError = true
+                            }
+                        }
+                    }) {
                         HStack {
                             Image(systemName: "apple.logo")
                                 .font(.title2)
@@ -692,15 +721,39 @@ public struct OnboardingView: View {
                 
                 // Trial section
                 VStack(spacing: 12) {
-                    Text("Start 7-Day Free Trial")
-                        .font(BFDesignSystem.Typography.titleMedium)
-                        .foregroundColor(.white)
+                    Button(action: {
+                        Task {
+                            do {
+                                try await viewModel.completeOnboarding()
+                            } catch {
+                                viewModel.error = error.localizedDescription
+                                viewModel.showError = true
+                            }
+                        }
+                    }) {
+                        Text("Start 7-Day Free Trial")
+                            .font(BFDesignSystem.Typography.titleMedium)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.white.opacity(0.2))
+                            .cornerRadius(12)
+                    }
+                    .disabled(viewModel.isLoading)
                     
                     Text("Cancel anytime. No commitment required.")
                         .font(BFDesignSystem.Typography.bodyMedium)
                         .foregroundColor(.white.opacity(0.8))
                 }
                 .padding(.top, 16)
+                .padding(.horizontal, 24)
+                
+                if viewModel.isLoading {
+                    SwiftUI.ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .scaleEffect(1.2)
+                        .padding(.top, 8)
+                }
                 
                 // Terms and privacy
                 Text("By continuing, you agree to our Terms of Service and Privacy Policy")
@@ -774,7 +827,16 @@ public struct OnboardingView: View {
             Spacer()
             
             if viewModel.currentStep == .features {
-                Button(action: { viewModel.completeOnboarding() }) {
+                Button(action: {
+                    Task {
+                        do {
+                            try await viewModel.completeOnboarding()
+                        } catch {
+                            viewModel.error = error.localizedDescription
+                            viewModel.showError = true
+                        }
+                    }
+                }) {
                     Text("Get Started")
                         .font(BFDesignSystem.Typography.labelLarge)
                         .foregroundColor(BFDesignSystem.Colors.primary)
@@ -861,6 +923,11 @@ private struct FeatureRow: View {
 // MARK: - ViewModel
 @MainActor
 final class OnboardingViewModel: ObservableObject {
+    enum SubscriptionPlan {
+        case monthly
+        case yearly
+    }
+    
     @Published var currentStep: OnboardingStep = .welcome
     @Published var name = ""
     @Published var email = ""
@@ -875,22 +942,102 @@ final class OnboardingViewModel: ObservableObject {
     @Published var dailyLimitDouble: Double = 100.0
     @Published var selectedPlan: SubscriptionPlan = .monthly
     
-    enum SubscriptionPlan {
-        case monthly
-        case yearly
+    private let dataManager: MockCDManager
+    private weak var appState: AppState?
+    
+    init(dataManager: MockCDManager) {
+        self.dataManager = dataManager
+    }
+    
+    func updateAppState(_ newAppState: AppState) {
+        self.appState = newAppState
+    }
+    
+    func completeOnboarding() async throws {
+        print("Starting onboarding completion...")
+        guard let appState = appState else {
+            print("AppState is nil!")
+            throw OnboardingError.appStateNotFound
+        }
+        
+        print("Validating fields...")
+        // Validate required fields
+        guard !name.isEmpty else { 
+            print("Name is empty")
+            throw OnboardingError.nameRequired 
+        }
+        guard !email.isEmpty else { 
+            print("Email is empty")
+            throw OnboardingError.emailRequired 
+        }
+        guard !password.isEmpty else { 
+            print("Password is empty")
+            throw OnboardingError.passwordRequired 
+        }
+        guard let firstGoal = goals.first, !firstGoal.isEmpty else { 
+            print("No goals set")
+            throw OnboardingError.goalRequired 
+        }
+        guard !selectedSports.isEmpty else { 
+            print("No sports selected")
+            throw OnboardingError.sportsRequired 
+        }
+        
+        print("All fields validated, proceeding with onboarding completion...")
+        isLoading = true
+        
+        do {
+            print("Saving user data...")
+            // Save user data
+            try dataManager.createOrUpdateUser(
+                name: name,
+                email: email,
+                dailyLimit: dailyLimitDouble
+            )
+            
+            print("Updating app state...")
+            // Update app state
+            withAnimation {
+                appState.completeOnboarding()
+                appState.username = name
+                appState.dailyLimit = dailyLimitDouble
+                appState.preferredSports = Array(selectedSports.map(\.rawValue))
+            }
+            
+            print("Onboarding completed successfully")
+            isLoading = false
+        } catch {
+            print("Error during onboarding completion: \(error)")
+            isLoading = false
+            throw error
+        }
+    }
+    
+    func signInWithApple() async throws {
+        isLoading = true
+        
+        do {
+            // Simulate authentication
+            try await Task.sleep(for: .seconds(1))
+            isLoading = false
+            nextStep()
+        } catch {
+            isLoading = false
+            throw error
+        }
     }
     
     func nextStep() {
-        withAnimation {
-            if let nextIndex = OnboardingStep(rawValue: currentStep.rawValue + 1) {
+        if let nextIndex = OnboardingStep(rawValue: currentStep.rawValue + 1) {
+            withAnimation {
                 currentStep = nextIndex
             }
         }
     }
     
     func previousStep() {
-        withAnimation {
-            if let prevIndex = OnboardingStep(rawValue: currentStep.rawValue - 1) {
+        if let prevIndex = OnboardingStep(rawValue: currentStep.rawValue - 1) {
+            withAnimation {
                 currentStep = prevIndex
             }
         }
@@ -908,20 +1055,29 @@ final class OnboardingViewModel: ObservableObject {
         goals.append("")
     }
     
-    func completeOnboarding() {
-        isLoading = true
-        // Save onboarding data
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            self.isLoading = false
-        }
-    }
-    
-    func signInWithApple() {
-        isLoading = true
-        // TODO: Implement Sign in with Apple
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            self.isLoading = false
-            self.nextStep()
+    enum OnboardingError: LocalizedError {
+        case appStateNotFound
+        case nameRequired
+        case emailRequired
+        case passwordRequired
+        case goalRequired
+        case sportsRequired
+        
+        var errorDescription: String? {
+            switch self {
+            case .appStateNotFound:
+                return "Internal error: App state not found"
+            case .nameRequired:
+                return "Please enter your name"
+            case .emailRequired:
+                return "Please enter your email"
+            case .passwordRequired:
+                return "Please enter a password"
+            case .goalRequired:
+                return "Please set at least one goal"
+            case .sportsRequired:
+                return "Please select at least one sport"
+            }
         }
     }
 }

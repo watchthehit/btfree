@@ -12,33 +12,10 @@ public struct BetFreeRootView: View {
             if !appState.isOnboarded {
                 OnboardingView()
             } else {
-                TabView(selection: $appState.selectedTab) {
-                    DashboardView()
-                        .tabItem {
-                            Label("Dashboard", systemImage: "chart.bar.fill")
-                        }
-                        .tag(0)
-                    
-                    ProfileView()
-                        .tabItem {
-                            Label("Profile", systemImage: "person.fill")
-                        }
-                        .tag(1)
-                    
-                    SavingsView()
-                        .tabItem {
-                            Label("Savings", systemImage: "dollarsign.circle.fill")
-                        }
-                        .tag(2)
-                    
-                    CravingView()
-                        .tabItem {
-                            Label("Cravings", systemImage: "brain.head.profile")
-                        }
-                        .tag(3)
-                }
+                MainTabView()
             }
         }
+        .animation(.easeInOut, value: appState.isOnboarded)
     }
 }
 

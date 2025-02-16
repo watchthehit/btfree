@@ -90,7 +90,14 @@ public struct AddTransactionView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
-                        saveTransaction()
+                        Task {
+                            do {
+                                try await saveTransaction()
+                            } catch {
+                                alertMessage = "Failed to save transaction: \(error.localizedDescription)"
+                                showingAlert = true
+                            }
+                        }
                     }
                     .disabled(amount.isEmpty || isLoading)
                 }
@@ -103,7 +110,8 @@ public struct AddTransactionView: View {
         }
     }
     
-    private func saveTransaction() {
+    @MainActor
+    private func saveTransaction() async throws {
         guard let amountValue = Double(amount) else {
             alertMessage = "Please enter a valid amount"
             showingAlert = true
@@ -111,37 +119,20 @@ public struct AddTransactionView: View {
         }
         
         isLoading = true
+        defer { isLoading = false }
         
-        Task {
-            do {
-                let transaction = Transaction(
-                    amount: amountValue,
-                    category: category,
-                    date: date,
-                    note: note.isEmpty ? nil : note
-                )
-                
-                // Simulate network delay
-                try await Task.sleep(nanoseconds: 1_000_000_000)
-                
-                // Save transaction
-                let manager = MockCDManager.shared
-                try await manager.addTransaction(transaction)
-                
-                await MainActor.run {
-                    dismiss()
-                }
-            } catch {
-                await MainActor.run {
-                    alertMessage = "Failed to save transaction: \(error.localizedDescription)"
-                    showingAlert = true
-                }
-            }
-            
-            await MainActor.run {
-                isLoading = false
-            }
-        }
+        let transaction = Transaction(
+            amount: amountValue,
+            category: category,
+            date: date,
+            note: note.isEmpty ? nil : note
+        )
+        
+        // Save transaction
+        let manager = MockCDManager.shared
+        try manager.addTransaction(transaction)
+        
+        dismiss()
     }
 }
 

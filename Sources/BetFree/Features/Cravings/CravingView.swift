@@ -6,6 +6,7 @@ import BetFreeModels
 public struct CravingView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = CravingViewModel()
+    @State private var isAnimated = false
     
     public init() {}
     
@@ -13,17 +14,59 @@ public struct CravingView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 24) {
-                    intensitySection
-                    triggersSection
-                    copingStrategiesSection
-                    submitButton
+                    IntensityCardView(
+                        selectedIntensity: $viewModel.selectedIntensity,
+                        description: intensityDescription
+                    )
+                    .opacity(isAnimated ? 1 : 0)
+                    .offset(y: isAnimated ? 0 : 20)
+                    
+                    TriggerCardView(
+                        selectedTriggers: $viewModel.selectedTriggers,
+                        toggleTrigger: viewModel.toggleTrigger
+                    )
+                    .opacity(isAnimated ? 1 : 0)
+                    .offset(y: isAnimated ? 0 : 20)
+                    
+                    CopingStrategiesCardView(
+                        selectedStrategies: $viewModel.selectedStrategies,
+                        toggleStrategy: viewModel.toggleStrategy
+                    )
+                    .opacity(isAnimated ? 1 : 0)
+                    .offset(y: isAnimated ? 0 : 20)
+                    
+                    // Submit Button
+                    Button {
+                        viewModel.logCraving()
+                    } label: {
+                        HStack {
+                            if viewModel.isLoading {
+                                SwiftUI.ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            } else {
+                                Text("Log This Urge")
+                                    .font(BFDesignSystem.Typography.labelLarge)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(BFDesignSystem.Colors.primary)
+                        .foregroundColor(.white)
+                        .cornerRadius(16)
+                    }
+                    .disabled(viewModel.isLoading)
+                    .padding(.horizontal)
+                    .opacity(isAnimated ? 1 : 0)
+                    .offset(y: isAnimated ? 0 : 20)
                 }
-                .padding()
+                .padding(.vertical)
             }
-            .navigationTitle("Log Craving")
-#if os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
-#endif
+            .navigationTitle("Log Urge")
+            .onAppear {
+                withAnimation(.spring(response: 0.6)) {
+                    isAnimated = true
+                }
+            }
             .toolbar {
                 #if os(iOS)
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -54,112 +97,138 @@ public struct CravingView: View {
         }
     }
     
-    private var intensitySection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("How strong is your craving?")
-                .font(.title)
-            
-            Text("Rate the intensity from 1-10")
-                .font(.body)
-                .foregroundColor(.secondary)
-            
-            Slider(value: $viewModel.intensity, in: 1...10, step: 1)
-                .tint(viewModel.intensityColor)
-            
-            HStack {
-                Text("1")
-                Spacer()
-                Text(String(format: "%.0f", viewModel.intensity))
-                    .foregroundColor(viewModel.intensityColor)
-                Spacer()
-                Text("10")
-            }
-            .font(.callout)
-            
-            Text(viewModel.intensityDescription)
-                .font(.body)
-                .foregroundColor(viewModel.intensityColor)
+    private var intensityDescription: String {
+        switch viewModel.selectedIntensity {
+        case 1: return "Mild - Barely noticeable"
+        case 2: return "Light - Can easily resist"
+        case 3: return "Moderate - Takes effort to resist"
+        case 4: return "Strong - Very challenging"
+        case 5: return "Severe - Need immediate help"
+        default: return "Select intensity level"
         }
-        .padding()
-        .background(Color.gray.opacity(0.1))
-        .cornerRadius(12)
-    }
-    
-    private var triggersSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("What triggered this craving?")
-                .font(.title)
-                .foregroundColor(.primary)
-            
-            Text("Select all that apply")
-                .font(.body)
-                .foregroundColor(.secondary)
-            
-            LazyVGrid(columns: [
-                GridItem(.flexible()),
-                GridItem(.flexible())
-            ], spacing: 16) {
-                ForEach(CravingTrigger.allCases) { trigger in
-                    TriggerButton(
-                        trigger: trigger,
-                        isSelected: viewModel.selectedTriggers.contains(trigger)
-                    ) {
-                        viewModel.toggleTrigger(trigger)
-                    }
-                }
-            }
-        }
-        .padding()
-        .background(Color.gray.opacity(0.1))
-        .cornerRadius(12)
-    }
-    
-    private var copingStrategiesSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Try these coping strategies")
-                .font(.title)
-                .foregroundColor(.primary)
-            
-            Text("Select what works for you")
-                .font(.body)
-                .foregroundColor(.secondary)
-            
-            VStack(spacing: 12) {
-                ForEach(CopingStrategy.allCases) { strategy in
-                    StrategyButton(
-                        strategy: strategy,
-                        isSelected: viewModel.selectedStrategies.contains(strategy)
-                    ) {
-                        viewModel.toggleStrategy(strategy)
-                    }
-                }
-            }
-        }
-        .padding()
-        .background(Color.gray.opacity(0.1))
-        .cornerRadius(12)
-    }
-    
-    private var submitButton: some View {
-        Button(action: {
-            viewModel.logCraving()
-        }) {
-            if viewModel.isLoading {
-                SwiftUI.ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle())
-            } else {
-                Text("Submit")
-            }
-        }
-        .buttonStyle(.borderedProminent)
-        .disabled(viewModel.isLoading)
-        .padding(.horizontal)
     }
 }
 
-@available(macOS 10.15, iOS 13.0, *)
-fileprivate struct TriggerButton: View {
-    let trigger: CravingTrigger
+// MARK: - Subviews
+private struct IntensityCardView: View {
+    @Binding var selectedIntensity: Int
+    let description: String
+    
+    var body: some View {
+        BFCard(style: .elevated, gradient: LinearGradient(
+            colors: [BFDesignSystem.Colors.warning, BFDesignSystem.Colors.warning.opacity(0.7)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )) {
+            VStack(spacing: 16) {
+                Text("How strong is your urge?")
+                    .font(BFDesignSystem.Typography.titleMedium)
+                    .foregroundColor(.white)
+                
+                HStack(spacing: 16) {
+                    ForEach(1...5, id: \.self) { intensity in
+                        IntensityButton(
+                            intensity: intensity,
+                            isSelected: selectedIntensity == intensity
+                        ) {
+                            selectedIntensity = intensity
+                        }
+                    }
+                }
+                
+                Text(description)
+                    .font(BFDesignSystem.Typography.bodyMedium)
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 8)
+            }
+            .padding()
+        }
+    }
+}
+
+private struct TriggerCardView: View {
+    @Binding var selectedTriggers: Set<Trigger>
+    let toggleTrigger: (Trigger) -> Void
+    
+    var body: some View {
+        BFCard(style: .elevated) {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("What triggered this urge?")
+                    .font(BFDesignSystem.Typography.titleMedium)
+                
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                    ForEach(Trigger.allCases) { trigger in
+                        TriggerButton(
+                            trigger: trigger,
+                            isSelected: selectedTriggers.contains(trigger)
+                        ) {
+                            toggleTrigger(trigger)
+                        }
+                    }
+                }
+            }
+            .padding()
+        }
+    }
+}
+
+private struct CopingStrategiesCardView: View {
+    @Binding var selectedStrategies: Set<CopingStrategy>
+    let toggleStrategy: (CopingStrategy) -> Void
+    
+    var body: some View {
+        BFCard(style: .elevated, gradient: LinearGradient(
+            colors: [BFDesignSystem.Colors.primary, BFDesignSystem.Colors.primary.opacity(0.7)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )) {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Try these strategies")
+                    .font(BFDesignSystem.Typography.titleMedium)
+                    .foregroundColor(.white)
+                
+                Text("Select what works for you")
+                    .font(BFDesignSystem.Typography.bodyMedium)
+                    .foregroundColor(.white.opacity(0.8))
+                
+                VStack(spacing: 12) {
+                    ForEach(CopingStrategy.allCases) { strategy in
+                        StrategyButton(
+                            strategy: strategy,
+                            isSelected: selectedStrategies.contains(strategy)
+                        ) {
+                            toggleStrategy(strategy)
+                        }
+                    }
+                }
+            }
+            .padding()
+        }
+    }
+}
+
+private struct IntensityButton: View {
+    let intensity: Int
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Text("\(intensity)")
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(isSelected ? BFDesignSystem.Colors.warning : .white)
+            }
+            .frame(width: 48, height: 48)
+            .background(isSelected ? .white : .white.opacity(0.2))
+            .cornerRadius(24)
+        }
+    }
+}
+
+private struct TriggerButton: View {
+    let trigger: Trigger
     let isSelected: Bool
     let action: () -> Void
     
@@ -168,32 +237,18 @@ fileprivate struct TriggerButton: View {
             HStack {
                 Image(systemName: trigger.iconName)
                 Text(trigger.name)
-                    .font(.body)
-                Spacer()
-                if isSelected {
-                    Image(systemName: "checkmark")
-                }
+                    .font(BFDesignSystem.Typography.labelMedium)
             }
-            .padding()
             .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(isSelected ? Color.gray.opacity(0.2) : Color.gray.opacity(0.1))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(
-                                isSelected ? Color.primary : Color.gray.opacity(0.5),
-                                lineWidth: 1
-                            )
-                    )
-            )
+            .padding(.vertical, 12)
+            .background(isSelected ? BFDesignSystem.Colors.primary.opacity(0.1) : Color.gray.opacity(0.1))
+            .foregroundColor(isSelected ? BFDesignSystem.Colors.primary : BFDesignSystem.Colors.textPrimary)
+            .cornerRadius(12)
         }
-        .buttonStyle(.plain)
     }
 }
 
-@available(macOS 10.15, iOS 13.0, *)
-fileprivate struct StrategyButton: View {
+private struct StrategyButton: View {
     let strategy: CopingStrategy
     let isSelected: Bool
     let action: () -> Void
@@ -202,30 +257,26 @@ fileprivate struct StrategyButton: View {
         Button(action: action) {
             HStack(spacing: 16) {
                 Image(systemName: strategy.iconName)
-                    .foregroundColor(isSelected ? Color.green : Color.blue)
+                    .foregroundColor(.white)
                 
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(strategy.rawValue)
-                        .font(.body)
-                        .foregroundColor(.primary)
+                        .font(BFDesignSystem.Typography.bodyMedium)
+                        .foregroundColor(.white)
                     
                     Text(strategy.description)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .font(BFDesignSystem.Typography.bodySmall)
+                        .foregroundColor(.white.opacity(0.8))
                 }
                 
                 Spacer()
                 
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(isSelected ? Color.green : Color.gray.opacity(0.5))
+                    .foregroundColor(isSelected ? .white : .white.opacity(0.5))
             }
             .padding()
-            .background(Color.gray.opacity(0.1))
-            .cornerRadius(8)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-            )
+            .background(isSelected ? Color.white.opacity(0.2) : Color.clear)
+            .cornerRadius(12)
         }
         .buttonStyle(.plain)
     }
@@ -234,37 +285,15 @@ fileprivate struct StrategyButton: View {
 @available(macOS 10.15, iOS 13.0, *)
 @MainActor
 fileprivate final class CravingViewModel: ObservableObject {
-    @Published fileprivate var intensity: Double = 5
-    @Published fileprivate var selectedTriggers: Set<CravingTrigger> = []
+    @Published fileprivate var selectedIntensity: Int = 1
+    @Published fileprivate var selectedTriggers: Set<Trigger> = []
     @Published fileprivate var selectedStrategies: Set<CopingStrategy> = []
     @Published fileprivate var isLoading = false
     @Published fileprivate var error: String?
     @Published fileprivate var showError = false
     @Published fileprivate var showSuccess = false
     
-    fileprivate var intensityColor: Color {
-        switch intensity {
-        case 1...3:
-            return Color.green
-        case 4...7:
-            return Color.blue
-        default:
-            return Color.red
-        }
-    }
-    
-    fileprivate var intensityDescription: String {
-        switch intensity {
-        case 1...3:
-            return "Mild craving - You've got this!"
-        case 4...7:
-            return "Moderate craving - Try some coping strategies"
-        default:
-            return "Strong craving - Use multiple strategies"
-        }
-    }
-    
-    fileprivate func toggleTrigger(_ trigger: CravingTrigger) {
+    fileprivate func toggleTrigger(_ trigger: Trigger) {
         if selectedTriggers.contains(trigger) {
             selectedTriggers.remove(trigger)
         } else {
@@ -341,7 +370,7 @@ private enum CopingStrategy: String, CaseIterable, Identifiable {
     }
 }
 
-private enum CravingTrigger: String, CaseIterable, Identifiable {
+private enum Trigger: String, CaseIterable, Identifiable {
     case boredom = "Boredom"
     case stress = "Stress"
     case social = "Social Pressure"

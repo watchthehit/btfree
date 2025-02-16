@@ -85,9 +85,15 @@ public class AppState: ObservableObject {
     
     @Published public var colorScheme: ColorScheme? = nil {
         didSet {
-            if let scheme = colorScheme {
-                defaults.set(scheme == .dark ? "dark" : "light", forKey: colorSchemeKey)
-            } else {
+            switch colorScheme {
+            case .dark:
+                defaults.set("dark", forKey: colorSchemeKey)
+            case .light:
+                defaults.set("light", forKey: colorSchemeKey)
+            case .none:
+                defaults.removeObject(forKey: colorSchemeKey)
+            case .some(_):
+                // Handle any future cases
                 defaults.removeObject(forKey: colorSchemeKey)
             }
         }

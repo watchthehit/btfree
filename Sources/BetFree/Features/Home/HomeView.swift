@@ -245,7 +245,7 @@ public struct HomeView: View {
             QuickActionButton(
                 title: "Get Support",
                 icon: "person.2.fill",
-                color: BFDesignSystem.Colors.primary
+                color: BFDesignSystem.Colors.textSecondary
             ) {
                 selectedTab = .resources
             }
@@ -253,7 +253,7 @@ public struct HomeView: View {
             QuickActionButton(
                 title: "View Stats",
                 icon: "chart.bar.fill",
-                color: BFDesignSystem.Colors.secondary
+                color: BFDesignSystem.Colors.textSecondary
             ) {
                 selectedTab = .stats
             }

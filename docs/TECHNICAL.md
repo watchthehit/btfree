@@ -27,10 +27,83 @@ dependencies: [
 ### Design System
 - Located in `Sources/BetFree/Core/Design/BFDesignSystem.swift`
 - Provides:
-  - Colors
+  - Colors (adaptive for light/dark mode)
   - Typography
   - Spacing
   - Corner Radius
+  - Shadows
+
+#### Colors
+```swift
+BFDesignSystem.Colors
+├── primary          // Main brand color
+├── success         // Success states
+├── warning         // Warning states
+├── error           // Error states
+├── background      // Main background
+├── secondaryBackground // Secondary background
+├── cardBackground  // Card backgrounds
+├── textPrimary     // Primary text
+├── textSecondary   // Secondary text
+└── border          // Borders and separators
+
+// Gradients
+├── primaryGradient
+├── successGradient
+├── warningGradient
+├── errorGradient
+├── calmingGradient
+├── warmGradient
+└── mindfulGradient
+```
+
+#### Typography
+```swift
+BFDesignSystem.Typography
+├── displayLarge    // 34pt bold
+├── displayMedium   // 28pt bold
+├── displaySmall    // 24pt bold
+├── titleLarge     // .title
+├── titleMedium    // .title2
+├── titleSmall     // .title3
+├── bodyLarge      // .body.medium
+├── bodyMedium     // .body
+├── bodySmall      // .footnote
+├── labelLarge     // .callout.medium
+├── labelMedium    // .callout
+├── labelSmall     // .caption
+├── caption        // .caption
+└── captionSmall   // .caption2
+```
+
+#### Shadows
+```swift
+BFDesignSystem.Layout.Shadow
+├── small          // radius: 10, y: 4, opacity: 0.1
+├── medium         // radius: 15, y: 8, opacity: 0.12
+├── large          // radius: 20, y: 12, opacity: 0.14
+├── card           // radius: 15, y: 8, opacity: 0.1
+└── button         // radius: 12, y: 6, opacity: 0.15
+
+// Usage:
+.withViewShadow(BFDesignSystem.Layout.Shadow.card)
+```
+
+### Swift 6 Compatibility
+The codebase is prepared for Swift 6 with proper handling of future enum cases:
+```swift
+// Example: ColorScheme handling
+switch colorScheme {
+case .dark:
+    // Handle dark mode
+case .light:
+    // Handle light mode
+case .none:
+    // Handle system default
+case .some(_):
+    // Handle future cases
+}
+```
 
 ### Typography System
 

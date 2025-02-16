@@ -223,94 +223,113 @@ class UserFlowUITests: XCTestCase {
 
 ### Layout Tests
 
+#### Scroll Behavior
+```swift
+func testScrollBehavior() {
+    // Test content scrolling
+    XCTAssertTrue(signUpView.isScrollEnabled)
+    XCTAssertFalse(signUpView.showsIndicators)
+    
+    // Test scroll position
+    XCTAssertEqual(scrollView.contentOffset.y, 0)
+    
+    // Test content size
+    XCTAssertTrue(scrollView.contentSize.height > scrollView.frame.height)
+    
+    // Test keyboard adjustments
+    XCTAssertTrue(scrollView.adjustedContentInsetDidChange())
+}
+```
+
 #### Safe Area Handling
 ```swift
 func testSafeAreaInsets() {
     // Test top safe area
-    XCTAssertEqual(view.topPadding, geometry.safeAreaInsets.top + 16)
+    XCTAssertEqual(view.safeAreaInsets.top, geometry.safeAreaInsets.top)
     
     // Test bottom safe area
-    XCTAssertEqual(view.bottomPadding, geometry.safeAreaInsets.bottom + 20)
+    XCTAssertEqual(view.safeAreaInsets.bottom, geometry.safeAreaInsets.bottom)
+    
+    // Test content padding
+    XCTAssertEqual(contentView.padding.top, geometry.safeAreaInsets.top + 16)
+    XCTAssertEqual(contentView.padding.bottom, geometry.safeAreaInsets.bottom + 20)
 }
 ```
 
-#### Scroll Behavior
+#### Keyboard Handling
 ```swift
-func testScrollViewBehavior() {
-    // Test content scrolling
-    XCTAssertTrue(view.isScrollEnabled)
-    XCTAssertFalse(view.showsIndicators)
+func testKeyboardHandling() {
+    // Test keyboard appearance
+    XCTAssertTrue(view.keyboardAdjustment)
     
-    // Test content overflow
-    XCTAssertTrue(view.contentSize.height > view.frame.height)
+    // Test scroll adjustment
+    let textField = view.textFields.first
+    textField?.becomeFirstResponder()
+    XCTAssertTrue(scrollView.contentOffset.y > 0)
+    
+    // Test keyboard dismissal
+    textField?.resignFirstResponder()
+    XCTAssertEqual(scrollView.contentOffset.y, 0)
 }
 ```
 
-#### Grid Layout
+#### Content Visibility
 ```swift
-func testGridLayout() {
-    // Test column configuration
-    XCTAssertEqual(grid.columns.count, 2)
+func testContentVisibility() {
+    // Test terms visibility
+    let termsText = view.staticTexts["Terms and Conditions"]
+    XCTAssertTrue(termsText.exists)
+    XCTAssertTrue(termsText.isHittable)
     
-    // Test item spacing
-    XCTAssertEqual(grid.spacing, 16)
+    // Test form fields visibility
+    let emailField = view.textFields["Email"]
+    XCTAssertTrue(emailField.exists)
+    XCTAssertTrue(emailField.isHittable)
     
-    // Test item sizing
-    XCTAssertEqual(grid.items.first?.size.width, expectedWidth)
+    // Test button visibility
+    let continueButton = view.buttons["Continue"]
+    XCTAssertTrue(continueButton.exists)
+    XCTAssertTrue(continueButton.isHittable)
 }
 ```
 
 ### Visual Tests
 
-#### Selection States
+#### Layout Consistency
 ```swift
-func testSelectionStates() {
-    // Test unselected state
-    XCTAssertEqual(button.backgroundColor, Color.white.opacity(0.2))
-    XCTAssertEqual(button.foregroundColor, .white)
+func testLayoutConsistency() {
+    // Test spacing
+    XCTAssertEqual(view.spacing, 32)
+    XCTAssertEqual(form.spacing, 16)
     
-    // Test selected state
-    button.isSelected = true
-    XCTAssertEqual(button.backgroundColor, .white)
-    XCTAssertEqual(button.foregroundColor, BFDesignSystem.Colors.primary)
+    // Test alignment
+    XCTAssertEqual(view.alignment, .center)
+    XCTAssertEqual(form.alignment, .leading)
+    
+    // Test padding
+    XCTAssertEqual(view.padding, EdgeInsets(top: 8, leading: 24, bottom: 32, trailing: 24))
 }
 ```
 
-#### Animations
+#### Responsive Design
 ```swift
-func testAnimations() {
-    // Test transition animation
-    XCTAssertEqual(view.animation, .easeInOut)
+func testResponsiveDesign() {
+    // Test different screen sizes
+    let sizes = ["iPhone SE", "iPhone 14", "iPhone 14 Pro Max"]
     
-    // Test spring animation
-    XCTAssertEqual(progressDot.animation.response, 0.3)
-}
-```
-
-### Navigation Tests
-
-#### Progress Tracking
-```swift
-func testProgressTracking() {
-    // Test progress dots
-    XCTAssertEqual(progressDots.count, OnboardingStep.allCases.count)
-    
-    // Test current step highlight
-    XCTAssertEqual(progressDots[currentStep].scale, 1.2)
-}
-```
-
-#### Navigation Flow
-```swift
-func testNavigationFlow() {
-    // Test forward navigation
-    XCTAssertTrue(canNavigateForward)
-    
-    // Test back navigation
-    XCTAssertTrue(canNavigateBack)
-    
-    // Test step validation
-    XCTAssertTrue(isStepValid)
+    for size in sizes {
+        let view = OnboardingView()
+        view.frame = getDeviceFrame(for: size)
+        
+        // Test content fits
+        XCTAssertTrue(view.contentFits)
+        
+        // Test scroll enabled when needed
+        XCTAssertEqual(view.isScrollEnabled, view.contentSize.height > view.frame.height)
+        
+        // Test safe area adaptation
+        XCTAssertTrue(view.respectsSafeArea)
+    }
 }
 ```
 

@@ -7,23 +7,63 @@ public struct ResourcesView: View {
     @State private var showArticle = false
     @State private var showEmergencyContact = false
     @State private var showChatView = false
+    @State private var isAnimated = false
     
     public init() {}
     
     public var body: some View {
         NavigationView {
             ScrollView {
-                LazyVGrid(
-                    columns: [GridItem(.flexible())],
-                    spacing: 16
-                ) {
-                    ForEach(viewModel.resources) { resource in
-                        ResourceCard(resource: resource) {
-                            handleResourceTap(resource)
+                VStack(spacing: 24) {
+                    // Emergency Support Card
+                    BFCard(style: .elevated, gradient: LinearGradient(
+                        colors: [BFDesignSystem.Colors.error, BFDesignSystem.Colors.error.opacity(0.7)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )) {
+                        Button {
+                            showEmergencyContact = true
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Need Immediate Help?")
+                                        .font(BFDesignSystem.Typography.titleMedium)
+                                        .foregroundColor(.white)
+                                    
+                                    Text("24/7 Support Available")
+                                        .font(BFDesignSystem.Typography.bodyMedium)
+                                        .foregroundColor(.white.opacity(0.8))
+                                }
+                                
+                                Spacer()
+                                
+                                Image(systemName: "phone.circle.fill")
+                                    .font(.system(size: 36))
+                                    .foregroundColor(.white)
+                            }
+                            .padding()
                         }
                     }
+                    .opacity(isAnimated ? 1 : 0)
+                    .offset(y: isAnimated ? 0 : 20)
+                    
+                    // Resources Grid
+                    LazyVGrid(
+                        columns: [GridItem(.flexible())],
+                        spacing: 16
+                    ) {
+                        ForEach(Array(viewModel.resources.enumerated()), id: \.element.id) { index, resource in
+                            ResourceCard(resource: resource) {
+                                handleResourceTap(resource)
+                            }
+                            .opacity(isAnimated ? 1 : 0)
+                            .offset(y: isAnimated ? 0 : 20)
+                            .animation(.spring(response: 0.6).delay(Double(index) * 0.1), value: isAnimated)
+                        }
+                    }
+                    .padding(.horizontal)
                 }
-                .padding()
+                .padding(.vertical)
             }
             .navigationTitle("Recovery Resources")
             .sheet(isPresented: $showArticle) {
@@ -37,6 +77,11 @@ public struct ResourcesView: View {
             }
             .sheet(isPresented: $showChatView) {
                 CounselorChatView()
+            }
+            .onAppear {
+                withAnimation(.spring(response: 0.6)) {
+                    isAnimated = true
+                }
             }
         }
     }
@@ -62,35 +107,78 @@ private struct ResourceCard: View {
     let action: () -> Void
     
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: 16) {
-                Image(systemName: resource.icon)
-                    .font(.title2)
-                    .foregroundColor(resource.type.color)
-                    .frame(width: 32)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(resource.title)
-                        .font(BFDesignSystem.Typography.titleMedium)
-                        .foregroundColor(BFDesignSystem.Colors.textPrimary)
+        BFCard(style: .elevated, gradient: resource.gradient) {
+            Button(action: action) {
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        Image(systemName: resource.categoryIcon)
+                            .font(.system(size: 28))
+                            .foregroundColor(.white)
+                        
+                        Spacer()
+                        
+                        Image(systemName: "chevron.right.circle.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(.white.opacity(0.8))
+                    }
                     
-                    Text(resource.description)
-                        .font(BFDesignSystem.Typography.bodyMedium)
-                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(resource.title)
+                            .font(BFDesignSystem.Typography.titleMedium)
+                            .foregroundColor(.white)
+                        
+                        Text(resource.description)
+                            .font(BFDesignSystem.Typography.bodyMedium)
+                            .foregroundColor(.white.opacity(0.8))
+                            .lineLimit(2)
+                    }
                 }
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                .padding()
             }
-            .padding()
-            .background(BFDesignSystem.Colors.cardBackground)
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(resource.type.color.opacity(0.2), lineWidth: 1)
+        }
+    }
+}
+
+private extension Resource {
+    var gradient: LinearGradient {
+        switch self.type {
+        case .emergency:
+            return LinearGradient(
+                colors: [BFDesignSystem.Colors.error, BFDesignSystem.Colors.error.opacity(0.7)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
             )
+        case .educational:
+            return LinearGradient(
+                colors: [BFDesignSystem.Colors.primary, BFDesignSystem.Colors.primary.opacity(0.7)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        case .support:
+            return LinearGradient(
+                colors: [BFDesignSystem.Colors.success, BFDesignSystem.Colors.success.opacity(0.7)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        case .tools:
+            return LinearGradient(
+                colors: [BFDesignSystem.Colors.error, BFDesignSystem.Colors.error.opacity(0.7)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        }
+    }
+    
+    var categoryIcon: String {
+        switch self.type {
+        case .emergency:
+            return "exclamationmark.triangle.fill"
+        case .educational:
+            return "book.fill"
+        case .support:
+            return "person.2.fill"
+        case .tools:
+            return "hammer.fill"
         }
     }
 }
