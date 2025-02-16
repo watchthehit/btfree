@@ -79,7 +79,7 @@ public struct BFCard<Content: View>: View {
             )
             .cornerRadius(style.cornerRadius)
             .shadow(
-                color: Color.black.opacity(style.shadowOpacity),
+                color: BFDesignSystem.Colors.textPrimary.opacity(style.shadowOpacity),
                 radius: style.shadowRadius,
                 y: 2
             )
@@ -87,7 +87,6 @@ public struct BFCard<Content: View>: View {
             .opacity(isInteractive ? (isPressed ? 0.7 : 1.0) : 1.0)
             .scaleEffect(isInteractive ? (isPressed ? 0.98 : 1.0) : 1.0)
             .animation(BFAnimation.Spring.tight, value: isPressed)
-            .fadeInOnAppear()
             .gesture(dragGesture)
     }
     
