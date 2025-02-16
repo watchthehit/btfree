@@ -244,6 +244,10 @@ public class AppState: ObservableObject {
     }
     
     public func logout() {
+        // First reset Core Data
+        dataManager.reset()
+        
+        // Then reset app state
         currentStreak = 0
         totalSavings = 0
         dailyLimit = 0
@@ -283,6 +287,10 @@ public class AppState: ObservableObject {
                 return "Failed to create or retrieve user profile"
             }
         }
+    }
+    
+    public func createOrUpdateUser(name: String, email: String?, dailyLimit: Double) throws {
+        try dataManager.createOrUpdateUser(name: name, email: email, dailyLimit: dailyLimit)
     }
 }
 

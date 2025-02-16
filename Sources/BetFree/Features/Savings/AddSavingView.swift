@@ -103,15 +103,19 @@ final class AddSavingViewModel: ObservableObject {
         
         isSaving = true
         
-        // TODO: Save to persistent storage
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            self.isSaving = false
-            if Int.random(in: 0...10) > 8 {
-                self.error = "Failed to save. Please try again."
-                self.showError = true
-            } else {
-                self.showSuccess = true
+        Task {
+            do {
+                // Simulate network delay
+                try await Task.sleep(nanoseconds: 1_000_000_000)
+                
+                // Save the amount
+                await addSaving(amount: amount, note: notes)
+            } catch {
+                await MainActor.run {
+                    self.error = error.localizedDescription
+                    self.showError = true
+                    self.isSaving = false
+                }
             }
         }
     }

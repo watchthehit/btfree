@@ -39,13 +39,14 @@ public enum Sport: String, CaseIterable, Identifiable {
         case .basketball: return "basketball.fill"
         case .baseball: return "baseball.fill"
         case .hockey: return "hockey.puck.fill"
-        case .soccer: return "soccerball"
-        case .tennis: return "tennis.racket"
-        case .golf: return "golf.ball.fill"
-        case .mma, .boxing: return "boxing.glove"
-        case .cricket: return "cricket.bat"
-        case .rugby: return "rugby.ball"
-        case .volleyball: return "volleyball.fill"
+        case .soccer: return "figure.soccer"
+        case .tennis: return "figure.tennis"
+        case .golf: return "figure.golf"
+        case .mma: return "figure.martial.arts"
+        case .boxing: return "figure.boxing"
+        case .cricket: return "figure.cricket"
+        case .rugby: return "figure.rugby"
+        case .volleyball: return "figure.volleyball"
         }
     }
 }

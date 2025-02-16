@@ -7,7 +7,6 @@ public enum OnboardingStep: Int, CaseIterable {
     case goals
     case sports
     case features
-    case trial
     
     public var title: String {
         switch self {
@@ -16,8 +15,7 @@ public enum OnboardingStep: Int, CaseIterable {
         case .dailyLimit: return "Daily Limit"
         case .goals: return "Goals"
         case .sports: return "Sports"
-        case .features: return "Features"
-        case .trial: return "Free Trial"
+        case .features: return "Premium Features"
         }
     }
     
@@ -34,9 +32,7 @@ public enum OnboardingStep: Int, CaseIterable {
         case .sports:
             return "Which sports do you typically bet on? This helps us personalize your experience."
         case .features:
-            return "Discover the powerful features that will help you on your journey."
-        case .trial:
-            return "Start your journey with a 7-day free trial of all premium features."
+            return "Unlock premium features and start your journey with a 7-day free trial."
         }
     }
 } 

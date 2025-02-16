@@ -121,9 +121,12 @@ public struct AddTransactionView: View {
                     note: note.isEmpty ? nil : note
                 )
                 
-                // Simulate network delay and save transaction
+                // Simulate network delay
                 try await Task.sleep(nanoseconds: 1_000_000_000)
-                try await MockCDManager.shared.addTransaction(transaction)
+                
+                // Save transaction
+                let manager = MockCDManager.shared
+                try await manager.addTransaction(transaction)
                 
                 await MainActor.run {
                     dismiss()

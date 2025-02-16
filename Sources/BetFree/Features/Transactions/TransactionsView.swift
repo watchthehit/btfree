@@ -70,18 +70,18 @@ public struct TransactionsView: View {
     }
     
     private func loadTransactions() async {
+        await MainActor.run {
+            isLoading = true
+        }
+        
         do {
-            await MainActor.run {
-                isLoading = true
-            }
-            
             let manager = MockCDManager.shared
             // Simulate network delay
             try await Task.sleep(nanoseconds: 1_000_000_000)
-            let fetchedTransactions = try await manager.getAllTransactions().map(\.transaction)
+            let fetchedTransactions = try await manager.getAllTransactions()
             
             await MainActor.run {
-                self.transactions = fetchedTransactions
+                self.transactions = fetchedTransactions.map(\.transaction)
                 self.isLoading = false
             }
         } catch {
@@ -94,11 +94,11 @@ public struct TransactionsView: View {
     
     private func deleteTransaction(_ transaction: BetFreeModels.Transaction) {
         Task {
+            await MainActor.run {
+                isLoading = true
+            }
+            
             do {
-                await MainActor.run {
-                    isLoading = true
-                }
-                
                 let manager = MockCDManager.shared
                 try await Task.sleep(nanoseconds: 1_000_000_000)  // Simulate network delay
                 try await manager.deleteTransaction(transaction)

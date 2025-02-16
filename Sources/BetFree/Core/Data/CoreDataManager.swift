@@ -109,17 +109,59 @@ public final class CoreDataManager: BetFreeDataManager {
         }
     }
     
+    @MainActor
     public func reset() {
-        let fetchRequests = [
-            NSFetchRequest<NSFetchRequestResult>(entityName: "UserProfileEntity"),
-            NSFetchRequest<NSFetchRequestResult>(entityName: "TransactionEntity")
-        ]
+        // Get the main context
+        let context = persistentContainer.viewContext
         
-        for request in fetchRequests {
-            let deleteRequest = NSBatchDeleteRequest(fetchRequest: request)
-            try? context.execute(deleteRequest)
+        do {
+            // Fetch and delete all entities
+            let entityNames = ["UserProfileEntity", "TransactionEntity"]
+            
+            for entityName in entityNames {
+                let fetchRequest: NSFetchRequest<NSManagedObject> = NSFetchRequest(entityName: entityName)
+                let objects = try context.fetch(fetchRequest)
+                
+                for object in objects {
+                    context.delete(object)
+                }
+            }
+            
+            // Save changes
+            try context.save()
+            
+            // Reset the context
+            context.reset()
+            
+            // Get the store URL
+            guard let storeURL = persistentContainer.persistentStoreCoordinator.persistentStores.first?.url else {
+                print("No persistent store URL found")
+                return
+            }
+            
+            // Remove the store
+            try persistentContainer.persistentStoreCoordinator.destroyPersistentStore(at: storeURL, ofType: NSSQLiteStoreType, options: nil)
+            
+            // Create a new store
+            try persistentContainer.persistentStoreCoordinator.addPersistentStore(
+                ofType: NSSQLiteStoreType,
+                configurationName: nil,
+                at: storeURL,
+                options: [
+                    NSMigratePersistentStoresAutomaticallyOption: true,
+                    NSInferMappingModelAutomaticallyOption: true
+                ]
+            )
+        } catch {
+            print("Error resetting Core Data: \(error)")
+            
+            // If reset fails, recreate the container
+            persistentContainer = NSPersistentContainer(name: "BetFreeModel")
+            persistentContainer.loadPersistentStores { description, error in
+                if let error = error {
+                    print("Unable to load persistent stores: \(error)")
+                }
+            }
         }
-        
-        try? context.save()
     }
 }

@@ -158,109 +158,113 @@ public struct OnboardingView: View {
     }
     
     private var personalInfoStep: some View {
-        VStack(spacing: 32) {
-            VStack(spacing: 8) {
-                Text("Join BetFree")
-                    .font(BFDesignSystem.Typography.titleLarge)
-                    .foregroundColor(.white)
-                
-                Text("Join 50,000+ people who've taken control")
-                    .font(BFDesignSystem.Typography.bodyMedium)
-                    .foregroundColor(.white.opacity(0.8))
-                    .multilineTextAlignment(.center)
-            }
-            
-            VStack(spacing: 24) {
-                // Trust badges
-                HStack(spacing: 16) {
-                    TrustBadge(icon: "checkmark.shield.fill", text: "Privacy First")
-                    TrustBadge(icon: "lock.fill", text: "Secure")
-                    TrustBadge(icon: "hand.raised.fill", text: "No Gambling Ads")
-                }
-                
-                // Sign in with Apple button
-                Button(action: { viewModel.signInWithApple() }) {
-                    HStack {
-                        Image(systemName: "apple.logo")
-                            .font(.title2)
-                        Text("Continue with Apple")
-                            .font(BFDesignSystem.Typography.labelLarge)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.white)
-                    .foregroundColor(.black)
-                    .cornerRadius(12)
-                }
-                .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
-                
-                // Or divider
-                HStack {
-                    Rectangle()
-                        .fill(Color.white.opacity(0.3))
-                        .frame(height: 1)
-                    Text("or")
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 32) {
+                VStack(spacing: 8) {
+                    Text("Join BetFree")
+                        .font(BFDesignSystem.Typography.titleLarge)
+                        .foregroundColor(.white)
+                    
+                    Text("Join 50,000+ people who've taken control")
                         .font(BFDesignSystem.Typography.bodyMedium)
                         .foregroundColor(.white.opacity(0.8))
-                    Rectangle()
-                        .fill(Color.white.opacity(0.3))
-                        .frame(height: 1)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.top, 8)
+                
+                VStack(spacing: 24) {
+                    // Trust badges
+                    HStack(spacing: 16) {
+                        TrustBadge(icon: "checkmark.shield.fill", text: "Privacy First")
+                        TrustBadge(icon: "lock.fill", text: "Secure")
+                        TrustBadge(icon: "hand.raised.fill", text: "No Gambling Ads")
+                    }
+                    
+                    // Sign in with Apple button
+                    Button(action: { viewModel.signInWithApple() }) {
+                        HStack {
+                            Image(systemName: "apple.logo")
+                                .font(.title2)
+                            Text("Continue with Apple")
+                                .font(BFDesignSystem.Typography.labelLarge)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.white)
+                        .foregroundColor(.black)
+                        .cornerRadius(12)
+                    }
+                    .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+                    
+                    // Or divider
+                    HStack {
+                        Rectangle()
+                            .fill(Color.white.opacity(0.3))
+                            .frame(height: 1)
+                        Text("or")
+                            .font(BFDesignSystem.Typography.bodyMedium)
+                            .foregroundColor(.white.opacity(0.8))
+                        Rectangle()
+                            .fill(Color.white.opacity(0.3))
+                            .frame(height: 1)
+                    }
+                    
+                    // Email signup form
+                    VStack(spacing: 16) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Full Name")
+                                .font(BFDesignSystem.Typography.labelMedium)
+                                .foregroundColor(.white)
+                            TextField("", text: $viewModel.name)
+                                .textFieldStyle(OnboardingTextFieldStyle())
+                                .textContentType(.name)
+                                .autocapitalization(.words)
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Email")
+                                .font(BFDesignSystem.Typography.labelMedium)
+                                .foregroundColor(.white)
+                            TextField("", text: $viewModel.email)
+                                .textFieldStyle(OnboardingTextFieldStyle())
+                                .textContentType(.emailAddress)
+                                .keyboardType(.emailAddress)
+                                .autocapitalization(.none)
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Password")
+                                .font(BFDesignSystem.Typography.labelMedium)
+                                .foregroundColor(.white)
+                            SecureField("", text: $viewModel.password)
+                                .textFieldStyle(OnboardingTextFieldStyle())
+                                .textContentType(.newPassword)
+                        }
+                    }
+                }
+                .padding(.horizontal, 24)
+                
+                if viewModel.isLoading {
+                    SwiftUI.ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .scaleEffect(1.2)
                 }
                 
-                // Email signup form
-                VStack(spacing: 16) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Full Name")
-                            .font(BFDesignSystem.Typography.labelMedium)
-                            .foregroundColor(.white)
-                        TextField("", text: $viewModel.name)
-                            .textFieldStyle(OnboardingTextFieldStyle())
-                            .textContentType(.name)
-                            .autocapitalization(.words)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Email")
-                            .font(BFDesignSystem.Typography.labelMedium)
-                            .foregroundColor(.white)
-                        TextField("", text: $viewModel.email)
-                            .textFieldStyle(OnboardingTextFieldStyle())
-                            .textContentType(.emailAddress)
-                            .keyboardType(.emailAddress)
-                            .autocapitalization(.none)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Password")
-                            .font(BFDesignSystem.Typography.labelMedium)
-                            .foregroundColor(.white)
-                        SecureField("", text: $viewModel.password)
-                            .textFieldStyle(OnboardingTextFieldStyle())
-                            .textContentType(.newPassword)
-                    }
+                if let error = viewModel.error {
+                    Text(error)
+                        .font(BFDesignSystem.Typography.bodySmall)
+                        .foregroundColor(.red)
+                        .padding(.top, 8)
                 }
-            }
-            .padding(.horizontal, 24)
-            
-            if viewModel.isLoading {
-                SwiftUI.ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                    .scaleEffect(1.2)
-            }
-            
-            if let error = viewModel.error {
-                Text(error)
+                
+                // Privacy note
+                Text("By continuing, you agree to our Terms of Service and Privacy Policy")
                     .font(BFDesignSystem.Typography.bodySmall)
-                    .foregroundColor(.red)
-                    .padding(.top, 8)
+                    .foregroundColor(.white.opacity(0.6))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+                    .padding(.bottom, 32)
             }
-            
-            // Privacy note
-            Text("By continuing, you agree to our Terms of Service and Privacy Policy")
-                .font(BFDesignSystem.Typography.bodySmall)
-                .foregroundColor(.white.opacity(0.6))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
         }
         .slideUpOnAppear()
     }
