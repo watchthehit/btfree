@@ -11,10 +11,25 @@ public class MockCDManager: BetFreeDataManager {
     public var context: NSManagedObjectContext
     
     public init() {
+        // Create an in-memory store description
+        let storeDescription = NSPersistentStoreDescription()
+        storeDescription.type = NSInMemoryStoreType
+        
+        // Initialize the container with the model from the bundle
         let container = NSPersistentContainer(name: "BetFreeModel")
-        container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
-        container.loadPersistentStores { _, _ in }
+        container.persistentStoreDescriptions = [storeDescription]
+        
+        // Load the persistent store synchronously
+        container.loadPersistentStores { description, error in
+            if let error = error {
+                print("Error loading persistent store: \(error)")
+                fatalError("Failed to load Core Data stack")
+            }
+        }
+        
+        // Configure the context
         self.context = container.viewContext
+        self.context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
     }
     
     public func getCurrentUser() -> UserProfileEntity? {
@@ -22,23 +37,32 @@ public class MockCDManager: BetFreeDataManager {
     }
     
     public func createOrUpdateUser(name: String, email: String?, dailyLimit: Double) throws {
-        if let existingUser = userProfile {
-            existingUser.name = name
-            existingUser.email = email
-            existingUser.dailyLimit = dailyLimit
-        } else {
-            let user = UserProfileEntity(context: context)
-            user.idString = UUID().uuidString
-            user.name = name
-            user.email = email
-            user.dailyLimit = dailyLimit
-            user.streak = 0
-            user.totalSavings = 0
-            user.lastCheckIn = Date()
-            userProfile = user
+        do {
+            if let existingUser = userProfile {
+                existingUser.name = name
+                existingUser.email = email
+                existingUser.dailyLimit = dailyLimit
+            } else {
+                let user = UserProfileEntity(context: context)
+                user.idString = UUID().uuidString
+                user.name = name
+                user.email = email
+                user.dailyLimit = dailyLimit
+                user.streak = 0
+                user.totalSavings = 0
+                user.lastCheckIn = Date()
+                userProfile = user
+            }
+            
+            if context.hasChanges {
+                try context.save()
+                print("Successfully saved user data")
+            }
+        } catch {
+            print("Error saving user data: \(error)")
+            context.rollback()
+            throw error
         }
-        
-        try context.save()
     }
     
     public func getAllTransactions() -> [TransactionEntity] {
