@@ -1,457 +1,376 @@
 import SwiftUI
+import BetFreeUI
+import BetFreeModels
 
+@available(macOS 10.15, iOS 13.0, *)
 public struct CravingView: View {
-    @StateObject private var manager = CravingManager()
-    @State private var showingAddSheet = false
-    @State private var selectedCraving: Craving?
-    
-    // Form state
-    @State private var intensity = 3
-    @State private var trigger = ""
-    @State private var location = ""
-    @State private var emotion = ""
-    @State private var duration = 300.0 // 5 minutes
-    @State private var copingStrategy = ""
-    @State private var outcome = ""
+    @Environment(\.dismiss) private var dismiss
+    @StateObject private var viewModel = CravingViewModel()
     
     public init() {}
     
     public var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 20) {
-                    // Stats Cards
-                    statsGrid
-                    
-                    // Intensity Chart
-                    timeChart
-                        .frame(height: 200)
-                    
-                    // Recent Cravings
-                    recentCravingsList
+                VStack(spacing: 24) {
+                    intensitySection
+                    triggersSection
+                    copingStrategiesSection
+                    submitButton
                 }
                 .padding()
             }
-            .navigationTitle("Cravings")
+            .navigationTitle("Log Craving")
+#if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+#endif
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        showingAddSheet = true
-                        BFHaptics.warning()
-                    } label: {
-                        Image(systemName: "plus")
+                #if os(iOS)
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Cancel") {
+                        dismiss()
                     }
-                    .semanticMeaning("Add Craving Button")
-                    .semanticHint("Double tap to log a new craving")
                 }
+                #else
+                ToolbarItem(placement: .automatic) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+                #endif
             }
-        }
-        .sheet(isPresented: $showingAddSheet) {
-            addCravingSheet
-        }
-        .sheet(item: $selectedCraving) { craving in
-            cravingDetailSheet(craving)
+            .alert("Success", isPresented: $viewModel.showSuccess) {
+                Button("OK") {
+                    dismiss()
+                }
+            } message: {
+                Text("Your craving has been logged!")
+            }
+            .alert("Error", isPresented: $viewModel.showError) {
+                Button("OK") { }
+            } message: {
+                Text(viewModel.error ?? "An unknown error occurred")
+            }
         }
     }
     
-    private var statsGrid: some View {
-        VStack(spacing: 20) {
+    private var intensitySection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("How strong is your craving?")
+                .font(.title)
+            
+            Text("Rate the intensity from 1-10")
+                .font(.body)
+                .foregroundColor(.secondary)
+            
+            Slider(value: $viewModel.intensity, in: 1...10, step: 1)
+                .tint(viewModel.intensityColor)
+            
+            HStack {
+                Text("1")
+                Spacer()
+                Text(String(format: "%.0f", viewModel.intensity))
+                    .foregroundColor(viewModel.intensityColor)
+                Spacer()
+                Text("10")
+            }
+            .font(.callout)
+            
+            Text(viewModel.intensityDescription)
+                .font(.body)
+                .foregroundColor(viewModel.intensityColor)
+        }
+        .padding()
+        .background(Color.gray.opacity(0.1))
+        .cornerRadius(12)
+    }
+    
+    private var triggersSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("What triggered this craving?")
+                .font(.title)
+                .foregroundColor(.primary)
+            
+            Text("Select all that apply")
+                .font(.body)
+                .foregroundColor(.secondary)
+            
             LazyVGrid(columns: [
                 GridItem(.flexible()),
                 GridItem(.flexible())
             ], spacing: 16) {
-                statCard(
-                    title: "Average Intensity",
-                    value: String(format: "%.1f", manager.averageIntensity),
-                    icon: "chart.line.uptrend.xyaxis",
-                    color: intensityColor(manager.averageIntensity)
-                )
-                
-                statCard(
-                    title: "Trend",
-                    value: trendText(manager.getCravingTrend()),
-                    icon: trendIcon(manager.getCravingTrend()),
-                    color: trendColor(manager.getCravingTrend())
-                )
-            }
-            
-            // Progress Insights
-            ForEach(manager.getProgressInsights(), id: \.self) { insight in
-                BFCard(style: .elevated) {
-                    HStack {
-                        Image(systemName: "lightbulb.fill")
-                            .foregroundColor(BFDesignSystem.Colors.warning)
-                        Text(insight)
-                            .font(BFDesignSystem.Typography.bodyMedium)
-                            .foregroundColor(BFDesignSystem.Colors.textPrimary)
+                ForEach(CravingTrigger.allCases) { trigger in
+                    TriggerButton(
+                        trigger: trigger,
+                        isSelected: viewModel.selectedTriggers.contains(trigger)
+                    ) {
+                        viewModel.toggleTrigger(trigger)
                     }
-                    .padding()
                 }
-                .semanticMeaning("Insight Card")
-                .semanticValue(insight)
-                .semanticHint("Progress insight based on your data")
-            }
-            
-            // Risk Level Alert
-            if let situation = CravingManager.riskySituations.first(where: { _ in 
-                Calendar.current.isDateInToday(Date())
-            }) {
-                let riskLevel = CravingManager.getRiskLevel(for: situation)
-                let safetyPlan = manager.getSafetyPlan(for: riskLevel)
-                
-                BFCard(style: .elevated) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(BFDesignSystem.Colors.error)
-                            Text("High Risk Day: \(situation)")
-                                .font(BFDesignSystem.Typography.titleMedium)
-                                .foregroundColor(BFDesignSystem.Colors.error)
-                        }
-                        
-                        Text("Your Safety Plan:")
-                            .font(BFDesignSystem.Typography.labelLarge)
-                        
-                        ForEach(safetyPlan, id: \.self) { step in
-                            HStack(alignment: .top) {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(BFDesignSystem.Colors.success)
-                                Text(step)
-                                    .font(BFDesignSystem.Typography.bodyMedium)
-                            }
-                        }
-                    }
-                    .padding()
-                }
-                .semanticMeaning("Risk Alert Card")
-                .semanticValue("High risk situation: \(situation)")
-                .semanticHint("Shows your safety plan for today")
             }
         }
+        .padding()
+        .background(Color.gray.opacity(0.1))
+        .cornerRadius(12)
     }
     
-    private func statCard(title: String, value: String, icon: String, color: Color) -> some View {
-        BFCard(style: .default) {
-            VStack(alignment: .center, spacing: 8) {
-                HStack {
-                    Image(systemName: icon)
-                        .foregroundColor(color)
-                    Text(title)
-                        .font(BFDesignSystem.Typography.labelMedium)
+    private var copingStrategiesSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Try these coping strategies")
+                .font(.title)
+                .foregroundColor(.primary)
+            
+            Text("Select what works for you")
+                .font(.body)
+                .foregroundColor(.secondary)
+            
+            VStack(spacing: 12) {
+                ForEach(CopingStrategy.allCases) { strategy in
+                    StrategyButton(
+                        strategy: strategy,
+                        isSelected: viewModel.selectedStrategies.contains(strategy)
+                    ) {
+                        viewModel.toggleStrategy(strategy)
+                    }
                 }
-                
-                Text(value)
-                    .font(BFDesignSystem.Typography.titleLarge)
-                    .foregroundColor(color)
+            }
+        }
+        .padding()
+        .background(Color.gray.opacity(0.1))
+        .cornerRadius(12)
+    }
+    
+    private var submitButton: some View {
+        Button(action: {
+            viewModel.logCraving()
+        }) {
+            if viewModel.isLoading {
+                SwiftUI.ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle())
+            } else {
+                Text("Submit")
+            }
+        }
+        .buttonStyle(.borderedProminent)
+        .disabled(viewModel.isLoading)
+        .padding(.horizontal)
+    }
+}
+
+@available(macOS 10.15, iOS 13.0, *)
+fileprivate struct TriggerButton: View {
+    let trigger: CravingTrigger
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Image(systemName: trigger.iconName)
+                Text(trigger.name)
+                    .font(.body)
+                Spacer()
+                if isSelected {
+                    Image(systemName: "checkmark")
+                }
             }
             .padding()
             .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(isSelected ? Color.gray.opacity(0.2) : Color.gray.opacity(0.1))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(
+                                isSelected ? Color.primary : Color.gray.opacity(0.5),
+                                lineWidth: 1
+                            )
+                    )
+            )
         }
-        .semanticMeaning("\(title) Card")
-        .semanticValue(value)
-        .semanticHint("Shows \(title.lowercased())")
-    }
-    
-    private var timeChart: some View {
-        BFCard(style: .elevated) {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Cravings by Time")
-                    .font(BFDesignSystem.Typography.titleMedium)
-                
-                GeometryReader { geometry in
-                    HStack(alignment: .bottom, spacing: 4) {
-                        ForEach(manager.cravingsByTime, id: \.hour) { hourData in
-                            VStack {
-                                let height = getBarHeight(count: hourData.count, maxCount: maxCount, availableHeight: geometry.size.height - 40)
-                                
-                                Rectangle()
-                                    .fill(BFDesignSystem.Colors.primary)
-                                    .frame(height: height)
-                                
-                                if hourData.hour % 6 == 0 {
-                                    Text("\(hourData.hour)")
-                                        .font(BFDesignSystem.Typography.labelSmall)
-                                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
-                                }
-                            }
-                            .frame(width: (geometry.size.width - 100) / 24)
-                        }
-                    }
-                    .padding(.horizontal)
-                }
-            }
-            .padding()
-        }
-        .semanticMeaning("Cravings by Time Chart")
-        .semanticValue("\(manager.cravingsByTime.reduce(0) { $0 + $1.count }) cravings recorded")
-        .semanticHint("Shows when cravings typically occur")
-    }
-    
-    private var maxCount: Int {
-        manager.cravingsByTime.map(\.count).max() ?? 1
-    }
-    
-    private func getBarHeight(count: Int, maxCount: Int, availableHeight: CGFloat) -> CGFloat {
-        guard maxCount > 0 else { return 0 }
-        return (CGFloat(count) / CGFloat(maxCount)) * availableHeight
-    }
-    
-    private var recentCravingsList: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Recent Cravings")
-                .font(BFDesignSystem.Typography.titleMedium)
-            
-            ForEach(manager.getRecentCravings()) { craving in
-                Button {
-                    selectedCraving = craving
-                    BFHaptics.warning()
-                } label: {
-                    CravingRow(craving: craving)
-                }
-            }
-        }
-    }
-    
-    private var addCravingSheet: some View {
-        NavigationView {
-            Form {
-                Section("Intensity") {
-                    Slider(value: .init(
-                        get: { Double(intensity) },
-                        set: { intensity = Int($0) }
-                    ), in: 1...5, step: 1) {
-                        Text("Intensity")
-                    } minimumValueLabel: {
-                        Text("1")
-                    } maximumValueLabel: {
-                        Text("5")
-                    }
-                    .semanticValue("\(intensity) out of 5")
-                }
-                
-                Section("Trigger") {
-                    Picker("What triggered it?", selection: $trigger) {
-                        Text("Select trigger").tag("")
-                        ForEach(CravingManager.commonTriggers, id: \.self) { trigger in
-                            Text(trigger).tag(trigger)
-                        }
-                    }
-                    .semanticHint("Select what caused the betting urge")
-                    
-                    if trigger.isEmpty {
-                        TextField("Or enter custom trigger", text: $trigger)
-                    }
-                }
-                
-                Section("Context") {
-                    Picker("Where were you?", selection: $location) {
-                        Text("Select location").tag("")
-                        ForEach(CravingManager.commonLocations, id: \.self) { location in
-                            Text(location).tag(location)
-                        }
-                    }
-                    .semanticHint("Select where you were")
-                    
-                    Picker("How did you feel?", selection: $emotion) {
-                        Text("Select emotion").tag("")
-                        ForEach(CravingManager.commonEmotions, id: \.self) { emotion in
-                            Text(emotion).tag(emotion)
-                        }
-                    }
-                    .semanticHint("Select your emotional state")
-                }
-                
-                Section("Duration") {
-                    Slider(value: $duration, in: 60...3600, step: 60) {
-                        Text("Duration")
-                    } minimumValueLabel: {
-                        Text("1m")
-                    } maximumValueLabel: {
-                        Text("1h")
-                    }
-                    .semanticValue("\(manager.formatDuration(duration))")
-                }
-                
-                Section("Response") {
-                    Picker("Coping strategy used", selection: $copingStrategy) {
-                        Text("Select strategy").tag("")
-                        ForEach(CravingManager.copingStrategies, id: \.self) { strategy in
-                            Text(strategy).tag(strategy)
-                        }
-                    }
-                    
-                    TextField("Outcome", text: $outcome)
-                        .semanticHint("Enter what happened after using the strategy")
-                }
-                
-                Section {
-                    Button("Log Urge") {
-                        let craving = Craving(
-                            intensity: intensity,
-                            trigger: trigger,
-                            location: location.isEmpty ? nil : location,
-                            emotion: emotion.isEmpty ? nil : emotion,
-                            duration: duration,
-                            copingStrategy: copingStrategy.isEmpty ? nil : copingStrategy,
-                            outcome: outcome.isEmpty ? nil : outcome
-                        )
-                        manager.add(craving)
-                        showingAddSheet = false
-                        resetForm()
-                    }
-                    .disabled(trigger.isEmpty)
-                }
-            }
-            .navigationTitle("Log Betting Urge")
-            .navigationBarItems(trailing: Button("Cancel") {
-                showingAddSheet = false
-                BFHaptics.error()
-            })
-        }
-    }
-    
-    private func cravingDetailSheet(_ craving: Craving) -> some View {
-        NavigationView {
-            List {
-                Section("Details") {
-                    DetailRow(label: "Intensity", value: "\(craving.intensity)/5")
-                    DetailRow(label: "Trigger", value: craving.trigger)
-                    if let location = craving.location {
-                        DetailRow(label: "Location", value: location)
-                    }
-                    if let emotion = craving.emotion {
-                        DetailRow(label: "Emotion", value: emotion)
-                    }
-                    DetailRow(label: "Duration", value: manager.formatDuration(craving.duration))
-                }
-                
-                if let strategy = craving.copingStrategy {
-                    Section("Response") {
-                        DetailRow(label: "Strategy", value: strategy)
-                        if let outcome = craving.outcome {
-                            DetailRow(label: "Outcome", value: outcome)
-                        }
-                    }
-                }
-            }
-            .navigationTitle("Craving Details")
-            .navigationBarItems(trailing: Button("Done") {
-                selectedCraving = nil
-            })
-        }
-    }
-    
-    private func resetForm() {
-        intensity = 3
-        trigger = ""
-        location = ""
-        emotion = ""
-        duration = 300
-        copingStrategy = ""
-        outcome = ""
-    }
-    
-    private func intensityColor(_ value: Double) -> Color {
-        switch value {
-        case ..<2:
-            return BFDesignSystem.Colors.success
-        case ..<4:
-            return BFDesignSystem.Colors.warning
-        default:
-            return BFDesignSystem.Colors.error
-        }
-    }
-    
-    private func trendText(_ value: Double) -> String {
-        switch value {
-        case ..<(-0.5):
-            return "Decreasing"
-        case ...0.5:
-            return "Stable"
-        default:
-            return "Increasing"
-        }
-    }
-    
-    private func trendIcon(_ value: Double) -> String {
-        switch value {
-        case ..<(-0.5):
-            return "arrow.down.circle.fill"
-        case ...0.5:
-            return "equal.circle.fill"
-        default:
-            return "arrow.up.circle.fill"
-        }
-    }
-    
-    private func trendColor(_ value: Double) -> Color {
-        switch value {
-        case ..<(-0.5):
-            return BFDesignSystem.Colors.success
-        case ...0.5:
-            return BFDesignSystem.Colors.primary
-        default:
-            return BFDesignSystem.Colors.error
-        }
+        .buttonStyle(.plain)
     }
 }
 
-private struct DetailRow: View {
-    let label: String
-    let value: String
+@available(macOS 10.15, iOS 13.0, *)
+fileprivate struct StrategyButton: View {
+    let strategy: CopingStrategy
+    let isSelected: Bool
+    let action: () -> Void
     
     var body: some View {
-        HStack {
-            Text(label)
-                .foregroundColor(BFDesignSystem.Colors.textSecondary)
-            Spacer()
-            Text(value)
-                .foregroundColor(BFDesignSystem.Colors.textPrimary)
-        }
-    }
-}
-
-private struct CravingRow: View {
-    let craving: Craving
-    
-    var body: some View {
-        BFCard(style: .default) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(craving.trigger)
-                        .font(BFDesignSystem.Typography.bodyLarge)
-                        .foregroundColor(BFDesignSystem.Colors.textPrimary)
+        Button(action: action) {
+            HStack(spacing: 16) {
+                Image(systemName: strategy.iconName)
+                    .foregroundColor(isSelected ? Color.green : Color.blue)
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(strategy.rawValue)
+                        .font(.body)
+                        .foregroundColor(.primary)
                     
-                    Text(craving.timestamp, formatter: DateFormatter())
-                        .font(BFDesignSystem.Typography.labelMedium)
-                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                    Text(strategy.description)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
                 
                 Spacer()
                 
-                Text("\(craving.intensity)")
-                    .font(BFDesignSystem.Typography.titleLarge)
-                    .foregroundColor(intensityColor(Double(craving.intensity)))
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(isSelected ? Color.green : Color.gray.opacity(0.5))
             }
             .padding()
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+            )
         }
-        .semanticMeaning("Craving Entry")
-        .semanticValue("Intensity \(craving.intensity) out of 5, triggered by \(craving.trigger)")
-        .semanticHint("Double tap to view details")
+        .buttonStyle(.plain)
+    }
+}
+
+@available(macOS 10.15, iOS 13.0, *)
+@MainActor
+fileprivate final class CravingViewModel: ObservableObject {
+    @Published fileprivate var intensity: Double = 5
+    @Published fileprivate var selectedTriggers: Set<CravingTrigger> = []
+    @Published fileprivate var selectedStrategies: Set<CopingStrategy> = []
+    @Published fileprivate var isLoading = false
+    @Published fileprivate var error: String?
+    @Published fileprivate var showError = false
+    @Published fileprivate var showSuccess = false
+    
+    fileprivate var intensityColor: Color {
+        switch intensity {
+        case 1...3:
+            return Color.green
+        case 4...7:
+            return Color.blue
+        default:
+            return Color.red
+        }
     }
     
-    private func intensityColor(_ value: Double) -> Color {
-        switch value {
-        case ..<2:
-            return BFDesignSystem.Colors.success
-        case ..<4:
-            return BFDesignSystem.Colors.warning
+    fileprivate var intensityDescription: String {
+        switch intensity {
+        case 1...3:
+            return "Mild craving - You've got this!"
+        case 4...7:
+            return "Moderate craving - Try some coping strategies"
         default:
-            return BFDesignSystem.Colors.error
+            return "Strong craving - Use multiple strategies"
+        }
+    }
+    
+    fileprivate func toggleTrigger(_ trigger: CravingTrigger) {
+        if selectedTriggers.contains(trigger) {
+            selectedTriggers.remove(trigger)
+        } else {
+            selectedTriggers.insert(trigger)
+        }
+    }
+    
+    fileprivate func toggleStrategy(_ strategy: CopingStrategy) {
+        if selectedStrategies.contains(strategy) {
+            selectedStrategies.remove(strategy)
+        } else {
+            selectedStrategies.insert(strategy)
+        }
+    }
+    
+    fileprivate func logCraving() {
+        isLoading = true
+        
+        // TODO: Save craving data
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            self.isLoading = false
+            if Int.random(in: 0...10) > 8 {
+                self.error = "Failed to log craving. Please try again."
+                self.showError = true
+            } else {
+                self.showSuccess = true
+            }
         }
     }
 }
 
-#Preview {
-    CravingView()
+private enum CopingStrategy: String, CaseIterable, Identifiable {
+    case deepBreathing = "Deep Breathing"
+    case physicalActivity = "Physical Activity"
+    case mindfulness = "Mindfulness"
+    case journaling = "Journaling"
+    case talkingToAFriend = "Talking to a Friend"
+    case seekingProfessionalHelp = "Seeking Professional Help"
+    
+    var id: String { rawValue }
+    var title: String { rawValue }
+    var description: String {
+        switch self {
+        case .deepBreathing:
+            return "Take slow, deep breaths to calm your mind and body."
+        case .physicalActivity:
+            return "Engage in physical activity to distract yourself and release endorphins."
+        case .mindfulness:
+            return "Focus on the present moment and let go of cravings."
+        case .journaling:
+            return "Write down your thoughts and feelings to process and release them."
+        case .talkingToAFriend:
+            return "Reach out to a friend or loved one for support and connection."
+        case .seekingProfessionalHelp:
+            return "Seek help from a professional counselor or therapist."
+        }
+    }
+    var iconName: String {
+        switch self {
+        case .deepBreathing:
+            return "heart"
+        case .physicalActivity:
+            return "figure.walk"
+        case .mindfulness:
+            return "mindfulness"
+        case .journaling:
+            return "pencil.tip"
+        case .talkingToAFriend:
+            return "person.2"
+        case .seekingProfessionalHelp:
+            return "briefcase"
+        }
+    }
+}
+
+private enum CravingTrigger: String, CaseIterable, Identifiable {
+    case boredom = "Boredom"
+    case stress = "Stress"
+    case social = "Social Pressure"
+    case ads = "Betting Ads"
+    case money = "Money Problems"
+    case wins = "Past Wins"
+    case losses = "Past Losses"
+    case excitement = "Need Excitement"
+    
+    var id: String { rawValue }
+    var name: String { rawValue }
+    
+    var iconName: String {
+        switch self {
+        case .boredom: return "hourglass"
+        case .stress: return "bolt.fill"
+        case .social: return "person.2.fill"
+        case .ads: return "megaphone.fill"
+        case .money: return "dollarsign.circle.fill"
+        case .wins: return "trophy.fill"
+        case .losses: return "arrow.down.circle.fill"
+        case .excitement: return "star.fill"
+        }
+    }
+}
+
+@available(macOS 10.15, iOS 13.0, *)
+struct CravingView_Previews: PreviewProvider {
+    static var previews: some View {
+        CravingView()
+    }
 }

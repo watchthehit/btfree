@@ -1,6 +1,8 @@
 import Foundation
 import SwiftUI
 import Combine
+import UserNotifications
+import BetFreeModels
 
 @MainActor
 public class AppState: ObservableObject {
@@ -109,11 +111,20 @@ public class AppState: ObservableObject {
         self.typicalBetAmount = defaults.double(forKey: typicalBetAmountKey)
         self.preferredSports = defaults.stringArray(forKey: preferredSportsKey) ?? []
         self.hasBlockedApps = defaults.bool(forKey: hasBlockedAppsKey)
-        self.subscriptionStatus = BFUserState(rawValue: defaults.integer(forKey: subscriptionStatusKey)) ?? .expired
+        
+        // Load subscription status
+        if let statusData = defaults.data(forKey: subscriptionStatusKey),
+           let status = try? JSONDecoder().decode(BFUserState.self, from: statusData) {
+            self.subscriptionStatus = status
+        } else {
+            self.subscriptionStatus = .expired
+        }
         
         // Initialize from Core Data if available
         if let user = dataManager.getCurrentUser() {
             self.username = user.name
+            self.currentStreak = Int(user.streak)
+            self.totalSavings = user.totalSavings
             self.dailyLimit = user.dailyLimit
             self.isOnboarded = true
         } else {
@@ -161,7 +172,11 @@ public class AppState: ObservableObject {
         defaults.set(typicalBetAmount, forKey: typicalBetAmountKey)
         defaults.set(preferredSports, forKey: preferredSportsKey)
         defaults.set(hasBlockedApps, forKey: hasBlockedAppsKey)
-        defaults.set(subscriptionStatus.rawValue, forKey: subscriptionStatusKey)
+        
+        // Save subscription status
+        if let statusData = try? JSONEncoder().encode(subscriptionStatus) {
+            defaults.set(statusData, forKey: subscriptionStatusKey)
+        }
     }
     
     private func scheduleTrialEndNotification(endDate: Date) {
@@ -172,10 +187,8 @@ public class AppState: ObservableObject {
         
         // Schedule for 24 hours before trial ends
         let triggerDate = Calendar.current.date(byAdding: .day, value: -1, to: endDate) ?? endDate
-        let trigger = UNCalendarNotificationTrigger(
-            dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: triggerDate),
-            repeats: false
-        )
+        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: triggerDate)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
         
         let request = UNNotificationRequest(
             identifier: "trial_end_reminder",
@@ -183,7 +196,11 @@ public class AppState: ObservableObject {
             trigger: trigger
         )
         
-        UNUserNotificationCenter.current().add(request)
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Failed to schedule trial end notification: \(error)")
+            }
+        }
     }
     
     private func handleStreakMilestone() {

@@ -1,184 +1,153 @@
 import SwiftUI
-import CoreHaptics
+
+#if os(iOS)
+import UIKit
 
 public enum BFHaptics {
-    // MARK: - Basic Feedback
-    
-    /// Trigger success feedback (e.g., when completing a goal)
-    public static func success() {
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
+    public static func impact(style: UIImpactFeedbackGenerator.FeedbackStyle = .medium) {
+        let generator = UIImpactFeedbackGenerator(style: style)
+        generator.impactOccurred()
     }
     
-    /// Trigger error feedback (e.g., when exceeding daily limit)
-    public static func error() {
-        UINotificationFeedbackGenerator().notificationOccurred(.error)
+    public static func notification(type: UINotificationFeedbackGenerator.FeedbackType = .success) {
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(type)
     }
     
-    /// Trigger warning feedback (e.g., when approaching daily limit)
-    public static func warning() {
-        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+    public static func selection() {
+        let generator = UISelectionFeedbackGenerator()
+        generator.selectionChanged()
     }
     
-    // MARK: - Interactive Feedback
-    
-    /// Light tap feedback for subtle interactions
-    public static func lightTap() {
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-    }
-    
-    /// Medium tap feedback for standard interactions
-    public static func mediumTap() {
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-    }
-    
-    /// Heavy tap feedback for emphasized interactions
-    public static func heavyTap() {
-        UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
-    }
-    
-    /// Soft tap feedback for gentle interactions
     public static func softTap() {
-        UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+        #if os(iOS)
+        let generator = UIImpactFeedbackGenerator(style: .soft)
+        generator.impactOccurred()
+        #endif
     }
     
-    /// Rigid tap feedback for firm interactions
-    public static func rigidTap() {
-        UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+    public static func mediumTap() {
+        #if os(iOS)
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+        #endif
     }
     
-    // MARK: - Selection Feedback
+    public static func heavyTap() {
+        #if os(iOS)
+        let generator = UIImpactFeedbackGenerator(style: .heavy)
+        generator.impactOccurred()
+        #endif
+    }
     
-    /// Selection changed feedback
-    public static func selectionChanged() {
-        UISelectionFeedbackGenerator().selectionChanged()
+    public static func success() {
+        #if os(iOS)
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+        #endif
+    }
+    
+    public static func error() {
+        #if os(iOS)
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.error)
+        #endif
+    }
+    
+    public static func warning() {
+        #if os(iOS)
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.warning)
+        #endif
     }
 }
-
-// MARK: - View Extensions
 
 public extension View {
     /// Adds haptic feedback when a button is pressed
-    func withHaptics(style: UIImpactFeedbackGenerator.FeedbackStyle = .light) -> some View {
+    func hapticFeedback(style: UIImpactFeedbackGenerator.FeedbackStyle = .medium) -> some View {
         self.simultaneousGesture(TapGesture().onEnded { _ in
-            UIImpactFeedbackGenerator(style: style).impactOccurred()
+            BFHaptics.impact(style: style)
         })
     }
     
-    /// Adds success haptic feedback when a condition is met
-    func withSuccessHaptics(when condition: Bool) -> some View {
-        onChange(of: condition) { newValue in
-            if newValue {
-                BFHaptics.success()
-            }
-        }
+    /// Adds haptic feedback when a button is pressed
+    func hapticNotification(type: UINotificationFeedbackGenerator.FeedbackType = .success) -> some View {
+        self.simultaneousGesture(TapGesture().onEnded { _ in
+            BFHaptics.notification(type: type)
+        })
     }
     
-    /// Adds error haptic feedback when a condition is met
-    func withErrorHaptics(when condition: Bool) -> some View {
-        onChange(of: condition) { newValue in
-            if newValue {
-                BFHaptics.error()
-            }
-        }
-    }
-}
-
-// MARK: - Advanced Haptic Engine
-
-public class BFHapticEngine {
-    private var engine: CHHapticEngine?
-    
-    public init() {
-        setupHapticEngine()
+    /// Adds haptic feedback when a button is pressed
+    func hapticSelection() -> some View {
+        self.simultaneousGesture(TapGesture().onEnded { _ in
+            BFHaptics.selection()
+        })
     }
     
-    private func setupHapticEngine() {
-        guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return }
-        
-        do {
-            engine = try CHHapticEngine()
-            try engine?.start()
-        } catch {
-            print("Haptic engine Creation Error: \(error.localizedDescription)")
-        }
+    /// Adds haptic feedback when a button is pressed
+    func hapticSoftTap() -> some View {
+        self.simultaneousGesture(TapGesture().onEnded { _ in
+            BFHaptics.softTap()
+        })
     }
     
-    /// Play a custom achievement pattern
-    public func playAchievementPattern() {
-        guard CHHapticEngine.capabilitiesForHardware().supportsHaptics,
-              let engine = engine else { return }
-        
-        do {
-            let pattern = try createAchievementPattern()
-            try engine.start()
-            let player = try engine.makePlayer(with: pattern)
-            try player.start(atTime: 0)
-        } catch {
-            print("Pattern Play Error: \(error.localizedDescription)")
-        }
+    /// Adds haptic feedback when a button is pressed
+    func hapticMediumTap() -> some View {
+        self.simultaneousGesture(TapGesture().onEnded { _ in
+            BFHaptics.mediumTap()
+        })
     }
     
-    /// Play a custom progress completion pattern
-    public func playProgressCompletionPattern() {
-        guard CHHapticEngine.capabilitiesForHardware().supportsHaptics,
-              let engine = engine else { return }
-        
-        do {
-            let pattern = try createProgressCompletionPattern()
-            try engine.start()
-            let player = try engine.makePlayer(with: pattern)
-            try player.start(atTime: 0)
-        } catch {
-            print("Pattern Play Error: \(error.localizedDescription)")
-        }
+    /// Adds haptic feedback when a button is pressed
+    func hapticHeavyTap() -> some View {
+        self.simultaneousGesture(TapGesture().onEnded { _ in
+            BFHaptics.heavyTap()
+        })
     }
     
-    // MARK: - Private Pattern Creation
-    
-    private func createAchievementPattern() throws -> CHHapticPattern {
-        let sharpness = CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.6)
-        let intensity = CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0)
-        
-        let start = CHHapticParameterCurve.ControlPoint(relativeTime: 0, value: 1.0)
-        let end = CHHapticParameterCurve.ControlPoint(relativeTime: 0.5, value: 0.0)
-        
-        let parameter = CHHapticParameterCurve(
-            parameterID: .hapticIntensityControl,
-            controlPoints: [start, end],
-            relativeTime: 0
-        )
-        
-        let event1 = CHHapticEvent(
-            eventType: .hapticTransient,
-            parameters: [intensity, sharpness],
-            relativeTime: 0
-        )
-        
-        let event2 = CHHapticEvent(
-            eventType: .hapticContinuous,
-            parameters: [
-                CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.5),
-                CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.5)
-            ],
-            relativeTime: 0.1,
-            duration: 0.4
-        )
-        
-        return try CHHapticPattern(events: [event1, event2], parameterCurves: [parameter])
+    /// Adds haptic feedback when a button is pressed
+    func hapticSuccess() -> some View {
+        self.simultaneousGesture(TapGesture().onEnded { _ in
+            BFHaptics.success()
+        })
     }
     
-    private func createProgressCompletionPattern() throws -> CHHapticPattern {
-        let sharpness = CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.5)
-        let intensity = CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.8)
-        
-        let events = (0...2).map { i -> CHHapticEvent in
-            CHHapticEvent(
-                eventType: .hapticTransient,
-                parameters: [intensity, sharpness],
-                relativeTime: TimeInterval(i) * 0.1
-            )
-        }
-        
-        return try CHHapticPattern(events: events, parameters: [])
+    /// Adds haptic feedback when a button is pressed
+    func hapticError() -> some View {
+        self.simultaneousGesture(TapGesture().onEnded { _ in
+            BFHaptics.error()
+        })
+    }
+    
+    /// Adds haptic feedback when a button is pressed
+    func hapticWarning() -> some View {
+        self.simultaneousGesture(TapGesture().onEnded { _ in
+            BFHaptics.warning()
+        })
     }
 }
+#else
+public enum BFHaptics {
+    public static func impact() {}
+    public static func notification() {}
+    public static func selection() {}
+    public static func softTap() {}
+    public static func mediumTap() {}
+    public static func heavyTap() {}
+    public static func success() {}
+    public static func error() {}
+    public static func warning() {}
+}
+
+public extension View {
+    func hapticFeedback() -> some View { self }
+    func hapticNotification() -> some View { self }
+    func hapticSelection() -> some View { self }
+    func hapticSoftTap() -> some View { self }
+    func hapticMediumTap() -> some View { self }
+    func hapticHeavyTap() -> some View { self }
+    func hapticSuccess() -> some View { self }
+    func hapticError() -> some View { self }
+    func hapticWarning() -> some View { self }
+}
+#endif

@@ -5,8 +5,8 @@ let package = Package(
     name: "BetFree",
     defaultLocalization: "en",
     platforms: [
-        .iOS(.v15),
-        .macOS(.v12)
+        .iOS(.v16),
+        .macOS(.v13)
     ],
     products: [
         .library(
@@ -16,7 +16,9 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/pointfreeco/swift-composable-architecture", exact: "1.2.0")
+        .package(url: "https://github.com/pointfreeco/swift-composable-architecture", exact: "1.2.0"),
+        .package(path: "Sources/BetFreeUI"),
+        .package(path: "Sources/BetFreeModels")
     ],
     targets: [
         .target(
@@ -25,7 +27,9 @@ let package = Package(
                 .product(
                     name: "ComposableArchitecture",
                     package: "swift-composable-architecture"
-                )
+                ),
+                "BetFreeUI",
+                "BetFreeModels"
             ],
             path: "Sources/BetFree",
             resources: [

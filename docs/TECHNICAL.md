@@ -34,54 +34,122 @@ dependencies: [
 
 ### Typography System
 
-The app uses a hierarchical typography system defined in `BFDesignSystem.Typography`:
+The app uses standard SwiftUI typography for better cross-platform compatibility:
 
 ```swift
-// Display - Large headlines and hero text
-displayLarge   // 34pt bold
-displayMedium  // 28pt semibold
-displaySmall   // 24pt semibold
+// Display and Titles
+.font(.largeTitle)  // Largest headlines
+.font(.title)       // Section headers
+.font(.title2)      // Subsection headers
+.font(.title3)      // Minor headers
 
-// Title - Section headers and important text
-titleLarge    // 22pt semibold
-titleMedium   // 20pt semibold
-titleSmall    // 18pt medium
+// Body Text
+.font(.body)        // Primary content
+.font(.callout)     // Secondary content
+.font(.subheadline) // Supporting text
 
-// Body - Primary content text
-bodyLarge     // 17pt regular
-bodyMedium    // 15pt regular
-bodySmall    // 13pt regular
-
-// Label - Supporting text and annotations
-labelLarge    // 14pt medium
-labelMedium   // 12pt medium
-labelSmall    // 11pt medium
+// Supporting Text
+.font(.caption)     // Small supporting text
+.font(.caption2)    // Smallest text
 ```
 
-#### Legacy Support
-For backward compatibility, the following styles are maintained:
+### Color System
+
+The app uses SwiftUI's semantic colors for consistent appearance across platforms:
+
 ```swift
-caption         // 13pt regular (equivalent to bodySmall)
-button         // 17pt semibold (equivalent to bodyLarge with semibold)
-body           // 15pt regular (equivalent to bodyMedium)
-display        // 34pt bold (equivalent to displayLarge)
-bodyLargeMedium // 17pt medium (equivalent to bodyLarge with medium weight)
+// Text Colors
+.foregroundColor(.primary)    // Primary text
+.foregroundColor(.secondary)  // Secondary text
+
+// UI Colors
+.background(.blue)           // Primary accent
+.tint(.blue)                // Tint color for controls
+.background(Color.gray.opacity(0.1))  // Subtle background
 ```
 
-#### Accessibility
-For dynamic type support, use the scaling helpers:
+### Button Styles
+
+Standard button styles are used across the app:
+
 ```swift
-Typography.scaledDisplay(size: CGFloat, weight: .bold)
-Typography.scaledBody(size: CGFloat, weight: .regular)
+// Primary Actions
+Button("Primary") { action() }
+    .buttonStyle(.borderedProminent)
+
+// Secondary Actions
+Button("Secondary") { action() }
+    .buttonStyle(.bordered)
+
+// Plain Actions
+Button("Plain") { action() }
+    .buttonStyle(.plain)
 ```
 
-#### Usage Example
+### Form Components
+
+Forms use standard SwiftUI form styling:
+
 ```swift
-Text("Header")
-    .font(BFDesignSystem.Typography.titleLarge)
-    
-Text("Body text")
-    .font(BFDesignSystem.Typography.bodyMedium)
+Form {
+    Section(header: Text("Section Title")) {
+        TextField("Label", text: $binding)
+        Toggle("Option", isOn: $binding)
+        Picker("Choice", selection: $binding) {
+            // Picker content
+        }
+    }
+}
+```
+
+### Progress Indicators
+
+Progress indicators use explicit SwiftUI namespace to avoid conflicts:
+
+```swift
+// Determinate Progress
+SwiftUI.ProgressView(value: progress)
+    .tint(.blue)
+
+// Indeterminate Progress
+SwiftUI.ProgressView()
+    .progressViewStyle(CircularProgressViewStyle())
+```
+
+### Platform-Specific Features
+
+The app handles platform differences using conditional compilation:
+
+```swift
+// Sheet Presentation
+#if os(iOS)
+.fullScreenCover(isPresented: $showSheet) {
+    SheetContent()
+}
+#else
+.sheet(isPresented: $showSheet) {
+    SheetContent()
+}
+#endif
+
+// Keyboard Types
+TextField("Amount", text: $amount)
+#if os(iOS)
+    .keyboardType(.decimalPad)
+#endif
+
+// Toolbar Placement
+.toolbar {
+    #if os(iOS)
+    ToolbarItem(placement: .navigationBarTrailing) {
+        // Content
+    }
+    #else
+    ToolbarItem(placement: .automatic) {
+        // Content
+    }
+    #endif
+}
 ```
 
 ### Navigation
@@ -977,30 +1045,57 @@ Check animations with:
 
 ### Best Practices
 
-1. **Typography**
-   - Always use `BFDesignSystem.Typography` for consistent scaling
-   - Test with different dynamic type sizes
-   - Ensure sufficient contrast in all modes
+1. **Accessibility First**
+   ```swift
+   // ❌ Don't
+   Button("Add") { ... }
+   
+   // ✅ Do
+   Button {
+       // action
+   } label: {
+       Image(systemName: "plus")
+   }
+   .semanticMeaning("Add Button")
+   .semanticHint("Double tap to add new entry")
+   ```
 
-2. **Interaction**
-   - Provide haptic feedback for important actions
-   - Include clear semantic descriptions
-   - Support both touch and VoiceOver navigation
+2. **Color Usage**
+   ```swift
+   // ❌ Don't
+   Text("High Risk")
+       .foregroundColor(.red)
+   
+   // ✅ Do
+   Text("High Risk")
+       .foregroundColor(BFDesignSystem.Colors.error)
+   ```
 
-3. **Progress**
-   - Always use `SwiftUI.ProgressView`
-   - Include clear progress values
-   - Provide appropriate haptic feedback
+3. **Haptic Feedback**
+   ```swift
+   // ❌ Don't
+   @State private var showingSheet = false
+   Button("Add") {
+       showingSheet = true
+   }
+   
+   // ✅ Do
+   @State private var showingSheet = false
+   Button("Add") {
+       BFHaptics.warning()
+       showingSheet = true
+   }
+   ```
 
 4. **Contrast**
-   - Use `respectIncreaseContrast()` on all views
-   - Test with system contrast settings
-   - Ensure readability in all modes
+   - Ensure sufficient contrast
+   - Don't rely solely on color
+   - Support dark mode
 
 5. **Motion**
-   - Use `respectReducedMotion()` for animations
+   - Respect reduced motion
+   - Keep animations optional
    - Provide static alternatives
-   - Keep animations subtle and purposeful
 
 ### Implementation Checklist
 

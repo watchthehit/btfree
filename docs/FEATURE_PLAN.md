@@ -1,165 +1,195 @@
 # BetFree Feature Enhancement Plan
 
-## Phase 1: Core Accessibility Improvements
+## Phase 1: Core Platform Compatibility
+
+### Cross-Platform UI
+- [x] Standard SwiftUI styling
+- [x] Platform-specific sheet presentation
+- [x] Toolbar adaptations
+- [x] Form handling improvements
+- [ ] Touch Bar support (macOS)
+- [ ] Keyboard shortcuts (macOS)
+- [ ] Context menus
+- [ ] Drag and drop support
 
 ### Progress Tracking
-- [ ] Enhanced visual progress with high contrast modes
-- [ ] VoiceOver support for statistics and progress
-- [ ] Haptic feedback for milestones
-- [ ] Reduced motion animations for celebrations
+- [x] Enhanced visual progress with standard styles
+- [ ] VoiceOver support for statistics
+- [ ] Haptic feedback for iOS
+- [ ] Alternative feedback for macOS
+- [ ] Cross-platform data sync
 
 ### Support System
-- [ ] Quick-access emergency support button
-- [ ] Voice-guided relaxation exercises
-- [ ] Accessible chat interface
-- [ ] Dynamic type support for all text
-
-### Behavioral Tools
-- [ ] Voice-activated journaling
-- [ ] Accessible mood tracker
-- [ ] Gesture-based quick actions
-- [ ] Audio feedback for interactions
+- [x] Quick-access emergency support
+- [ ] Platform-specific sharing
+- [ ] Universal chat interface
+- [ ] Cross-device notifications
 
 ## Phase 2: Enhanced Features
 
 ### Money Saved Calculator
 ```swift
-struct SavingsView {
-    // Track daily savings
-    // Support currency formatting
-    // Provide audio feedback
-    // Include haptic celebration
+struct SavingsView: View {
+    var body: some View {
+        Form {
+            // Platform-specific keyboard type
+            #if os(iOS)
+            TextField("Amount", text: $amount)
+                .keyboardType(.decimalPad)
+            #else
+            TextField("Amount", text: $amount)
+            #endif
+            
+            // Common elements
+            DatePicker("Date", selection: $date)
+            
+            // Platform-specific actions
+            #if os(iOS)
+            ShareLink(item: savingsReport)
+            #else
+            Button("Export") {
+                exportReport()
+            }
+            #endif
+        }
+    }
 }
 ```
 
 ### Achievement System
 ```swift
 struct AchievementSystem {
-    // Milestone tracking
-    // Accessible notifications
-    // Voice celebrations
-    // Haptic feedback
+    // Cross-platform notifications
+    func notifyAchievement() {
+        #if os(iOS)
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        #endif
+        
+        // Common celebration
+        withAnimation {
+            showCelebration = true
+        }
+    }
 }
 ```
 
 ### Craving Management
 ```swift
-struct CravingTracker {
-    // Quick logging
-    // Voice input support
-    // Pattern recognition
-    // Accessible charts
+struct CravingTracker: View {
+    var body: some View {
+        NavigationStack {
+            Form {
+                // Common form elements
+                Section(header: Text("Intensity")) {
+                    Slider(value: $intensity)
+                }
+                
+                // Platform-specific features
+                #if os(iOS)
+                LocationButton {
+                    requestLocation()
+                }
+                #endif
+                
+                // Common actions
+                Button("Log") {
+                    logCraving()
+                }
+                .buttonStyle(.borderedProminent)
+            }
+        }
+    }
 }
 ```
 
-## Phase 3: Educational Content
-
-### Daily Meditations
-- [ ] Audio-guided meditations
-- [ ] Text-to-speech support
-- [ ] Progress tracking
-- [ ] Offline access
-
-### Recovery Resources
-- [ ] Accessible article format
-- [ ] Voice-guided tutorials
-- [ ] Interactive exercises
-- [ ] Progress bookmarking
-
 ## Implementation Guidelines
 
-### Accessibility First
-1. All new features must support:
-   - VoiceOver
-   - Dynamic Type
-   - Reduced Motion
-   - High Contrast
+### Platform Compatibility
+1. All features must support:
+   - iOS 16.0+
+   - macOS 13.0+
+   - Standard SwiftUI components
+   - Platform-specific interactions
 
 2. User Input:
-   - Multiple input methods
-   - Voice commands
-   - Gesture alternatives
-   - Keyboard support
+   - Touch (iOS)
+   - Mouse/Trackpad (macOS)
+   - Keyboard (macOS)
+   - Apple Pencil (iPadOS)
 
-3. Feedback:
-   - Visual cues
-   - Audio feedback
-   - Haptic responses
-   - Status messages
+3. UI Adaptation:
+   - Responsive layouts
+   - Platform-specific controls
+   - Adaptive typography
+   - Dynamic spacing
 
 ### Testing Requirements
 
-1. Accessibility Testing:
-   - Screen reader compatibility
-   - Color contrast compliance
-   - Motion sensitivity
-   - Input method variety
+1. Cross-Platform Testing:
+   - iOS devices
+   - Mac hardware
+   - Screen sizes
+   - Input methods
 
-2. User Testing:
-   - Diverse user groups
-   - Different ability levels
-   - Various devices
-   - Multiple settings
-
-3. Performance Testing:
-   - Load times
-   - Animation smoothness
+2. Performance Testing:
+   - Load times per platform
    - Memory usage
-   - Battery impact
+   - Battery impact (iOS)
+   - CPU usage (macOS)
 
 ## Timeline
 
 ### Month 1
-- Core accessibility implementation
-- Basic feature enhancement
-- Initial testing
+- [x] Core UI migration
+- [x] Platform-specific adaptations
+- [x] Initial testing
 
 ### Month 2
-- Enhanced feature rollout
-- User feedback collection
-- Accessibility refinement
+- [ ] Enhanced feature support
+- [ ] Platform-specific optimizations
+- [ ] User feedback collection
 
 ### Month 3
-- Educational content integration
-- Final testing
-- Public release
+- [ ] Final platform refinements
+- [ ] Performance optimization
+- [ ] Public release
 
 ## Success Metrics
 
-1. Accessibility:
-   - 100% VoiceOver coverage
-   - WCAG 2.1 AA compliance
-   - Zero contrast issues
-   - Complete keyboard support
+1. Platform Support:
+   - 100% feature parity
+   - Native feel on each platform
+   - Consistent performance
+   - High user satisfaction
 
 2. User Engagement:
-   - Daily active users
-   - Feature usage stats
-   - Session duration
-   - Retention rate
-
-3. Support Effectiveness:
-   - Response times
-   - User satisfaction
-   - Issue resolution
+   - Cross-platform usage
    - Feature adoption
+   - Platform retention
+   - User feedback
+
+3. Technical Quality:
+   - Build success rate
+   - Test coverage
+   - Performance metrics
+   - Crash-free sessions
 
 ## Resources Required
 
 1. Development:
-   - iOS accessibility expert
+   - iOS developer
+   - macOS expert
    - UI/UX designer
-   - Content writer
-   - QA specialist
+   - QA engineer
 
 2. Testing:
-   - Accessibility testing tools
-   - User testing group
-   - Device lab
+   - Device lab (iOS/macOS)
+   - Automated testing
+   - Beta testers
    - Analytics system
 
-3. Content:
-   - Medical reviewers
-   - Voice talent
-   - Translators
-   - Subject experts
+3. Infrastructure:
+   - CI/CD pipeline
+   - Cross-platform testing
+   - Performance monitoring
+   - Crash reporting

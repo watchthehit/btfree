@@ -9,10 +9,15 @@ public class BFStoreManager: ObservableObject {
     @Published private(set) var purchasedProductIDs = Set<String>()
     @Published private(set) var subscriptionStatus: BFUserState = .expired
     
-    private var updateListenerTask: Task<Void, Error>?
+    private var transactionListener: Task<Void, Error>?
     
     private init() {
-        updateListenerTask = listenForTransactions()
+        // Start listening for transactions
+        transactionListener = Task.detached {
+            await self.listenForTransactions()
+        }
+        
+        // Load initial state
         Task {
             await loadProducts()
             await updateSubscriptionStatus()
@@ -20,7 +25,7 @@ public class BFStoreManager: ObservableObject {
     }
     
     deinit {
-        updateListenerTask?.cancel()
+        transactionListener?.cancel()
     }
     
     // MARK: - Product Loading
@@ -36,7 +41,7 @@ public class BFStoreManager: ObservableObject {
     
     // MARK: - Purchase Flow
     
-    public func purchase(_ product: Product) async throws -> Transaction? {
+    public func purchase(_ product: Product) async throws -> StoreKit.Transaction? {
         let result = try await product.purchase()
         
         switch result {
@@ -46,13 +51,10 @@ public class BFStoreManager: ObservableObject {
             await updateSubscriptionStatus()
             return transaction
             
-        case .userCancelled:
+        case .userCancelled, .pending:
             return nil
             
-        case .pending:
-            throw BFStoreError.pending
-            
-        @unknown default:
+        default:
             throw BFStoreError.unknown
         }
     }
@@ -75,51 +77,51 @@ public class BFStoreManager: ObservableObject {
     }
     
     private func updateSubscriptionStatus() async {
-        for await result in Transaction.currentEntitlements {
-            guard let transaction = try? checkVerified(result) else {
+        var hasActiveSubscription = false
+        
+        // Get all transactions
+        for await verification in StoreKit.Transaction.currentEntitlements {
+            guard let transaction = try? checkVerified(verification) else {
                 continue
             }
             
-            if transaction.revocationDate == nil {
+            // Check if the transaction is still valid
+            if transaction.revocationDate == nil && !transaction.isUpgraded {
                 // Active subscription
                 purchasedProductIDs.insert(transaction.productID)
                 
                 let expirationDate = transaction.expirationDate ?? .distantFuture
-                if transaction.isUpgraded {
-                    continue
-                }
                 
-                if let offerType = transaction.offerType {
-                    switch offerType {
-                    case .introductory:
+                // Check subscription status
+                if transaction.productType == .autoRenewable {
+                    hasActiveSubscription = true
+                    if let product = products.first(where: { $0.id == transaction.productID }),
+                       product.subscription?.introductoryOffer != nil {
                         subscriptionStatus = .trial(endDate: expirationDate)
-                    default:
+                    } else {
                         subscriptionStatus = .subscribed(expiryDate: expirationDate)
                     }
-                } else {
-                    subscriptionStatus = .subscribed(expiryDate: expirationDate)
                 }
-                return
             } else {
                 purchasedProductIDs.remove(transaction.productID)
             }
         }
         
-        subscriptionStatus = .expired
+        if !hasActiveSubscription {
+            subscriptionStatus = .expired
+        }
     }
     
     // MARK: - Transaction Listener
     
-    private func listenForTransactions() -> Task<Void, Error> {
-        return Task.detached {
-            for await result in Transaction.updates {
-                guard let transaction = try? self.checkVerified(result) else {
-                    continue
-                }
-                
-                await transaction.finish()
-                await self.updateSubscriptionStatus()
+    private func listenForTransactions() async {
+        for await verification in StoreKit.Transaction.updates {
+            guard let transaction = try? checkVerified(verification) else {
+                continue
             }
+            
+            await transaction.finish()
+            await updateSubscriptionStatus()
         }
     }
     
@@ -173,11 +175,52 @@ public enum BFSubscriptionProduct: String, CaseIterable {
     }
 }
 
-public enum BFUserState: Equatable {
+public enum BFUserState: Codable, Equatable {
     case trial(endDate: Date)
     case subscribed(expiryDate: Date)
     case expired
     case needsRestore
+    
+    private enum CodingKeys: String, CodingKey {
+        case type, endDate, expiryDate
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let type = try container.decode(Int.self, forKey: .type)
+        
+        switch type {
+        case 1:
+            let endDate = try container.decode(Date.self, forKey: .endDate)
+            self = .trial(endDate: endDate)
+        case 2:
+            let expiryDate = try container.decode(Date.self, forKey: .expiryDate)
+            self = .subscribed(expiryDate: expiryDate)
+        case 3:
+            self = .expired
+        case 4:
+            self = .needsRestore
+        default:
+            self = .expired
+        }
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        switch self {
+        case .trial(let endDate):
+            try container.encode(1, forKey: .type)
+            try container.encode(endDate, forKey: .endDate)
+        case .subscribed(let expiryDate):
+            try container.encode(2, forKey: .type)
+            try container.encode(expiryDate, forKey: .expiryDate)
+        case .expired:
+            try container.encode(3, forKey: .type)
+        case .needsRestore:
+            try container.encode(4, forKey: .type)
+        }
+    }
 }
 
 public enum BFStoreError: LocalizedError {

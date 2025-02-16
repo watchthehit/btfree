@@ -1,5 +1,8 @@
 import SwiftUI
+import BetFreeUI
+import BetFreeModels
 
+@available(macOS 10.15, iOS 13.0, *)
 public struct SavingsView: View {
     @EnvironmentObject private var appState: AppState
     @State private var showingAddSaving = false
@@ -161,40 +164,43 @@ private struct SavingRow: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text(saving.description)
+                Text(saving.amount.formatted(.currency(code: "USD")))
                     .font(BFDesignSystem.Typography.bodyLarge)
                     .foregroundColor(BFDesignSystem.Colors.textPrimary)
                 
-                Text(saving.date, style: .date)
+                Text(saving.date.formatted(date: .abbreviated, time: .omitted))
                     .font(BFDesignSystem.Typography.bodySmall)
                     .foregroundColor(BFDesignSystem.Colors.textSecondary)
             }
             
             Spacer()
             
-            Text("$\(String(format: "%.2f", saving.amount))")
-                .font(BFDesignSystem.Typography.titleMedium)
-                .foregroundColor(BFDesignSystem.Colors.success)
+            Text(saving.sport)
+                .font(BFDesignSystem.Typography.bodyMedium)
+                .foregroundColor(BFDesignSystem.Colors.textSecondary)
         }
+        .padding()
+        .background(BFDesignSystem.Colors.background)
+        .cornerRadius(8)
     }
 }
 
 private struct EmptyStateView: View {
     var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "piggybank.fill")
-                .font(.system(size: 48))
+        VStack(spacing: 24) {
+            Image(systemName: "dollarsign.circle.fill")
+                .font(.system(size: 64))
                 .foregroundColor(BFDesignSystem.Colors.primary)
             
             Text("No Savings Yet")
-                .font(BFDesignSystem.Typography.titleMedium)
+                .font(BFDesignSystem.Typography.titleLarge)
+                .foregroundColor(BFDesignSystem.Colors.textPrimary)
             
-            Text("Start tracking your savings from avoided sports bets")
+            Text("Start tracking your savings by adding your first entry")
                 .font(BFDesignSystem.Typography.bodyMedium)
                 .foregroundColor(BFDesignSystem.Colors.textSecondary)
                 .multilineTextAlignment(.center)
         }
-        .frame(maxWidth: .infinity)
         .padding()
     }
 }

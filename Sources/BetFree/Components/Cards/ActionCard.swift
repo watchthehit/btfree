@@ -1,49 +1,45 @@
 import SwiftUI
+import BetFreeUI
 
+@available(macOS 10.15, iOS 13.0, *)
 public struct ActionCard: View {
     let title: String
     let icon: String
     let action: () -> Void
-    let color: Color
     
     public init(
         title: String,
         icon: String,
-        color: Color = .blue,
         action: @escaping () -> Void
     ) {
         self.title = title
         self.icon = icon
-        self.color = color
         self.action = action
     }
     
     public var body: some View {
         Button(action: action) {
-            VStack(spacing: 12) {
+            HStack {
                 Image(systemName: icon)
-                    .font(.system(size: 28))
-                    .foregroundColor(color)
+                    .font(.title2)
+                    .foregroundColor(Color.blue)
                 
                 Text(title)
-                    .font(.subheadline)
-                    .foregroundColor(.primary)
+                    .font(.body)
+                    .foregroundColor(.black)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 20)
-            .padding(.horizontal, 16)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.systemBackground))
-                    .shadow(
-                        color: Color.black.opacity(0.1),
-                        radius: 10,
-                        x: 0,
-                        y: 4
-                    )
+            .padding(16)
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(8)
+            .shadow(
+                color: Color.black.opacity(0.1),
+                radius: 4,
+                x: 0,
+                y: 2
             )
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(.plain)
     }
 }
 
@@ -51,20 +47,25 @@ public struct ActionCard: View {
     HStack(spacing: 16) {
         ActionCard(
             title: "Add Transaction",
-            icon: "plus.circle.fill",
-            color: .blue
+            icon: "plus.circle.fill"
         ) {
             print("Add transaction tapped")
         }
         
         ActionCard(
             title: "Get Help",
-            icon: "questionmark.circle.fill",
-            color: .purple
+            icon: "questionmark.circle.fill"
         ) {
             print("Help tapped")
         }
     }
-    .padding()
-    .background(Color(.systemGroupedBackground))
+    .padding(.all)
+    .background(Color.white)
+    .cornerRadius(12)
+    .shadow(
+        color: Color.black.opacity(0.1),
+        radius: 4,
+        x: 0,
+        y: 2
+    )
 }

@@ -1,12 +1,14 @@
 import SwiftUI
 import CoreData
-import BetFree
+import BetFreeUI
 
+@available(macOS 10.15, iOS 13.0, *)
 public struct AddTransactionView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appState: AppState
-    @State private var amount: String = ""
-    @State private var note: String = ""
+    @State private var amount = ""
+    @State private var note = ""
+    @State private var date = Date()
     @State private var category: TransactionCategory = .other
     @State private var showingAlert = false
     @State private var alertMessage = ""
@@ -18,14 +20,17 @@ public struct AddTransactionView: View {
             Form {
                 // Amount Section
                 Section {
-                    HStack {
-                        Text("$")
-                            .foregroundColor(.secondary)
+                    VStack(alignment: .leading) {
+                        Text("Amount")
+                            .font(BFDesignSystem.Typography.labelMedium)
+                            .foregroundColor(BFDesignSystem.Colors.textSecondary)
                         TextField("Amount", text: $amount)
-                            .keyboardType(.decimalPad)
+                        #if os(iOS)
+                        .keyboardType(.decimalPad)
+                        #endif
                     }
                 } header: {
-                    Text("Amount")
+                    Text("Transaction Details")
                 }
                 
                 // Category Section
@@ -42,25 +47,52 @@ public struct AddTransactionView: View {
                 
                 // Note Section
                 Section {
-                    TextField("Optional note", text: $note)
-                } header: {
-                    Text("Note")
+                    VStack(alignment: .leading) {
+                        Text("Note")
+                            .font(BFDesignSystem.Typography.labelMedium)
+                            .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                        TextField("Optional note", text: $note)
+                    }
+                    
+                    DatePicker(
+                        "Date",
+                        selection: $date,
+                        displayedComponents: [.date]
+                    )
+                }
+                
+                Section {
+                    Button {
+                        saveTransaction()
+                    } label: {
+                        Text("Save Transaction")
+                            .font(BFDesignSystem.Typography.bodyLarge)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(BFDesignSystem.Colors.primary)
+                            .cornerRadius(8)
+                    }
                 }
             }
             .navigationTitle("Add Transaction")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
+                #if os(iOS)
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Cancel") {
                         dismiss()
                     }
                 }
-                
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        saveTransaction()
+                #else
+                ToolbarItem(placement: .automatic) {
+                    Button("Cancel") {
+                        dismiss()
                     }
                 }
+                #endif
             }
             .alert("Error", isPresented: $showingAlert) {
                 Button("OK") {}

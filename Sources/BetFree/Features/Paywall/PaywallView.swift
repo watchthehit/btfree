@@ -1,193 +1,211 @@
 import SwiftUI
-import StoreKit
+import BetFreeUI
 
+@available(macOS 10.15, iOS 13.0, *)
 public struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var storeManager = BFStoreManager.shared
-    @State private var selectedProduct: Product?
-    @State private var isLoading = false
-    @State private var error: String?
+    @State private var selectedPlan: Plan?
+    @State private var isPurchasing = false
     
-    private let onComplete: () -> Void
+    public init() {}
     
-    public init(onComplete: @escaping () -> Void) {
-        self.onComplete = onComplete
-    }
+    fileprivate let features: [Feature] = [
+        Feature(icon: "chart.line.uptrend.xyaxis", title: "Advanced Analytics", description: "Track your progress with detailed insights"),
+        Feature(icon: "bell.badge.fill", title: "Smart Reminders", description: "Get personalized notifications"),
+        Feature(icon: "lock.shield.fill", title: "App Blocking", description: "Block gambling apps and websites"),
+        Feature(icon: "person.2.fill", title: "Community Support", description: "Connect with others on the same journey")
+    ]
+    
+    fileprivate let plans: [Plan] = [
+        Plan(id: 1, title: "Monthly Plan", description: "Perfect for trying out", price: "$9.99/month"),
+        Plan(id: 2, title: "Yearly Plan", description: "Save 40% compared to monthly", price: "$59.99/year")
+    ]
     
     public var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 32) {
+                VStack(spacing: 24) {
                     // Header
                     VStack(spacing: 16) {
                         Image(systemName: "shield.fill")
                             .font(.system(size: 64))
                             .foregroundColor(BFDesignSystem.Colors.primary)
                         
-                        Text("BetFree Premium")
-                            .font(BFDesignSystem.Typography.titleLarge)
+                        Text("Unlock Premium Features")
+                            .font(BFDesignSystem.Typography.displayMedium)
+                            .foregroundColor(BFDesignSystem.Colors.textPrimary)
                         
-                        Text("Take control of your betting habits")
+                        Text("Get access to advanced features and support our mission")
                             .font(BFDesignSystem.Typography.bodyLarge)
                             .foregroundColor(BFDesignSystem.Colors.textSecondary)
                             .multilineTextAlignment(.center)
                     }
-                    .padding(.top, 32)
+                    .padding(.top, 24)
                     
                     // Features
                     VStack(spacing: 16) {
-                        featureRow(icon: "lock.shield.fill", title: "Block Betting Apps", description: "Prevent access to betting apps")
-                        featureRow(icon: "chart.line.uptrend.xyaxis", title: "Track Progress", description: "Monitor your recovery journey")
-                        featureRow(icon: "dollarsign.circle.fill", title: "Track Savings", description: "See how much you've saved")
+                        ForEach(features) { feature in
+                            FeatureRow(
+                                icon: feature.icon,
+                                title: feature.title,
+                                description: feature.description
+                            )
+                        }
                     }
-                    .padding(.horizontal)
                     
-                    // Subscription Options
+                    // Plans
                     VStack(spacing: 16) {
-                        ForEach(storeManager.products, id: \.id) { product in
-                            subscriptionButton(for: product)
+                        ForEach(plans) { plan in
+                            PlanCard(
+                                plan: plan,
+                                isSelected: selectedPlan?.id == plan.id,
+                                action: { selectedPlan = plan }
+                            )
                         }
                     }
-                    .padding(.horizontal)
                     
-                    // Trial Info
-                    if case .trial = storeManager.subscriptionStatus {
-                        Text("7-day free trial, then \(selectedProduct?.displayPrice ?? "$9.99")/month")
-                            .font(BFDesignSystem.Typography.bodyMedium)
-                            .foregroundColor(BFDesignSystem.Colors.textSecondary)
-                    }
-                    
-                    // Error
-                    if let error = error {
-                        Text(error)
-                            .font(BFDesignSystem.Typography.bodyMedium)
-                            .foregroundColor(BFDesignSystem.Colors.error)
-                    }
-                    
-                    // Restore Button
-                    Button {
-                        Task {
-                            await restorePurchases()
+                    // Purchase Button
+                    Button(action: {
+                        guard let selectedPlan = selectedPlan else { return }
+                        isPurchasing = true
+                        // Implement purchase logic
+                    }) {
+                        if isPurchasing {
+                            SwiftUI.ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
+                                .tint(BFDesignSystem.Colors.primary)
+                        } else {
+                            Text("Continue")
+                                .font(BFDesignSystem.Typography.titleMedium)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
                         }
-                    } label: {
-                        Text("Restore Purchases")
-                            .font(BFDesignSystem.Typography.labelMedium)
-                            .foregroundColor(BFDesignSystem.Colors.textSecondary)
                     }
-                    .padding(.top)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(BFDesignSystem.Colors.primary)
+                    .cornerRadius(8)
+                    .disabled(selectedPlan == nil || isPurchasing)
+                    .opacity(selectedPlan == nil ? 0.5 : 1)
                 }
-                .padding(.bottom, 32)
+                .padding()
             }
             .navigationTitle("Premium")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    if case .trial = storeManager.subscriptionStatus {
-                        Button("Skip") {
-                            dismiss()
-                        }
+                #if os(iOS)
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Close") {
+                        dismiss()
                     }
                 }
-            }
-            .overlay {
-                if isLoading {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(.black.opacity(0.3))
+                #else
+                ToolbarItem(placement: .automatic) {
+                    Button("Close") {
+                        dismiss()
+                    }
                 }
+                #endif
             }
         }
     }
+}
+
+@available(macOS 10.15, iOS 13.0, *)
+private struct FeatureRow: View {
+    let icon: String
+    let title: String
+    let description: String
     
-    private func featureRow(icon: String, title: String, description: String) -> some View {
+    var body: some View {
         HStack(spacing: 16) {
             Image(systemName: icon)
                 .font(.title2)
                 .foregroundColor(BFDesignSystem.Colors.primary)
-                .frame(width: 32)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(BFDesignSystem.Typography.titleSmall)
+                    .font(BFDesignSystem.Typography.bodyLarge)
+                    .foregroundColor(BFDesignSystem.Colors.textPrimary)
                 
                 Text(description)
                     .font(BFDesignSystem.Typography.bodyMedium)
                     .foregroundColor(BFDesignSystem.Colors.textSecondary)
             }
-            
-            Spacer()
         }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(BFDesignSystem.Colors.background)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(BFDesignSystem.Colors.textSecondary.opacity(0.2), lineWidth: 1)
+                )
+        )
     }
+}
+
+@available(macOS 10.15, iOS 13.0, *)
+private struct PlanCard: View {
+    let plan: Plan
+    let isSelected: Bool
+    let action: () -> Void
     
-    private func subscriptionButton(for product: Product) -> some View {
-        Button {
-            selectedProduct = product
-            Task {
-                await purchase(product)
-            }
-        } label: {
-            VStack(spacing: 8) {
-                Text(product.displayName)
-                    .font(BFDesignSystem.Typography.titleMedium)
-                
-                Text(product.displayPrice)
-                    .font(BFDesignSystem.Typography.titleLarge)
-                    .foregroundColor(BFDesignSystem.Colors.primary)
-                
-                if product.id == BFSubscriptionProduct.yearly.id {
-                    Text("Save 33%")
-                        .font(BFDesignSystem.Typography.labelSmall)
-                        .foregroundColor(BFDesignSystem.Colors.success)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(BFDesignSystem.Colors.success.opacity(0.1))
-                        .cornerRadius(8)
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(plan.title)
+                        .font(BFDesignSystem.Typography.bodyLarge)
+                        .foregroundColor(BFDesignSystem.Colors.textPrimary)
+                    
+                    Text(plan.description)
+                        .font(BFDesignSystem.Typography.bodyMedium)
+                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                    
+                    Text(plan.price)
+                        .font(BFDesignSystem.Typography.titleMedium)
+                        .foregroundColor(BFDesignSystem.Colors.primary)
+                        .padding(.top, 8)
                 }
+                
+                Spacer()
+                
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .font(.title2)
+                    .foregroundColor(isSelected ? BFDesignSystem.Colors.primary : BFDesignSystem.Colors.textSecondary)
             }
-            .frame(maxWidth: .infinity)
             .padding()
-            .background(selectedProduct?.id == product.id ? BFDesignSystem.Colors.primary.opacity(0.1) : BFDesignSystem.Colors.background)
-            .cornerRadius(16)
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(selectedProduct?.id == product.id ? BFDesignSystem.Colors.primary : BFDesignSystem.Colors.border, lineWidth: 1)
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(isSelected ? BFDesignSystem.Colors.primary.opacity(0.1) : BFDesignSystem.Colors.background)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(
+                                isSelected ? BFDesignSystem.Colors.primary : BFDesignSystem.Colors.textSecondary.opacity(0.2),
+                                lineWidth: 1
+                            )
+                    )
             )
         }
+        .buttonStyle(.plain)
     }
-    
-    private func purchase(_ product: Product) async {
-        isLoading = true
-        error = nil
-        
-        do {
-            if let transaction = try await storeManager.purchase(product) {
-                onComplete()
-                dismiss()
-            }
-        } catch {
-            self.error = error.localizedDescription
-        }
-        
-        isLoading = false
-    }
-    
-    private func restorePurchases() async {
-        isLoading = true
-        error = nil
-        
-        do {
-            try await storeManager.restorePurchases()
-            if case .subscribed = storeManager.subscriptionStatus {
-                onComplete()
-                dismiss()
-            } else {
-                error = "No active subscription found"
-            }
-        } catch {
-            self.error = error.localizedDescription
-        }
-        
-        isLoading = false
-    }
+}
+
+private struct Feature: Identifiable {
+    let id = UUID()
+    let icon: String
+    let title: String
+    let description: String
+}
+
+private struct Plan: Identifiable {
+    let id: Int
+    let title: String
+    let description: String
+    let price: String
 }

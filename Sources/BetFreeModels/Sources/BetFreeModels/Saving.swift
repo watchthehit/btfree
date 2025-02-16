@@ -3,16 +3,16 @@ import Foundation
 public struct Saving: Identifiable, Codable {
     public let id: UUID
     public let amount: Double
-    public let description: String
     public let date: Date
     public let sport: String
+    public let notes: String?
     
-    public init(id: UUID = UUID(), amount: Double, description: String, date: Date, sport: String) {
+    public init(id: UUID = UUID(), amount: Double, date: Date, sport: String, notes: String? = nil) {
         self.id = id
         self.amount = amount
-        self.description = description
         self.date = date
         self.sport = sport
+        self.notes = notes
     }
 }
 

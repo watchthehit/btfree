@@ -1,172 +1,108 @@
 import SwiftUI
+import BetFreeUI
+import BetFreeModels
 
+@available(macOS 10.15, iOS 13.0, *)
 public struct AddSavingView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appState: AppState
-    
-    @State private var amount = ""
-    @State private var description = ""
-    @State private var date = Date()
-    @State private var selectedSport: Sport?
-    @State private var showQuickAmounts = true
-    
-    private let quickAmounts = [10, 20, 50, 100, 200, 500]
-    private let sports = [
-        Sport(name: "Football", icon: "football.fill"),
-        Sport(name: "Basketball", icon: "basketball.fill"),
-        Sport(name: "Baseball", icon: "baseball.fill"),
-        Sport(name: "Hockey", icon: "hockey.puck.fill"),
-        Sport(name: "Soccer", icon: "soccerball"),
-        Sport(name: "Tennis", icon: "tennis.racket"),
-        Sport(name: "Golf", icon: "golf.ball.fill"),
-        Sport(name: "Racing", icon: "car.fill")
-    ]
+    @StateObject private var viewModel = AddSavingViewModel()
     
     public var body: some View {
         NavigationView {
             Form {
-                // Quick Add Section
-                if showQuickAmounts {
-                    Section {
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 12) {
-                                ForEach(quickAmounts, id: \.self) { value in
-                                    QuickAmountButton(amount: value) {
-                                        amount = String(value)
-                                    }
-                                }
-                            }
-                            .padding(.horizontal, 4)
+                Section(header: Text("Details")) {
+                    Picker("Sport", selection: $viewModel.selectedSport) {
+                        ForEach(Sport.allCases) { sport in
+                            Text(sport.rawValue).tag(sport)
                         }
-                        .listRowInsets(EdgeInsets())
-                        .padding(.vertical, 8)
-                    } header: {
-                        Text("Quick Add")
                     }
-                }
-                
-                // Amount Section
-                Section {
-                    TextField("Amount", text: $amount)
+                    
+                    TextField("Amount", text: $viewModel.amount)
+                    #if os(iOS)
                         .keyboardType(.decimalPad)
-                } header: {
-                    Text("Avoided Bet Amount")
+                    #endif
+                    
+                    DatePicker("Date", selection: $viewModel.date, displayedComponents: .date)
                 }
                 
-                // Sport Section
+                Section(header: Text("Additional Information")) {
+                    TextField("Notes (optional)", text: $viewModel.notes)
+                }
+                
                 Section {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 12) {
-                            ForEach(sports, id: \.name) { sport in
-                                SportButton(
-                                    sport: sport,
-                                    isSelected: selectedSport?.name == sport.name
-                                ) {
-                                    selectedSport = sport
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 4)
+                    Button("Save") {
+                        viewModel.save()
                     }
-                    .listRowInsets(EdgeInsets())
-                    .padding(.vertical, 8)
-                } header: {
-                    Text("Sport")
-                }
-                
-                // Description Section
-                Section {
-                    TextField("Description (optional)", text: $description)
-                } header: {
-                    Text("Description")
-                }
-                
-                // Date Section
-                Section {
-                    DatePicker(
-                        "Date",
-                        selection: $date,
-                        displayedComponents: [.date]
-                    )
+                    .disabled(viewModel.isSaving)
                 }
             }
             .navigationTitle("Add Saving")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
+                #if os(iOS)
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Cancel") {
                         dismiss()
                     }
                 }
-                
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        saveSaving()
+                #else
+                ToolbarItem(placement: .automatic) {
+                    Button("Cancel") {
                         dismiss()
                     }
-                    .disabled(amount.isEmpty || selectedSport == nil)
                 }
+                #endif
+            }
+            .disabled(viewModel.isSaving)
+            .alert("Error", isPresented: $viewModel.showError) {
+                Button("OK") {}
+            } message: {
+                Text(viewModel.error ?? "An unknown error occurred")
+            }
+            .alert("Success", isPresented: $viewModel.showSuccess) {
+                Button("OK") {
+                    dismiss()
+                }
+            } message: {
+                Text("Your saving has been recorded!")
             }
         }
     }
+}
+
+@MainActor
+final class AddSavingViewModel: ObservableObject {
+    @Published var selectedSport: Sport = .football
+    @Published var amount = ""
+    @Published var date = Date()
+    @Published var notes = ""
+    @Published var isSaving = false
+    @Published var showSuccess = false
+    @Published var showError = false
+    @Published var error: String?
     
-    private func saveSaving() {
-        guard let amountValue = Double(amount),
-              let sport = selectedSport else {
-            return
-        }
-        
-        let saving = Saving(
-            amount: amountValue,
-            description: description.isEmpty ? "Avoided bet on \(sport.name)" : description,
-            date: date,
-            sport: sport.name
-        )
-        
-        appState.addSaving(saving)
+    var canSave: Bool {
+        !amount.isEmpty && Double(amount) != nil
     }
-}
-
-private struct Sport {
-    let name: String
-    let icon: String
-}
-
-private struct QuickAmountButton: View {
-    let amount: Int
-    let action: () -> Void
     
-    var body: some View {
-        Button(action: action) {
-            Text("$\(amount)")
-                .font(BFDesignSystem.Typography.labelLarge)
-                .foregroundColor(BFDesignSystem.Colors.primary)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(BFDesignSystem.Colors.primary.opacity(0.1))
-                .cornerRadius(8)
-        }
-    }
-}
-
-private struct SportButton: View {
-    let sport: Sport
-    let isSelected: Bool
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 4) {
-                Image(systemName: sport.icon)
-                    .font(.title3)
-                Text(sport.name)
-                    .font(BFDesignSystem.Typography.labelSmall)
+    func save() {
+        guard let amount = Double(amount) else { return }
+        
+        isSaving = true
+        
+        // TODO: Save to persistent storage
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            self.isSaving = false
+            if Int.random(in: 0...10) > 8 {
+                self.error = "Failed to save. Please try again."
+                self.showError = true
+            } else {
+                self.showSuccess = true
             }
-            .foregroundColor(isSelected ? BFDesignSystem.Colors.primary : BFDesignSystem.Colors.textSecondary)
-            .frame(width: 80)
-            .padding(.vertical, 8)
-            .background(isSelected ? BFDesignSystem.Colors.primary.opacity(0.1) : Color.clear)
-            .cornerRadius(8)
         }
     }
 }

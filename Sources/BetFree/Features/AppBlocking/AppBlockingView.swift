@@ -1,6 +1,11 @@
 import SwiftUI
-import StoreKit
+import BetFreeUI
 
+#if os(iOS)
+import UIKit
+#endif
+
+@available(macOS 10.15, iOS 13.0, *)
 public struct AppBlockingView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var appState: AppState
@@ -33,6 +38,8 @@ public struct AppBlockingView: View {
             action: .password
         )
     ]
+    
+    public init() {}
     
     public var body: some View {
         NavigationView {
@@ -106,7 +113,9 @@ public struct AppBlockingView: View {
                 Spacer()
             }
             .navigationTitle("Block Betting Apps")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .sheet(isPresented: $showingScreenTimeSettings) {
                 ScreenTimeSettingsView()
             }
@@ -114,6 +123,7 @@ public struct AppBlockingView: View {
     }
     
     private func handleStepAction(_ action: BlockingStepAction) {
+        #if os(iOS)
         switch action {
         case .screenTime:
             if let url = URL(string: UIApplication.openSettingsURLString) {
@@ -130,6 +140,21 @@ public struct AppBlockingView: View {
                 UIApplication.shared.open(url)
             }
         }
+        #elseif os(macOS)
+        switch action {
+        case .screenTime:
+            // Implement macOS screen time settings
+            break
+        case .appLimits:
+            showingScreenTimeSettings = true
+        case .webRestrictions:
+            // Implement macOS web restrictions
+            break
+        case .password:
+            // Implement macOS password settings
+            break
+        }
+        #endif
         
         // Advance to next step
         withAnimation {
@@ -167,27 +192,13 @@ private struct ProgressCircle: View {
     }
 }
 
-private struct ScreenTimeSettingsView: View {
+#if os(iOS)
+struct ScreenTimeSettingsView: View {
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         NavigationView {
             List {
-                Section {
-                    ForEach(commonBettingApps, id: \.name) { app in
-                        HStack {
-                            Image(systemName: "app.fill")
-                                .foregroundColor(app.color)
-                            Text(app.name)
-                            Spacer()
-                            Text("Block")
-                                .foregroundColor(BFDesignSystem.Colors.error)
-                        }
-                    }
-                } header: {
-                    Text("Common Betting Apps")
-                }
-                
                 Section {
                     Button("Open Screen Time Settings") {
                         if let url = URL(string: UIApplication.openSettingsURLString) {
@@ -195,11 +206,9 @@ private struct ScreenTimeSettingsView: View {
                         }
                         dismiss()
                     }
-                } footer: {
-                    Text("Set app limits to 0 minutes for betting apps")
                 }
             }
-            .navigationTitle("Block Apps")
+            .navigationTitle("Screen Time Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -210,17 +219,24 @@ private struct ScreenTimeSettingsView: View {
             }
         }
     }
+}
+#else
+struct ScreenTimeSettingsView: View {
+    @Environment(\.dismiss) private var dismiss
     
-    private let commonBettingApps = [
-        BettingApp(name: "DraftKings", color: .green),
-        BettingApp(name: "FanDuel", color: .blue),
-        BettingApp(name: "BetMGM", color: .orange),
-        BettingApp(name: "Caesars", color: .purple),
-        BettingApp(name: "PointsBet", color: .red)
-    ]
+    var body: some View {
+        NavigationView {
+            Text("Screen Time settings are not available on macOS")
+                .padding()
+                .navigationTitle("Screen Time Settings")
+                .toolbar {
+                    ToolbarItem(placement: .automatic) {
+                        Button("Done") {
+                            dismiss()
+                        }
+                    }
+                }
+        }
+    }
 }
-
-private struct BettingApp {
-    let name: String
-    let color: Color
-}
+#endif

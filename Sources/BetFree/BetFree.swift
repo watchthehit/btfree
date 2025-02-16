@@ -1,5 +1,6 @@
 import SwiftUI
 import ComposableArchitecture
+import BetFreeUI
 
 public struct BetFreeRootView: View {
     @EnvironmentObject var appState: AppState
@@ -130,7 +131,9 @@ struct BetFreeLibraryPreviewApp: App {
 
 @MainActor
 public struct BetFree {
-    public init() {}
+    public static func initialize() {
+        // Initialize app-wide settings here
+    }
 }
 
 @MainActor

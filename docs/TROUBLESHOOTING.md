@@ -309,6 +309,186 @@ XCTAssert(subscribeButton.waitForExistence(timeout: 5))
 subscribeButton.tap()
 ```
 
+### Cross-Platform Compatibility
+
+#### 1. Platform-Specific Sheet Presentation
+**Issue**: `fullScreenCover` is not available on macOS.
+
+**Solution**:
+```swift
+// ❌ Wrong Implementation - iOS only
+.fullScreenCover(isPresented: $showPaywall) {
+    PaywallView()
+}
+
+// ✅ Correct Implementation - Cross-platform
+#if os(iOS)
+.fullScreenCover(isPresented: $showPaywall) {
+    PaywallView()
+}
+#else
+.sheet(isPresented: $showPaywall) {
+    PaywallView()
+}
+#endif
+```
+
+#### 2. Keyboard Type Compatibility
+**Issue**: `keyboardType` modifier not available on macOS TextField.
+
+**Solution**:
+```swift
+// ❌ Wrong Implementation
+TextField("Amount", text: $amount)
+    .keyboardType(.decimalPad)
+
+// ✅ Correct Implementation
+TextField("Amount", text: $amount)
+#if os(iOS)
+    .keyboardType(.decimalPad)
+#endif
+```
+
+#### 3. Toolbar Placement
+**Issue**: Different toolbar placement requirements for iOS and macOS.
+
+**Solution**:
+```swift
+.toolbar {
+    #if os(iOS)
+    ToolbarItem(placement: .navigationBarTrailing) {
+        Button("Cancel") {
+            dismiss()
+        }
+    }
+    #else
+    ToolbarItem(placement: .automatic) {
+        Button("Cancel") {
+            dismiss()
+        }
+    }
+    #endif
+}
+```
+
+### Design System Integration
+
+#### 1. Custom Style Migration
+**Issue**: Custom design system styles causing compilation errors.
+
+**Solution**:
+```swift
+// ❌ Wrong Implementation - Custom styles
+.font(BFDesignSystem.Typography.titleLarge)
+.foregroundColor(BFDesignSystem.Colors.textPrimary)
+
+// ✅ Correct Implementation - SwiftUI styles
+.font(.title)
+.foregroundColor(.primary)
+```
+
+#### 2. Button Styling
+**Issue**: Custom button styles causing compilation errors.
+
+**Solution**:
+```swift
+// ❌ Wrong Implementation
+Button("Save") { action() }
+    .primaryStyle()
+
+// ✅ Correct Implementation
+Button("Save") { action() }
+    .buttonStyle(.borderedProminent)
+```
+
+#### 3. Background and Corner Radius
+**Issue**: Custom background and corner radius properties not found.
+
+**Solution**:
+```swift
+// ❌ Wrong Implementation
+.background(BFDesignSystem.Colors.surface)
+.cornerRadius(BFDesignSystem.CornerRadius.lg)
+
+// ✅ Correct Implementation
+.background(Color.gray.opacity(0.1))
+.cornerRadius(12)
+```
+
+### Form and Input Handling
+
+#### 1. Form Section Headers
+**Issue**: Incorrect form section header syntax.
+
+**Solution**:
+```swift
+// ❌ Wrong Implementation
+Section {
+    // Content
+} header: {
+    Text("Section Title")
+}
+
+// ✅ Correct Implementation
+Section(header: Text("Section Title")) {
+    // Content
+}
+```
+
+#### 2. TextField Validation
+**Issue**: Unused guard let values in validation.
+
+**Warning**:
+```swift
+// ⚠️ Warning: Unused value
+guard let amount = Double(amount) else { return }
+
+// ✅ Better Implementation
+guard let parsedAmount = Double(amount) else { return }
+// Use parsedAmount in subsequent code
+```
+
+### Progress Indicators
+
+#### 1. Progress View Style
+**Issue**: Incorrect progress view styling.
+
+**Solution**:
+```swift
+// ❌ Wrong Implementation
+ProgressView()
+    .tint(.white)
+
+// ✅ Correct Implementation
+SwiftUI.ProgressView()
+    .progressViewStyle(CircularProgressViewStyle())
+```
+
+#### 2. Loading State
+**Issue**: Inconsistent loading state handling.
+
+**Solution**:
+```swift
+// ❌ Wrong Implementation
+if isLoading {
+    ProgressView()
+} else {
+    Button("Submit") { action() }
+}
+
+// ✅ Correct Implementation
+Button(action: action) {
+    if isLoading {
+        SwiftUI.ProgressView()
+            .progressViewStyle(CircularProgressViewStyle())
+    } else {
+        Text("Submit")
+    }
+}
+.buttonStyle(.borderedProminent)
+.disabled(isLoading)
+```
+
 ## Best Practices for Issue Prevention
 
 ### 1. Code Organization
@@ -329,4 +509,4 @@ subscribeButton.tap()
 ### 4. Dependency Management
 - Keep dependencies updated
 - Resolve conflicts promptly
-- Document version requirements 
+- Document version requirements

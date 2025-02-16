@@ -78,7 +78,8 @@ UserDefaults.standard.set(false, forKey: "isOnboarded")
 - Package dependencies
 - Enhanced onboarding flow
 - Dashboard UI
-- Design system
+- Cross-platform compatibility (iOS/macOS)
+- Standard SwiftUI styling
 - Core Data integration
 - Transaction tracking
 - Achievement system
@@ -88,10 +89,19 @@ UserDefaults.standard.set(false, forKey: "isOnboarded")
 - Resource content
 - Profile features
 - Analytics integration
+- Accessibility improvements
 
 ## Version History
 
-### v0.1.4 (Current)
+### v0.1.5 (Current)
+- Improved cross-platform compatibility
+- Migrated to standard SwiftUI styling
+- Fixed sheet presentation on macOS
+- Enhanced form handling
+- Improved progress indicators
+- Fixed compilation issues
+
+### v0.1.4
 - Fixed Core Data entity initialization
 - Added transaction tracking
 - Implemented achievement system

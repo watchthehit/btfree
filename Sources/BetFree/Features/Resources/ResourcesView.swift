@@ -103,7 +103,9 @@ private struct ArticleView: View {
                     .padding()
             }
             .navigationTitle("Article")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
         }
     }
 }
@@ -117,7 +119,9 @@ private struct EmergencyContactView: View {
                     .padding()
             }
             .navigationTitle("Emergency Contact")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
         }
     }
 }
@@ -131,7 +135,9 @@ private struct CounselorChatView: View {
                     .padding()
             }
             .navigationTitle("Chat with Counselor")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
         }
     }
 }
