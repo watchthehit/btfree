@@ -244,9 +244,39 @@ Task {
 1. Always use `@MainActor` for UI updates
 2. Wrap Core Data operations in `Task` blocks
 3. Use proper error handling with try/catch
-4. Simulate network delays in mock implementations
+4. Use in-memory store for mocking and testing
 5. Update UI state on the main thread
 6. Use proper transaction mapping between Core Data and model objects
+
+#### Mock Data Manager Implementation
+```swift
+// Initialize in-memory Core Data stack
+let storeDescription = NSPersistentStoreDescription()
+storeDescription.type = NSInMemoryStoreType
+
+let container = NSPersistentContainer(name: "BetFreeModel")
+container.persistentStoreDescriptions = [storeDescription]
+
+// Configure context
+context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+
+// Handle errors properly
+do {
+    try context.save()
+    print("Successfully saved data")
+} catch {
+    print("Error saving data: \(error)")
+    context.rollback()
+    throw error
+}
+```
+
+#### Error Handling
+- Always use `try-catch` blocks for Core Data operations
+- Roll back context on error
+- Provide meaningful error messages
+- Log errors for debugging
+- Use proper error types and localized descriptions
 
 ### Features
 - Onboarding
@@ -1963,4 +1993,113 @@ Button(action: action) {
    - Implement proper semantic descriptions
    - Support dynamic type
 
-// ... existing code ...
+### Savings System
+
+The savings tracking system is implemented in `Sources/BetFree/Features/Savings/` and consists of several key components:
+
+#### SavingsManager
+```swift
+public class SavingsManager: ObservableObject {
+    @Published public private(set) var totalSaved: Double
+    @Published public private(set) var dailyAverage: Double
+    @Published public private(set) var streakDays: Int
+    @Published public private(set) var lastUpdate: Date?
+    @Published public private(set) var recentSavings: [Saving]
+}
+```
+
+Key features:
+1. **Recent Savings Tracking**
+   - Maintains list of last 10 savings
+   - Persists in UserDefaults
+   - Includes amount, date, and notes
+
+2. **Daily Statistics**
+   - Tracks daily savings amounts
+   - Calculates running average
+   - Maintains streak information
+
+3. **Data Persistence**
+   - Uses UserDefaults for storage
+   - Encodes/decodes Saving objects
+   - Maintains separate date-based tracking
+
+4. **Milestone Tracking**
+   - Monitors savings milestones
+   - Triggers notifications on achievements
+   - Supports haptic feedback
+
+#### Implementation Details
+
+1. **Saving Model**
+```swift
+public struct Saving: Identifiable, Codable {
+    public let id: UUID
+    public let amount: Double
+    public let date: Date
+    public let sport: String
+    public let notes: String?
+}
+```
+
+2. **Recent Savings Management**
+```swift
+// Adding a new saving
+let saving = Saving(amount: amount, date: Date(), sport: "", notes: nil)
+recentSavings.insert(saving, at: 0)
+
+// Maintain maximum of 10 entries
+if recentSavings.count > 10 {
+    recentSavings.removeLast()
+}
+```
+
+3. **UserDefaults Storage**
+```swift
+// Saving
+if let encoded = try? JSONEncoder().encode(recentSavings) {
+    defaults.set(encoded, forKey: "recentSavings")
+}
+
+// Loading
+if let savedData = defaults.data(forKey: "recentSavings"),
+   let decoded = try? JSONDecoder().decode([Saving].self, from: savedData) {
+    recentSavings = decoded
+}
+```
+
+#### UI Components
+
+1. **SavingsView**
+   - Main view for savings tracking
+   - Shows total and recent savings
+   - Provides time-based filtering
+
+2. **Statistics Cards**
+   - Daily average display
+   - Highest day amount
+   - Total days tracked
+   - Current streak
+
+3. **Recent Savings List**
+   - Chronological display
+   - Shows amount and notes
+   - Supports optional details
+
+#### Usage Example
+```swift
+let manager = SavingsManager()
+
+// Add a new saving
+manager.addSaving(50.0)
+
+// Access statistics
+let total = manager.totalSaved
+let average = manager.dailyAverage
+let streak = manager.streakDays
+
+// Get recent savings
+let recent = manager.recentSavings
+```
+
+// ... existing content ...
