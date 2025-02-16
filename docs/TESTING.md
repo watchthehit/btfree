@@ -221,6 +221,147 @@ class UserFlowUITests: XCTestCase {
 }
 ```
 
+### Layout Tests
+
+#### Safe Area Handling
+```swift
+func testSafeAreaInsets() {
+    // Test top safe area
+    XCTAssertEqual(view.topPadding, geometry.safeAreaInsets.top + 16)
+    
+    // Test bottom safe area
+    XCTAssertEqual(view.bottomPadding, geometry.safeAreaInsets.bottom + 20)
+}
+```
+
+#### Scroll Behavior
+```swift
+func testScrollViewBehavior() {
+    // Test content scrolling
+    XCTAssertTrue(view.isScrollEnabled)
+    XCTAssertFalse(view.showsIndicators)
+    
+    // Test content overflow
+    XCTAssertTrue(view.contentSize.height > view.frame.height)
+}
+```
+
+#### Grid Layout
+```swift
+func testGridLayout() {
+    // Test column configuration
+    XCTAssertEqual(grid.columns.count, 2)
+    
+    // Test item spacing
+    XCTAssertEqual(grid.spacing, 16)
+    
+    // Test item sizing
+    XCTAssertEqual(grid.items.first?.size.width, expectedWidth)
+}
+```
+
+### Visual Tests
+
+#### Selection States
+```swift
+func testSelectionStates() {
+    // Test unselected state
+    XCTAssertEqual(button.backgroundColor, Color.white.opacity(0.2))
+    XCTAssertEqual(button.foregroundColor, .white)
+    
+    // Test selected state
+    button.isSelected = true
+    XCTAssertEqual(button.backgroundColor, .white)
+    XCTAssertEqual(button.foregroundColor, BFDesignSystem.Colors.primary)
+}
+```
+
+#### Animations
+```swift
+func testAnimations() {
+    // Test transition animation
+    XCTAssertEqual(view.animation, .easeInOut)
+    
+    // Test spring animation
+    XCTAssertEqual(progressDot.animation.response, 0.3)
+}
+```
+
+### Navigation Tests
+
+#### Progress Tracking
+```swift
+func testProgressTracking() {
+    // Test progress dots
+    XCTAssertEqual(progressDots.count, OnboardingStep.allCases.count)
+    
+    // Test current step highlight
+    XCTAssertEqual(progressDots[currentStep].scale, 1.2)
+}
+```
+
+#### Navigation Flow
+```swift
+func testNavigationFlow() {
+    // Test forward navigation
+    XCTAssertTrue(canNavigateForward)
+    
+    // Test back navigation
+    XCTAssertTrue(canNavigateBack)
+    
+    // Test step validation
+    XCTAssertTrue(isStepValid)
+}
+```
+
+### Accessibility Tests
+
+#### VoiceOver
+```swift
+func testVoiceOverSupport() {
+    // Test semantic descriptions
+    XCTAssertEqual(view.accessibilityLabel, expectedLabel)
+    XCTAssertEqual(view.accessibilityValue, expectedValue)
+    XCTAssertEqual(view.accessibilityHint, expectedHint)
+}
+```
+
+#### Dynamic Type
+```swift
+func testDynamicType() {
+    // Test text scaling
+    XCTAssertEqual(text.minimumScaleFactor, 0.8)
+    
+    // Test layout adaptation
+    XCTAssertTrue(layout.adaptsToContentSizeCategory)
+}
+```
+
+### Onboarding Flow
+```swift
+func testOnboardingFlow() {
+    // Test welcome screen
+    XCTAssertTrue(welcomeScreen.isAnimated)
+    XCTAssertTrue(welcomeScreen.hasProperSpacing)
+    
+    // Test sign up
+    XCTAssertTrue(signUpView.hasProperKeyboardHandling)
+    XCTAssertTrue(signUpView.validatesInput)
+    
+    // Test limit setup
+    XCTAssertTrue(limitSetup.hasHapticFeedback)
+    XCTAssertTrue(limitSetup.showsSuggestions)
+    
+    // Test sports selection
+    XCTAssertTrue(sportsGrid.isScrollable)
+    XCTAssertTrue(sportsGrid.hasProperSpacing)
+    
+    // Test trial activation
+    XCTAssertTrue(trialView.showsPricing)
+    XCTAssertTrue(trialView.hasProperLayout)
+}
+```
+
 ### 4. Performance Tests
 
 #### Memory Tests
@@ -348,4 +489,117 @@ jobs:
 1. Keep test documentation updated
 2. Document test patterns
 3. Maintain testing guidelines
-4. Update setup instructions 
+4. Update setup instructions
+
+## Test Coverage Requirements
+
+1. **Layout Tests**
+   - Safe area handling
+   - Scroll behavior
+   - Grid layout
+   - Spacing system
+
+2. **Visual Tests**
+   - Selection states
+   - Animations
+   - Color schemes
+   - Typography
+
+3. **Navigation Tests**
+   - Progress tracking
+   - Flow validation
+   - Back/forward navigation
+   - State preservation
+
+4. **Accessibility Tests**
+   - VoiceOver support
+   - Dynamic Type
+   - Color contrast
+   - Semantic descriptions
+
+5. **Performance Tests**
+   - Scroll performance
+   - Animation smoothness
+   - Layout calculations
+   - Memory usage
+
+## Integration Tests
+
+### Onboarding Flow
+```swift
+func testOnboardingFlow() {
+    // Test welcome screen
+    XCTAssertTrue(welcomeScreen.isAnimated)
+    XCTAssertTrue(welcomeScreen.hasProperSpacing)
+    
+    // Test sign up
+    XCTAssertTrue(signUpView.hasProperKeyboardHandling)
+    XCTAssertTrue(signUpView.validatesInput)
+    
+    // Test limit setup
+    XCTAssertTrue(limitSetup.hasHapticFeedback)
+    XCTAssertTrue(limitSetup.showsSuggestions)
+    
+    // Test sports selection
+    XCTAssertTrue(sportsGrid.isScrollable)
+    XCTAssertTrue(sportsGrid.hasProperSpacing)
+    
+    // Test trial activation
+    XCTAssertTrue(trialView.showsPricing)
+    XCTAssertTrue(trialView.hasProperLayout)
+}
+```
+
+### Performance Tests
+```swift
+func testPerformance() {
+    // Test scroll performance
+    measure {
+        scrollView.scrollToBottom(animated: true)
+    }
+    
+    // Test animation performance
+    measure {
+        view.animate()
+    }
+    
+    // Test layout performance
+    measure {
+        view.layoutIfNeeded()
+    }
+}
+```
+
+## Test Coverage Requirements
+
+1. **Layout Tests**
+   - Safe area handling
+   - Scroll behavior
+   - Grid layout
+   - Spacing system
+
+2. **Visual Tests**
+   - Selection states
+   - Animations
+   - Color schemes
+   - Typography
+
+3. **Navigation Tests**
+   - Progress tracking
+   - Flow validation
+   - Back/forward navigation
+   - State preservation
+
+4. **Accessibility Tests**
+   - VoiceOver support
+   - Dynamic Type
+   - Color contrast
+   - Semantic descriptions
+
+5. **Performance Tests**
+   - Scroll performance
+   - Animation smoothness
+   - Layout calculations
+   - Memory usage
+
+// ... existing code ... 

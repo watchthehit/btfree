@@ -1800,3 +1800,167 @@ public struct OnboardingView: View {
 - Opacity transitions
 - Sliding transitions
 - Custom timing curves
+```
+
+### Layout Guidelines
+
+#### Spacing System
+```swift
+// Standard spacing values
+BFDesignSystem.Layout.Spacing.small   // 8 points
+BFDesignSystem.Layout.Spacing.medium  // 16 points
+BFDesignSystem.Layout.Spacing.large   // 24 points
+BFDesignSystem.Layout.Spacing.xlarge  // 32 points
+```
+
+#### Safe Area Handling
+```swift
+// Proper safe area handling
+.padding(.top, geometry.safeAreaInsets.top + 16)
+.padding(.bottom, geometry.safeAreaInsets.bottom + 20)
+```
+
+#### Scroll Implementation
+```swift
+// Scrollable content with proper spacing
+ScrollView(showsIndicators: false) {
+    VStack(spacing: 24) {
+        // Content
+    }
+    .padding(.bottom, 32)
+}
+```
+
+#### Grid Layout
+```swift
+// Two-column grid layout
+LazyVGrid(
+    columns: [
+        GridItem(.flexible()),
+        GridItem(.flexible())
+    ],
+    spacing: 16
+) {
+    // Grid items
+}
+```
+
+### Visual Feedback
+
+#### Selection States
+```swift
+// Button selection state
+.background(isSelected ? Color.white : Color.white.opacity(0.2))
+.foregroundColor(isSelected ? BFDesignSystem.Colors.primary : .white)
+```
+
+#### Animations
+```swift
+// Standard transitions
+.animation(.easeInOut, value: someState)
+.transition(.opacity.combined(with: .move(edge: .bottom)))
+
+// Custom animations
+.animation(.spring(response: 0.3), value: currentStep)
+```
+
+### Content Organization
+
+#### Section Layout
+```swift
+VStack(spacing: 8) {
+    // Title section
+    Text("Section Title")
+        .font(BFDesignSystem.Typography.titleLarge)
+    
+    // Description
+    Text("Section description")
+        .font(BFDesignSystem.Typography.bodyLarge)
+        .foregroundColor(.white.opacity(0.8))
+}
+.padding(.top, 8)
+```
+
+#### Card Components
+```swift
+// Standard card layout
+.padding()
+.background(Color.white.opacity(0.1))
+.cornerRadius(12)
+```
+
+### Navigation System
+
+#### Progress Tracking
+```swift
+// Progress dots
+HStack(spacing: 8) {
+    ForEach(OnboardingStep.allCases, id: \.self) { step in
+        Circle()
+            .fill(step.rawValue <= currentStep.rawValue 
+                ? Color.white 
+                : Color.white.opacity(0.3))
+            .frame(width: 8, height: 8)
+            .scaleEffect(step == currentStep ? 1.2 : 1)
+    }
+}
+```
+
+#### Navigation Buttons
+```swift
+// Navigation button style
+Button(action: action) {
+    HStack {
+        Text("Continue")
+        Image(systemName: "chevron.right")
+    }
+    .foregroundColor(.white)
+    .padding()
+}
+```
+
+### Accessibility Considerations
+
+#### VoiceOver Support
+```swift
+// Semantic descriptions
+.semanticMeaning("Section Title")
+.semanticValue("Selected value")
+.semanticHint("Double tap to select")
+```
+
+#### Dynamic Type
+```swift
+// Scalable typography
+.font(BFDesignSystem.Typography.bodyLarge)
+.minimumScaleFactor(0.8)
+```
+
+### Implementation Best Practices
+
+1. **Content Scrolling**
+   - Use ScrollView for potentially overflowing content
+   - Hide scroll indicators for cleaner UI
+   - Add proper bottom padding for content
+
+2. **Layout Structure**
+   - Maintain consistent spacing hierarchy
+   - Use proper safe area insets
+   - Implement responsive layouts
+
+3. **Visual Feedback**
+   - Provide clear selection states
+   - Use smooth animations
+   - Maintain proper contrast
+
+4. **Navigation**
+   - Clear progress indication
+   - Intuitive navigation controls
+   - Proper back/forward flow
+
+5. **Accessibility**
+   - Support VoiceOver
+   - Implement proper semantic descriptions
+   - Support dynamic type
+
+// ... existing code ...

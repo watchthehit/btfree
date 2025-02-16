@@ -71,51 +71,64 @@
 
 ## User Experience
 
-### Onboarding Flow
-The onboarding process consists of 7 carefully designed steps to maximize user engagement and success:
+### Onboarding Experience
 
-1. **Welcome Screen**
-   - Animated logo with pulsing effect
-   - Success story showcase
-   - Key statistics display (89% success rate, 50K+ users, $2.5M saved)
-   - Engaging welcome message
+#### 1. Welcome Screen
+- Animated welcome message with smooth transitions
+- Clear value proposition
+- Optimized layout with proper spacing and safe area handling
+- Progress indicator showing onboarding steps
 
-2. **Sign Up**
-   - Sign in with Apple integration
-   - Email-based signup option
-   - Trust badges (Privacy First, Secure, No Gambling Ads)
-   - Clear privacy policy and terms of service
+#### 2. Sign Up Process
+- Seamless Apple ID integration
+- Clean form layout with proper keyboard handling
+- Real-time validation feedback
+- Secure authentication flow
 
-3. **Daily Limit Setup**
-   - Interactive slider for limit selection ($1-$1000)
-   - Quick preset options ($50, $100, $200, $500)
-   - Visual savings projections (1 month, 6 months, 1 year)
-   - Adjustable settings reminder
+#### 3. Daily Limit Setup
+- Interactive slider with haptic feedback
+- Visual representation of limit amount
+- Smart suggestions based on user input
+- Clear confirmation of selected limit
 
-4. **Goal Setting**
-   - Multiple goal input (up to 3 goals)
-   - Smart suggestions based on common objectives
-   - Timeline-based milestones
-   - Motivational quotes
-   - Progress visualization
+#### 4. Goal Setting
+- Intelligent goal suggestions
+- Interactive input validation
+- Clear progress visualization
+- Motivational feedback messages
 
-5. **Sports Selection**
-   - Visual sport selection grid
-   - Common betting sports included
-   - Toggle selection interface
-   - Sport-specific icons
+#### 5. Sports Selection
+- Scrollable grid layout of available sports
+- Visual feedback on selection
+- Multi-select capability
+- Search and filter options
+- Proper spacing and touch targets
 
-6. **Feature Overview**
-   - Progress tracking explanation
-   - Craving management tools
-   - Savings calculator demo
-   - Achievement system preview
+#### 6. Features Overview
+- Clear value proposition for each feature
+- Organized content sections
+- Proper content scrolling
+- Visual hierarchy with icons and descriptions
 
-7. **Trial Activation**
-   - Premium features showcase
-   - 7-day free trial offer
-   - Clear value proposition
-   - Immediate access to all features
+#### 7. Trial Activation
+- Clear pricing display
+- Monthly and yearly options with savings calculation
+- Prominent trial activation button
+- Terms and conditions accessibility
+
+### Navigation & Progress
+- Progress indicator dots at the top
+- Back/Continue navigation buttons
+- Smooth transitions between steps
+- Proper spacing to avoid content overlap
+- Clear visual feedback for current step
+
+### Layout System
+- Consistent padding and spacing
+- Proper scroll behavior where needed
+- Safe area awareness
+- Optimized for all screen sizes
+- Clear visual hierarchy
 
 ### Dashboard
 - Current Streak Display
