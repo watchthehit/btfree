@@ -19,7 +19,7 @@ public struct SavingsView: View {
     
     public var body: some View {
         NavigationView {
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
                     TotalSavingsCardView(
                         totalSaved: savingsManager.totalSaved,
@@ -43,7 +43,9 @@ public struct SavingsView: View {
                         .opacity(isAnimated ? 1 : 0)
                         .offset(y: isAnimated ? 0 : 20)
                 }
-                .padding(.vertical)
+                .padding(.horizontal)
+                .padding(.vertical, 24)
+                .frame(maxWidth: .infinity)
             }
             .navigationTitle("Savings")
             .toolbar {

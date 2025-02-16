@@ -2102,4 +2102,68 @@ let streak = manager.streakDays
 let recent = manager.recentSavings
 ```
 
-// ... existing content ...
+### Scrolling Implementation
+
+The app implements consistent scrolling behavior across all views:
+
+#### Main Views
+```swift
+ScrollView(showsIndicators: false) {
+    VStack(spacing: 24) {
+        // Content
+    }
+    .padding(.horizontal)
+    .padding(.vertical, 24)
+    .frame(maxWidth: .infinity)
+}
+```
+
+Key features:
+1. **Hidden Indicators**
+   - Uses `showsIndicators: false` for cleaner UI
+   - Maintains consistent appearance
+
+2. **Proper Spacing**
+   - Consistent vertical spacing (24pt)
+   - Horizontal padding for content
+   - Full width frame for proper layout
+
+3. **Content Organization**
+   - Card-based layout for sections
+   - Proper padding inside cards
+   - Animated content transitions
+
+4. **Form Views**
+```swift
+ScrollView(showsIndicators: false) {
+    VStack(spacing: 24) {
+        // Form sections in cards
+        BFCard(style: .elevated) {
+            VStack(spacing: 16) {
+                // Form fields
+            }
+            .padding()
+        }
+    }
+    .padding()
+}
+```
+
+5. **List Views**
+```swift
+ScrollView(showsIndicators: false) {
+    LazyVStack(spacing: 16) {
+        ForEach(items) { item in
+            // Item view
+        }
+    }
+    .padding()
+}
+```
+
+#### Best Practices
+1. Always use ScrollView for potentially long content
+2. Hide scroll indicators for cleaner UI
+3. Use consistent padding and spacing
+4. Implement proper safe area handling
+5. Support dynamic content height

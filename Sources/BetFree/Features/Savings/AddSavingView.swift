@@ -10,61 +10,83 @@ public struct AddSavingView: View {
     
     public var body: some View {
         NavigationView {
-            Form {
-                Section(header: Text("Details")) {
-                    Picker("Sport", selection: $viewModel.selectedSport) {
-                        ForEach(Sport.allCases) { sport in
-                            Text(sport.rawValue).tag(sport)
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 24) {
+                    // Details Section
+                    BFCard(style: .elevated) {
+                        VStack(spacing: 16) {
+                            Picker("Sport", selection: $viewModel.selectedSport) {
+                                ForEach(Sport.allCases) { sport in
+                                    Text(sport.rawValue).tag(sport)
+                                }
+                            }
+                            
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Amount")
+                                    .font(BFDesignSystem.Typography.labelMedium)
+                                    .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                                TextField("Amount", text: $viewModel.amount)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    #if os(iOS)
+                                    .keyboardType(.decimalPad)
+                                    #endif
+                            }
+                            
+                            DatePicker("Date", selection: $viewModel.date, displayedComponents: .date)
                         }
+                        .padding()
                     }
                     
-                    TextField("Amount", text: $viewModel.amount)
-                    #if os(iOS)
-                        .keyboardType(.decimalPad)
-                    #endif
+                    // Additional Information Section
+                    BFCard(style: .elevated) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Notes (optional)")
+                                .font(BFDesignSystem.Typography.labelMedium)
+                                .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                            TextField("Add notes", text: $viewModel.notes)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                        }
+                        .padding()
+                    }
                     
-                    DatePicker("Date", selection: $viewModel.date, displayedComponents: .date)
-                }
-                
-                Section(header: Text("Additional Information")) {
-                    TextField("Notes (optional)", text: $viewModel.notes)
-                }
-                
-                Section {
+                    // Save Button
                     Button(action: {
-                        guard let amount = Double(viewModel.amount) else { return }
-                        viewModel.addSaving(amount: amount, note: viewModel.notes)
-                        dismiss()
+                        Task {
+                            do {
+                                try await viewModel.save()
+                            } catch {
+                                viewModel.showError = true
+                                viewModel.error = error.localizedDescription
+                            }
+                        }
                     }) {
-                        Text("Add Saving")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
-                            .cornerRadius(10)
+                        HStack {
+                            if viewModel.isSaving {
+                                SwiftUI.ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            } else {
+                                Text("Save")
+                                    .font(BFDesignSystem.Typography.labelLarge)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(BFDesignSystem.Colors.primary)
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
                     }
-                    .disabled(viewModel.isSaving)
+                    .disabled(viewModel.isSaving || !viewModel.canSave)
                 }
+                .padding()
             }
             .navigationTitle("Add Saving")
-            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
-            #endif
             .toolbar {
-                #if os(iOS)
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
                         dismiss()
                     }
                 }
-                #else
-                ToolbarItem(placement: .automatic) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-                #endif
             }
             .disabled(viewModel.isSaving)
             .alert("Error", isPresented: $viewModel.showError) {
@@ -98,51 +120,29 @@ final class AddSavingViewModel: ObservableObject {
         !amount.isEmpty && Double(amount) != nil
     }
     
-    func save() {
+    func save() async throws {
         guard let amount = Double(amount) else { return }
         
         isSaving = true
         
-        Task {
-            do {
-                // Simulate network delay
-                try await Task.sleep(nanoseconds: 1_000_000_000)
-                
-                // Save the amount
-                await addSaving(amount: amount, note: notes)
-            } catch {
-                await MainActor.run {
-                    self.error = error.localizedDescription
-                    self.showError = true
-                    self.isSaving = false
-                }
-            }
-        }
+        // Simulate network delay
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+        
+        // Save the amount
+        try await addSaving(amount: amount, note: notes)
     }
     
-    func addSaving(amount: Double, note: String) {
+    func addSaving(amount: Double, note: String) async throws {
         isSaving = true
         
-        Task {
-            do {
-                // Simulate network delay
-                try await Task.sleep(nanoseconds: 1_000_000_000)
-                
-                // TODO: Implement actual saving logic
-                print("Adding saving: $\(amount) with note: \(note)")
-                
-                await MainActor.run {
-                    self.showSuccess = true
-                    self.isSaving = false
-                }
-            } catch {
-                await MainActor.run {
-                    self.error = error.localizedDescription
-                    self.showError = true
-                    self.isSaving = false
-                }
-            }
-        }
+        // Simulate network delay
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+        
+        // TODO: Implement actual saving logic
+        print("Adding saving: $\(amount) with note: \(note)")
+        
+        isSaving = false
+        showSuccess = true
     }
 }
 
