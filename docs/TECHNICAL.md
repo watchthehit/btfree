@@ -180,17 +180,73 @@ Located in `Sources/BetFree/Core/Data/`
 
 2. Transaction
    - Required Fields:
-     - `id`: UUID
+     - `idString`: String (UUID string)
      - `amount`: Double
      - `date`: Date
+     - `category`: String
    - Optional Fields:
      - `note`: String
-     - `category`: String
 
 #### Core Data Managers
 - `CoreDataManager`: Main persistence manager
 - `MockCDManager`: In-memory store for testing
 - Both conform to `BetFreeDataManager` protocol
+
+### Transaction Management
+```swift
+// Add new transaction
+Task {
+    do {
+        let transaction = Transaction(
+            amount: 50.0,
+            category: .savings,
+            date: Date(),
+            note: "Weekly savings"
+        )
+        try await dataManager.addTransaction(transaction)
+    } catch {
+        print("Error adding transaction: \(error)")
+    }
+}
+
+// Delete transaction
+Task {
+    do {
+        try await dataManager.deleteTransaction(transaction)
+    } catch {
+        print("Error deleting transaction: \(error)")
+    }
+}
+
+// Load transactions
+Task {
+    await MainActor.run {
+        isLoading = true
+    }
+    do {
+        let manager = MockCDManager.shared
+        try await Task.sleep(nanoseconds: 100_000_000)  // Simulate network delay
+        let transactions = manager.getAllTransactions().map(\.transaction)
+        await MainActor.run {
+            self.transactions = transactions
+            self.isLoading = false
+        }
+    } catch {
+        print("Error loading transactions: \(error)")
+        await MainActor.run {
+            self.isLoading = false
+        }
+    }
+}
+```
+
+### Core Data Best Practices
+1. Always use `@MainActor` for UI updates
+2. Wrap Core Data operations in `Task` blocks
+3. Use proper error handling with try/catch
+4. Simulate network delays in mock implementations
+5. Update UI state on the main thread
+6. Use proper transaction mapping between Core Data and model objects
 
 ### Features
 - Onboarding
@@ -918,8 +974,10 @@ struct FeatureView: View {
 
 ## Troubleshooting
 
-### SwiftUI ProgressView Naming Conflict
-When using SwiftUI's ProgressView, you must use the explicit namespace `SwiftUI.ProgressView` due to a naming conflict with our custom ProgressView component:
+### Common Issues and Solutions
+
+#### 1. SwiftUI ProgressView Naming Conflict
+When using SwiftUI's ProgressView, you must use the explicit namespace to avoid conflicts:
 
 ```swift
 // ❌ Will not compile - naming conflict with custom ProgressView
@@ -931,193 +989,193 @@ SwiftUI.ProgressView(value: progressValue)
 
 This is necessary because we have a custom `ProgressView` component in `/Sources/BetFree/Features/Progress/ProgressView.swift`.
 
-Examples of correct usage in our codebase:
-```swift
-// Basic usage
-SwiftUI.ProgressView(value: progressValue)
-
-// With styling
-SwiftUI.ProgressView()
-    .progressViewStyle(CircularProgressViewStyle())
-```
-
-## Testing
-- Use `MockCDManager` for Core Data testing
-- In-memory store prevents persistence between test runs
-- Reset store using `reset()` method
-- Inject mock manager through dependency injection
-
-### Progress Indicators
-When using progress indicators, always use the SwiftUI namespace to avoid conflicts:
+#### 2. Core Data Context Issues
+If you encounter Core Data context issues:
 
 ```swift
-// ❌ Don't use:
-ProgressView(value: progressValue)
-
-// ✅ Do use:
-SwiftUI.ProgressView(value: progressValue)
-```
-
-Example with accessibility:
-```swift
-SwiftUI.ProgressView(value: progress)
-    .tint(progress >= 1.0 ? BFDesignSystem.Colors.error : BFDesignSystem.Colors.primary)
-    .semanticValue("\(Int(progress * 100))% complete")
-    .semanticHint("Shows your daily spending progress")
-    .respectIncreaseContrast()
-```
-
-### Component Integration
-
-#### 1. Cards
-Cards should implement all accessibility features:
-
-```swift
-BFCard(style: .default) {
-    content
+// ❌ Don't access context from background thread
+backgroundQueue.async {
+    let context = CoreDataManager.shared.context
+    // ... operations
 }
-.semanticMeaning("Statistics Card")
-.semanticValue("$100 saved this month")
-.semanticHint("Double tap to view details")
-.respectReducedMotion()
-.respectIncreaseContrast()
+
+// ✅ Do use @MainActor and async/await
+@MainActor
+func performOperation() async {
+    let context = CoreDataManager.shared.context
+    // ... operations
+}
 ```
 
-#### 2. Progress Sections
-Progress sections should be fully accessible:
+#### 3. ResourcesView Access
+When using ResourcesView, ensure proper module access:
 
 ```swift
-VStack {
-    Text("Daily Progress")
-        .font(BFDesignSystem.Typography.titleMedium)
-    
-    SwiftUI.ProgressView(value: progress)
-        .tint(getProgressColor(progress))
-}
-.semanticGroup("Daily Progress Section")
-.semanticValue("\(Int(progress * 100))% of daily limit")
-.semanticHint("Shows your spending progress for today")
-.respectReducedMotion()
-.respectIncreaseContrast()
+// ❌ Don't redeclare ResourcesView
+struct ResourcesView: View { ... }
+
+// ✅ Do use the existing ResourcesView
+import BetFree
+// ... then use ResourcesView directly
 ```
 
-#### 3. Interactive Elements
-All interactive elements should include:
-- Clear semantic meaning
-- Appropriate haptic feedback
-- Motion respect
-- High contrast support
+#### 4. Transaction Management
+Common transaction-related issues:
 
 ```swift
-Button(action: handleTap) {
-    Text("Add Transaction")
-}
-.withHaptics(style: .medium)
-.semanticMeaning("Add Transaction Button")
-.semanticHint("Double tap to add a new transaction")
-.respectReducedMotion()
-.respectIncreaseContrast()
+// ❌ Don't modify transactions directly
+transaction.amount = newAmount
+
+// ✅ Do use the DataManager
+try await dataManager.updateTransaction(
+    id: transaction.id,
+    amount: newAmount
+)
 ```
 
-### Testing Guidelines
+#### 5. State Updates
+Handle state updates properly:
 
-#### 1. Accessibility Testing
-Test your components with:
-- VoiceOver enabled
-- Increased contrast mode
-- Reduced motion enabled
-- Different text sizes
-- Different color schemes
+```swift
+// ❌ Don't update state directly from background
+DispatchQueue.global().async {
+    self.someState = newValue // Will crash
+}
 
-#### 2. Haptic Testing
-Verify haptic feedback:
-- Success/error states
-- Progress updates
-- Interactive elements
-- Custom patterns
+// ✅ Do use MainActor
+@MainActor
+func updateState() {
+    self.someState = newValue
+}
+```
 
-#### 3. Motion Testing
-Check animations with:
-- Default settings
-- Reduced motion enabled
-- Different device speeds
-- Different animation states
+### Build Issues
 
-### Best Practices
+#### 1. Package Resolution
+If packages fail to resolve:
+1. Delete derived data: `~/Library/Developer/Xcode/DerivedData`
+2. Clean build folder: `Cmd + Shift + K`
+3. Reset package caches: `File > Packages > Reset Package Caches`
 
-1. **Accessibility First**
-   ```swift
-   // ❌ Don't
-   Button("Add") { ... }
-   
-   // ✅ Do
-   Button {
-       // action
-   } label: {
-       Image(systemName: "plus")
-   }
-   .semanticMeaning("Add Button")
-   .semanticHint("Double tap to add new entry")
-   ```
+#### 2. Compilation Errors
+Common compilation fixes:
+1. Check module imports
+2. Verify access levels (public/internal)
+3. Ensure MainActor usage for UI updates
+4. Validate Core Data model versions
 
-2. **Color Usage**
-   ```swift
-   // ❌ Don't
-   Text("High Risk")
-       .foregroundColor(.red)
-   
-   // ✅ Do
-   Text("High Risk")
-       .foregroundColor(BFDesignSystem.Colors.error)
-   ```
+#### 3. Runtime Crashes
+Common crash solutions:
+1. Verify Core Data migrations
+2. Check thread safety with @MainActor
+3. Validate optional unwrapping
+4. Ensure proper initialization order
 
-3. **Haptic Feedback**
-   ```swift
-   // ❌ Don't
-   @State private var showingSheet = false
-   Button("Add") {
-       showingSheet = true
-   }
-   
-   // ✅ Do
-   @State private var showingSheet = false
-   Button("Add") {
-       BFHaptics.warning()
-       showingSheet = true
-   }
-   ```
+### Performance Issues
 
-4. **Contrast**
-   - Ensure sufficient contrast
-   - Don't rely solely on color
-   - Support dark mode
+#### 1. Memory Management
+Handle memory efficiently:
 
-5. **Motion**
-   - Respect reduced motion
-   - Keep animations optional
-   - Provide static alternatives
+```swift
+// ❌ Don't hold strong references
+class SomeManager {
+    var handler: (() -> Void)?
+}
 
-### Implementation Checklist
+// ✅ Do use weak references
+class SomeManager {
+    weak var delegate: SomeDelegate?
+}
+```
 
-When implementing new features, ensure:
+#### 2. Core Data Performance
+Optimize Core Data usage:
 
-1. **Accessibility**
-   - [ ] VoiceOver support added
-   - [ ] Dynamic type implemented
-   - [ ] High contrast support added
-   - [ ] Reduced motion respected
+```swift
+// ❌ Don't fetch all records
+let allRecords = try context.fetch(request)
 
-2. **Feedback**
-   - [ ] Appropriate haptics used
-   - [ ] Visual feedback provided
-   - [ ] Clear error states
-   - [ ] Progress indicators
+// ✅ Do use batch fetching
+request.fetchBatchSize = 20
+request.fetchLimit = 50
+```
 
-3. **Documentation**
-   - [ ] Accessibility features documented
-   - [ ] Usage examples provided
-   - [ ] Testing guidelines included
-   - [ ] Best practices noted
+### Testing Issues
+
+#### 1. Mock Data Manager
+Use the mock data manager for testing:
+
+```swift
+// ❌ Don't use production manager in tests
+let manager = CoreDataManager.shared
+
+// ✅ Do use mock manager
+let manager = MockCDManager()
+```
+
+#### 2. UI Testing
+Handle UI test specific cases:
+
+```swift
+// ❌ Don't hardcode test values
+if isUITesting {
+    username = "test"
+}
+
+// ✅ Do use launch arguments
+if CommandLine.arguments.contains("--uitesting") {
+    username = ProcessInfo.processInfo.environment["TEST_USERNAME"]
+}
+```
+
+### Debugging Tips
+
+#### 1. Core Data Debugging
+Enable SQL debugging:
+```swift
+// Add to scheme arguments
+-com.apple.CoreData.SQLDebug 1
+```
+
+#### 2. View Hierarchy
+Debug view issues:
+```swift
+// Add to any view
+.border(Color.red) // Visualize boundaries
+.background(Color.blue.opacity(0.2)) // Check layout
+```
+
+#### 3. State Changes
+Track state updates:
+```swift
+// Add property wrapper
+@Published var someState: String {
+    willSet { print("State changing from \(someState) to \(newValue)") }
+    didSet { print("State changed to \(someState)") }
+}
+```
+
+### Common Error Messages
+
+1. "Invalid redeclaration":
+   - Check for duplicate type declarations
+   - Verify module imports
+   - Ensure proper access levels
+
+2. "Thread-related crash":
+   - Add @MainActor to view models
+   - Use async/await for Core Data
+   - Dispatch UI updates to main thread
+
+3. "Core Data constraint failure":
+   - Verify unique constraints
+   - Check relationship rules
+   - Validate data before saving
+
+4. "View identity error":
+   - Ensure proper ForEach identifiers
+   - Use stable IDs for list items
+   - Avoid changing view identity
 
 ## Code Examples
 
@@ -1575,3 +1633,144 @@ Main settings interface with the following sections:
    - Subject and message input
    - Mail composition handling
    - Error handling for mail setup
+```
+
+### Proper Logout Handling
+When implementing logout functionality:
+
+```swift
+// ❌ Don't reset state without cleaning Core Data
+func logout() {
+    currentStreak = 0
+    totalSavings = 0
+    // This can lead to crashes if Core Data objects are accessed
+}
+
+// ✅ Do clean Core Data first, then reset state
+func logout() {
+    // First reset Core Data
+    dataManager.reset()
+    
+    // Then reset app state
+    currentStreak = 0
+    totalSavings = 0
+    // ... other state resets
+}
+```
+
+This ensures that:
+1. Core Data objects are properly cleaned up
+2. No dangling references remain
+3. App state is consistent with data layer
+4. Prevents crashes from accessing deleted objects
+
+## Core Data Model Changes
+
+### Entity Attributes
+The `UserProfileEntity` in Core Data requires these attributes:
+```swift
+idString: String (non-optional, default: "")  // Used as unique identifier
+name: String (non-optional, default: "")
+email: String? (optional)
+dailyLimit: Double (non-optional, default: 0.0)
+streak: Int32 (non-optional, default: 0)
+totalSavings: Double (non-optional, default: 0.0)
+lastCheckIn: Date? (optional)
+```
+
+### Making Model Changes
+When modifying the Core Data model:
+1. Always update both `.xcdatamodeld` files:
+   - `Sources/BetFree/Core/Data/BetFree.xcdatamodeld`
+   - `Sources/BetFree/Core/Data/Resources/CoreData/BetFreeModel.xcdatamodeld`
+
+2. After model changes:
+   - Clean build folder
+   - Delete app from simulator
+   - Reset derived data if needed
+   - Update mock managers if necessary
+
+3. For production updates:
+   - Create new model version
+   - Set up mapping model
+   - Test migration path
+   - Update documentation
+
+### Common Pitfalls
+1. **Unmatched Models**: Ensure both `.xcdatamodeld` files are in sync
+2. **Missing Attributes**: Add all required attributes to both models
+3. **Type Mismatches**: Use consistent types across models
+4. **Default Values**: Set appropriate defaults for non-optional attributes
+5. **Migration Issues**: Test migration paths thoroughly
+
+### Onboarding Implementation
+
+#### OnboardingView Structure
+```swift
+struct OnboardingView {
+    // State
+    @StateObject private var viewModel = OnboardingViewModel()
+    @EnvironmentObject private var appState: AppState
+    
+    // Steps
+    private var welcomeStep: some View
+    private var signUpStep: some View      // Sign in with Apple or Email
+    private var dailyLimitStep: some View  // Spending limit setup
+    private var goalsStep: some View       // Personal goals
+    private var sportsStep: some View      // Sports selection
+    private var featuresStep: some View    // Feature showcase
+    private var trialStep: some View       // Trial activation
+}
+```
+
+#### Authentication Flow
+```swift
+@MainActor
+final class OnboardingViewModel: ObservableObject {
+    // Authentication State
+    @Published var name = ""
+    @Published var email = ""
+    @Published var password = ""
+    @Published var isLoading = false
+    @Published var error: String?
+    
+    // Sign in with Apple
+    func signInWithApple() async {
+        isLoading = true
+        do {
+            // Handle Apple authentication
+            await MainActor.run {
+                isLoading = false
+                nextStep()
+            }
+        } catch {
+            await MainActor.run {
+                self.error = error.localizedDescription
+                isLoading = false
+            }
+        }
+    }
+    
+    // Email Sign Up
+    func signUpWithEmail() async {
+        isLoading = true
+        do {
+            // Validate input
+            guard !email.isEmpty, !password.isEmpty else {
+                throw AuthError.invalidInput
+            }
+            
+            // Create account
+            await MainActor.run {
+                isLoading = false
+                nextStep()
+            }
+        } catch {
+            await MainActor.run {
+                self.error = error.localizedDescription
+                isLoading = false
+            }
+        }
+    }
+}
+```

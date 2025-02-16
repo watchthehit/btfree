@@ -73,15 +73,34 @@
 
 ### Onboarding Flow
 1. Welcome Screen
-2. Personal Info Collection
+2. Sign Up
    ```swift
    // Core Data model
+   @NSManaged public var idString: String  // Unique identifier
    @NSManaged public var name: String
    @NSManaged public var email: String?
    ```
-3. Goal Setting
-4. Daily Limit Setup
-5. Subscription Options
+   - Sign in with Apple
+   - Email signup with password
+   - Secure authentication
+3. Daily Limit Setup
+   - Customizable spending limit
+   - Adjustable in settings
+4. Goal Setting
+   - Multiple personal goals
+   - Progress tracking
+5. Sports Selection
+   - Personalized sports preferences
+   - Betting history analysis
+6. Feature Overview
+   - Progress tracking
+   - Craving management
+   - Savings calculator
+   - Achievement system
+7. Trial Activation
+   - 7-day free trial
+   - Premium features preview
+   - Subscription options
 
 ### Dashboard
 - Current Streak Display
@@ -93,6 +112,12 @@
 
 ### Profile Management
 - Personal Information
+   ```swift
+   // Core Data model
+   @NSManaged public var idString: String  // Unique identifier
+   @NSManaged public var name: String
+   @NSManaged public var email: String?
+   ```
 - Notification Settings
 - Privacy Controls
 - Data Management
@@ -110,17 +135,145 @@
 
 ### Transaction Management
 ```swift
+// Core Data entity
+@NSManaged public var idString: String  // UUID string
+@NSManaged public var amount: Double
+@NSManaged public var date: Date
+@NSManaged public var note: String?
+@NSManaged public var category: String
+
 // Add new transaction
-try CoreDataManager.shared.addTransaction(
-    amount: 50.0,
-    note: "Weekly savings"
-)
+Task {
+    do {
+        let transaction = Transaction(
+            id: UUID(),
+            amount: 50.0,
+            category: .savings,
+            date: Date(),
+            note: "Weekly savings"
+        )
+        try await dataManager.addTransaction(transaction)
+        await MainActor.run {
+            // Update UI after successful addition
+            transactions.append(transaction)
+        }
+    } catch {
+        await MainActor.run {
+            errorMessage = error.localizedDescription
+        }
+    }
+}
 
 // Get today's transactions
-let transactions = CoreDataManager.shared.getTodaysTransactions()
+@MainActor
+func loadTodaysTransactions() async {
+    isLoading = true
+    do {
+        let manager = DataManagerFactory.createDataManager()
+        try await Task.sleep(nanoseconds: 100_000_000)  // Simulate network delay
+        let todaysTransactions = manager.getTodaysTransactions()
+        self.transactions = todaysTransactions
+        isLoading = false
+    } catch {
+        errorMessage = error.localizedDescription
+        isLoading = false
+    }
+}
 
 // Calculate total spent
-let total = CoreDataManager.shared.getTotalSpentToday()
+@MainActor
+func calculateTotalSpent() async -> Double {
+    do {
+        let manager = DataManagerFactory.createDataManager()
+        return manager.getTotalSpentToday()
+    } catch {
+        errorMessage = error.localizedDescription
+        return 0.0
+    }
+}
+```
+
+### Transaction View Implementation
+```swift
+struct TransactionsView: View {
+    @StateObject private var viewModel = TransactionsViewModel()
+    @State private var isLoading = false
+    @State private var showingAddTransaction = false
+    @State private var errorMessage: String?
+    
+    var body: some View {
+        NavigationView {
+            Group {
+                if isLoading {
+                    ProgressView()
+                } else {
+                    transactionsList
+                }
+            }
+            .navigationTitle("Transactions")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showingAddTransaction = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
+            .sheet(isPresented: $showingAddTransaction) {
+                AddTransactionView()
+            }
+            .onAppear {
+                Task {
+                    await loadTransactions()
+                }
+            }
+            .refreshable {
+                await loadTransactions()
+            }
+        }
+    }
+    
+    private var transactionsList: some View {
+        List {
+            ForEach(viewModel.transactions) { transaction in
+                TransactionRow(transaction: transaction)
+                    .swipeActions {
+                        Button(role: .destructive) {
+                            Task {
+                                await deleteTransaction(transaction)
+                            }
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    }
+            }
+        }
+    }
+    
+    @MainActor
+    private func loadTransactions() async {
+        isLoading = true
+        do {
+            let manager = DataManagerFactory.createDataManager()
+            try await Task.sleep(nanoseconds: 100_000_000)
+            viewModel.transactions = manager.getAllTransactions().map(\.transaction)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        isLoading = false
+    }
+    
+    @MainActor
+    private func deleteTransaction(_ transaction: Transaction) async {
+        do {
+            try await viewModel.deleteTransaction(transaction)
+            await loadTransactions()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+}
 ```
 
 ### Profile Management

@@ -83,6 +83,57 @@ class AchievementTests: XCTestCase {
 }
 ```
 
+### Authentication Tests
+
+```swift
+class AuthenticationTests: XCTestCase {
+    var viewModel: OnboardingViewModel!
+    
+    override func setUp() {
+        viewModel = OnboardingViewModel()
+    }
+    
+    func testEmailSignUp() async throws {
+        // Given
+        viewModel.email = "test@example.com"
+        viewModel.password = "password123"
+        viewModel.name = "Test User"
+        
+        // When
+        await viewModel.signUpWithEmail()
+        
+        // Then
+        XCTAssertFalse(viewModel.isLoading)
+        XCTAssertNil(viewModel.error)
+        XCTAssertEqual(viewModel.currentStep, .dailyLimit)
+    }
+    
+    func testInvalidEmailSignUp() async throws {
+        // Given
+        viewModel.email = ""
+        viewModel.password = "password123"
+        
+        // When
+        await viewModel.signUpWithEmail()
+        
+        // Then
+        XCTAssertFalse(viewModel.isLoading)
+        XCTAssertNotNil(viewModel.error)
+        XCTAssertEqual(viewModel.currentStep, .signUp)
+    }
+    
+    func testAppleSignIn() async throws {
+        // When
+        await viewModel.signInWithApple()
+        
+        // Then
+        XCTAssertFalse(viewModel.isLoading)
+        XCTAssertNil(viewModel.error)
+        XCTAssertEqual(viewModel.currentStep, .dailyLimit)
+    }
+}
+```
+
 ### 2. Integration Tests
 
 #### Data Flow Tests
