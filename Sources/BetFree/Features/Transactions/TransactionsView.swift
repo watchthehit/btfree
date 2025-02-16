@@ -70,20 +70,45 @@ public struct TransactionsView: View {
     }
     
     private func loadTransactions() async {
-        isLoading = true
-        defer { isLoading = false }
+        await MainActor.run {
+            isLoading = true
+        }
         
-        let manager = MockCDManager.shared
-        transactions = manager.getAllTransactions().map(\.transaction)
+        do {
+            let manager = MockCDManager.shared
+            // Simulate async operation since Core Data operations should be async
+            try await Task.sleep(nanoseconds: 100_000_000)  // 0.1 second delay
+            let fetchedTransactions = manager.getAllTransactions().map(\.transaction)
+            
+            await MainActor.run {
+                self.transactions = fetchedTransactions
+                self.isLoading = false
+            }
+        } catch {
+            print("Error loading transactions: \(error)")
+            await MainActor.run {
+                self.isLoading = false
+            }
+        }
     }
     
     private func deleteTransaction(_ transaction: BetFreeModels.Transaction) {
+        // Create async context
         Task {
             do {
-                try await MockCDManager.shared.deleteTransaction(transaction)
+                await MainActor.run {
+                    isLoading = true
+                }
+                
+                let manager = MockCDManager.shared
+                try await Task.sleep(nanoseconds: 100_000_000)  // 0.1 second delay
+                try await manager.deleteTransaction(transaction)
                 await loadTransactions()
             } catch {
                 print("Error deleting transaction: \(error)")
+                await MainActor.run {
+                    isLoading = false
+                }
             }
         }
     }
