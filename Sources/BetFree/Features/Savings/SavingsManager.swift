@@ -1,10 +1,12 @@
 import Foundation
+import BetFreeModels
 
 public class SavingsManager: ObservableObject {
     @Published public private(set) var totalSaved: Double = 0
     @Published public private(set) var dailyAverage: Double = 0
     @Published public private(set) var streakDays: Int = 0
     @Published public private(set) var lastUpdate: Date?
+    @Published public private(set) var recentSavings: [Saving] = []
     
     private let defaults = UserDefaults.standard
     private let savingsKey = "BFSavings"
@@ -24,6 +26,13 @@ public class SavingsManager: ObservableObject {
         if let savedDict = defaults.dictionary(forKey: savingsByDateKey) as? [String: Double] {
             savingsByDate = savedDict
         }
+        
+        // Load recent savings
+        if let savedData = defaults.data(forKey: "recentSavings"),
+           let decoded = try? JSONDecoder().decode([Saving].self, from: savedData) {
+            recentSavings = decoded
+        }
+        
         calculateDailyAverage()
     }
     
@@ -32,6 +41,11 @@ public class SavingsManager: ObservableObject {
         defaults.set(streakDays, forKey: streakKey)
         defaults.set(lastUpdate, forKey: lastUpdateKey)
         defaults.set(savingsByDate, forKey: savingsByDateKey)
+        
+        // Save recent savings
+        if let encoded = try? JSONEncoder().encode(recentSavings) {
+            defaults.set(encoded, forKey: "recentSavings")
+        }
     }
     
     private func calculateDailyAverage() {
@@ -46,6 +60,15 @@ public class SavingsManager: ObservableObject {
         // Save amount for today
         let dateString = Self.dateFormatter.string(from: Date())
         savingsByDate[dateString] = (savingsByDate[dateString] ?? 0) + amount
+        
+        // Add to recent savings
+        let saving = Saving(amount: amount, date: Date(), sport: "", notes: nil)
+        recentSavings.insert(saving, at: 0)
+        
+        // Keep only last 10 savings
+        if recentSavings.count > 10 {
+            recentSavings.removeLast()
+        }
         
         updateStreak()
         calculateDailyAverage()
