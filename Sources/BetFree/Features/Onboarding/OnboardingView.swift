@@ -31,7 +31,8 @@ public struct OnboardingView: View {
                                 .animation(.spring(response: 0.3), value: viewModel.currentStep)
                         }
                     }
-                    .padding(.top, 20)
+                    .padding(.top, geometry.safeAreaInsets.top + 16)
+                    .padding(.bottom, 24)
                     
                     // Page content
                     TabView(selection: $viewModel.currentStep) {
@@ -58,10 +59,6 @@ public struct OnboardingView: View {
                         // Features
                         featuresStep
                             .tag(OnboardingStep.features)
-                        
-                        // Trial
-                        trialStep
-                            .tag(OnboardingStep.trial)
                     }
                     .tabViewStyle(.page(indexDisplayMode: .never))
                     .animation(.easeInOut, value: viewModel.currentStep)
@@ -603,107 +600,197 @@ public struct OnboardingView: View {
     
     private var sportsStep: some View {
         VStack(spacing: 24) {
-            Text("Select Your Sports")
-                .font(BFDesignSystem.Typography.titleLarge)
-                .foregroundColor(.white)
+            VStack(spacing: 16) {
+                Text("Select Your Sports")
+                    .font(BFDesignSystem.Typography.titleLarge)
+                    .foregroundColor(.white)
+                
+                Text("Which sports do you typically bet on?")
+                    .font(BFDesignSystem.Typography.bodyLarge)
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+            }
+            .padding(.top, 8)
             
-            Text("Which sports do you typically bet on?")
-                .font(BFDesignSystem.Typography.bodyLarge)
-                .foregroundColor(.white.opacity(0.8))
-            
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                ForEach(Sport.allCases) { sport in
-                    SportButton(
-                        sport: sport,
-                        isSelected: viewModel.selectedSports.contains(sport)
-                    ) {
-                        viewModel.toggleSport(sport)
+            ScrollView(showsIndicators: false) {
+                LazyVGrid(
+                    columns: [
+                        GridItem(.flexible()),
+                        GridItem(.flexible())
+                    ],
+                    spacing: 16
+                ) {
+                    ForEach(Sport.allCases) { sport in
+                        SportButton(
+                            sport: sport,
+                            isSelected: viewModel.selectedSports.contains(sport)
+                        ) {
+                            viewModel.toggleSport(sport)
+                        }
                     }
                 }
+                .padding(.horizontal, 24)
+                .padding(.vertical, 8)
             }
-            .padding(.horizontal, 24)
         }
         .slideUpOnAppear()
     }
     
     private var featuresStep: some View {
-        VStack(spacing: 24) {
-            Text("Powerful Features")
-                .font(BFDesignSystem.Typography.titleLarge)
-                .foregroundColor(.white)
-            
-            VStack(spacing: 20) {
-                FeatureRow(icon: "chart.line.uptrend.xyaxis", title: "Progress Tracking", description: "Monitor your journey with detailed insights")
-                FeatureRow(icon: "brain.head.profile", title: "Craving Management", description: "Tools to handle betting urges effectively")
-                FeatureRow(icon: "dollarsign.circle.fill", title: "Savings Calculator", description: "See how much you're saving")
-                FeatureRow(icon: "trophy.fill", title: "Achievement System", description: "Celebrate your milestones")
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 24) {
+                VStack(spacing: 8) {
+                    Text("Transform Your Life")
+                        .font(BFDesignSystem.Typography.titleLarge)
+                        .foregroundColor(.white)
+                        .padding(.top, 8)
+                }
+                
+                // Features section
+                VStack(spacing: 16) {
+                    FeatureRow(icon: "chart.line.uptrend.xyaxis", title: "Progress Tracking", description: "Monitor your journey with detailed insights")
+                    FeatureRow(icon: "brain.head.profile", title: "Craving Management", description: "Tools to handle betting urges effectively")
+                    FeatureRow(icon: "dollarsign.circle.fill", title: "Savings Calculator", description: "See how much you're saving")
+                    FeatureRow(icon: "trophy.fill", title: "Achievement System", description: "Celebrate your milestones")
+                }
+                .padding(.horizontal, 24)
+                
+                // Pricing section
+                VStack(spacing: 16) {
+                    Text("Choose Your Plan")
+                        .font(BFDesignSystem.Typography.titleMedium)
+                        .foregroundColor(.white)
+                    
+                    HStack(spacing: 16) {
+                        // Monthly plan
+                        PlanCard(
+                            title: "Monthly",
+                            price: "$9.99",
+                            period: "month",
+                            isSelected: viewModel.selectedPlan == .monthly,
+                            action: { viewModel.selectedPlan = .monthly }
+                        )
+                        
+                        // Yearly plan
+                        PlanCard(
+                            title: "Yearly",
+                            price: "$59.99",
+                            period: "year",
+                            savings: "Save 50%",
+                            isSelected: viewModel.selectedPlan == .yearly,
+                            action: { viewModel.selectedPlan = .yearly }
+                        )
+                    }
+                    .padding(.horizontal, 24)
+                }
+                .padding(.top, 8)
+                
+                // Trial section
+                VStack(spacing: 12) {
+                    Text("Start 7-Day Free Trial")
+                        .font(BFDesignSystem.Typography.titleMedium)
+                        .foregroundColor(.white)
+                    
+                    Text("Cancel anytime. No commitment required.")
+                        .font(BFDesignSystem.Typography.bodyMedium)
+                        .foregroundColor(.white.opacity(0.8))
+                }
+                .padding(.top, 16)
+                
+                // Terms and privacy
+                Text("By continuing, you agree to our Terms of Service and Privacy Policy")
+                    .font(BFDesignSystem.Typography.bodySmall)
+                    .foregroundColor(.white.opacity(0.6))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+                    .padding(.vertical, 16)
             }
-            .padding(.horizontal, 24)
+            .padding(.bottom, 32)
         }
         .slideUpOnAppear()
     }
     
-    private var trialStep: some View {
-        VStack(spacing: 24) {
-            Text("Start Your Journey")
-                .font(BFDesignSystem.Typography.titleLarge)
-                .foregroundColor(.white)
-            
-            VStack(spacing: 20) {
-                Text("Try BetFree Premium Free")
-                    .font(BFDesignSystem.Typography.displaySmall)
-                    .foregroundColor(.white)
-                
-                Text("7 days free trial")
-                    .font(BFDesignSystem.Typography.titleMedium)
-                    .foregroundColor(.white.opacity(0.8))
-                
-                VStack(spacing: 12) {
-                    PremiumFeatureRow(text: "Unlimited progress tracking")
-                    PremiumFeatureRow(text: "Advanced analytics")
-                    PremiumFeatureRow(text: "Personalized strategies")
-                    PremiumFeatureRow(text: "Priority support")
+    private struct PlanCard: View {
+        let title: String
+        let price: String
+        let period: String
+        var savings: String? = nil
+        let isSelected: Bool
+        let action: () -> Void
+        
+        var body: some View {
+            Button(action: action) {
+                VStack(spacing: 8) {
+                    Text(title)
+                        .font(BFDesignSystem.Typography.titleSmall)
+                    
+                    Text(price)
+                        .font(BFDesignSystem.Typography.displaySmall)
+                    
+                    Text("per \(period)")
+                        .font(BFDesignSystem.Typography.bodySmall)
+                    
+                    if let savings = savings {
+                        Text(savings)
+                            .font(BFDesignSystem.Typography.labelMedium)
+                            .foregroundColor(BFDesignSystem.Colors.success)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 4)
+                            .background(BFDesignSystem.Colors.success.opacity(0.2))
+                            .cornerRadius(12)
+                    }
                 }
-                .padding(.vertical, 20)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(isSelected ? Color.white : Color.white.opacity(0.1))
+                .foregroundColor(isSelected ? BFDesignSystem.Colors.primary : .white)
+                .cornerRadius(16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(isSelected ? Color.white : Color.clear, lineWidth: 2)
+                )
             }
-            .padding(.horizontal, 24)
         }
-        .slideUpOnAppear()
     }
     
     private var navigationButtons: some View {
-        HStack(spacing: 16) {
+        HStack {
             if viewModel.currentStep != .welcome {
-                Button(action: viewModel.previousStep) {
-                    Text("Back")
-                        .font(BFDesignSystem.Typography.labelLarge)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 12)
-                        .background(Color.white.opacity(0.2))
-                        .clipShape(Capsule())
+                Button(action: { viewModel.previousStep() }) {
+                    HStack {
+                        Image(systemName: "chevron.left")
+                        Text("Back")
+                    }
+                    .foregroundColor(.white)
+                    .padding()
                 }
             }
             
-            Button(action: {
-                if viewModel.currentStep == .trial {
-                    viewModel.completeOnboarding()
-                    appState.completeOnboarding()
-                } else {
-                    viewModel.nextStep()
+            Spacer()
+            
+            if viewModel.currentStep == .features {
+                Button(action: { viewModel.completeOnboarding() }) {
+                    Text("Get Started")
+                        .font(BFDesignSystem.Typography.labelLarge)
+                        .foregroundColor(BFDesignSystem.Colors.primary)
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(12)
                 }
-            }) {
-                Text(viewModel.currentStep == .trial ? "Start Free Trial" : "Continue")
-                    .font(BFDesignSystem.Typography.labelLarge)
-                    .foregroundColor(BFDesignSystem.Colors.primary)
-                    .padding(.horizontal, 32)
-                    .padding(.vertical, 16)
-                    .background(Color.white)
-                    .clipShape(Capsule())
+                .disabled(viewModel.isLoading)
+            } else {
+                Button(action: { viewModel.nextStep() }) {
+                    HStack {
+                        Text("Continue")
+                        Image(systemName: "chevron.right")
+                    }
+                    .foregroundColor(.white)
+                    .padding()
+                }
             }
         }
-        .padding(.horizontal, 24)
-        .padding(.top, 32)
+        .padding(.horizontal)
     }
 }
 
@@ -767,21 +854,6 @@ private struct FeatureRow: View {
     }
 }
 
-private struct PremiumFeatureRow: View {
-    let text: String
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundColor(.white)
-            
-            Text(text)
-                .font(BFDesignSystem.Typography.bodyLarge)
-                .foregroundColor(.white)
-        }
-    }
-}
-
 // MARK: - ViewModel
 @MainActor
 final class OnboardingViewModel: ObservableObject {
@@ -797,6 +869,12 @@ final class OnboardingViewModel: ObservableObject {
     @Published var showError = false
     @Published var isAnimating = false
     @Published var dailyLimitDouble: Double = 100.0
+    @Published var selectedPlan: SubscriptionPlan = .monthly
+    
+    enum SubscriptionPlan {
+        case monthly
+        case yearly
+    }
     
     func nextStep() {
         withAnimation {
