@@ -83,6 +83,12 @@ public class AppState: ObservableObject {
     
     @Published public var savings: [Saving] = []
     
+    @Published public var colorScheme: ColorScheme? = nil {
+        didSet {
+            defaults.set(colorScheme?.rawValue, forKey: colorSchemeKey)
+        }
+    }
+    
     // Computed properties for UI
     public var streak: Int { currentStreak }
     public var savingsAmount: Double { totalSavings }
@@ -98,6 +104,7 @@ public class AppState: ObservableObject {
     private let typicalBetAmountKey = "BFTypicalBetAmount"
     private let preferredSportsKey = "BFPreferredSports"
     private let subscriptionStatusKey = "BFSubscriptionStatus"
+    private let colorSchemeKey = "BFColorScheme"
     
     public static let preview: AppState = {
         let state = AppState(dataManager: MockCDManager.shared)
@@ -123,6 +130,12 @@ public class AppState: ObservableObject {
         self.hasBlockedApps = defaults.bool(forKey: hasBlockedAppsKey, defaultValue: false)
         self.typicalBetAmount = defaults.double(forKey: typicalBetAmountKey)
         self.preferredSports = defaults.stringArray(forKey: preferredSportsKey) ?? []
+        
+        // Load color scheme preference
+        if let rawValue = defaults.string(forKey: colorSchemeKey),
+           let scheme = ColorScheme(rawValue: rawValue) {
+            self.colorScheme = scheme
+        }
         
         // Load user profile from Core Data
         if let user = dataManager.getCurrentUser() {
@@ -291,6 +304,19 @@ public class AppState: ObservableObject {
     
     public func createOrUpdateUser(name: String, email: String?, dailyLimit: Double) throws {
         try dataManager.createOrUpdateUser(name: name, email: email, dailyLimit: dailyLimit)
+    }
+    
+    public func toggleColorScheme() {
+        withAnimation {
+            switch colorScheme {
+            case .none:
+                colorScheme = .dark
+            case .dark:
+                colorScheme = .light
+            case .light:
+                colorScheme = nil
+            }
+        }
     }
 }
 

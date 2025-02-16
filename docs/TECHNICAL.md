@@ -2167,3 +2167,89 @@ ScrollView(showsIndicators: false) {
 3. Use consistent padding and spacing
 4. Implement proper safe area handling
 5. Support dynamic content height
+```
+
+### Dark Mode Support
+
+The app implements a comprehensive dark mode system with three states:
+- System (follows device settings)
+- Light Mode (forced light)
+- Dark Mode (forced dark)
+
+#### Color System
+```swift
+// Adaptive colors that respond to color scheme
+public static var primary: Color {
+    Color(light: Color(hex: "007AFF"), dark: Color(hex: "0A84FF"))
+}
+
+// Semantic colors for text
+public static var textPrimary: Color {
+    Color(light: Color(hex: "000000"), dark: .white)
+}
+
+// Background colors
+public static var background: Color {
+    Color(light: .white, dark: Color(hex: "1C1C1E"))
+}
+```
+
+#### User Preferences
+```swift
+// Color scheme state in AppState
+@Published public var colorScheme: ColorScheme? = nil {
+    didSet {
+        defaults.set(colorScheme?.rawValue, forKey: colorSchemeKey)
+    }
+}
+
+// Toggle between modes
+public func toggleColorScheme() {
+    withAnimation {
+        switch colorScheme {
+        case .none: colorScheme = .dark
+        case .dark: colorScheme = .light
+        case .light: colorScheme = nil
+        }
+    }
+}
+```
+
+#### UI Implementation
+```swift
+// Apply color scheme to view hierarchy
+.preferredColorScheme(appState.colorScheme)
+
+// Color scheme toggle button
+ColorSchemeButton(colorScheme: appState.colorScheme) {
+    appState.toggleColorScheme()
+}
+```
+
+#### Best Practices
+1. **Color Definition**
+   - Use semantic color names
+   - Define both light and dark variants
+   - Support opacity variants
+
+2. **UI Components**
+   - Test in both modes
+   - Use system colors when possible
+   - Support dynamic type
+
+3. **Gradients**
+   - Adapt gradient colors
+   - Maintain contrast ratios
+   - Consider reduced transparency
+
+4. **Assets**
+   - Provide dark variants
+   - Test contrast levels
+   - Support reduced motion
+
+5. **Testing**
+   - Test mode transitions
+   - Verify color contrast
+   - Check accessibility
+
+// ... existing content ...
