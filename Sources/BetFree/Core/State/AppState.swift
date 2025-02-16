@@ -85,7 +85,11 @@ public class AppState: ObservableObject {
     
     @Published public var colorScheme: ColorScheme? = nil {
         didSet {
-            defaults.set(colorScheme?.rawValue, forKey: colorSchemeKey)
+            if let scheme = colorScheme {
+                defaults.set(scheme == .dark ? "dark" : "light", forKey: colorSchemeKey)
+            } else {
+                defaults.removeObject(forKey: colorSchemeKey)
+            }
         }
     }
     
@@ -132,9 +136,8 @@ public class AppState: ObservableObject {
         self.preferredSports = defaults.stringArray(forKey: preferredSportsKey) ?? []
         
         // Load color scheme preference
-        if let rawValue = defaults.string(forKey: colorSchemeKey),
-           let scheme = ColorScheme(rawValue: rawValue) {
-            self.colorScheme = scheme
+        if let scheme = defaults.string(forKey: colorSchemeKey) {
+            self.colorScheme = scheme == "dark" ? .dark : .light
         }
         
         // Load user profile from Core Data

@@ -25,12 +25,12 @@ public struct BFTextField: View {
     }
     
     public var body: some View {
-        VStack(alignment: .leading, spacing: BFDesignSystem.Layout.Spacing.small) {
+        VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(BFDesignSystem.Typography.caption)
                 .foregroundColor(BFDesignSystem.Colors.textSecondary)
             
-            HStack(spacing: BFDesignSystem.Layout.Spacing.small) {
+            HStack(spacing: 8) {
                 if let prefix = prefix {
                     Text(prefix)
                         .font(BFDesignSystem.Typography.bodyLarge)
@@ -46,9 +46,9 @@ public struct BFTextField: View {
             }
             .padding()
             .background(BFDesignSystem.Colors.cardBackground)
-            .cornerRadius(BFDesignSystem.Layout.CornerRadius.medium)
+            .cornerRadius(12)
             .overlay(
-                RoundedRectangle(cornerRadius: BFDesignSystem.Layout.CornerRadius.medium)
+                RoundedRectangle(cornerRadius: 12)
                     .stroke(BFDesignSystem.Colors.textSecondary.opacity(0.2), lineWidth: 1)
             )
         }

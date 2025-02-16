@@ -1,3 +1,8 @@
+import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
+
 public enum BFDesignSystem {
     public enum Colors {
         // Base colors that adapt to color scheme
@@ -96,6 +101,45 @@ public enum BFDesignSystem {
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
+        }
+    }
+    
+    public enum Layout {
+        public enum Spacing {
+            public static let xxSmall: CGFloat = 4
+            public static let xSmall: CGFloat = 8
+            public static let small: CGFloat = 12
+            public static let medium: CGFloat = 16
+            public static let large: CGFloat = 24
+            public static let xLarge: CGFloat = 32
+            public static let xxLarge: CGFloat = 48
+        }
+        
+        public enum CornerRadius {
+            public static let small: CGFloat = 12
+            public static let medium: CGFloat = 16
+            public static let large: CGFloat = 20
+            public static let xLarge: CGFloat = 28
+            public static let card: CGFloat = 24
+            public static let button: CGFloat = 16
+        }
+        
+        public enum Shadow {
+            public static let small = ViewShadow(radius: 10, y: 4, opacity: 0.1)
+            public static let medium = ViewShadow(radius: 15, y: 8, opacity: 0.12)
+            public static let large = ViewShadow(radius: 20, y: 12, opacity: 0.14)
+            public static let card = ViewShadow(radius: 15, y: 8, opacity: 0.1)
+            public static let button = ViewShadow(radius: 12, y: 6, opacity: 0.15)
+        }
+        
+        public enum Size {
+            public static let iconSmall: CGFloat = 18
+            public static let iconMedium: CGFloat = 24
+            public static let iconLarge: CGFloat = 32
+            public static let iconXLarge: CGFloat = 40
+            
+            public static let buttonHeight: CGFloat = 56
+            public static let progressCircleLarge: CGFloat = 100
         }
     }
     
