@@ -94,8 +94,7 @@ public struct TransactionsView: View {
         defer { isLoading = false }
         
         let manager = MockCDManager.shared
-        let fetchedTransactions = manager.getAllTransactions()
-        self.transactions = fetchedTransactions.map(\.transaction)
+        self.transactions = manager.getAllTransactions()
     }
     
     @MainActor

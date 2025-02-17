@@ -92,9 +92,10 @@ public class AppState: ObservableObject {
                 defaults.set("light", forKey: colorSchemeKey)
             case .none:
                 defaults.removeObject(forKey: colorSchemeKey)
-            case .some(_):
-                // Handle any future cases
+            @unknown default:
+                // Handle any future cases by defaulting to system preference
                 defaults.removeObject(forKey: colorSchemeKey)
+                print("Warning: Unknown ColorScheme value encountered")
             }
         }
     }

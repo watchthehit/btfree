@@ -237,7 +237,19 @@ TextField("Amount", text: $amount)
 - UserDefaults for app preferences
 
 ### Core Data Model
-Located in `Sources/BetFree/Core/Data/`
+Located in `Sources/BetFree/Core/Data/Resources/CoreData/BetFreeModel.xcdatamodeld`
+
+#### Model Registration
+The Core Data model is registered using a standardized approach:
+```swift
+// Initialize Core Data stack with explicit model loading
+guard let modelURL = Bundle.module.url(forResource: "BetFreeModel", withExtension: "momd"),
+      let model = NSManagedObjectModel(contentsOf: modelURL) else {
+    fatalError("Failed to load Core Data model")
+}
+
+let container = NSPersistentContainer(name: "BetFreeModel", managedObjectModel: model)
+```
 
 #### Entities
 1. UserProfile (`UserProfileEntity`)
@@ -264,11 +276,73 @@ Located in `Sources/BetFree/Core/Data/`
    - Required Fields:
      - `id`: UUID
      - `intensity`: Int32
-     - `duration`: Int32
      - `timestamp`: Date
+     - `duration`: Int32
    - Optional Fields:
      - `triggers`: String?
      - `strategies`: String?
+
+#### Core Data Best Practices
+1. **Model Loading**
+   ```swift
+   // Always load model explicitly from bundle
+   guard let modelURL = Bundle.module.url(forResource: "BetFreeModel", withExtension: "momd"),
+         let model = NSManagedObjectModel(contentsOf: modelURL) else {
+       fatalError("Failed to load Core Data model")
+   }
+   ```
+
+2. **Error Handling**
+   ```swift
+   // Proper error handling with descriptive messages
+   container.loadPersistentStores { description, error in
+       if let error = error {
+           print("Core Data failed to load: \(error.localizedDescription)")
+           print("Store description: \(description)")
+           fatalError(error.localizedDescription)
+       }
+   }
+   ```
+
+3. **Context Configuration**
+   ```swift
+   // Standard context configuration
+   container.viewContext.automaticallyMergesChangesFromParent = true
+   container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+   ```
+
+4. **Entity Creation**
+   ```swift
+   // Safe entity creation with proper context
+   let entity = CravingEntity(context: context)
+   entity.id = UUID()  // Always set required fields
+   try context.save()  // Save after modifications
+   ```
+
+5. **Type Consistency**
+   ```swift
+   // Consistent type handling
+   public var duration: Int32  // Core Data storage
+   var durationInterval: TimeInterval {  // Public interface
+       get { TimeInterval(duration) }
+       set { duration = Int32(newValue) }
+   }
+   ```
+
+#### Core Data Managers
+The app uses two data managers that conform to `BetFreeDataManager` protocol:
+
+1. `CoreDataManager` - Production implementation
+   - Handles persistent storage
+   - Thread-safe with @MainActor
+   - Proper error handling
+   - Consistent type conversion
+
+2. `MockCDManager` - Testing implementation
+   - In-memory store
+   - Mirrors production functionality
+   - Supports test isolation
+   - Thread-safe with @MainActor
 
 ### Data Management
 

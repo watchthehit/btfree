@@ -37,7 +37,7 @@ let package = Package(
             ],
             resources: [
                 .process("Resources"),
-                .process("Core/Data/BetFree.xcdatamodeld")
+                .process("Core/Data/Resources/CoreData/BetFreeModel.xcdatamodeld")
             ]
         ),
         .testTarget(

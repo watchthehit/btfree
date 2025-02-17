@@ -1,6 +1,7 @@
 import SwiftUI
 import ComposableArchitecture
 import BetFreeModels
+import BetFreeUI
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -166,7 +167,7 @@ public struct DashboardView: View {
     
     private func loadTransactions() {
         let manager = DataManagerFactory.createDataManager()
-        transactions = manager.getAllTransactions().map(\.transaction)
+        transactions = manager.getAllTransactions()
     }
 }
 
@@ -303,16 +304,14 @@ struct TransactionRow: View {
     }
 }
 
+struct DashboardView_Previews: PreviewProvider {
+    static var previews: some View {
+        DashboardView()
+            .environmentObject(AppState.preview)
+    }
+}
+
 #Preview {
     DashboardView()
         .environmentObject(AppState.preview)
-}
-
-#if canImport(UIKit)
-enum HapticFeedback {
-    static func fireAndForget() {
-        let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.impactOccurred()
-    }
-}
-#endif 
+} 

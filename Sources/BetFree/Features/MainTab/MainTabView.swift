@@ -83,6 +83,8 @@ private struct ColorSchemeButton: View {
             return "moon.fill"
         case .light:
             return "sun.max.fill"
+        @unknown default:
+            return "circle.lefthalf.filled"
         }
     }
 }

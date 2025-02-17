@@ -12,7 +12,7 @@ public struct ProgressTrackingView: View {
     
     public var body: some View {
         NavigationView {
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
                     // Timeframe Picker
                     Picker("Timeframe", selection: $selectedTimeframe) {
@@ -107,7 +107,9 @@ public struct ProgressTrackingView: View {
                     .opacity(isAnimated ? 1 : 0)
                     .offset(y: isAnimated ? 0 : 20)
                 }
-                .padding(.vertical)
+                .padding(.horizontal)
+                .padding(.vertical, 24)
+                .frame(maxWidth: .infinity)
             }
             .navigationTitle("Progress")
             .onAppear {

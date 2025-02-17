@@ -47,7 +47,7 @@ A comprehensive iOS application focused on gambling addiction recovery through p
 See [Technical Documentation](docs/TECHNICAL.md) for detailed development information.
 
 ### Core Data Model
-The app uses Core Data for persistent storage with two main entities:
+The app uses Core Data for persistent storage with three main entities:
 
 #### UserProfile Entity
 - `id`: UUID (required)
@@ -64,6 +64,14 @@ The app uses Core Data for persistent storage with two main entities:
 - `date`: Date (required)
 - `note`: String (optional)
 - `category`: String (optional)
+
+#### Craving Entity
+- `id`: UUID (required)
+- `intensity`: Int32 (required)
+- `triggers`: String (optional)
+- `strategies`: String (optional)
+- `timestamp`: Date (required)
+- `duration`: Int32 (required)
 
 ### Testing Onboarding
 To force the onboarding flow for testing:
@@ -95,7 +103,15 @@ UserDefaults.standard.set(false, forKey: "isOnboarded")
 
 ## Version History
 
-### v0.1.7 (Current)
+### v0.1.8 (Current)
+- Fixed Core Data model registration and initialization
+- Standardized Core Data model naming across app
+- Improved Core Data error handling and logging
+- Enhanced model bundle loading mechanism
+- Fixed CravingEntity persistence issues
+- Updated technical documentation
+
+### v0.1.7
 - Fixed type consistency in Craving duration handling
 - Standardized UserProfile parameter ordering
 - Enhanced MockCDManager implementation

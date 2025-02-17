@@ -7,11 +7,18 @@ public final class CoreDataManager: BetFreeDataManager {
     public static let shared = CoreDataManager()
     
     private lazy var persistentContainer: NSPersistentContainer = {
-        let container = NSPersistentContainer(name: "BetFreeModel")
+        // Use the model from the module bundle
+        guard let modelURL = Bundle.module.url(forResource: "BetFreeModel", withExtension: "momd"),
+              let model = NSManagedObjectModel(contentsOf: modelURL) else {
+            fatalError("Failed to load Core Data model")
+        }
+        
+        let container = NSPersistentContainer(name: "BetFreeModel", managedObjectModel: model)
         
         container.loadPersistentStores { description, error in
             if let error = error {
                 print("Unable to load persistent stores: \(error)")
+                fatalError("Failed to load Core Data store: \(error)")
             }
         }
         
