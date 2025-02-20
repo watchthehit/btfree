@@ -151,6 +151,7 @@ public class AppState: ObservableObject {
         return state
     }()
     
+    @MainActor
     public init(dataManager: BetFreeDataManager = MockCDManager.shared) {
         self.dataManager = dataManager
         

@@ -8,6 +8,7 @@ public struct BetFreeRootView: View {
     @State private var isLoading = true
     @State private var error: Error?
     
+    @MainActor
     public init(dataManager: BetFreeDataManager = MockCDManager.shared) {
         _appState = StateObject(wrappedValue: AppState(dataManager: dataManager))
     }

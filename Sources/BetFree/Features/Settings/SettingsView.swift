@@ -2,10 +2,13 @@ import SwiftUI
 import BetFreeUI
 import BetFreeModels
 
+@MainActor
 public struct SettingsView: View {
     @EnvironmentObject private var appState: AppState
     @State private var showingLogoutAlert = false
     @State private var showingResetAlert = false
+    @State private var showingErrorAlert = false
+    @State private var errorMessage = ""
     @State private var dailyLimit = ""
     
     public init() {}
@@ -99,7 +102,9 @@ public struct SettingsView: View {
         .alert("Log Out", isPresented: $showingLogoutAlert) {
             Button("Cancel", role: .cancel) {}
             Button("Log Out", role: .destructive) {
-                appState.logout()
+                Task {
+                    await appState.logout()
+                }
             }
         } message: {
             Text("Are you sure you want to log out?")
@@ -107,10 +112,17 @@ public struct SettingsView: View {
         .alert("Reset Data", isPresented: $showingResetAlert) {
             Button("Cancel", role: .cancel) {}
             Button("Reset", role: .destructive) {
-                appState.logout()
+                Task {
+                    await appState.logout()
+                }
             }
         } message: {
             Text("This will permanently delete all your data. This action cannot be undone.")
+        }
+        .alert("Error", isPresented: $showingErrorAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
         }
     }
 }
