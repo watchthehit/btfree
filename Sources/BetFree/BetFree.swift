@@ -9,7 +9,8 @@ public struct BetFreeRootView: View {
     @State private var error: Error?
     
     @MainActor
-    public init(dataManager: BetFreeDataManager = MockCDManager.shared) {
+    public init(dataManager: BetFreeDataManager = CoreDataManager.shared) {
+        print("🔄 Initializing BetFreeRootView")
         _appState = StateObject(wrappedValue: AppState(dataManager: dataManager))
     }
     
@@ -30,9 +31,20 @@ public struct BetFreeRootView: View {
         .animation(.easeInOut, value: appState.isOnboarded)
         .task {
             do {
-                try await Task.sleep(nanoseconds: 500_000_000) // 0.5 second minimum loading time
+                print("🔄 Starting app initialization")
+                // Wait for Core Data to load
+                if let coreDataManager = appState.dataManager as? CoreDataManager,
+                   let persistenceController = coreDataManager.persistenceController {
+                    try await persistenceController.waitForLoad()
+                }
+                
+                // Minimum loading time for UX
+                try await Task.sleep(nanoseconds: 500_000_000)
+                
+                print("✅ App initialization complete")
                 isLoading = false
             } catch {
+                print("❌ Error during initialization: \(error)")
                 self.error = error
             }
         }
@@ -55,6 +67,7 @@ private struct LoadingView: View {
 
 private struct ErrorView: View {
     let error: Error
+    @State private var showingDetails = false
     
     var body: some View {
         VStack(spacing: 20) {
@@ -71,6 +84,34 @@ private struct ErrorView: View {
                 .foregroundColor(BFDesignSystem.Colors.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
+            
+            Button(action: { showingDetails.toggle() }) {
+                Label(showingDetails ? "Hide Details" : "Show Details", 
+                      systemImage: showingDetails ? "chevron.up" : "chevron.down")
+            }
+            .padding()
+            
+            if showingDetails {
+                ScrollView {
+                    Text(String(describing: error))
+                        .font(.system(.caption, design: .monospaced))
+                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                        .padding()
+                        .background(Color.black.opacity(0.05))
+                        .cornerRadius(8)
+                }
+                .frame(maxHeight: 200)
+                .padding()
+            }
+            
+            Button(action: {
+                // Force quit the app to allow a clean restart
+                exit(1)
+            }) {
+                Label("Quit App", systemImage: "power")
+                    .foregroundColor(BFDesignSystem.Colors.error)
+            }
+            .padding()
         }
     }
 }

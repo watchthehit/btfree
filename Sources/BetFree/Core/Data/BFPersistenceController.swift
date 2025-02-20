@@ -32,23 +32,24 @@ public class BFPersistenceController {
     
     public let container: NSPersistentContainer
     private var isLoaded = false
+    private var loadTask: Task<Void, Error>?
     
     public init(inMemory: Bool = false) {
-        print("Initializing BFPersistenceController")
+        print("🔄 Initializing BFPersistenceController")
         
         // Use the programmatic model
         let model = CoreDataModel.shared.createModel()
-        print("Core Data model created")
+        print("✅ Core Data model created")
         
         container = NSPersistentContainer(name: "BetFree", managedObjectModel: model)
         
         if inMemory {
-            print("Using in-memory store")
+            print("📱 Using in-memory store")
             container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
         } else {
-            print("Using persistent store")
+            print("💾 Using persistent store")
             if let storeURL = container.persistentStoreDescriptions.first?.url {
-                print("Store URL: \(storeURL)")
+                print("📍 Store URL: \(storeURL)")
             }
         }
         
@@ -57,26 +58,29 @@ public class BFPersistenceController {
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         
         // Start loading stores
-        Task {
+        loadTask = Task { [weak self] in
+            guard let self = self else { return }
             do {
-                try await loadPersistentStores()
-                print("Core Data configuration complete")
+                try await self.loadPersistentStores()
+                print("✅ Core Data configuration complete")
             } catch {
-                print("Fatal error loading Core Data store: \(error.localizedDescription)")
-                fatalError("Failed to load Core Data store: \(error.localizedDescription)")
+                print("❌ Fatal error loading Core Data store: \(error.localizedDescription)")
+                print("Stack trace: \(Thread.callStackSymbols.joined(separator: "\n"))")
+                throw error
             }
         }
     }
     
     private func loadPersistentStores() async throws {
+        print("🔄 Starting to load persistent stores")
         return try await withCheckedThrowingContinuation { continuation in
             container.loadPersistentStores { description, error in
                 if let error = error {
-                    print("Core Data failed to load: \(error.localizedDescription)")
-                    print("Store description: \(description)")
+                    print("❌ Core Data failed to load: \(error.localizedDescription)")
+                    print("📝 Store description: \(description)")
                     continuation.resume(throwing: BFPersistenceError.failedToLoadStore(error))
                 } else {
-                    print("Core Data store loaded successfully")
+                    print("✅ Core Data store loaded successfully")
                     self.isLoaded = true
                     continuation.resume()
                 }
@@ -84,29 +88,38 @@ public class BFPersistenceController {
         }
     }
     
+    public func waitForLoad() async throws {
+        if !isLoaded {
+            print("⏳ Waiting for Core Data to load...")
+            try await loadTask?.value
+        }
+    }
+    
     public func save() {
         let context = container.viewContext
         
         guard isLoaded else {
-            print("Warning: Attempting to save before Core Data is fully loaded")
+            print("⚠️ Warning: Attempting to save before Core Data is fully loaded")
             return
         }
         
         if context.hasChanges {
             do {
                 try context.save()
-                print("Core Data context saved successfully")
+                print("✅ Core Data context saved successfully")
             } catch {
-                print("Error saving Core Data context: \(error)")
+                print("❌ Error saving Core Data context: \(error)")
             }
         }
     }
     
     public func reset() async throws {
+        print("🔄 Starting Core Data reset")
         let coordinator = container.persistentStoreCoordinator
         
         // Remove all existing stores
         try coordinator.persistentStores.forEach { store in
+            print("🗑️ Removing store at: \(store.url?.absoluteString ?? "unknown")")
             try coordinator.remove(store)
         }
         
@@ -118,6 +131,7 @@ public class BFPersistenceController {
         
         // Reset the view context
         container.viewContext.reset()
+        print("✅ Core Data reset complete")
     }
 }
 

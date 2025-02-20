@@ -14,37 +14,19 @@ public final class CoreDataManager: BetFreeDataManager {
     
     public static var modelInstance: NSManagedObjectModel?
     
-    private lazy var persistentContainer: NSPersistentContainer = {
-        let modelName = "BetFree"
-        
-        // Create the model programmatically
-        let model = CoreDataModel.shared.createModel()
-        CoreDataManager.modelInstance = model
-        
-        let container = NSPersistentContainer(name: modelName, managedObjectModel: model)
-        container.loadPersistentStores { description, error in
-            if let error = error {
-                fatalError("Failed to load Core Data stack: \(error)")
-            }
-        }
-        
-        container.viewContext.automaticallyMergesChangesFromParent = true
-        container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
-        
-        return container
-    }()
+    public let persistenceController: BFPersistenceController
+    
+    public var persistentContainer: NSPersistentContainer {
+        persistenceController.container
+    }
     
     public var context: NSManagedObjectContext {
         persistentContainer.viewContext
     }
     
-    private var container: NSPersistentContainer {
-        persistentContainer
-    }
-    
     public init() {
-        // Force load the container on init to catch any issues early
-        _ = persistentContainer
+        print("🔄 Initializing CoreDataManager")
+        self.persistenceController = BFPersistenceController()
     }
     
     private func getCurrentUserEntity() -> UserProfileEntity? {
@@ -66,7 +48,7 @@ public final class CoreDataManager: BetFreeDataManager {
     }
     
     public func createOrUpdateUser(name: String, email: String?, dailyLimit: Double) throws {
-        let context = container.viewContext
+        let context = persistentContainer.viewContext
         
         let fetchRequest = NSFetchRequest<UserProfileEntity>(entityName: "UserProfileEntity")
         fetchRequest.predicate = NSPredicate(format: "idString == %@", name)
@@ -92,7 +74,7 @@ public final class CoreDataManager: BetFreeDataManager {
                 try context.save()
             }
         } catch {
-            print("Error creating/updating user: \(error)")
+            print("❌ Error creating/updating user: \(error)")
             throw BFDataError.entityCreationFailed
         }
     }
@@ -220,6 +202,7 @@ public final class CoreDataManager: BetFreeDataManager {
     
     @MainActor
     public func reset() async {
+        print("🔄 Starting CoreDataManager reset")
         do {
             let context = persistentContainer.viewContext
             
@@ -236,9 +219,10 @@ public final class CoreDataManager: BetFreeDataManager {
             }
             
             try context.save()
+            print("✅ CoreDataManager reset complete")
             
         } catch {
-            print("Error resetting Core Data: \(error)")
+            print("❌ Error resetting Core Data: \(error)")
         }
     }
 }

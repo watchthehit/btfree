@@ -6,7 +6,7 @@ import BetFreeModels
 
 @MainActor
 public class AppState: ObservableObject {
-    private let dataManager: BetFreeDataManager
+    public let dataManager: BetFreeDataManager
     
     private enum BFColorScheme {
         case system
