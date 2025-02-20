@@ -219,7 +219,7 @@ public final class CoreDataManager: BetFreeDataManager {
     }
     
     @MainActor
-    public func reset() {
+    public func reset() async {
         do {
             let context = persistentContainer.viewContext
             

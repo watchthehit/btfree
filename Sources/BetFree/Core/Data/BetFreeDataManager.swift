@@ -22,5 +22,5 @@ public protocol BetFreeDataManager {
     func deleteCraving(id: UUID) async throws
     
     // Data management
-    func reset()
+    func reset() async
 }

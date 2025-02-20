@@ -151,7 +151,7 @@ public class AppState: ObservableObject {
         return state
     }()
     
-    public init(dataManager: BetFreeDataManager) {
+    public init(dataManager: BetFreeDataManager = MockCDManager.shared) {
         self.dataManager = dataManager
         
         // Load saved settings
@@ -170,21 +170,27 @@ public class AppState: ObservableObject {
             self.colorScheme = scheme == "dark" ? .dark : .light
         }
         
-        // Load user profile from Core Data
-        if let user = dataManager.getCurrentUser() {
-            let name = user.name
-            self.username = name
-            self.currentStreak = Int(user.streak)
-            self.totalSavings = user.totalSavings
-            self.dailyLimit = user.dailyLimit
-        }
-        
         // Load subscription status
         if let statusData = defaults.data(forKey: subscriptionStatusKey),
            let status = try? JSONDecoder().decode(BFUserState.self, from: statusData) {
             self.subscriptionStatus = status
         } else {
             self.subscriptionStatus = .expired
+        }
+        
+        // Load user profile from Core Data
+        Task {
+            await loadUserProfile()
+        }
+    }
+    
+    private func loadUserProfile() async {
+        if let user = dataManager.getCurrentUser() {
+            let name = user.name
+            self.username = name
+            self.currentStreak = Int(user.streak)
+            self.totalSavings = user.totalSavings
+            self.dailyLimit = user.dailyLimit
         }
     }
     
@@ -290,9 +296,9 @@ public class AppState: ObservableObject {
         isOnboarded = true
     }
     
-    public func logout() {
+    public func logout() async {
         // First reset Core Data
-        dataManager.reset()
+        await dataManager.reset()
         
         // Then reset app state
         currentStreak = 0

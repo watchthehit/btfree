@@ -150,7 +150,8 @@ public class MockCDManager: BetFreeDataManager {
         }
     }
     
-    public func reset() {
+    @MainActor
+    public func reset() async {
         userProfile = nil
         transactions.removeAll()
         cravings.removeAll()

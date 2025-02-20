@@ -2,8 +2,10 @@ import CoreData
 
 public enum BFPersistenceError: Error {
     case failedToLoadStore(Error)
+    case modelCreationFailed
 }
 
+@MainActor
 public class BFPersistenceController {
     public static let shared = BFPersistenceController()
     
@@ -29,13 +31,14 @@ public class BFPersistenceController {
     }()
     
     public let container: NSPersistentContainer
-    private var loadError: Error?
+    private var isLoaded = false
     
     public init(inMemory: Bool = false) {
         print("Initializing BFPersistenceController")
         
         // Use the programmatic model
         let model = CoreDataModel.shared.createModel()
+        print("Core Data model created")
         
         container = NSPersistentContainer(name: "BetFree", managedObjectModel: model)
         
@@ -49,43 +52,72 @@ public class BFPersistenceController {
             }
         }
         
-        var loadError: Error?
-        let group = DispatchGroup()
-        group.enter()
-        
-        container.loadPersistentStores { description, error in
-            defer { group.leave() }
-            if let error = error {
-                print(" Core Data failed to load: \(error.localizedDescription)")
-                print("Store description: \(description)")
-                loadError = error
-            } else {
-                print(" Core Data store loaded successfully")
-            }
-        }
-        
-        group.wait()
-        
-        if let error = loadError {
-            print("Fatal error: Failed to load Core Data store")
-            fatalError(error.localizedDescription)
-        }
-        
+        // Configure automatic merging
         container.viewContext.automaticallyMergesChangesFromParent = true
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
-        print("Core Data configuration complete")
+        
+        // Start loading stores
+        Task {
+            do {
+                try await loadPersistentStores()
+                print("Core Data configuration complete")
+            } catch {
+                print("Fatal error loading Core Data store: \(error.localizedDescription)")
+                fatalError("Failed to load Core Data store: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    private func loadPersistentStores() async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            container.loadPersistentStores { description, error in
+                if let error = error {
+                    print("Core Data failed to load: \(error.localizedDescription)")
+                    print("Store description: \(description)")
+                    continuation.resume(throwing: BFPersistenceError.failedToLoadStore(error))
+                } else {
+                    print("Core Data store loaded successfully")
+                    self.isLoaded = true
+                    continuation.resume()
+                }
+            }
+        }
     }
     
     public func save() {
         let context = container.viewContext
         
+        guard isLoaded else {
+            print("Warning: Attempting to save before Core Data is fully loaded")
+            return
+        }
+        
         if context.hasChanges {
             do {
                 try context.save()
-                print(" Core Data context saved successfully")
+                print("Core Data context saved successfully")
             } catch {
-                print(" Error saving Core Data context: \(error)")
+                print("Error saving Core Data context: \(error)")
             }
         }
     }
+    
+    public func reset() async throws {
+        let coordinator = container.persistentStoreCoordinator
+        
+        // Remove all existing stores
+        try coordinator.persistentStores.forEach { store in
+            try coordinator.remove(store)
+        }
+        
+        // Reset the loaded state
+        isLoaded = false
+        
+        // Load stores again
+        try await loadPersistentStores()
+        
+        // Reset the view context
+        container.viewContext.reset()
+    }
 }
+

@@ -2,20 +2,75 @@ import SwiftUI
 import ComposableArchitecture
 import BetFreeUI
 
+@MainActor
 public struct BetFreeRootView: View {
-    @EnvironmentObject var appState: AppState
+    @StateObject private var appState: AppState
+    @State private var isLoading = true
+    @State private var error: Error?
     
-    public init() {}
+    public init(dataManager: BetFreeDataManager = MockCDManager.shared) {
+        _appState = StateObject(wrappedValue: AppState(dataManager: dataManager))
+    }
     
     public var body: some View {
         Group {
-            if !appState.isOnboarded {
+            if isLoading {
+                LoadingView()
+            } else if let error = error {
+                ErrorView(error: error)
+            } else if !appState.isOnboarded {
                 OnboardingView()
+                    .environmentObject(appState)
             } else {
                 MainTabView()
+                    .environmentObject(appState)
             }
         }
         .animation(.easeInOut, value: appState.isOnboarded)
+        .task {
+            do {
+                try await Task.sleep(nanoseconds: 500_000_000) // 0.5 second minimum loading time
+                isLoading = false
+            } catch {
+                self.error = error
+            }
+        }
+    }
+}
+
+private struct LoadingView: View {
+    var body: some View {
+        VStack(spacing: 20) {
+            SwiftUI.ProgressView()
+                .progressViewStyle(CircularProgressViewStyle())
+                .scaleEffect(1.5)
+            
+            Text("Loading...")
+                .font(BFDesignSystem.Typography.titleMedium)
+                .foregroundColor(BFDesignSystem.Colors.textSecondary)
+        }
+    }
+}
+
+private struct ErrorView: View {
+    let error: Error
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 48))
+                .foregroundColor(BFDesignSystem.Colors.error)
+            
+            Text("Failed to Initialize")
+                .font(BFDesignSystem.Typography.titleLarge)
+                .foregroundColor(BFDesignSystem.Colors.textPrimary)
+            
+            Text(error.localizedDescription)
+                .font(BFDesignSystem.Typography.bodyMedium)
+                .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+        }
     }
 }
 
@@ -25,7 +80,6 @@ public struct BetFreePreview: View {
     
     public var body: some View {
         BetFreeRootView()
-            .environmentObject(appState)
     }
 }
 
@@ -75,37 +129,6 @@ public struct AppFeature: Reducer {
     public init() {}
 }
 
-// Renamed to avoid collision with the app's main struct
-struct BetFreeLibraryPreviewApp: App {
-    @State private var appState: AppState?
-    @State private var isLoading = true
-    
-    public var body: some Scene {
-        WindowGroup {
-            Group {
-                if let appState = appState {
-                    if !appState.isOnboarded {
-                        OnboardingView()
-                            .environmentObject(appState)
-                    } else {
-                        MainTabView()
-                            .environmentObject(appState)
-                    }
-                } else if isLoading {
-                    SwiftUI.ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle())
-                } else {
-                    Text("Failed to initialize app state")
-                }
-            }
-            .task {
-                self.appState = AppState.preview
-                isLoading = false
-            }
-        }
-    }
-}
-
 @MainActor
 public struct BetFree {
     public static func initialize() {
@@ -120,5 +143,5 @@ public var previewContent: some View {
 
 @MainActor
 public var content: some View {
-    BetFreePreview()
+    BetFreeRootView()
 }
