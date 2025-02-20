@@ -1,1 +1,21 @@
-.build/ .swiftpm/ *.xcodeproj *.xcworkspace/ .DS_Store /.build /Packages /*.xcodeproj xcuserdata/ DerivedData/ .swiftpm/xcode/package.xcworkspace .swiftpm/xcode/xcuserdata/
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
+# Xcode
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+DerivedData/
+.DS_Store
+
+# Build artifacts
+build/
+*.o
+*.LinkFileList
+*.hmap
+
+# User-specific files
+*.xcuserstate
+UserInterfaceState.xcuserstate

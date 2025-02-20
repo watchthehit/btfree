@@ -173,7 +173,7 @@ public class AppState: ObservableObject {
         // Load user profile from Core Data
         if let user = dataManager.getCurrentUser() {
             let name = user.name
-            self.username = name ?? ""
+            self.username = name
             self.currentStreak = Int(user.streak)
             self.totalSavings = user.totalSavings
             self.dailyLimit = user.dailyLimit

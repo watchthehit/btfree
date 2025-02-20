@@ -23,12 +23,14 @@ public enum BFDesignSystem {
         public static let border = Color(UIColor.separator)
         public static let background = Color(UIColor.systemBackground)
         public static let secondaryBackground = Color(UIColor.secondarySystemBackground)
+        public static let cardBackground = Color(UIColor.systemBackground)
         #else
         public static let textPrimary = Color.primary
         public static let textSecondary = Color.secondary
         public static let border = Color.gray.opacity(0.2)
-        public static let background = Color(NSColor.windowBackgroundColor)
-        public static let secondaryBackground = Color(NSColor.controlBackgroundColor)
+        public static let background = Color.white
+        public static let secondaryBackground = Color.white.opacity(0.8)
+        public static let cardBackground = Color.white
         #endif
         
         // Gradients
@@ -39,6 +41,33 @@ public enum BFDesignSystem {
             ]),
             startPoint: .topLeading,
             endPoint: .bottomTrailing
+        )
+        
+        public static let warmGradient = LinearGradient(
+            colors: [
+                Color.orange,
+                Color.red.opacity(0.8)
+            ],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+        
+        public static let calmingGradient = LinearGradient(
+            colors: [
+                Color.blue.opacity(0.8),
+                Color.purple.opacity(0.8)
+            ],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+        
+        public static let mindfulGradient = LinearGradient(
+            colors: [
+                Color.green,
+                Color.blue
+            ],
+            startPoint: .leading,
+            endPoint: .trailing
         )
         
         public static let primary = Color(red: 0.4, green: 0.2, blue: 1.0)

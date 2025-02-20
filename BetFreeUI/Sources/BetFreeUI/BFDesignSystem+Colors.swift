@@ -27,7 +27,7 @@ public extension BFDesignSystem {
         public static let warmGradient = LinearGradient(
             colors: [
                 Color.orange,
-                Color.red
+                Color.red.opacity(0.8)
             ],
             startPoint: .leading,
             endPoint: .trailing
@@ -35,8 +35,8 @@ public extension BFDesignSystem {
         
         public static let calmingGradient = LinearGradient(
             colors: [
-                Color.blue,
-                Color.purple
+                Color.blue.opacity(0.8),
+                Color.purple.opacity(0.8)
             ],
             startPoint: .leading,
             endPoint: .trailing

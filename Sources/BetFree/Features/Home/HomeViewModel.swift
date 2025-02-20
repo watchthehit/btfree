@@ -84,7 +84,7 @@ final class HomeViewModel: ObservableObject {
     
     func performDailyCheckIn() async throws {
         print("Performing daily check-in...")
-        try await dataManager.updateUserStreak()
+        try dataManager.updateUserStreak()
         await MainActor.run {
             defaults.set(Date(), forKey: lastCheckInKey)
             
