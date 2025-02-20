@@ -8,6 +8,29 @@ import BetFreeModels
 public class AppState: ObservableObject {
     private let dataManager: BetFreeDataManager
     
+    private enum BFColorScheme {
+        case system
+        case light
+        case dark
+        
+        var colorScheme: ColorScheme? {
+            switch self {
+            case .system: return nil
+            case .light: return .light
+            case .dark: return .dark
+            }
+        }
+        
+        init(colorScheme: ColorScheme?) {
+            switch colorScheme {
+            case .none: self = .system
+            case .light: self = .light
+            case .dark: self = .dark
+            case .some(_): self = .system // Handle any future cases
+            }
+        }
+    }
+    
     @Published public var username: String {
         didSet { 
             try? dataManager.createOrUpdateUser(name: username, email: nil, dailyLimit: dailyLimit)
@@ -85,17 +108,17 @@ public class AppState: ObservableObject {
     
     @Published public var colorScheme: ColorScheme? = nil {
         didSet {
-            switch colorScheme {
-            case .dark:
-                defaults.set("dark", forKey: colorSchemeKey)
-            case .light:
-                defaults.set("light", forKey: colorSchemeKey)
-            case .none:
+            if let scheme = colorScheme {
+                switch scheme {
+                case .dark:
+                    defaults.set("dark", forKey: colorSchemeKey)
+                case .light:
+                    defaults.set("light", forKey: colorSchemeKey)
+                default:
+                    defaults.removeObject(forKey: colorSchemeKey)
+                }
+            } else {
                 defaults.removeObject(forKey: colorSchemeKey)
-            @unknown default:
-                // Handle any future cases by defaulting to system preference
-                defaults.removeObject(forKey: colorSchemeKey)
-                print("Warning: Unknown ColorScheme value encountered")
             }
         }
     }
@@ -149,7 +172,8 @@ public class AppState: ObservableObject {
         
         // Load user profile from Core Data
         if let user = dataManager.getCurrentUser() {
-            self.username = user.name ?? ""
+            let name = user.name
+            self.username = name ?? ""
             self.currentStreak = Int(user.streak)
             self.totalSavings = user.totalSavings
             self.dailyLimit = user.dailyLimit
@@ -318,8 +342,9 @@ public class AppState: ObservableObject {
     
     public func toggleColorScheme() {
         withAnimation {
-            switch colorScheme {
-            case .none:
+            let currentScheme = BFColorScheme(colorScheme: colorScheme)
+            switch currentScheme {
+            case .system:
                 colorScheme = .dark
             case .dark:
                 colorScheme = .light

@@ -66,7 +66,7 @@ public struct OnboardingView: View {
                         featuresStep
                             .tag(OnboardingStep.features)
                     }
-                    .tabViewStyle(.page(indexDisplayMode: .never))
+                    .tabViewStyle(.automatic)
                     .animation(.easeInOut, value: viewModel.currentStep)
                     
                     // Navigation buttons
@@ -247,7 +247,6 @@ public struct OnboardingView: View {
                             TextField("", text: $viewModel.name)
                                 .textFieldStyle(OnboardingTextFieldStyle())
                                 .textContentType(.name)
-                                .autocapitalization(.words)
                         }
                         
                         VStack(alignment: .leading, spacing: 8) {
@@ -942,10 +941,10 @@ final class OnboardingViewModel: ObservableObject {
     @Published var dailyLimitDouble: Double = 100.0
     @Published var selectedPlan: SubscriptionPlan = .monthly
     
-    private let dataManager: MockCDManager
+    private let dataManager: BetFreeDataManager
     private weak var appState: AppState?
     
-    init(dataManager: MockCDManager) {
+    init(dataManager: BetFreeDataManager) {
         self.dataManager = dataManager
     }
     

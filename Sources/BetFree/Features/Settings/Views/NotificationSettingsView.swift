@@ -1,7 +1,12 @@
 import SwiftUI
 import UserNotifications
+
 #if canImport(UIKit)
 import UIKit
+#endif
+
+#if canImport(AppKit)
+import AppKit
 #endif
 
 public struct NotificationSettingsView: View {
@@ -102,8 +107,8 @@ public struct NotificationSettingsView: View {
         }
         .alert("Enable Notifications", isPresented: $showingPermissionAlert) {
             Button("Settings") {
-                if let url = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(url)
+                if let url = URL(string: "x-apple.systempreferences:com.apple.preference.notifications") {
+                    NSWorkspace.shared.open(url)
                 }
             }
             Button("Cancel", role: .cancel) {}
@@ -159,13 +164,14 @@ public struct NotificationSettingsView: View {
     }
     
     private func openSystemSettings() {
-        #if canImport(UIKit)
-        guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
-            return
-        }
-        
-        if UIApplication.shared.canOpenURL(settingsUrl) {
+        #if os(iOS)
+        if let settingsUrl = URL(string: UIApplication.openSettingsURLString),
+           UIApplication.shared.canOpenURL(settingsUrl) {
             UIApplication.shared.open(settingsUrl)
+        }
+        #elseif os(macOS)
+        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.notifications") {
+            NSWorkspace.shared.open(url)
         }
         #endif
     }

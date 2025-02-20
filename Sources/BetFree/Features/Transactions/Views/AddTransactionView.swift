@@ -38,7 +38,6 @@ public struct AddTransactionView: View {
                             .font(BFDesignSystem.Typography.labelMedium)
                             .foregroundColor(BFDesignSystem.Colors.textSecondary)
                         TextField("Amount", text: $amount)
-                            .keyboardType(.decimalPad)
                     }
                 } header: {
                     Text("Transaction Details")
@@ -81,14 +80,13 @@ public struct AddTransactionView: View {
                 }
             }
             .navigationTitle("Add Transaction")
-            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
                     }
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         Task {
                             do {

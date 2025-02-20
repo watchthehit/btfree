@@ -10,8 +10,12 @@ public class BFStoreManager: ObservableObject {
     @Published private(set) var subscriptionStatus: BFUserState = .expired
     
     private var transactionListener: Task<Void, Error>?
+    private let subscriptionService: BFSubscriptionService
     
     private init() {
+        // Initialize subscription service
+        self.subscriptionService = BFSubscriptionServiceImpl()
+        
         // Start listening for transactions
         transactionListener = Task.detached {
             await self.listenForTransactions()
@@ -32,7 +36,7 @@ public class BFStoreManager: ObservableObject {
     
     public func loadProducts() async {
         do {
-            let products = try await Product.products(for: BFSubscriptionProduct.allCases.map(\.id))
+            let products = try await Product.products(for: BFConfig.subscriptionProducts.map(\.id))
             self.products = products.sorted { $0.price < $1.price }
         } catch {
             print("Failed to load products: \(error)")
@@ -47,6 +51,12 @@ public class BFStoreManager: ObservableObject {
         switch result {
         case .success(let verification):
             let transaction = try checkVerified(verification)
+            
+            // Validate with server before finishing
+            guard try await subscriptionService.validateSubscription(transaction) else {
+                throw BFStoreError.verification
+            }
+            
             await transaction.finish()
             await updateSubscriptionStatus()
             return transaction
@@ -61,6 +71,22 @@ public class BFStoreManager: ObservableObject {
     
     public func restorePurchases() async throws {
         try await AppStore.sync()
+        
+        // Get receipt for validation
+        if let receipt = await getReceipt() {
+            let response = try await subscriptionService.verifyReceipt(receipt)
+            if response.isValid {
+                // Update subscription status based on receipt validation
+                if let expirationDate = response.expirationDate {
+                    if response.isTrialPeriod {
+                        subscriptionStatus = .trial(endDate: expirationDate)
+                    } else {
+                        subscriptionStatus = .subscribed(expiryDate: expirationDate)
+                    }
+                }
+            }
+        }
+        
         await updateSubscriptionStatus()
     }
     
@@ -82,6 +108,17 @@ public class BFStoreManager: ObservableObject {
         // Get all transactions
         for await verification in StoreKit.Transaction.currentEntitlements {
             guard let transaction = try? checkVerified(verification) else {
+                continue
+            }
+            
+            // Validate with server
+            do {
+                let isValid = try await subscriptionService.validateSubscription(transaction)
+                if !isValid {
+                    continue
+                }
+            } catch {
+                print("Failed to validate subscription: \(error)")
                 continue
             }
             
@@ -143,9 +180,7 @@ public class BFStoreManager: ObservableObject {
     }
     
     private func verifyTrialEligibility(receipt: String) async throws -> Bool {
-        // TODO: Implement server-side validation
-        // For now, just check local UserDefaults
-        return !UserDefaults.standard.bool(forKey: "BF_HAS_HAD_TRIAL")
+        return try await subscriptionService.verifyTrialEligibility(receipt)
     }
     
     // MARK: - Helper Methods

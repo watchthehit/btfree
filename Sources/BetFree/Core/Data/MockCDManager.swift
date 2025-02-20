@@ -10,35 +10,23 @@ public class MockCDManager: BetFreeDataManager {
     private var transactions: [TransactionEntity] = []
     private var cravings: [CravingEntity] = []
     public var context: NSManagedObjectContext
+    private let container: NSPersistentContainer
     
     public init() {
-        // Create an in-memory store description
-        let storeDescription = NSPersistentStoreDescription()
-        storeDescription.type = NSInMemoryStoreType
-        
-        // Initialize the container with the model from the bundle
-        let container = NSPersistentContainer(name: "BetFreeModel")
-        container.persistentStoreDescriptions = [storeDescription]
-        
-        // Load the persistent store synchronously
-        container.loadPersistentStores { description, error in
+        let container = NSPersistentContainer(name: "BetFree")
+        container.loadPersistentStores { _, error in
             if let error = error {
-                print("Error loading persistent store: \(error)")
-                fatalError("Failed to load Core Data stack")
+                fatalError("Failed to load Core Data stack: \(error)")
             }
         }
-        
-        // Configure the context
+        self.container = container
         self.context = container.viewContext
-        self.context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
     }
-    
-    // MARK: - User Management
     
     public func getCurrentUser() -> UserProfile? {
         guard let entity = userProfile else { return nil }
         return UserProfile(
-            name: entity.name ?? "",
+            name: entity.name,
             email: entity.email,
             streak: Int(entity.streak),
             totalSavings: entity.totalSavings,
@@ -48,42 +36,32 @@ public class MockCDManager: BetFreeDataManager {
     }
     
     public func createOrUpdateUser(name: String, email: String?, dailyLimit: Double) throws {
-        do {
-            if let existingUser = userProfile {
-                existingUser.name = name
-                existingUser.email = email
-                existingUser.dailyLimit = dailyLimit
-                existingUser.idString = name
-            } else {
-                let user = UserProfileEntity(context: context)
-                user.idString = UUID().uuidString
-                user.name = name
-                user.email = email
-                user.dailyLimit = dailyLimit
-                user.streak = 0
-                user.totalSavings = 0
-                user.lastCheckIn = Date()
-                userProfile = user
-            }
-            
-            if context.hasChanges {
-                try context.save()
-            }
-        } catch {
-            context.rollback()
-            throw error
-        }
+        let user = UserProfileEntity(context: context)
+        user.idString = UUID().uuidString
+        user.name = name
+        user.email = email
+        user.dailyLimit = dailyLimit
+        user.streak = 0
+        user.totalSavings = 0
+        user.lastCheckIn = Date()
+        
+        userProfile = user
+        try context.save()
     }
     
-    // MARK: - Transaction Management
+    public func updateUserStreak() throws {
+        guard let user = userProfile else { return }
+        user.streak += 1
+        try context.save()
+    }
     
     public func getAllTransactions() -> [Transaction] {
         return transactions.map { entity in
             Transaction(
-                id: UUID(uuidString: entity.idString ?? "") ?? UUID(),
+                id: entity.id,
                 amount: entity.amount,
-                category: TransactionCategory(rawValue: entity.category ?? "") ?? .other,
-                date: entity.date ?? Date(),
+                category: TransactionCategory(rawValue: entity.category) ?? .other,
+                date: entity.date,
                 note: entity.note
             )
         }
@@ -91,104 +69,45 @@ public class MockCDManager: BetFreeDataManager {
     
     public func addTransaction(_ transaction: Transaction) throws {
         let entity = TransactionEntity(context: context)
-        entity.idString = transaction.id.uuidString
+        entity.id = transaction.id
         entity.amount = transaction.amount
         entity.category = transaction.category.rawValue
         entity.date = transaction.date
         entity.note = transaction.note
         
         transactions.append(entity)
-        
-        if let user = userProfile {
-            user.totalSavings += transaction.amount
-        }
-        
         try context.save()
     }
     
     public func deleteTransaction(_ transaction: Transaction) throws {
-        if let index = transactions.firstIndex(where: { $0.idString == transaction.id.uuidString }) {
-            let entity = transactions[index]
-            
-            if let user = userProfile {
-                user.totalSavings -= entity.amount
-            }
-            
-            context.delete(entity)
+        if let index = transactions.firstIndex(where: { $0.id == transaction.id }) {
+            context.delete(transactions[index])
             transactions.remove(at: index)
             try context.save()
         }
     }
     
-    public func updateUserStreak() throws {
-        guard let user = userProfile else { return }
-        
-        let calendar = Calendar.current
-        let now = Date()
-        
-        if let lastCheckIn = user.lastCheckIn {
-            let isNextDay = calendar.isDate(now, inSameDayAs: calendar.date(byAdding: .day, value: 1, to: lastCheckIn) ?? now)
-            let isToday = calendar.isDateInToday(lastCheckIn)
-            
-            if isNextDay {
-                user.streak += 1
-            } else if !isToday {
-                user.streak = 0
-            }
-        }
-        
-        user.lastCheckIn = now
-        try context.save()
-    }
-    
-    // MARK: - Craving Management
-    
     public func createCraving(intensity: Int, triggers: String, strategies: String, timestamp: Date, duration: Int) async throws -> Craving {
         let entity = CravingEntity(context: context)
         entity.id = UUID()
-        entity.intensity = Int32(intensity)
-        entity.triggers = triggers
-        entity.strategies = strategies
-        entity.timestamp = timestamp
+        entity.intensity = Int16(intensity)
+        entity.trigger = triggers
+        entity.date = timestamp
         entity.duration = Int32(duration)
+        entity.note = strategies
         
-        cravings.append(entity)
         try context.save()
         
         return Craving(
-            id: entity.id!,
+            id: entity.id,
             intensity: Int(entity.intensity),
-            trigger: triggers,
-            location: nil,
+            trigger: entity.trigger,
+            location: entity.location,
             emotion: nil,
-            duration: TimeInterval(duration),
-            copingStrategy: strategies,
+            duration: TimeInterval(entity.duration),
+            copingStrategy: entity.note,
             outcome: nil
         )
-    }
-    
-    public func getCravings() async throws -> [Craving] {
-        return cravings.map { entity in
-            Craving(
-                id: entity.id!,
-                intensity: Int(entity.intensity),
-                trigger: entity.triggers ?? "",
-                location: nil,
-                emotion: nil,
-                duration: TimeInterval(entity.duration),
-                copingStrategy: entity.strategies,
-                outcome: nil
-            )
-        }
-    }
-    
-    public func deleteCraving(id: UUID) async throws {
-        if let index = cravings.firstIndex(where: { $0.id == id }) {
-            let entity = cravings[index]
-            context.delete(entity)
-            cravings.remove(at: index)
-            try context.save()
-        }
     }
     
     public func reset() {

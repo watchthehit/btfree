@@ -53,7 +53,7 @@ public struct TransactionsView: View {
             }
             .navigationTitle("Transactions")
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .primaryAction) {
                     Button {
                         showingAddTransaction = true
                     } label: {

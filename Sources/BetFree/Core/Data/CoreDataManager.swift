@@ -2,29 +2,33 @@ import CoreData
 import Foundation
 import BetFreeModels
 
+public enum BFDataError: Error {
+    case entityCreationFailed
+    case modelLoadingFailed
+    case persistentStoreError
+}
+
 @MainActor
 public final class CoreDataManager: BetFreeDataManager {
     public static let shared = CoreDataManager()
     
+    public static var modelInstance: NSManagedObjectModel?
+    
     private lazy var persistentContainer: NSPersistentContainer = {
-        // Use the model from the module bundle
-        guard let modelURL = Bundle.module.url(forResource: "BetFreeModel", withExtension: "momd"),
-              let model = NSManagedObjectModel(contentsOf: modelURL) else {
-            fatalError("Failed to load Core Data model")
+        let modelName = "BetFree"
+        
+        // Use cached model if available
+        if let existingModel = CoreDataManager.modelInstance {
+            print("Using cached Core Data model")
+            return NSPersistentContainer(name: modelName, managedObjectModel: existingModel)
         }
         
-        let container = NSPersistentContainer(name: "BetFreeModel", managedObjectModel: model)
-        
+        let container = NSPersistentContainer(name: modelName)
         container.loadPersistentStores { description, error in
             if let error = error {
-                print("Unable to load persistent stores: \(error)")
-                fatalError("Failed to load Core Data store: \(error)")
+                fatalError("Failed to load Core Data stack: \(error)")
             }
         }
-        
-        container.viewContext.automaticallyMergesChangesFromParent = true
-        container.viewContext.mergePolicy = NSMergePolicy(merge: .mergeByPropertyObjectTrumpMergePolicyType)
-        
         return container
     }()
     
@@ -32,7 +36,14 @@ public final class CoreDataManager: BetFreeDataManager {
         persistentContainer.viewContext
     }
     
-    public init() {}
+    private var container: NSPersistentContainer {
+        persistentContainer
+    }
+    
+    public init() {
+        // Force load the container on init to catch any issues early
+        _ = persistentContainer
+    }
     
     private func getCurrentUserEntity() -> UserProfileEntity? {
         let request = NSFetchRequest<UserProfileEntity>(entityName: "UserProfileEntity")
@@ -43,7 +54,7 @@ public final class CoreDataManager: BetFreeDataManager {
     public func getCurrentUser() -> UserProfile? {
         guard let entity = getCurrentUserEntity() else { return nil }
         return UserProfile(
-            name: entity.name ?? "",
+            name: entity.name,
             email: entity.email,
             streak: Int(entity.streak),
             totalSavings: entity.totalSavings,
@@ -53,22 +64,35 @@ public final class CoreDataManager: BetFreeDataManager {
     }
     
     public func createOrUpdateUser(name: String, email: String?, dailyLimit: Double) throws {
-        if let existingUser = getCurrentUserEntity() {
-            existingUser.name = name
-            existingUser.email = email
-            existingUser.dailyLimit = dailyLimit
-            existingUser.idString = name
-        } else {
-            let user = UserProfileEntity(context: context)
-            user.idString = name
-            user.name = name
-            user.email = email
-            user.dailyLimit = dailyLimit
-            user.streak = 0
-            user.totalSavings = 0
-            user.lastCheckIn = Date()
+        let context = container.viewContext
+        
+        let fetchRequest = NSFetchRequest<UserProfileEntity>(entityName: "UserProfileEntity")
+        fetchRequest.predicate = NSPredicate(format: "idString == %@", name)
+        fetchRequest.fetchLimit = 1
+        
+        do {
+            if let existingUser = try context.fetch(fetchRequest).first {
+                existingUser.name = name
+                existingUser.email = email
+                existingUser.dailyLimit = dailyLimit
+            } else {
+                let user = UserProfileEntity(context: context)
+                user.idString = UUID().uuidString
+                user.name = name
+                user.email = email
+                user.dailyLimit = dailyLimit
+                user.streak = 0
+                user.totalSavings = 0
+                user.lastCheckIn = Date()
+            }
+            
+            if context.hasChanges {
+                try context.save()
+            }
+        } catch {
+            print("Error creating/updating user: \(error)")
+            throw BFDataError.entityCreationFailed
         }
-        try context.save()
     }
     
     public func updateUserStreak() throws {
@@ -92,15 +116,26 @@ public final class CoreDataManager: BetFreeDataManager {
         try context.save()
     }
     
-    public func getAllTransactions() -> [TransactionEntity] {
+    public func getAllTransactions() -> [Transaction] {
         let request = NSFetchRequest<TransactionEntity>(entityName: "TransactionEntity")
         request.sortDescriptors = [NSSortDescriptor(keyPath: \TransactionEntity.date, ascending: false)]
-        return (try? context.fetch(request)) ?? []
+        
+        guard let entities = try? context.fetch(request) else { return [] }
+        
+        return entities.map { entity in
+            Transaction(
+                id: entity.id,
+                amount: entity.amount,
+                category: TransactionCategory(rawValue: entity.category) ?? .other,
+                date: entity.date,
+                note: entity.note
+            )
+        }
     }
     
     public func addTransaction(_ transaction: Transaction) throws {
         let entity = TransactionEntity(context: context)
-        entity.idString = transaction.id.uuidString
+        entity.id = transaction.id
         entity.amount = transaction.amount
         entity.category = transaction.category.rawValue
         entity.date = transaction.date
@@ -115,7 +150,7 @@ public final class CoreDataManager: BetFreeDataManager {
     
     public func deleteTransaction(_ transaction: Transaction) throws {
         let request = NSFetchRequest<TransactionEntity>(entityName: "TransactionEntity")
-        request.predicate = NSPredicate(format: "idString == %@", transaction.id.uuidString)
+        request.predicate = NSPredicate(format: "id == %@", transaction.id as CVarArg)
         request.fetchLimit = 1
         
         if let entity = try context.fetch(request).first {
@@ -128,12 +163,63 @@ public final class CoreDataManager: BetFreeDataManager {
         }
     }
     
+    public func createCraving(intensity: Int, triggers: String, strategies: String, timestamp: Date, duration: Int) async throws -> Craving {
+        let entity = CravingEntity(context: context)
+        entity.id = UUID()
+        entity.intensity = Int16(intensity)
+        entity.trigger = triggers
+        entity.note = strategies
+        entity.date = timestamp
+        entity.duration = Int32(duration)
+        
+        try context.save()
+        
+        return Craving(
+            id: entity.id,
+            intensity: Int(entity.intensity),
+            trigger: entity.trigger,
+            location: entity.location,
+            emotion: nil,
+            duration: TimeInterval(entity.duration),
+            copingStrategy: entity.note,
+            outcome: nil
+        )
+    }
+    
+    public func getCravings() async throws -> [Craving] {
+        let request = NSFetchRequest<CravingEntity>(entityName: "CravingEntity")
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \CravingEntity.date, ascending: false)]
+        
+        let entities = try context.fetch(request)
+        return entities.map { entity in
+            Craving(
+                id: entity.id,
+                intensity: Int(entity.intensity),
+                trigger: entity.trigger,
+                location: entity.location,
+                emotion: nil,
+                duration: TimeInterval(entity.duration),
+                copingStrategy: entity.note,
+                outcome: nil
+            )
+        }
+    }
+    
+    public func deleteCraving(id: UUID) async throws {
+        let request = NSFetchRequest<CravingEntity>(entityName: "CravingEntity")
+        request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        
+        if let entity = try context.fetch(request).first {
+            context.delete(entity)
+            try context.save()
+        }
+    }
+    
     @MainActor
     public func reset() {
-        // Get the main context
-        let context = persistentContainer.viewContext
-        
         do {
+            let context = persistentContainer.viewContext
+            
             // Fetch and delete all entities
             let entityNames = ["UserProfileEntity", "TransactionEntity", "CravingEntity"]
             
@@ -146,113 +232,10 @@ public final class CoreDataManager: BetFreeDataManager {
                 }
             }
             
-            // Save changes
             try context.save()
             
-            // Reset the context
-            context.reset()
-            
-            // Get the store URL
-            guard let storeURL = persistentContainer.persistentStoreCoordinator.persistentStores.first?.url else {
-                print("No persistent store URL found")
-                return
-            }
-            
-            // Remove the store
-            try persistentContainer.persistentStoreCoordinator.destroyPersistentStore(at: storeURL, ofType: NSSQLiteStoreType, options: nil)
-            
-            // Create a new store
-            try persistentContainer.persistentStoreCoordinator.addPersistentStore(
-                ofType: NSSQLiteStoreType,
-                configurationName: nil,
-                at: storeURL,
-                options: [
-                    NSMigratePersistentStoresAutomaticallyOption: true,
-                    NSInferMappingModelAutomaticallyOption: true
-                ]
-            )
         } catch {
             print("Error resetting Core Data: \(error)")
-            
-            // If reset fails, recreate the container
-            persistentContainer = NSPersistentContainer(name: "BetFreeModel")
-            persistentContainer.loadPersistentStores { description, error in
-                if let error = error {
-                    print("Unable to load persistent stores: \(error)")
-                }
-            }
-        }
-    }
-    
-    // MARK: - Craving Management
-    
-    public func createCraving(intensity: Int, triggers: String, strategies: String, timestamp: Date, duration: Int) async throws -> Craving {
-        let entity = CravingEntity(context: context)
-        entity.id = UUID()
-        entity.intensity = Int32(intensity)
-        entity.triggers = triggers
-        entity.strategies = strategies
-        entity.timestamp = timestamp
-        entity.duration = Int32(duration)
-        
-        try context.save()
-        
-        return Craving(
-            id: entity.id!,
-            intensity: Int(entity.intensity),
-            trigger: triggers,
-            location: nil,
-            emotion: nil,
-            duration: TimeInterval(duration),
-            copingStrategy: strategies,
-            outcome: nil
-        )
-    }
-    
-    public func getCravings() async throws -> [Craving] {
-        let request = CravingEntity.fetchRequest()
-        request.sortDescriptors = [NSSortDescriptor(keyPath: \CravingEntity.timestamp, ascending: false)]
-        
-        let entities = try context.fetch(request)
-        return entities.map { entity in
-            Craving(
-                id: entity.id!,
-                intensity: Int(entity.intensity),
-                trigger: entity.triggers ?? "",
-                location: nil,
-                emotion: nil,
-                duration: TimeInterval(entity.duration),
-                copingStrategy: entity.strategies,
-                outcome: nil
-            )
-        }
-    }
-    
-    public func deleteCraving(id: UUID) async throws {
-        let request = CravingEntity.fetchRequest()
-        request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
-        
-        if let entity = try context.fetch(request).first {
-            context.delete(entity)
-            try context.save()
-        }
-    }
-    
-    // MARK: - Transaction Management
-    
-    public func getAllTransactions() -> [Transaction] {
-        let request = NSFetchRequest<TransactionEntity>(entityName: "TransactionEntity")
-        request.sortDescriptors = [NSSortDescriptor(keyPath: \TransactionEntity.date, ascending: false)]
-        let entities = (try? context.fetch(request)) ?? []
-        
-        return entities.map { entity in
-            Transaction(
-                id: UUID(uuidString: entity.idString ?? "") ?? UUID(),
-                amount: entity.amount,
-                category: TransactionCategory(rawValue: entity.category ?? "") ?? .other,
-                date: entity.date ?? Date(),
-                note: entity.note
-            )
         }
     }
 }

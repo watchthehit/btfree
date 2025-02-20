@@ -1,14 +1,17 @@
 import SwiftUI
 import BetFreeUI
+import BetFreeModels
 
 @available(macOS 10.15, iOS 13.0, *)
 public struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var viewModel = PaywallViewModel()
+    @StateObject private var viewModel: PaywallViewModel
     @State private var selectedPlan: Plan?
     @State private var isPurchasing = false
     
-    public init() {}
+    public init(dataManager: BetFreeDataManager) {
+        _viewModel = StateObject(wrappedValue: PaywallViewModel(dataManager: dataManager))
+    }
     
     fileprivate let features: [Feature] = [
         Feature(icon: "chart.line.uptrend.xyaxis", title: "Advanced Analytics", description: "Track your progress with detailed insights"),
@@ -209,28 +212,4 @@ fileprivate struct Feature: Identifiable {
     let icon: String
     let title: String
     let description: String
-}
-
-fileprivate struct Plan: Identifiable {
-    let id: Int
-    let title: String
-    let description: String
-    let price: String
-}
-
-@MainActor
-fileprivate final class PaywallViewModel: ObservableObject {
-    @Published private(set) var purchaseSuccessful = false
-    @Published private(set) var error: Error?
-    
-    fileprivate func purchase(plan: Plan) async {
-        do {
-            // TODO: Implement actual purchase logic
-            try await Task.sleep(nanoseconds: 2 * 1_000_000_000) // Simulate network request
-            purchaseSuccessful = true
-        } catch {
-            self.error = error
-            purchaseSuccessful = false
-        }
-    }
 }

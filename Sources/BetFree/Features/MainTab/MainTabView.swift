@@ -3,88 +3,71 @@ import BetFreeUI
 
 public struct MainTabView: View {
     @EnvironmentObject private var appState: AppState
+    @State private var selectedTab: Tab = .home
+    
+    private enum Tab {
+        case home, progress, savings, profile, settings
+        
+        var title: String {
+            switch self {
+            case .home: return "Home"
+            case .progress: return "Progress"
+            case .savings: return "Savings"
+            case .profile: return "Profile"
+            case .settings: return "Settings"
+            }
+        }
+        
+        var icon: String {
+            switch self {
+            case .home: return "house.fill"
+            case .progress: return "chart.line.uptrend.xyaxis"
+            case .savings: return "dollarsign.circle.fill"
+            case .profile: return "person.fill"
+            case .settings: return "gear"
+            }
+        }
+    }
     
     public init() {}
     
     public var body: some View {
-        TabView(selection: $appState.selectedTab) {
-            TodayView()
+        TabView(selection: $selectedTab) {
+            HomeView()
                 .tabItem {
-                    Label("Today", systemImage: "sun.max.fill")
+                    Label(Tab.home.title, systemImage: Tab.home.icon)
                 }
-                .tag(0)
+                .tag(Tab.home)
+            
+            ProgressView()
+                .tabItem {
+                    Label(Tab.progress.title, systemImage: Tab.progress.icon)
+                }
+                .tag(Tab.progress)
             
             SavingsView()
                 .tabItem {
-                    Label("Savings", systemImage: "dollarsign.circle.fill")
+                    Label(Tab.savings.title, systemImage: Tab.savings.icon)
                 }
-                .tag(1)
+                .tag(Tab.savings)
             
-            CravingView()
+            ProfileView()
                 .tabItem {
-                    Label("Cravings", systemImage: "exclamationmark.triangle.fill")
+                    Label(Tab.profile.title, systemImage: Tab.profile.icon)
                 }
-                .tag(2)
+                .tag(Tab.profile)
             
-            ProgressTrackingView()
+            SettingsView()
                 .tabItem {
-                    Label("Progress", systemImage: "chart.line.uptrend.xyaxis.circle.fill")
+                    Label("Settings", systemImage: "gear")
                 }
-                .tag(3)
-            
-            ResourcesView()
-                .tabItem {
-                    Label("Resources", systemImage: "heart.circle.fill")
-                }
-                .tag(4)
+                .tag(Tab.settings)
         }
         .tint(BFDesignSystem.Colors.primary)
-        .background(
-            LinearGradient(
-                colors: [
-                    BFDesignSystem.Colors.background,
-                    BFDesignSystem.Colors.background.opacity(0.95)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
-        )
-        .preferredColorScheme(appState.colorScheme)
-        .overlay(alignment: .topTrailing) {
-            ColorSchemeButton(colorScheme: appState.colorScheme) {
-                appState.toggleColorScheme()
-            }
-            .padding()
-        }
     }
 }
 
-private struct ColorSchemeButton: View {
-    let colorScheme: ColorScheme?
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: iconName)
-                .font(.system(size: 20))
-                .foregroundColor(BFDesignSystem.Colors.textPrimary)
-                .padding(12)
-                .background(BFDesignSystem.Colors.secondaryBackground)
-                .clipShape(Circle())
-        }
-    }
-    
-    private var iconName: String {
-        switch colorScheme {
-        case .none:
-            return "circle.lefthalf.filled"
-        case .dark:
-            return "moon.fill"
-        case .light:
-            return "sun.max.fill"
-        @unknown default:
-            return "circle.lefthalf.filled"
-        }
-    }
+#Preview {
+    MainTabView()
+        .environmentObject(AppState.preview)
 }

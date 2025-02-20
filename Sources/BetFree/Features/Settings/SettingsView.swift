@@ -14,10 +14,9 @@ public struct SettingsView: View {
         NavigationView {
             List {
                 // Profile Section
-                Section("Profile") {
+                Section {
                     TextField("Name", text: $appState.username)
                         .textContentType(.name)
-                        .autocapitalization(.words)
                     
                     HStack {
                         Text("Daily Limit")
@@ -31,6 +30,8 @@ public struct SettingsView: View {
                                 }
                             }
                     }
+                } header: {
+                    Text("Profile")
                 }
                 
                 // Notifications Section

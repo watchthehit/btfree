@@ -2,20 +2,6 @@
 
 A comprehensive iOS application focused on gambling addiction recovery through personalized behavior tracking, progress visualization, and professional resources.
 
-## Quick Start
-
-1. Clone the repository
-2. Open `BetFree.xcworkspace` in Xcode
-3. Wait for package dependencies to resolve
-4. Build and run (⌘ + R)
-
-## Requirements
-
-- iOS 16.0+
-- Xcode 14.0+
-- Swift 5.9+
-- macOS 13.0+ (for development)
-
 ## Features
 
 ### Core Features
@@ -25,28 +11,48 @@ A comprehensive iOS application focused on gambling addiction recovery through p
 - Profile management
 - Transaction tracking
 - Achievement system
+- Craving management
 
-### Onboarding Experience
-- Multi-step feature introduction
-- Profile personalization
-- Goal setting
-- 7-day free trial
-- Subscription management
+### Technical Features
+- SwiftUI-based UI
+- Core Data persistence
+- Composable Architecture integration
+- Cross-platform support (iOS/macOS)
+- Modular architecture
+- Comprehensive test coverage
 
-### Dashboard Features
-- Emergency help access
-- Progress visualization
-- Daily goals tracking
-- Quick action grid
-- Motivational messages
-- Transaction history
-- Achievement tracking
+## Requirements
 
-## Development
+- iOS 16.0+
+- macOS 13.0+
+- Xcode 14.0+
+- Swift 5.9+
 
-See [Technical Documentation](docs/TECHNICAL.md) for detailed development information.
+## Installation
+
+1. Clone the repository
+```bash
+git clone https://github.com/yourusername/BetFree.git
+cd BetFree
+```
+
+2. Open the project
+```bash
+open Package.swift
+```
+
+3. Build and run
+
+## Architecture
+
+The project follows a modular architecture with the following main components:
+
+- `BetFree`: Main application module
+- `BetFreeUI`: UI components and design system
+- `BetFreeModels`: Shared models and business logic
 
 ### Core Data Model
+
 The app uses Core Data for persistent storage with three main entities:
 
 #### UserProfile Entity
@@ -73,88 +79,13 @@ The app uses Core Data for persistent storage with three main entities:
 - `timestamp`: Date (required)
 - `duration`: Int32 (required)
 
-### Testing Onboarding
-To force the onboarding flow for testing:
-```swift
-UserDefaults.standard.set(false, forKey: "isOnboarded")
-```
+## Contributing
 
-## Current Status
+1. Create a feature branch
+2. Commit your changes
+3. Push to the branch
+4. Create a Pull Request
 
- Working Features:
-- Project structure
-- Package dependencies
-- Enhanced onboarding flow
-- Dashboard UI
-- Cross-platform compatibility (iOS/macOS)
-- Standard SwiftUI styling
-- Core Data integration
-- Transaction tracking
-- Achievement system
-- Craving management system
-- User profile management
-- Consistent data type handling
+## License
 
- In Progress:
-- Subscription integration
-- Resource content
-- Analytics integration
-- Accessibility improvements
-
-## Version History
-
-### v0.1.8 (Current)
-- Fixed Core Data model registration and initialization
-- Standardized Core Data model naming across app
-- Improved Core Data error handling and logging
-- Enhanced model bundle loading mechanism
-- Fixed CravingEntity persistence issues
-- Updated technical documentation
-
-### v0.1.7
-- Fixed type consistency in Craving duration handling
-- Standardized UserProfile parameter ordering
-- Enhanced MockCDManager implementation
-- Improved Core Data manager consistency
-- Added comprehensive craving management
-- Fixed transaction mapping in dashboard
-
-### v0.1.6
-- Resolved ResourcesView redeclaration issue
-- Enhanced Settings module documentation
-- Improved crisis support accessibility
-- Standardized email handling in ContactView
-- Updated technical documentation
-
-### v0.1.5
-- Improved cross-platform compatibility
-- Migrated to standard SwiftUI styling
-- Fixed sheet presentation on macOS
-- Enhanced form handling
-- Improved progress indicators
-- Fixed compilation issues
-
-### v0.1.4
-- Fixed Core Data entity initialization
-- Added transaction tracking
-- Implemented achievement system
-- Improved data persistence
-
-### v0.1.3
-- Enhanced onboarding with feature showcase
-- Added free trial and subscription flow
-- Improved dashboard UI/UX
-
-### v0.1.2
-- Enhanced Dashboard UI with progress tracking
-- Added emergency help button
-- Implemented quick actions
-
-### v0.1.1
-- Fixed navigation and state initialization
-- Improved app architecture
-
-### v0.1.0
-- Initial project setup
-- Basic navigation structure
-- Design system implementation
+This project is private and confidential. All rights reserved.

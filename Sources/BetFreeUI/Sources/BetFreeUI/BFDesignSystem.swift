@@ -4,25 +4,73 @@ import SwiftUI
 public enum BFDesignSystem {
     // MARK: - Colors
     public enum Colors {
-        public static let primary = Color("Primary", bundle: .module)
-        public static let success = Color("Success", bundle: .module)
-        public static let error = Color("Error", bundle: .module)
-        public static let border = Color("Border", bundle: .module)
-        public static let textPrimary = Color("TextPrimary", bundle: .module)
-        public static let textSecondary = Color("TextSecondary", bundle: .module)
+        public static let primary = Color.blue
+        public static let success = Color.green
+        public static let warning = Color.yellow
+        public static let error = Color.red
+        public static let textPrimary = Color.primary
+        public static let textSecondary = Color.secondary
+        public static let border = Color.gray.opacity(0.2)
     }
     
     // MARK: - Typography
+    @available(macOS 11.0, *)
     public enum Typography {
-        public static let titleLarge = Font.title
-        public static let titleMedium = Font.title2
-        public static let titleSmall = Font.title3
-        public static let bodyLarge = Font.body.weight(.medium)
-        public static let bodyMedium = Font.body
-        public static let bodySmall = Font.footnote
-        public static let labelLarge = Font.callout.weight(.medium)
-        public static let labelMedium = Font.callout
-        public static let labelSmall = Font.caption
+        public static var titleLarge: Font {
+            if #available(macOS 11.0, *) {
+                return Font.title
+            } else {
+                return Font.system(size: 28, weight: .bold)
+            }
+        }
+        
+        public static var titleMedium: Font {
+            if #available(macOS 11.0, *) {
+                return Font.title2
+            } else {
+                return Font.system(size: 22, weight: .bold)
+            }
+        }
+        
+        public static var titleSmall: Font {
+            if #available(macOS 11.0, *) {
+                return Font.title3
+            } else {
+                return Font.system(size: 20, weight: .semibold)
+            }
+        }
+        
+        public static var bodyLarge: Font {
+            Font.body.weight(.medium)
+        }
+        
+        public static var bodyMedium: Font {
+            Font.body
+        }
+        
+        public static var bodySmall: Font {
+            Font.footnote
+        }
+        
+        public static var labelLarge: Font {
+            Font.callout
+        }
+        
+        public static var labelMedium: Font {
+            Font.subheadline
+        }
+        
+        public static var labelSmall: Font {
+            Font.caption
+        }
+        
+        public static var displayLarge: Font {
+            if #available(macOS 11.0, *) {
+                return Font.largeTitle
+            } else {
+                return Font.system(size: 34, weight: .bold)
+            }
+        }
     }
     
     // MARK: - Spacing
@@ -35,9 +83,9 @@ public enum BFDesignSystem {
     
     // MARK: - Corner Radius
     public enum Radius {
-        public static let small: CGFloat = 8
-        public static let medium: CGFloat = 12
-        public static let large: CGFloat = 16
+        public static let small: CGFloat = 4
+        public static let medium: CGFloat = 8
+        public static let large: CGFloat = 12
         public static let extraLarge: CGFloat = 24
     }
     
