@@ -68,17 +68,24 @@ public struct CravingView: View {
                     )
                     .tag(2)
                 }
+                #if os(iOS)
                 .tabViewStyle(.page(indexDisplayMode: .never))
+                #else
+                .tabViewStyle(.automatic)
+                #endif
                 .animation(.easeInOut, value: currentStep)
             }
             .navigationTitle(navigationTitle)
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.large)
+            #endif
             .onAppear {
                 withAnimation(.spring(response: 0.6)) {
                     isAnimated = true
                 }
             }
             .toolbar {
+                #if os(iOS)
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Cancel") {
                         if !viewModel.isLoading {
@@ -87,6 +94,16 @@ public struct CravingView: View {
                     }
                     .disabled(viewModel.isLoading)
                 }
+                #else
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        if !viewModel.isLoading {
+                            dismiss()
+                        }
+                    }
+                    .disabled(viewModel.isLoading)
+                }
+                #endif
             }
             .alert("Success", isPresented: $viewModel.showSuccess) {
                 Button("OK") {

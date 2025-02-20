@@ -1,4 +1,5 @@
 import SwiftUI
+import BetFreeUI
 
 public struct BFCardStyle {
     let cornerRadius: CGFloat

@@ -1,4 +1,5 @@
 import SwiftUI
+import BetFreeUI
 
 public struct BFTestimonialCard: View {
     let quote: String

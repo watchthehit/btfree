@@ -246,27 +246,33 @@ public struct OnboardingView: View {
                                 .foregroundColor(.white)
                             TextField("", text: $viewModel.name)
                                 .textFieldStyle(OnboardingTextFieldStyle())
+                                #if os(iOS)
                                 .textContentType(.name)
+                                #endif
                         }
                         
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Email")
-                                .font(BFDesignSystem.Typography.labelMedium)
-                                .foregroundColor(.white)
+                                .font(BFDesignSystem.Typography.bodyMedium)
+                                .foregroundColor(BFDesignSystem.Colors.textSecondary)
                             TextField("", text: $viewModel.email)
                                 .textFieldStyle(OnboardingTextFieldStyle())
+                                #if os(iOS)
                                 .textContentType(.emailAddress)
                                 .keyboardType(.emailAddress)
-                                .autocapitalization(.none)
+                                .textInputAutocapitalization(.never)
+                                #endif
                         }
                         
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Password")
-                                .font(BFDesignSystem.Typography.labelMedium)
-                                .foregroundColor(.white)
+                                .font(BFDesignSystem.Typography.bodyMedium)
+                                .foregroundColor(BFDesignSystem.Colors.textSecondary)
                             SecureField("", text: $viewModel.password)
                                 .textFieldStyle(OnboardingTextFieldStyle())
+                                #if os(iOS)
                                 .textContentType(.newPassword)
+                                #endif
                         }
                     }
                 }

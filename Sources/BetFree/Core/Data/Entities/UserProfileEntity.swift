@@ -10,8 +10,8 @@ public class UserProfileEntity: NSManagedObject {
     @NSManaged public var totalSavings: Double
     @NSManaged public var dailyLimit: Double
     @NSManaged public var lastCheckIn: Date?
-    @NSManaged public var transactions: NSSet?
-    @NSManaged public var cravings: NSSet?
+    @NSManaged public var transactions: Set<TransactionEntity>?
+    @NSManaged public var cravings: Set<CravingEntity>?
 }
 
 extension UserProfileEntity {
@@ -38,4 +38,18 @@ extension UserProfileEntity {
 
     @objc(removeCravings:)
     @NSManaged public func removeFromCravings(_ values: NSSet)
+
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<UserProfileEntity> {
+        return NSFetchRequest<UserProfileEntity>(entityName: "UserProfileEntity")
+    }
+    
+    public var transactionsArray: [TransactionEntity] {
+        let set = transactions ?? []
+        return Array(set)
+    }
+    
+    public var cravingsArray: [CravingEntity] {
+        let set = cravings ?? []
+        return Array(set)
+    }
 } 

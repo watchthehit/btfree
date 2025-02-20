@@ -80,13 +80,23 @@ public struct AddSavingView: View {
                 .padding()
             }
             .navigationTitle("Add Saving")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
+                #if os(iOS)
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
                         dismiss()
                     }
                 }
+                #else
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+                #endif
             }
             .disabled(viewModel.isSaving)
             .alert("Error", isPresented: $viewModel.showError) {

@@ -1,4 +1,5 @@
 import SwiftUI
+import BetFreeUI
 #if canImport(UIKit)
 import UIKit
 #endif

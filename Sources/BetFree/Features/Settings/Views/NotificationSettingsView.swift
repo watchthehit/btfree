@@ -107,9 +107,16 @@ public struct NotificationSettingsView: View {
         }
         .alert("Enable Notifications", isPresented: $showingPermissionAlert) {
             Button("Settings") {
+                #if os(macOS)
                 if let url = URL(string: "x-apple.systempreferences:com.apple.preference.notifications") {
                     NSWorkspace.shared.open(url)
                 }
+                #elseif os(iOS)
+                if let url = URL(string: UIApplication.openSettingsURLString),
+                   UIApplication.shared.canOpenURL(url) {
+                    UIApplication.shared.open(url)
+                }
+                #endif
             }
             Button("Cancel", role: .cancel) {}
         } message: {

@@ -1,4 +1,0 @@
-module BetFreeUI {
-    header "/Users/bh/Desktop/project/Sources/BetFreeUI/.build/arm64-apple-macosx/debug/BetFreeUI.build/BetFreeUI-Swift.h"
-    requires objc
-}

@@ -65,7 +65,8 @@ final class CravingReportViewModel: ObservableObject {
         !trigger.isEmpty && !strategy.isEmpty
     }
     
-    nonisolated init() {
+    @MainActor
+    init() {
         self.dataManager = CoreDataManager.shared
     }
     

@@ -1,11 +1,26 @@
+# Xcode
 .DS_Store
-/.build
-/Packages
-/*.xcodeproj
 xcuserdata/
-DerivedData/
+*.xcscmblueprint
+*.xccheckout
+
+# Swift Package Manager
+.build/
 .swiftpm/
-.netrc
-*.xcworkspace
-.env
-.env.*
+Package.resolved
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Obj-C/Swift specific
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM.build/
+.swiftpm/
+*.xcodeproj/
+.DS_Store
+Sources/BetFreeUI/.build/
+Sources/BetFreeUI/.swiftpm/

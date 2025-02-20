@@ -1,5 +1,5 @@
 import SwiftUI
-#if canImport(UIKit)
+#if os(iOS)
 import UIKit
 #endif
 
@@ -17,102 +17,63 @@ public struct ViewShadow {
 
 public enum BFDesignSystem {
     public enum Colors {
-        // Base colors that adapt to color scheme
-        public static var primary: Color {
-            adaptiveColor(light: colorFromHex("007AFF"), dark: colorFromHex("0A84FF"))
-        }
-        
-        public static var success: Color {
-            adaptiveColor(light: colorFromHex("34C759"), dark: colorFromHex("30D158"))
-        }
-        
-        public static var warning: Color {
-            adaptiveColor(light: colorFromHex("FF9500"), dark: colorFromHex("FFB340"))
-        }
-        
-        public static var error: Color {
-            adaptiveColor(light: colorFromHex("FF3B30"), dark: colorFromHex("FF453A"))
-        }
-        
-        public static var background: Color {
-            adaptiveColor(light: .white, dark: colorFromHex("1C1C1E"))
-        }
-        
-        public static var secondaryBackground: Color {
-            adaptiveColor(light: colorFromHex("F2F2F7"), dark: colorFromHex("2C2C2E"))
-        }
-        
-        public static var cardBackground: Color {
-            adaptiveColor(light: .white, dark: colorFromHex("2C2C2E"))
-        }
-        
-        public static var textPrimary: Color {
-            adaptiveColor(light: colorFromHex("000000"), dark: .white)
-        }
-        
-        public static var textSecondary: Color {
-            adaptiveColor(light: colorFromHex("6C6C6C"), dark: colorFromHex("EBEBF5").opacity(0.6))
-        }
-        
-        public static var border: Color {
-            adaptiveColor(light: colorFromHex("E5E5EA"), dark: colorFromHex("38383A"))
-        }
+        #if os(iOS)
+        public static let textPrimary = Color(UIColor.label)
+        public static let textSecondary = Color(UIColor.secondaryLabel)
+        public static let border = Color(UIColor.separator)
+        public static let background = Color(UIColor.systemBackground)
+        public static let secondaryBackground = Color(UIColor.secondarySystemBackground)
+        #else
+        public static let textPrimary = Color.primary
+        public static let textSecondary = Color.secondary
+        public static let border = Color.gray.opacity(0.2)
+        public static let background = Color(NSColor.windowBackgroundColor)
+        public static let secondaryBackground = Color(NSColor.controlBackgroundColor)
+        #endif
         
         // Gradients
-        public static var primaryGradient: LinearGradient {
-            LinearGradient(
-                colors: [primary, primary.opacity(0.7)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+        public static let primaryGradient = LinearGradient(
+            gradient: Gradient(colors: [
+                Color(red: 0.4, green: 0.2, blue: 1.0),
+                Color(red: 0.2, green: 0.4, blue: 1.0)
+            ]),
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+        
+        public static let primary = Color(red: 0.4, green: 0.2, blue: 1.0)
+        public static let success = Color.green
+        public static let error = Color.red
+        public static let warning = Color.yellow
+        
+        // Helper to create color variants
+        private static func adaptiveColor(light: Color, dark: Color) -> Color {
+            #if os(iOS)
+            return Color(UIColor { traitCollection in
+                switch traitCollection.userInterfaceStyle {
+                case .dark:
+                    return UIColor(dark)
+                default:
+                    return UIColor(light)
+                }
+            })
+            #else
+            return light
+            #endif
         }
         
-        public static var successGradient: LinearGradient {
-            LinearGradient(
-                colors: [success, success.opacity(0.7)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        }
-        
-        public static var warningGradient: LinearGradient {
-            LinearGradient(
-                colors: [warning, warning.opacity(0.7)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        }
-        
-        public static var errorGradient: LinearGradient {
-            LinearGradient(
-                colors: [error, error.opacity(0.7)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        }
-        
-        public static var calmingGradient: LinearGradient {
-            LinearGradient(
-                colors: [primary, success],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        }
-        
-        public static var warmGradient: LinearGradient {
-            LinearGradient(
-                colors: [warning, error],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        }
-        
-        public static var mindfulGradient: LinearGradient {
-            LinearGradient(
-                colors: [success, primary],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+        private static func colorFromHex(_ hex: String) -> Color {
+            var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+            hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
+            
+            var rgb: UInt64 = 0
+            Scanner(string: hexSanitized).scanHexInt64(&rgb)
+            
+            let red = Double((rgb & 0xFF0000) >> 16) / 255.0
+            let green = Double((rgb & 0x00FF00) >> 8) / 255.0
+            let blue = Double(rgb & 0x0000FF) / 255.0
+            
+            return Color(red: red, green: green, blue: blue)
         }
     }
     
@@ -174,18 +135,6 @@ public enum BFDesignSystem {
         
         public static let caption = Font.caption
         public static let captionSmall = Font.caption2
-    }
-    
-    // Helper to create color variants
-    private static func adaptiveColor(light: Color, dark: Color) -> Color {
-        return Color(uiColor: UIColor { traitCollection in
-            switch traitCollection.userInterfaceStyle {
-            case .dark:
-                return UIColor(dark)
-            default:
-                return UIColor(light)
-            }
-        })
     }
     
     // Helper to create color from hex

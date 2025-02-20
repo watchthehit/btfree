@@ -17,18 +17,20 @@ public final class CoreDataManager: BetFreeDataManager {
     private lazy var persistentContainer: NSPersistentContainer = {
         let modelName = "BetFree"
         
-        // Use cached model if available
-        if let existingModel = CoreDataManager.modelInstance {
-            print("Using cached Core Data model")
-            return NSPersistentContainer(name: modelName, managedObjectModel: existingModel)
-        }
+        // Create the model programmatically
+        let model = CoreDataModel.shared.createModel()
+        CoreDataManager.modelInstance = model
         
-        let container = NSPersistentContainer(name: modelName)
+        let container = NSPersistentContainer(name: modelName, managedObjectModel: model)
         container.loadPersistentStores { description, error in
             if let error = error {
                 fatalError("Failed to load Core Data stack: \(error)")
             }
         }
+        
+        container.viewContext.automaticallyMergesChangesFromParent = true
+        container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        
         return container
     }()
     
@@ -124,7 +126,7 @@ public final class CoreDataManager: BetFreeDataManager {
         
         return entities.map { entity in
             Transaction(
-                id: entity.id,
+                id: UUID(uuidString: entity.idString) ?? UUID(),
                 amount: entity.amount,
                 category: TransactionCategory(rawValue: entity.category) ?? .other,
                 date: entity.date,
@@ -135,13 +137,14 @@ public final class CoreDataManager: BetFreeDataManager {
     
     public func addTransaction(_ transaction: Transaction) throws {
         let entity = TransactionEntity(context: context)
-        entity.id = transaction.id
+        entity.idString = transaction.id.uuidString
         entity.amount = transaction.amount
         entity.category = transaction.category.rawValue
         entity.date = transaction.date
         entity.note = transaction.note
         
         if let user = getCurrentUserEntity() {
+            entity.user = user
             user.totalSavings += transaction.amount
         }
         
@@ -150,7 +153,7 @@ public final class CoreDataManager: BetFreeDataManager {
     
     public func deleteTransaction(_ transaction: Transaction) throws {
         let request = NSFetchRequest<TransactionEntity>(entityName: "TransactionEntity")
-        request.predicate = NSPredicate(format: "id == %@", transaction.id as CVarArg)
+        request.predicate = NSPredicate(format: "idString == %@", transaction.id.uuidString)
         request.fetchLimit = 1
         
         if let entity = try context.fetch(request).first {

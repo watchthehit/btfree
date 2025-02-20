@@ -7,52 +7,83 @@ public struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     @State private var showCravingSheet = false
     
-    public init() {}
+    public init() {
+        print("🏠 HomeView initialized")
+    }
     
     public var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: 24) {
-                    // Streak Card
-                    StreakCard(
-                        streak: appState.streak,
-                        savings: appState.savingsAmount
-                    )
-                    
-                    // Quick Actions
-                    QuickActionsGrid()
-                    
-                    // Daily Check-in
-                    if !viewModel.hasCheckedInToday {
-                        CheckInCard {
-                            Task {
-                                do {
-                                    try await viewModel.performDailyCheckIn()
-                                } catch {
-                                    print("Error performing daily check-in: \(error)")
+        let _ = print("🏠 HomeView body evaluated")
+        NavigationStack {
+            Group {
+                if viewModel.isLoading {
+                    VStack {
+                        let _ = print("🏠 HomeView showing loading state")
+                        Spacer()
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                        Spacer()
+                    }
+                } else {
+                    let _ = print("🏠 HomeView showing content")
+                    ScrollView {
+                        VStack(spacing: 24) {
+                            // Streak Card
+                            StreakCard(
+                                streak: appState.streak,
+                                savings: appState.savingsAmount
+                            )
+                            
+                            // Quick Actions
+                            QuickActionsGrid()
+                            
+                            // Daily Check-in
+                            if !viewModel.hasCheckedInToday {
+                                CheckInCard {
+                                    Task {
+                                        do {
+                                            try await viewModel.performDailyCheckIn()
+                                        } catch {
+                                            print("Error performing daily check-in: \(error)")
+                                        }
+                                    }
                                 }
                             }
+                            
+                            // Recent Activity
+                            RecentActivityList(activities: viewModel.recentActivities)
                         }
+                        .padding()
                     }
-                    
-                    // Recent Activity
-                    RecentActivityList(activities: viewModel.recentActivities)
                 }
-                .padding()
             }
-            .navigationTitle("Welcome, \(appState.username)")
+            .navigationTitle(appState.username.isEmpty ? "Welcome" : "Welcome, \(appState.username)")
             .toolbar {
-                ToolbarItem(placement: .trailing) {
+                #if os(iOS)
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showCravingSheet = true }) {
                         Label("Report Craving", systemImage: "exclamationmark.triangle.fill")
-                            .labelStyle(.iconOnly)
-                            .foregroundColor(.red)
                     }
                 }
+                #else
+                ToolbarItem(placement: .primaryAction) {
+                    Button(action: { showCravingSheet = true }) {
+                        Label("Report Craving", systemImage: "exclamationmark.triangle.fill")
+                    }
+                }
+                #endif
             }
         }
         .sheet(isPresented: $showCravingSheet) {
             CravingReportView()
+        }
+        .onAppear {
+            print("🏠 HomeView appeared")
+            print("🏠 AppState username: \(appState.username)")
+            print("🏠 AppState streak: \(appState.streak)")
+            print("🏠 AppState savings: \(appState.savingsAmount)")
+        }
+        .onDisappear {
+            print("🏠 HomeView disappeared")
         }
     }
 }
@@ -69,16 +100,22 @@ private struct StreakCard: View {
                         .font(BFDesignSystem.Typography.titleMedium)
                         .foregroundColor(BFDesignSystem.Colors.textPrimary)
                     
-                    Text("\(streak) Days Bet-Free")
-                        .font(BFDesignSystem.Typography.displayMedium)
-                        .foregroundColor(BFDesignSystem.Colors.primary)
+                    HStack(alignment: .firstTextBaseline, spacing: 4) {
+                        Text("\(max(0, streak))")
+                            .font(BFDesignSystem.Typography.displayMedium)
+                            .foregroundColor(BFDesignSystem.Colors.primary)
+                        Text("Days Bet-Free")
+                            .font(BFDesignSystem.Typography.bodyMedium)
+                            .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                    }
                 }
                 
                 Spacer()
                 
                 Image(systemName: "flame.fill")
                     .font(.system(size: 40))
-                    .foregroundColor(BFDesignSystem.Colors.primary)
+                    .foregroundColor(streak > 0 ? BFDesignSystem.Colors.primary : BFDesignSystem.Colors.textSecondary)
+                    .opacity(streak > 0 ? 1.0 : 0.5)
             }
             
             Divider()
@@ -89,7 +126,7 @@ private struct StreakCard: View {
                         .font(BFDesignSystem.Typography.titleSmall)
                         .foregroundColor(BFDesignSystem.Colors.textSecondary)
                     
-                    Text("$\(savings, specifier: "%.2f")")
+                    Text(formatCurrency(savings))
                         .font(BFDesignSystem.Typography.titleLarge)
                         .foregroundColor(BFDesignSystem.Colors.success)
                 }
@@ -106,6 +143,13 @@ private struct StreakCard: View {
         .padding()
         .background(BFDesignSystem.Colors.secondaryBackground)
         .cornerRadius(16)
+    }
+    
+    private func formatCurrency(_ value: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = "USD"
+        return formatter.string(from: NSNumber(value: max(0, value))) ?? "$0.00"
     }
 }
 

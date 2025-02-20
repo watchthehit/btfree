@@ -119,9 +119,15 @@ public struct DashboardView: View {
             }
             .navigationTitle("Dashboard")
             .toolbar {
+                #if os(iOS)
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    addButton
+                }
+                #else
                 ToolbarItem(placement: .primaryAction) {
                     addButton
                 }
+                #endif
             }
             .sheet(isPresented: $showingTransactionSheet) {
                 AddTransactionView()

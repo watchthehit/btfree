@@ -1,4 +1,5 @@
 import SwiftUI
+import BetFreeUI
 
 public struct BFSelectableCard: View {
     let title: String

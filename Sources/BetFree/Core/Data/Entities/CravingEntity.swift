@@ -10,4 +10,10 @@ public class CravingEntity: NSManagedObject {
     @NSManaged public var location: String?
     @NSManaged public var note: String?
     @NSManaged public var duration: Int32
+}
+
+extension CravingEntity {
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<CravingEntity> {
+        return NSFetchRequest<CravingEntity>(entityName: "CravingEntity")
+    }
 } 

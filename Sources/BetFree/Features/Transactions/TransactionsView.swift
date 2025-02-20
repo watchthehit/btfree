@@ -11,44 +11,20 @@ public struct TransactionsView: View {
     
     public var body: some View {
         NavigationView {
-            Group {
+            VStack {
                 if isLoading {
                     VStack {
                         Spacer()
-                        SwiftUI.ProgressView()
+                        ProgressView()
                             .progressViewStyle(.circular)
-                            .scaleEffect(1.5)
-                        Spacer()
-                    }
-                } else if transactions.isEmpty {
-                    VStack(spacing: 16) {
-                        Spacer()
-                        Text("No Transactions")
-                            .font(BFDesignSystem.Typography.titleMedium)
-                            .foregroundColor(BFDesignSystem.Colors.textSecondary)
-                        Text("Add a transaction to get started")
-                            .font(BFDesignSystem.Typography.bodyMedium)
-                            .foregroundColor(BFDesignSystem.Colors.textSecondary)
                         Spacer()
                     }
                 } else {
-                    List(transactions) { transaction in
-                        TransactionRowView(transaction: transaction)
-                            .swipeActions {
-                                Button(role: .destructive) {
-                                    Task {
-                                        do {
-                                            try await deleteTransaction(transaction)
-                                        } catch {
-                                            print("Error deleting transaction: \(error)")
-                                        }
-                                    }
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
-                            }
+                    if transactions.isEmpty {
+                        EmptyStateView()
+                    } else {
+                        TransactionListView(transactions: transactions)
                     }
-                    .listStyle(.plain)
                 }
             }
             .navigationTitle("Transactions")

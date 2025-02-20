@@ -17,7 +17,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/pointfreeco/swift-composable-architecture", exact: "1.2.0"),
-        .package(path: "Sources/BetFreeUI"),
+        .package(path: "BetFreeUI"),
         .package(path: "Sources/BetFreeModels")
     ],
     targets: [
@@ -32,13 +32,8 @@ let package = Package(
                 "BetFreeModels"
             ],
             path: "Sources/BetFree",
-            exclude: [
-                "Core/Data/BetFree.xcdatamodeld/BetFree.xcdatamodel/contents"
-            ],
             resources: [
-                .process("Resources"),
-                .process("Core/Data/Resources/CoreData/BetFreeModel.xcdatamodeld"),
-                .process("Core/Data/BetFree.xcdatamodeld")
+                .process("Resources")
             ]
         ),
         .testTarget(

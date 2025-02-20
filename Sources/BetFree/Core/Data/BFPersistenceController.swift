@@ -34,13 +34,10 @@ public class BFPersistenceController {
     public init(inMemory: Bool = false) {
         print("Initializing BFPersistenceController")
         
-        // Use the model from the main bundle
-        guard let modelURL = Bundle.module.url(forResource: "BetFreeModel", withExtension: "momd"),
-              let model = NSManagedObjectModel(contentsOf: modelURL) else {
-            fatalError("Failed to load Core Data model")
-        }
+        // Use the programmatic model
+        let model = CoreDataModel.shared.createModel()
         
-        container = NSPersistentContainer(name: "BetFreeModel", managedObjectModel: model)
+        container = NSPersistentContainer(name: "BetFree", managedObjectModel: model)
         
         if inMemory {
             print("Using in-memory store")

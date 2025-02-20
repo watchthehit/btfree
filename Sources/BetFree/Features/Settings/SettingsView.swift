@@ -14,15 +14,20 @@ public struct SettingsView: View {
         NavigationView {
             List {
                 // Profile Section
-                Section {
+                Section(header: Text("Profile")) {
                     TextField("Name", text: $appState.username)
+                        #if os(iOS)
                         .textContentType(.name)
+                        #endif
                     
                     HStack {
                         Text("Daily Limit")
                         Spacer()
                         TextField("$0.00", text: $dailyLimit)
+                            #if os(iOS)
                             .keyboardType(.decimalPad)
+                            #endif
+                            .textFieldStyle(.plain)
                             .multilineTextAlignment(.trailing)
                             .onChange(of: dailyLimit) { newValue in
                                 if let amount = Double(newValue) {
@@ -30,8 +35,6 @@ public struct SettingsView: View {
                                 }
                             }
                     }
-                } header: {
-                    Text("Profile")
                 }
                 
                 // Notifications Section

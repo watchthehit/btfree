@@ -39,30 +39,51 @@ struct Activity: Identifiable {
 final class HomeViewModel: ObservableObject {
     @Published private(set) var hasCheckedInToday = false
     @Published private(set) var recentActivities: [Activity] = []
+    @Published private(set) var isLoading = true
     
     private let dataManager: BetFreeDataManager
     private let defaults = UserDefaults.standard
     private let lastCheckInKey = "BFLastCheckIn"
     
     init() {
+        print("Initializing HomeViewModel...")
         let manager = CoreDataManager.shared
         self.dataManager = manager
+        self.hasCheckedInToday = checkIfCheckedInToday()
+        
+        Task {
+            await loadInitialData()
+        }
+    }
+    
+    private func loadInitialData() async {
+        print("Loading initial data...")
+        defer { 
+            print("Initial data load complete")
+            isLoading = false 
+        }
+        
         self.hasCheckedInToday = checkIfCheckedInToday()
         loadRecentActivities()
     }
     
     private func checkIfCheckedInToday() -> Bool {
         guard let lastCheckIn = defaults.object(forKey: lastCheckInKey) as? Date else {
+            print("No last check-in found")
             return false
         }
-        return Calendar.current.isDateInToday(lastCheckIn)
+        let isToday = Calendar.current.isDateInToday(lastCheckIn)
+        print("Last check-in was today: \(isToday)")
+        return isToday
     }
     
     private func loadRecentActivities() {
+        print("Loading recent activities")
         recentActivities = Activity.preview
     }
     
     func performDailyCheckIn() async throws {
+        print("Performing daily check-in...")
         try await dataManager.updateUserStreak()
         await MainActor.run {
             defaults.set(Date(), forKey: lastCheckInKey)
@@ -80,6 +101,7 @@ final class HomeViewModel: ObservableObject {
                 hasCheckedInToday = true
             }
         }
+        print("Daily check-in complete")
     }
 }
 

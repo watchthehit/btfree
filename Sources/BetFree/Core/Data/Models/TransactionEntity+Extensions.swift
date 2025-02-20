@@ -5,10 +5,10 @@ import BetFreeModels
 extension TransactionEntity {
     var transaction: Transaction {
         Transaction(
-            id: UUID(uuidString: idString ?? "") ?? UUID(),
+            id: UUID(uuidString: idString) ?? UUID(),
             amount: amount,
-            category: TransactionCategory(rawValue: category ?? "") ?? .other,
-            date: date ?? Date(),
+            category: TransactionCategory(rawValue: category) ?? .other,
+            date: date,
             note: note
         )
     }
