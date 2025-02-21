@@ -18,16 +18,16 @@ public enum Sport: String, Hashable, CaseIterable, Identifiable, Codable {
     
     public var iconName: String {
         switch self {
-        case .football: return "football"
-        case .basketball: return "basketball"
-        case .baseball: return "baseball"
-        case .hockey: return "hockey.puck"
-        case .soccer: return "soccer"
+        case .football: return "sportscourt.fill"
+        case .basketball: return "basketball.fill"
+        case .baseball: return "baseball.fill"
+        case .hockey: return "hockey.puck.fill"
+        case .soccer: return "soccer.ball.inverse"
         case .tennis: return "tennis.racket"
-        case .golf: return "golf"
+        case .golf: return "figure.golf"
         case .boxing: return "figure.boxing"
         case .mma: return "figure.martial.arts"
-        case .racing: return "car"
+        case .racing: return "car.fill"
         }
     }
 } 
