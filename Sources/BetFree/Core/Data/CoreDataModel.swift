@@ -105,7 +105,60 @@ public final class CoreDataModel {
             noteAttribute
         ]
         
-        model.entities = [userEntity, transactionEntity]
+        // Craving Entity
+        let cravingEntity = NSEntityDescription()
+        cravingEntity.name = "CravingEntity"
+        cravingEntity.managedObjectClassName = NSStringFromClass(CravingEntity.self)
+        
+        let cravingIdAttribute = NSAttributeDescription()
+        cravingIdAttribute.name = "id"
+        cravingIdAttribute.attributeType = .UUIDAttributeType
+        cravingIdAttribute.isOptional = false
+        
+        let intensityAttribute = NSAttributeDescription()
+        intensityAttribute.name = "intensity"
+        intensityAttribute.attributeType = .integer16AttributeType
+        intensityAttribute.isOptional = false
+        intensityAttribute.defaultValue = 0
+        
+        let triggerAttribute = NSAttributeDescription()
+        triggerAttribute.name = "trigger"
+        triggerAttribute.attributeType = .stringAttributeType
+        triggerAttribute.isOptional = true
+        
+        let locationAttribute = NSAttributeDescription()
+        locationAttribute.name = "location"
+        locationAttribute.attributeType = .stringAttributeType
+        locationAttribute.isOptional = true
+        
+        let durationAttribute = NSAttributeDescription()
+        durationAttribute.name = "duration"
+        durationAttribute.attributeType = .integer32AttributeType
+        durationAttribute.isOptional = false
+        durationAttribute.defaultValue = 0
+        
+        let cravingNoteAttribute = NSAttributeDescription()
+        cravingNoteAttribute.name = "note"
+        cravingNoteAttribute.attributeType = .stringAttributeType
+        cravingNoteAttribute.isOptional = true
+        
+        let cravingDateAttribute = NSAttributeDescription()
+        cravingDateAttribute.name = "date"
+        cravingDateAttribute.attributeType = .dateAttributeType
+        cravingDateAttribute.isOptional = false
+        cravingDateAttribute.defaultValue = Date()
+        
+        cravingEntity.properties = [
+            cravingIdAttribute,
+            intensityAttribute,
+            triggerAttribute,
+            locationAttribute,
+            durationAttribute,
+            cravingNoteAttribute,
+            cravingDateAttribute
+        ]
+        
+        model.entities = [userEntity, transactionEntity, cravingEntity]
         return model
     }
 }
