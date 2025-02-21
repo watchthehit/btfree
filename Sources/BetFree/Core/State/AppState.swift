@@ -140,6 +140,7 @@ public class AppState: ObservableObject {
     private let subscriptionStatusKey = "BFSubscriptionStatus"
     private let colorSchemeKey = "BFColorScheme"
     
+    @MainActor
     public static let preview: AppState = {
         let state = AppState(dataManager: MockCDManager.shared)
         state.username = "Preview User"
