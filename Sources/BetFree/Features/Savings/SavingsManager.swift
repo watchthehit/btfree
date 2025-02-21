@@ -54,7 +54,7 @@ public class SavingsManager: ObservableObject {
         dailyAverage = totalSaved / Double(max(1, days))
     }
     
-    public func addSaving(_ amount: Double) {
+    public func addSaving(_ amount: Double, sport: Sport = .football) {
         totalSaved += amount
         
         // Save amount for today
@@ -62,7 +62,7 @@ public class SavingsManager: ObservableObject {
         savingsByDate[dateString] = (savingsByDate[dateString] ?? 0) + amount
         
         // Add to recent savings
-        let saving = Saving(amount: amount, date: Date(), sport: "", notes: nil)
+        let saving = Saving(amount: amount, date: Date(), sport: sport, note: nil)
         recentSavings.insert(saving, at: 0)
         
         // Keep only last 10 savings
