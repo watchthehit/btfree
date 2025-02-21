@@ -1,6 +1,6 @@
 import Foundation
 
-public enum Sport: String, Hashable, CaseIterable, Identifiable {
+public enum Sport: String, Hashable, CaseIterable, Identifiable, Codable {
     case football = "Football"
     case basketball = "Basketball"
     case baseball = "Baseball"
