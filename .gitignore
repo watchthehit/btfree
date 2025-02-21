@@ -1,14 +1,18 @@
+# Xcode
+.DS_Store
+xcuserdata/
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+*.xcworkspace/*
+!*.xcworkspace/contents.xcworkspacedata
+DerivedData/
+
 # Swift Package Manager
 .build/
 .swiftpm/
 Package.resolved
-
-# Xcode
-*.xcodeproj
-*.xcworkspace
-xcuserdata/
-DerivedData/
-.DS_Store
 
 # Build artifacts
 build/
@@ -19,3 +23,7 @@ build/
 # User-specific files
 *.xcuserstate
 UserInterfaceState.xcuserstate
+*.xcuserdatad/
+
+# Generated files
+*.generated.swift

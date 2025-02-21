@@ -33,9 +33,8 @@ public struct BetFreeRootView: View {
             do {
                 print("🔄 Starting app initialization")
                 // Wait for Core Data to load
-                if let coreDataManager = appState.dataManager as? CoreDataManager,
-                   let persistenceController = coreDataManager.persistenceController {
-                    try await persistenceController.waitForLoad()
+                if let coreDataManager = appState.dataManager as? CoreDataManager {
+                    try await coreDataManager.persistenceController.waitForLoad()
                 }
                 
                 // Minimum loading time for UX

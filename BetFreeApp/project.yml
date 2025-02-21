@@ -8,25 +8,16 @@ targets:
     type: application
     platform: iOS
     sources:
-      - BetFreeApp
+      - path: BetFreeApp
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.betfree.app
-        DEVELOPMENT_TEAM: ""  # Leave this empty for automatic team selection
+        DEVELOPMENT_TEAM: ""
         CODE_SIGN_IDENTITY: "Apple Development"
         CODE_SIGN_STYLE: Automatic
-        CODE_SIGN_ENTITLEMENTS: BetFreeApp/BetFreeApp.entitlements
-    entitlements:
-      path: BetFreeApp/BetFreeApp.entitlements
-      properties:
-        com.apple.developer.applesignin:
-          - Default
-    capabilities:
-      com.apple.applesignin: {}
     dependencies:
       - package: BetFree
         product: BetFree
 packages:
   BetFree:
     path: ..
-    group: Dependencies

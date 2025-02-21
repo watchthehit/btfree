@@ -2,9 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:BetFreeApp/BetFreeApp.xcodeproj">
+      location = "group:.">
    </FileRef>
    <FileRef
-      location = "group:">
+      location = "group:BetFreeApp/BetFreeApp.xcodeproj">
    </FileRef>
 </Workspace>

@@ -10,7 +10,7 @@ public enum BFDataError: Error {
 
 @MainActor
 public final class CoreDataManager: BetFreeDataManager {
-    public static let shared = CoreDataManager()
+    @MainActor public static let shared = CoreDataManager()
     
     public static var modelInstance: NSManagedObjectModel?
     
