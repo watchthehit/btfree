@@ -88,133 +88,178 @@ public struct HomeView: View {
     }
 }
 
+private struct SavingsSparkline: View {
+    let values: [Double]
+    let height: CGFloat = 30
+    
+    var body: some View {
+        GeometryReader { geometry in
+            Path { path in
+                guard values.count > 1 else { return }
+                
+                let width = geometry.size.width
+                let height = geometry.size.height
+                let step = width / CGFloat(values.count - 1)
+                
+                let points = values.enumerated().map { index, value in
+                    let x = CGFloat(index) * step
+                    let y = (1 - (value / (values.max() ?? 1))) * height
+                    return CGPoint(x: x, y: y)
+                }
+                
+                path.move(to: points[0])
+                for point in points.dropFirst() {
+                    path.addLine(to: point)
+                }
+            }
+            .stroke(BFDesignSystem.Colors.success, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+        }
+        .frame(height: height)
+    }
+}
+
 private struct StreakCard: View {
     let streak: Int
     let savings: Double
     
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(alignment: .leading, spacing: 20) {
+            // Streak section
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Current Streak")
-                        .font(BFDesignSystem.Typography.titleMedium)
-                        .foregroundColor(BFDesignSystem.Colors.textPrimary)
+                        .font(.system(size: 28, weight: .regular))
+                        .foregroundColor(.white)
                     
-                    HStack(alignment: .firstTextBaseline, spacing: 4) {
-                        Text("\(max(0, streak))")
-                            .font(BFDesignSystem.Typography.displayMedium)
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Text("\(streak)")
+                            .font(.system(size: 32, weight: .medium))
                             .foregroundColor(BFDesignSystem.Colors.primary)
                         Text("Days Bet-Free")
-                            .font(BFDesignSystem.Typography.bodyMedium)
-                            .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                            .font(.system(size: 17, weight: .regular))
+                            .foregroundColor(.gray)
                     }
                 }
                 
                 Spacer()
                 
-                Image(systemName: "flame.fill")
-                    .font(.system(size: 40))
-                    .foregroundColor(streak > 0 ? BFDesignSystem.Colors.primary : BFDesignSystem.Colors.textSecondary)
-                    .opacity(streak > 0 ? 1.0 : 0.5)
+                Image(systemName: "flame")
+                    .font(.system(size: 32))
+                    .foregroundColor(.gray)
             }
             
             Divider()
+                .background(Color.gray.opacity(0.3))
             
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Total Savings")
-                        .font(BFDesignSystem.Typography.titleSmall)
-                        .foregroundColor(BFDesignSystem.Colors.textSecondary)
+            // Savings section
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Total Savings")
+                    .font(.system(size: 17, weight: .regular))
+                    .foregroundColor(.gray)
+                
+                HStack {
+                    Text("$\(String(format: "%.2f", savings))")
+                        .font(.system(size: 28, weight: .medium))
+                        .foregroundColor(.green)
                     
-                    Text(formatCurrency(savings))
-                        .font(BFDesignSystem.Typography.titleLarge)
-                        .foregroundColor(BFDesignSystem.Colors.success)
+                    Spacer()
+                    
+                    Button(action: {}) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "plus")
+                                .font(.system(size: 14, weight: .semibold))
+                            Text("Add Saving")
+                                .font(.system(size: 17, weight: .semibold))
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color.blue)
+                        .cornerRadius(8)
+                    }
                 }
-                
-                Spacer()
-                
-                Button(action: {}) {
-                    Label("Add Saving", systemImage: "plus.circle.fill")
-                        .font(BFDesignSystem.Typography.labelLarge)
-                }
-                .buttonStyle(BFButtonStyle())
             }
         }
-        .padding()
-        .background(BFDesignSystem.Colors.secondaryBackground)
+        .padding(20)
+        .background(Color(white: 0.12))
         .cornerRadius(16)
-    }
-    
-    private func formatCurrency(_ value: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        return formatter.string(from: NSNumber(value: max(0, value))) ?? "$0.00"
     }
 }
 
 private struct QuickActionsGrid: View {
+    enum QuickAction: String, CaseIterable {
+        case trackSavings = "Track Savings"
+        case viewProgress = "View Progress"
+        case resources = "Resources"
+        case getHelp = "Get Help"
+        
+        var icon: String {
+            switch self {
+            case .trackSavings: return "dollarsign"
+            case .viewProgress: return "chart.line.uptrend.xyaxis"
+            case .resources: return "book"
+            case .getHelp: return "phone"
+            }
+        }
+        
+        var iconColor: Color {
+            switch self {
+            case .trackSavings: return .green
+            case .viewProgress: return .purple
+            case .resources: return .yellow
+            case .getHelp: return .red
+            }
+        }
+        
+        var circleColor: Color {
+            iconColor.opacity(0.3)
+        }
+    }
+    
     var body: some View {
         LazyVGrid(columns: [
             GridItem(.flexible()),
             GridItem(.flexible())
-        ], spacing: 16) {
-            QuickActionButton(
-                title: "Track Savings",
-                icon: "dollarsign.circle.fill",
-                color: BFDesignSystem.Colors.success
-            ) {
-                // Navigate to savings tracking
-            }
-            
-            QuickActionButton(
-                title: "View Progress",
-                icon: "chart.line.uptrend.xyaxis",
-                color: BFDesignSystem.Colors.primary
-            ) {
-                // Navigate to progress view
-            }
-            
-            QuickActionButton(
-                title: "Resources",
-                icon: "book.fill",
-                color: BFDesignSystem.Colors.warning
-            ) {
-                // Navigate to resources
-            }
-            
-            QuickActionButton(
-                title: "Get Help",
-                icon: "phone.fill",
-                color: .red
-            ) {
-                // Show emergency contacts
+        ], spacing: 12) {
+            ForEach(QuickAction.allCases, id: \.self) { action in
+                Button(action: {
+                    handleAction(action)
+                }) {
+                    VStack(spacing: 12) {
+                        Circle()
+                            .fill(action.circleColor)
+                            .frame(width: 64, height: 64)
+                            .overlay(
+                                Image(systemName: action.icon)
+                                    .font(.system(size: 28))
+                                    .foregroundColor(action.iconColor)
+                            )
+                        
+                        Text(action.rawValue)
+                            .font(.system(size: 17))
+                            .foregroundColor(.white)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color(white: 0.15))
+                    .cornerRadius(16)
+                }
+                .buttonStyle(PlainButtonStyle())
             }
         }
+        .padding(.horizontal, 4)
     }
-}
-
-private struct QuickActionButton: View {
-    let title: String
-    let icon: String
-    let color: Color
-    let action: () -> Void
     
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 12) {
-                Image(systemName: icon)
-                    .font(.system(size: 24))
-                    .foregroundColor(color)
-                
-                Text(title)
-                    .font(BFDesignSystem.Typography.labelMedium)
-                    .foregroundColor(BFDesignSystem.Colors.textPrimary)
-            }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(BFDesignSystem.Colors.secondaryBackground)
-            .cornerRadius(12)
+    private func handleAction(_ action: QuickAction) {
+        switch action {
+        case .trackSavings:
+            print("Track savings tapped")
+        case .viewProgress:
+            print("View progress tapped")
+        case .resources:
+            print("Resources tapped")
+        case .getHelp:
+            print("Get help tapped")
         }
     }
 }
@@ -223,24 +268,35 @@ private struct CheckInCard: View {
     let action: () -> Void
     
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) {
             Text("Daily Check-In")
-                .font(BFDesignSystem.Typography.titleMedium)
-                .foregroundColor(BFDesignSystem.Colors.textPrimary)
+                .font(.system(size: 28, weight: .regular))
+                .foregroundColor(.white)
             
             Text("Stay accountable by checking in every day")
-                .font(BFDesignSystem.Typography.bodyMedium)
-                .foregroundColor(BFDesignSystem.Colors.textSecondary)
+                .font(.system(size: 17))
+                .foregroundColor(.gray)
                 .multilineTextAlignment(.center)
+                .padding(.horizontal, 20)
             
             Button(action: action) {
-                Label("Check In Now", systemImage: "checkmark.circle.fill")
-                    .font(BFDesignSystem.Typography.labelLarge)
+                HStack(spacing: 6) {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 16, weight: .medium))
+                    Text("Check In Now")
+                        .font(.system(size: 17, weight: .medium))
+                }
+                .foregroundColor(.blue)
+                .frame(maxWidth: .infinity)
+                .frame(height: 50)
+                .background(Color.white)
+                .cornerRadius(8)
             }
-            .buttonStyle(BFButtonStyle())
+            .padding(.top, 4)
+            .padding(.horizontal, 20)
         }
-        .padding()
-        .background(BFDesignSystem.Colors.secondaryBackground)
+        .padding(.vertical, 24)
+        .background(Color(white: 0.12))
         .cornerRadius(16)
     }
 }
