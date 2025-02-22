@@ -50,7 +50,7 @@ public class AppState: ObservableObject {
                 do {
                     try await dataManager.updateUserStreak()
                     saveSettings()
-                    await handleStreakMilestone()
+                    handleStreakMilestone()
                 } catch {
                     print("Error updating streak: \(error)")
                 }
@@ -252,7 +252,7 @@ public class AppState: ObservableObject {
         }
     }
     
-    private func handleStreakMilestone() async {
+    private func handleStreakMilestone() {
         // Check if notifications are enabled
         guard defaults.bool(forKey: "milestoneAlertsEnabled", defaultValue: true) else {
             return
@@ -262,9 +262,11 @@ public class AppState: ObservableObject {
         let milestones = [7, 30, 90, 180, 365]
         for milestone in milestones {
             if currentStreak == milestone {
-                try? await NotificationService.shared.scheduleMilestoneCelebration(
-                    milestone: "\(milestone) days bet-free"
-                )
+                Task {
+                    try? await NotificationService.shared.scheduleMilestoneCelebration(
+                        milestone: "\(milestone) days bet-free"
+                    )
+                }
                 break
             }
         }

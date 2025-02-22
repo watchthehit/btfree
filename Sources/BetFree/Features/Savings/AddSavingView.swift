@@ -117,7 +117,7 @@ public struct AddSavingView: View {
 
 @MainActor
 final class AddSavingViewModel: ObservableObject {
-    @Published var selectedSport: Sport = .football
+    @Published var selectedSport: Sport = .baseball
     @Published var amount = ""
     @Published var date = Date()
     @Published var notes = ""

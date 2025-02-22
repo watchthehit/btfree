@@ -1,8 +1,6 @@
 import Foundation
 
 public enum Sport: String, Hashable, CaseIterable, Identifiable, Codable {
-    case football = "Football"
-    case basketball = "Basketball"
     case baseball = "Baseball"
     case hockey = "Hockey"
     case soccer = "Soccer"
@@ -18,16 +16,14 @@ public enum Sport: String, Hashable, CaseIterable, Identifiable, Codable {
     
     public var iconName: String {
         switch self {
-        case .football: return "sportscourt.fill"
-        case .basketball: return "basketball.fill"
-        case .baseball: return "baseball.fill"
-        case .hockey: return "hockey.puck.fill"
-        case .soccer: return "soccer.ball.inverse"
+        case .baseball: return "baseball"
+        case .hockey: return "hockey.puck"
+        case .soccer: return "soccerball"
         case .tennis: return "tennis.racket"
         case .golf: return "figure.golf"
         case .boxing: return "figure.boxing"
-        case .mma: return "figure.martial.arts"
-        case .racing: return "car.fill"
+        case .mma: return "figure.boxing"
+        case .racing: return "car"
         }
     }
 } 

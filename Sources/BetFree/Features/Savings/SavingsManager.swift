@@ -54,7 +54,7 @@ public class SavingsManager: ObservableObject {
         dailyAverage = totalSaved / Double(max(1, days))
     }
     
-    public func addSaving(_ amount: Double, sport: Sport = .football) {
+    public func addSaving(_ amount: Double, sport: Sport = .baseball) {
         totalSaved += amount
         
         // Save amount for today
