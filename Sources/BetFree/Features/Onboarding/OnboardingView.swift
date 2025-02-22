@@ -10,8 +10,7 @@ public struct OnboardingView: View {
     @MainActor
     public init() {
         print("Initializing OnboardingView...")
-        let dataManager = MockCDManager.shared
-        _viewModel = StateObject(wrappedValue: OnboardingViewModel(dataManager: dataManager))
+        _viewModel = StateObject(wrappedValue: OnboardingViewModel(dataManager: CoreDataManager.shared))
         print("OnboardingView initialized with viewModel")
     }
     
@@ -20,7 +19,7 @@ public struct OnboardingView: View {
             ZStack {
                 // Background gradient
                 LinearGradient(
-                    colors: [Color.blue.opacity(0.8), Color.purple.opacity(0.6)],
+                    colors: [BFDesignSystem.Colors.primary, BFDesignSystem.Colors.primary.opacity(0.6)],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -66,7 +65,7 @@ public struct OnboardingView: View {
                         featuresStep
                             .tag(OnboardingStep.features)
                     }
-                    .tabViewStyle(.automatic)
+                    .tabViewStyle(.page(indexDisplayMode: .never))
                     .animation(.easeInOut, value: viewModel.currentStep)
                     
                     // Navigation buttons
@@ -951,69 +950,76 @@ final class OnboardingViewModel: ObservableObject {
     private weak var appState: AppState?
     
     init(dataManager: BetFreeDataManager) {
+        print("📱 Initializing OnboardingViewModel with dataManager")
         self.dataManager = dataManager
     }
     
     func updateAppState(_ newAppState: AppState) {
+        print("📱 Updating AppState in OnboardingViewModel")
         self.appState = newAppState
     }
     
     func completeOnboarding() async throws {
-        print("Starting onboarding completion...")
+        print("📱 Starting onboarding completion...")
         guard let appState = appState else {
-            print("AppState is nil!")
+            print("❌ AppState is nil!")
             throw OnboardingError.appStateNotFound
         }
         
-        print("Validating fields...")
+        print("📱 Validating fields...")
         // Validate required fields
         guard !name.isEmpty else { 
-            print("Name is empty")
+            print("❌ Name is empty")
             throw OnboardingError.nameRequired 
         }
         guard !email.isEmpty else { 
-            print("Email is empty")
+            print("❌ Email is empty")
             throw OnboardingError.emailRequired 
         }
         guard !password.isEmpty else { 
-            print("Password is empty")
+            print("❌ Password is empty")
             throw OnboardingError.passwordRequired 
         }
         guard let firstGoal = goals.first, !firstGoal.isEmpty else { 
-            print("No goals set")
+            print("❌ No goals set")
             throw OnboardingError.goalRequired 
         }
         guard !selectedSports.isEmpty else { 
-            print("No sports selected")
+            print("❌ No sports selected")
             throw OnboardingError.sportsRequired 
         }
         
-        print("All fields validated, proceeding with onboarding completion...")
-        isLoading = true
+        print("✅ All fields validated, proceeding with onboarding completion...")
+        await MainActor.run {
+            isLoading = true
+        }
         
         do {
-            print("Saving user data...")
+            print("📱 Saving user data...")
             // Save user data
-            try dataManager.createOrUpdateUser(
+            try await dataManager.createOrUpdateUser(
                 name: name,
                 email: email,
                 dailyLimit: dailyLimitDouble
             )
             
-            print("Updating app state...")
-            // Update app state
-            withAnimation {
+            print("📱 Updating app state...")
+            // Update app state on the main actor
+            await MainActor.run {
                 appState.completeOnboarding()
                 appState.username = name
                 appState.dailyLimit = dailyLimitDouble
                 appState.preferredSports = Array(selectedSports.map(\.rawValue))
+                isLoading = false
+                print("✅ App state updated successfully")
             }
             
-            print("Onboarding completed successfully")
-            isLoading = false
+            print("✅ Onboarding completed successfully")
         } catch {
-            print("Error during onboarding completion: \(error)")
-            isLoading = false
+            await MainActor.run {
+                isLoading = false
+            }
+            print("❌ Error during onboarding completion: \(error)")
             throw error
         }
     }

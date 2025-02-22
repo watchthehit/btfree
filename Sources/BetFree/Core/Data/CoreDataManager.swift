@@ -225,4 +225,15 @@ public final class CoreDataManager: BetFreeDataManager {
             print("❌ Error resetting Core Data: \(error)")
         }
     }
+    
+    private func storeURL() -> URL {
+        let appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let appName = "BetFreeApp"
+        let appDirectory = appSupportURL.appendingPathComponent(appName, isDirectory: true)
+        
+        // Create directory if it doesn't exist
+        try? FileManager.default.createDirectory(at: appDirectory, withIntermediateDirectories: true)
+        
+        return appDirectory.appendingPathComponent("BetFree.sqlite")
+    }
 }

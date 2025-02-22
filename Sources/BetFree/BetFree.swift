@@ -9,9 +9,17 @@ public struct BetFreeRootView: View {
     @State private var error: Error?
     
     @MainActor
-    public init(dataManager: BetFreeDataManager = CoreDataManager.shared) {
+    public init(dataManager: BetFreeDataManager? = nil) {
         print("🔄 Initializing BetFreeRootView")
-        _appState = StateObject(wrappedValue: AppState(dataManager: dataManager))
+        // Ensure we're creating the data manager on the main thread
+        let resolvedDataManager = dataManager ?? {
+            print("📱 Creating Core Data manager on main thread")
+            return CoreDataManager.shared
+        }()
+        
+        // Initialize AppState with the resolved data manager
+        _appState = StateObject(wrappedValue: AppState(dataManager: resolvedDataManager))
+        print("📱 AppState initialized with data manager")
     }
     
     public var body: some View {
@@ -32,19 +40,29 @@ public struct BetFreeRootView: View {
         .task {
             do {
                 print("🔄 Starting app initialization")
+                
                 // Wait for Core Data to load
                 if let coreDataManager = appState.dataManager as? CoreDataManager {
                     try await coreDataManager.persistenceController.waitForLoad()
+                    print("✅ Core Data loaded successfully")
                 }
+                
+                // Load user profile
+                await appState.loadUserProfile()
+                print("✅ User profile loaded")
                 
                 // Minimum loading time for UX
                 try await Task.sleep(nanoseconds: 500_000_000)
                 
-                print("✅ App initialization complete")
-                isLoading = false
+                await MainActor.run {
+                    print("✅ App initialization complete")
+                    isLoading = false
+                }
             } catch {
                 print("❌ Error during initialization: \(error)")
-                self.error = error
+                await MainActor.run {
+                    self.error = error
+                }
             }
         }
     }

@@ -31,64 +31,78 @@ public class AppState: ObservableObject {
         }
     }
     
-    @Published public var username: String {
+    @Published public var username: String = "" {
         didSet { 
-            try? dataManager.createOrUpdateUser(name: username, email: nil, dailyLimit: dailyLimit)
-            saveSettings()
-        }
-    }
-    
-    @Published public var currentStreak: Int {
-        didSet { 
-            do {
-                try dataManager.updateUserStreak()
-                saveSettings()
-                handleStreakMilestone()
-            } catch {
-                print("Error updating streak: \(error)")
+            Task {
+                do {
+                    try await dataManager.createOrUpdateUser(name: username, email: nil, dailyLimit: dailyLimit)
+                    saveSettings()
+                } catch {
+                    print("Error updating user: \(error)")
+                }
             }
         }
     }
     
-    @Published public var totalSavings: Double {
+    @Published public var currentStreak: Int = 0 {
+        didSet { 
+            Task {
+                do {
+                    try await dataManager.updateUserStreak()
+                    saveSettings()
+                    await handleStreakMilestone()
+                } catch {
+                    print("Error updating streak: \(error)")
+                }
+            }
+        }
+    }
+    
+    @Published public var totalSavings: Double = 0 {
         didSet {
             saveSettings()
             handleSavingsMilestone(oldValue: oldValue)
         }
     }
     
-    @Published public var dailyLimit: Double {
+    @Published public var dailyLimit: Double = 0 {
         didSet {
-            try? dataManager.createOrUpdateUser(name: username, email: nil, dailyLimit: dailyLimit)
-            saveSettings()
+            Task {
+                do {
+                    try await dataManager.createOrUpdateUser(name: username, email: nil, dailyLimit: dailyLimit)
+                    saveSettings()
+                } catch {
+                    print("Error updating daily limit: \(error)")
+                }
+            }
         }
     }
     
-    @Published public var isOnboarded: Bool {
-        didSet {
-            saveSettings()
-        }
-    }
-    
-    @Published public var selectedTab: Int {
-        didSet {
-            saveSettings()
-        }
-    }
-    
-    @Published public var hasBlockedApps: Bool {
+    @Published public var isOnboarded: Bool = false {
         didSet {
             saveSettings()
         }
     }
     
-    @Published public var typicalBetAmount: Double {
+    @Published public var selectedTab: Int = 0 {
         didSet {
             saveSettings()
         }
     }
     
-    @Published public var preferredSports: [String] {
+    @Published public var hasBlockedApps: Bool = false {
+        didSet {
+            saveSettings()
+        }
+    }
+    
+    @Published public var typicalBetAmount: Double = 0 {
+        didSet {
+            saveSettings()
+        }
+    }
+    
+    @Published public var preferredSports: [String] = [] {
         didSet {
             saveSettings()
         }
@@ -153,7 +167,8 @@ public class AppState: ObservableObject {
     }()
     
     @MainActor
-    public init(dataManager: BetFreeDataManager = MockCDManager.shared) {
+    public init(dataManager: BetFreeDataManager) {
+        print("📱 Initializing AppState")
         self.dataManager = dataManager
         
         // Load saved settings
@@ -176,23 +191,23 @@ public class AppState: ObservableObject {
         if let statusData = defaults.data(forKey: subscriptionStatusKey),
            let status = try? JSONDecoder().decode(BFUserState.self, from: statusData) {
             self.subscriptionStatus = status
-        } else {
-            self.subscriptionStatus = .expired
         }
         
-        // Load user profile from Core Data
-        Task {
-            await loadUserProfile()
-        }
+        print("📱 AppState initialized with settings")
     }
     
-    private func loadUserProfile() async {
-        if let user = dataManager.getCurrentUser() {
-            let name = user.name
-            self.username = name
+    @MainActor
+    public func loadUserProfile() async {
+        print("📱 Loading user profile")
+        if let user = await dataManager.getCurrentUser() {
+            print("📱 User profile found")
+            self.username = user.name
             self.currentStreak = Int(user.streak)
             self.totalSavings = user.totalSavings
             self.dailyLimit = user.dailyLimit
+            print("📱 User profile loaded: \(user.name)")
+        } else {
+            print("📱 No user profile found")
         }
     }
     
@@ -237,22 +252,20 @@ public class AppState: ObservableObject {
         }
     }
     
-    private func handleStreakMilestone() {
-        Task {
-            // Check if notifications are enabled
-            guard defaults.bool(forKey: "milestoneAlertsEnabled", defaultValue: true) else {
-                return
-            }
-            
-            // Check for streak milestones
-            let milestones = [7, 30, 90, 180, 365]
-            for milestone in milestones {
-                if currentStreak == milestone {
-                    try? await NotificationService.shared.scheduleMilestoneCelebration(
-                        milestone: "\(milestone) days bet-free"
-                    )
-                    break
-                }
+    private func handleStreakMilestone() async {
+        // Check if notifications are enabled
+        guard defaults.bool(forKey: "milestoneAlertsEnabled", defaultValue: true) else {
+            return
+        }
+        
+        // Check for streak milestones
+        let milestones = [7, 30, 90, 180, 365]
+        for milestone in milestones {
+            if currentStreak == milestone {
+                try? await NotificationService.shared.scheduleMilestoneCelebration(
+                    milestone: "\(milestone) days bet-free"
+                )
+                break
             }
         }
     }

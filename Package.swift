@@ -3,10 +3,16 @@ import PackageDescription
 
 let package = Package(
     name: "BetFree",
+    defaultLocalization: "en",
     platforms: [
+        .macOS(.v13),
         .iOS(.v16)
     ],
     products: [
+        .executable(
+            name: "BetFreeApp",
+            targets: ["BetFreeApp"]
+        ),
         .library(
             name: "BetFree",
             targets: ["BetFree"]
@@ -24,6 +30,19 @@ let package = Package(
         .package(url: "https://github.com/pointfreeco/swift-composable-architecture", exact: "1.2.0")
     ],
     targets: [
+        .executableTarget(
+            name: "BetFreeApp",
+            dependencies: [
+                "BetFree",
+                "BetFreeUI",
+                "BetFreeModels",
+                .product(name: "ComposableArchitecture", package: "swift-composable-architecture")
+            ],
+            path: "Sources/BetFreeApp",
+            swiftSettings: [
+                .define("DEBUG", .when(configuration: .debug))
+            ]
+        ),
         .target(
             name: "BetFree",
             dependencies: [
@@ -31,14 +50,20 @@ let package = Package(
                 "BetFreeUI",
                 "BetFreeModels"
             ],
-            path: "Sources/BetFree"
+            path: "Sources/BetFree",
+            resources: [
+                .process("Resources")
+            ]
         ),
         .target(
             name: "BetFreeUI",
             dependencies: [
                 .product(name: "ComposableArchitecture", package: "swift-composable-architecture")
             ],
-            path: "BetFreeUI/Sources/BetFreeUI"
+            path: "BetFreeUI/Sources/BetFreeUI",
+            resources: [
+                .process("Resources")
+            ]
         ),
         .target(
             name: "BetFreeModels",
