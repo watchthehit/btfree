@@ -4,20 +4,22 @@ struct CravingReport: Identifiable, Codable {
     var id = UUID()
     var date: Date
     var intensity: Int
-    var trigger: String?
+    var trigger: String
     var notes: String?
     var didGiveIn: Bool
     var location: String?
     var duration: TimeInterval?
+    var emotionalState: String?
     
     init(
         date: Date = Date(),
         intensity: Int,
-        trigger: String? = nil,
+        trigger: String,
         notes: String? = nil,
         didGiveIn: Bool = false,
         location: String? = nil,
-        duration: TimeInterval? = nil
+        duration: TimeInterval? = nil,
+        emotionalState: String? = nil
     ) {
         self.date = date
         self.intensity = intensity
@@ -26,6 +28,7 @@ struct CravingReport: Identifiable, Codable {
         self.didGiveIn = didGiveIn
         self.location = location
         self.duration = duration
+        self.emotionalState = emotionalState
     }
 }
 

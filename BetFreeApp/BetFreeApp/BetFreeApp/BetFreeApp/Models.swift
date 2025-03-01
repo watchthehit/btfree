@@ -130,4 +130,62 @@ extension MindfulnessExercise {
             category: .gratitude
         )
     ]
+}
+
+// Notification type model for onboarding
+struct NotificationType: Identifiable, Hashable {
+    var id = UUID()
+    var name: String
+    var icon: String
+    var isEnabled: Bool
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    static func == (lhs: NotificationType, rhs: NotificationType) -> Bool {
+        lhs.id == rhs.id
+    }
+}
+
+// MARK: - PricingPlan
+enum PricingPlan: String, Codable, CaseIterable {
+    case yearly
+    case monthly
+    
+    var displayName: String {
+        switch self {
+        case .yearly:
+            return "Annual Plan"
+        case .monthly:
+            return "Monthly Plan"
+        }
+    }
+    
+    var price: Double {
+        switch self {
+        case .yearly:
+            return 49.99
+        case .monthly:
+            return 9.99
+        }
+    }
+    
+    var billingPeriod: String {
+        switch self {
+        case .yearly:
+            return "per year"
+        case .monthly:
+            return "per month"
+        }
+    }
+    
+    var savingsDescription: String? {
+        switch self {
+        case .yearly:
+            return "Save 50% compared to monthly"
+        case .monthly:
+            return nil
+        }
+    }
 } 

@@ -189,7 +189,7 @@ struct SoftGateScreen: View {
                     Button(action: {
                         // Start free trial and continue
                         viewModel.hasAgreedToFreeTrial = true
-                        viewModel.nextPage()
+                        viewModel.nextScreen()
                     }) {
                         HStack {
                             Text("Start Free Trial")
@@ -201,7 +201,7 @@ struct SoftGateScreen: View {
                     Button(action: {
                         // Skip trial and continue
                         viewModel.hasAgreedToFreeTrial = false
-                        viewModel.nextPage()
+                        viewModel.nextScreen()
                     }) {
                         Text("Continue with Basic Version")
                     }

@@ -1,33 +1,94 @@
 import SwiftUI
 
 struct BFColors {
-    // Primary colors
-    static let primary = Color("Primary", bundle: nil, defaultColor: Color(hex: "#3B82F6")) // Blue
-    static let secondary = Color("Secondary", bundle: nil, defaultColor: Color(hex: "#10B981")) // Green
-    static let accent = Color("Accent", bundle: nil, defaultColor: Color(hex: "#8B5CF6")) // Purple
+    // Primary Colors - Base Palette
+    static let primary = Color(hex: "#3B82F6") // Blue
+    static let secondary = Color(hex: "#10B981") // Green
+    static let accent = Color(hex: "#8B5CF6") // Purple
     
-    // Background colors
-    static let background = Color("Background", bundle: nil, defaultColor: Color(hex: "#FFFFFF")) // White
-    static let secondaryBackground = Color("SecondaryBackground", bundle: nil, defaultColor: Color(hex: "#F3F4F6")) // Light Gray
+    // Functional Colors
+    static let success = Color(hex: "#10B981") // Green
+    static let warning = Color(hex: "#F59E0B") // Amber
+    static let error = Color(hex: "#EF4444") // Red
     
-    // Text colors
-    static let textPrimary = Color("TextPrimary", bundle: nil, defaultColor: Color(hex: "#1F2937")) // Dark Gray
-    static let textSecondary = Color("TextSecondary", bundle: nil, defaultColor: Color(hex: "#6B7280")) // Medium Gray
-    static let textTertiary = Color("TextTertiary", bundle: nil, defaultColor: Color(hex: "#9CA3AF")) // Light Gray
+    // Theme Colors - For different emotional states
+    static let calm = Color(hex: "#67E8F9") // Cyan
+    static let focus = Color(hex: "#A78BFA") // Lavender
+    static let hope = Color(hex: "#34D399") // Teal
     
-    // Semantic colors
-    static let success = Color("Success", bundle: nil, defaultColor: Color(hex: "#10B981")) // Green
-    static let warning = Color("Warning", bundle: nil, defaultColor: Color(hex: "#F59E0B")) // Amber
-    static let error = Color("Error", bundle: nil, defaultColor: Color(hex: "#EF4444")) // Red
-    static let info = Color("Info", bundle: nil, defaultColor: Color(hex: "#3B82F6")) // Blue
+    // Neutral Colors - For backgrounds, cards, and text - with dark mode support
+    static let background = adaptiveColor(light: Color(hex: "#FFFFFF"), dark: Color(hex: "#1F2937"))
+    static let cardBackground = adaptiveColor(light: Color(hex: "#F9FAFB"), dark: Color(hex: "#374151"))
+    static let textPrimary = adaptiveColor(light: Color(hex: "#1F2937"), dark: Color(hex: "#F9FAFB"))
+    static let textSecondary = adaptiveColor(light: Color(hex: "#6B7280"), dark: Color(hex: "#D1D5DB"))
+    static let textTertiary = adaptiveColor(light: Color(hex: "#9CA3AF"), dark: Color(hex: "#9CA3AF"))
+    static let divider = adaptiveColor(light: Color(hex: "#E5E7EB"), dark: Color(hex: "#4B5563"))
     
-    // Custom colors for specific features
-    static let calm = Color("Calm", bundle: nil, defaultColor: Color(hex: "#67E8F9")) // Light Blue
-    static let focus = Color("Focus", bundle: nil, defaultColor: Color(hex: "#A78BFA")) // Lavender
-    static let energy = Color("Energy", bundle: nil, defaultColor: Color(hex: "#FBBF24")) // Yellow
+    // Helper Functions for Dynamic Coloring
+    static func progressGradient() -> LinearGradient {
+        LinearGradient(
+            gradient: Gradient(colors: [primary, accent]),
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+    }
+    
+    static func calmingGradient() -> LinearGradient {
+        LinearGradient(
+            gradient: Gradient(colors: [calm.opacity(0.6), calm]),
+            startPoint: .top,
+            endPoint: .bottom
+        )
+    }
+    
+    static func themeGradient(for theme: AppState.AppTheme) -> LinearGradient {
+        switch theme {
+        case .standard:
+            return progressGradient()
+        case .calm:
+            return calmingGradient()
+        case .focus:
+            return LinearGradient(
+                gradient: Gradient(colors: [focus.opacity(0.7), focus]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        case .hope:
+            return LinearGradient(
+                gradient: Gradient(colors: [hope.opacity(0.6), hope]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        }
+    }
+    
+    // Helper to get color based on craving intensity
+    static func intensityColor(for level: Int) -> Color {
+        switch level {
+        case 0...3:
+            return calm
+        case 4...6:
+            return warning
+        case 7...10:
+            return error
+        default:
+            return primary
+        }
+    }
+    
+    // Dark mode adjustments
+    static func adaptiveColor(light: Color, dark: Color) -> Color {
+        #if os(iOS)
+        return Color(.init { traitCollection in
+            return traitCollection.userInterfaceStyle == .dark ? UIColor(dark) : UIColor(light)
+        })
+        #else
+        return light
+        #endif
+    }
 }
 
-// Extension to create colors from hex values
+// We'll keep the extension here for reference, but it's also in ColorExtensions.swift
 extension Color {
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
