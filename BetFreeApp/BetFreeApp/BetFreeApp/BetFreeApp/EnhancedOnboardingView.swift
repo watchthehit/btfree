@@ -363,8 +363,8 @@ struct EnhancedOnboardingView: View {
     
     var body: some View {
         ZStack {
-            // Apply background
-            BFColors.background
+            // Teal background color from screenshot
+            Color(hex: "#3DDFD3")
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -496,7 +496,7 @@ struct CombinedValuePropositionView: View {
     var body: some View {
         ZStack {
             // Teal background color from screenshot
-            Color(UIColor(hex: "#3DDFD3"))
+            Color(hex: "#3DDFD3")
                 .ignoresSafeArea()
             
             VStack {
