@@ -105,11 +105,12 @@ class OnboardingViewModel: ObservableObject {
 // MARK: - Main Onboarding View
 struct EnhancedOnboardingView: View {
     @StateObject private var viewModel = OnboardingViewModel()
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         ZStack {
-            // STATIC BACKGROUND - NO ANIMATIONS
-            Color(hex: "#2C3550")
+            // Apply Serene Strength deep space background
+            BFColors.background
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -127,12 +128,12 @@ struct EnhancedOnboardingView: View {
                                 Text("Back")
                                     .fontWeight(.medium)
                             }
-                            .foregroundColor(.white)
+                            .foregroundColor(BFColors.textPrimary)
                             .padding(.vertical, 6)
                             .padding(.horizontal, 12)
                             .background(
                                 Capsule()
-                                    .fill(Color.white.opacity(0.2))
+                                    .fill(BFColors.cardBackground.opacity(0.2))
                                     .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 1)
                             )
                         }
@@ -147,14 +148,14 @@ struct EnhancedOnboardingView: View {
                     Spacer()
                     
                     VStack(spacing: 4) {
-                        // Progress bar
+                        // Progress bar with vibrant teal
                         ProgressView(value: viewModel.progressValue)
-                            .progressViewStyle(LinearProgressViewStyle(tint: Color.white))
+                            .progressViewStyle(LinearProgressViewStyle(tint: BFColors.secondary))
                             .frame(width: 120, height: 4)
                         
                         Text("Step \(viewModel.currentScreenIndex + 1) of \(viewModel.screens.count)")
                             .font(.caption)
-                            .foregroundColor(.white.opacity(0.9))
+                            .foregroundColor(BFColors.textSecondary)
                     }
                     .padding(.vertical, 10)
                     
@@ -175,12 +176,12 @@ struct EnhancedOnboardingView: View {
                         } label: {
                             Text("Skip")
                                 .fontWeight(.medium)
-                                .foregroundColor(.white.opacity(0.9))
+                                .foregroundColor(BFColors.textSecondary)
                                 .padding(.vertical, 6)
                                 .padding(.horizontal, 12)
                                 .background(
                                     Capsule()
-                                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                                        .stroke(BFColors.secondary.opacity(0.3), lineWidth: 1)
                                 )
                         }
                         .buttonStyle(PlainButtonStyle())
@@ -220,16 +221,16 @@ struct EnhancedOnboardingView: View {
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 .animation(.spring(response: 0.5, dampingFraction: 0.8), value: viewModel.currentScreenIndex)
                 
-                // Dots indicator
+                // Dots indicator with vibrant teal
                 HStack(spacing: 8) {
                     ForEach(0..<viewModel.screens.count, id: \.self) { index in
                         Circle()
                             .fill(viewModel.currentScreenIndex == index ? 
-                                  Color.white : Color.white.opacity(0.3))
+                                  BFColors.secondary : BFColors.secondary.opacity(0.3))
                             .frame(width: 8, height: 8)
                             .scaleEffect(viewModel.currentScreenIndex == index ? 1.3 : 1.0)
                             .shadow(color: viewModel.currentScreenIndex == index ? 
-                                    Color.white.opacity(0.5) : Color.clear, radius: 4)
+                                    BFColors.secondary.opacity(0.5) : Color.clear, radius: 4)
                     }
                 }
                 .padding(.vertical, 16)
@@ -251,9 +252,9 @@ struct EnhancedOnboardingView: View {
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
                             .background(
-                                Color(hex: "#4CAF50")
+                                BFColors.secondary
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
+                                .shadow(color: BFColors.secondary.opacity(0.3), radius: 8, x: 0, y: 4)
                             )
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -263,6 +264,11 @@ struct EnhancedOnboardingView: View {
             }
         }
         .ignoresSafeArea(edges: .bottom)
+        .preferredColorScheme(.dark) // Force dark mode for consistent appearance
+        .onAppear {
+            // Force UI appearance to dark mode on UIKit level
+            UIApplication.shared.windows.first?.overrideUserInterfaceStyle = .dark
+        }
     }
 }
 
@@ -278,13 +284,13 @@ struct WelcomeScreen: View {
                     Text("Welcome to BetFree")
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundColor(BFColors.textPrimary)
                         .opacity(showContent ? 1 : 0)
                         .offset(y: showContent ? 0 : -20)
                     
                     Text("Your journey to gambling-free living starts here")
                         .font(.title3)
-                        .foregroundColor(.white.opacity(0.9))
+                        .foregroundColor(BFColors.textSecondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 30)
                         .opacity(showContent ? 1 : 0)
@@ -292,20 +298,20 @@ struct WelcomeScreen: View {
                 }
                 .padding(.top, 30)
                 
-                // Main illustration - SIMPLIFIED, NO ANIMATIONS
+                // Main illustration - Use Serene Strength colors
                 ZStack {
                     Circle()
-                        .fill(Color.white.opacity(0.15))
+                        .fill(Color(hex: "#415A77").opacity(0.15)) // Ocean Blue
                         .frame(width: 220, height: 220)
                     
                     Circle()
-                        .fill(Color.white.opacity(0.1))
+                        .fill(Color(hex: "#1B263B").opacity(0.2)) // Darker Navy blue
                         .frame(width: 260, height: 260)
                     
                     Image(systemName: "heart.circle.fill")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .foregroundColor(Color(hex: "#4CAF50"))
+                        .foregroundColor(Color(hex: "#64FFDA")) // Vibrant Teal
                         .frame(width: 140, height: 140)
                         .scaleEffect(showContent ? 1 : 0.8)
                         .opacity(showContent ? 1 : 0)
@@ -317,7 +323,7 @@ struct WelcomeScreen: View {
                 VStack(spacing: 20) {
                     Text("How BetFree Helps You")
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundColor(BFColors.textPrimary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 25)
                         .opacity(showContent ? 1 : 0)
@@ -334,7 +340,7 @@ struct WelcomeScreen: View {
                 VStack(spacing: 15) {
                     Text("Premium Features Included")
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundColor(BFColors.textPrimary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 25)
                         .opacity(showContent ? 1 : 0)
@@ -344,18 +350,18 @@ struct WelcomeScreen: View {
                             VStack(spacing: 8) {
                                 Image(systemName: feature.icon)
                                     .font(.system(size: 28))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(BFColors.textPrimary)
                                 
                                 Text(feature.title)
                                     .font(.caption)
-                                    .foregroundColor(.white.opacity(0.9))
+                                    .foregroundColor(BFColors.textSecondary)
                                     .multilineTextAlignment(.center)
                             }
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 15)
                             .background(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color.white.opacity(0.15))
+                                    .fill(BFColors.cardBackground)
                             )
                         }
                     }
@@ -367,7 +373,8 @@ struct WelcomeScreen: View {
             }
             .padding(.bottom, 20)
         }
-        .background(Color(hex: "#2C3550"))
+        // Use Serene Strength deep space background
+        .background(Color(hex: "#0D1B2A"))
         .onAppear {
             withAnimation(.easeOut(duration: 0.5)) {
                 showContent = true
@@ -401,22 +408,22 @@ struct BenefitRow: View {
         HStack(spacing: 15) {
             ZStack {
                 Circle()
-                    .fill(Color.white.opacity(0.15))
+                    .fill(BFColors.primary.opacity(0.15))
                     .frame(width: 46, height: 46)
                 
                 Image(systemName: icon)
                     .font(.system(size: 20))
-                    .foregroundColor(.white)
+                    .foregroundColor(BFColors.textPrimary)
             }
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(BFColors.textPrimary)
                 
                 Text(description)
                     .font(.footnote)
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(BFColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
             
@@ -426,7 +433,7 @@ struct BenefitRow: View {
         .padding(.horizontal, 16)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(0.1))
+                .fill(BFColors.cardBackground)
         )
         .padding(.horizontal, 25)
         .opacity(appear ? 1 : 0)
@@ -449,18 +456,18 @@ struct PersonalSetupScreen: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 60, height: 60)
-                    .foregroundColor(.white)
+                    .foregroundColor(BFColors.primary)
                     .padding(.top, 20)
                 
                 Text("What's your name?")
                     .font(.system(size: 28, weight: .bold))
                     .multilineTextAlignment(.center)
-                    .foregroundColor(.white)
+                    .foregroundColor(BFColors.textPrimary)
                 
                 Text("This helps us personalize your journey to quit.")
                     .font(.body)
                     .multilineTextAlignment(.center)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(BFColors.textSecondary)
                     .padding(.horizontal)
                     .padding(.bottom, 20)
                 
@@ -468,8 +475,8 @@ struct PersonalSetupScreen: View {
                 VStack(spacing: 8) {
                     TextField("Enter your name", text: $username)
                         .padding()
-                        .background(Color.white)
-                        .foregroundColor(.black)
+                        .background(BFColors.cardBackground)
+                        .foregroundColor(BFColors.textPrimary)
                         .cornerRadius(10)
                         .focused($isUsernameFocused)
                         .autocorrectionDisabled()
@@ -477,7 +484,7 @@ struct PersonalSetupScreen: View {
                     
                     Text("Enter your name above to continue")
                         .font(.caption)
-                        .foregroundColor(Color.white.opacity(0.7))
+                        .foregroundColor(BFColors.textSecondary)
                 }
                 .padding(.horizontal, 30)
                 
@@ -486,17 +493,17 @@ struct PersonalSetupScreen: View {
                 Text("What triggers your urges?")
                     .font(.system(size: 28, weight: .bold))
                     .multilineTextAlignment(.center)
-                    .foregroundColor(.white)
+                    .foregroundColor(BFColors.textPrimary)
                     .padding(.top, 20)
                 
                 Text("Select all that apply to you.")
                     .font(.body)
                     .multilineTextAlignment(.center)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(BFColors.textSecondary)
                     .padding(.horizontal)
                     .padding(.bottom, 10)
                 
-                // SIMPLIFIED TRIGGER BUTTONS - NO ANIMATIONS
+                // Trigger buttons with BFColors
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                     ForEach(viewModel.availableTriggers, id: \.self) { trigger in
                         Button {
@@ -517,11 +524,11 @@ struct PersonalSetupScreen: View {
                             .frame(maxWidth: .infinity)
                             .background(
                                 viewModel.userTriggers.contains(trigger) ? 
-                                Color(hex: "#4CAF50").opacity(0.8) : 
-                                Color.white.opacity(0.1)
+                                BFColors.success.opacity(0.8) : 
+                                BFColors.cardBackground.opacity(0.1)
                             )
                             .cornerRadius(10)
-                            .foregroundColor(.white)
+                            .foregroundColor(BFColors.textPrimary)
                         }
                         .buttonStyle(PlainButtonStyle())
                     }
@@ -533,7 +540,7 @@ struct PersonalSetupScreen: View {
             .padding()
             .frame(maxWidth: .infinity)
         }
-        .background(Color(hex: "#2C3550"))
+        .background(BFColors.background)
         .onTapGesture {
             isUsernameFocused = false
         }
@@ -552,18 +559,18 @@ struct PaywallScreen: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 60, height: 60)
-                        .foregroundColor(.yellow)
+                        .foregroundColor(BFColors.accent)
                         .padding(.top, 30)
                     
                     Text("Unlock Full Access")
                         .font(.system(size: 28, weight: .bold))
                         .multilineTextAlignment(.center)
-                        .foregroundColor(.white)
+                        .foregroundColor(BFColors.textPrimary)
                     
                     Text("Get unlimited access to all BetFree features to help you quit for good.")
                         .font(.body)
                         .multilineTextAlignment(.center)
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(BFColors.textSecondary)
                         .padding(.horizontal)
                 }
                 
@@ -581,31 +588,32 @@ struct PaywallScreen: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Annual Plan")
                                     .font(.headline)
+                                    .foregroundColor(BFColors.textPrimary)
                                 Text("Save 50% compared to monthly")
                                     .font(.subheadline)
-                                    .foregroundColor(.white.opacity(0.8))
+                                    .foregroundColor(BFColors.textSecondary)
                             }
                             Spacer()
                             
-                            // PRICING DISPLAY IN YELLOW
+                            // PRICING DISPLAY
                             VStack(alignment: .trailing) {
                                 Text("$49.99")
                                     .font(.system(size: 24, weight: .bold))
-                                    .foregroundColor(.yellow)
+                                    .foregroundColor(BFColors.accent)
                                 Text("per year")
                                     .font(.caption)
-                                    .foregroundColor(.yellow.opacity(0.8))
+                                    .foregroundColor(BFColors.accent.opacity(0.8))
                             }
                             
                             if viewModel.selectedPlan == .yearly {
                                 Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(Color(hex: "#4CAF50"))
+                                    .foregroundColor(BFColors.success)
                                     .padding(.leading, 8)
                             }
                         }
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(viewModel.selectedPlan == .yearly ? Color(hex: "#4CAF50").opacity(0.2) : Color.white.opacity(0.1))
+                        .background(viewModel.selectedPlan == .yearly ? BFColors.success.opacity(0.2) : BFColors.cardBackground.opacity(0.1))
                         .cornerRadius(12)
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -622,29 +630,29 @@ struct PaywallScreen: View {
                                     .font(.headline)
                                 Text("Pay month-to-month")
                                     .font(.subheadline)
-                                .foregroundColor(.white.opacity(0.8))
+                                .foregroundColor(BFColors.textSecondary)
                             }
                             Spacer()
                             
-                            // PRICING DISPLAY IN YELLOW
+                            // PRICING DISPLAY
                             VStack(alignment: .trailing) {
                                 Text("$9.99")
                                     .font(.system(size: 24, weight: .bold))
-                                    .foregroundColor(.yellow)
+                                    .foregroundColor(BFColors.accent)
                                 Text("per month")
                                     .font(.caption)
-                                    .foregroundColor(.yellow.opacity(0.8))
+                                    .foregroundColor(BFColors.accent.opacity(0.8))
                             }
                             
                             if viewModel.selectedPlan == .monthly {
                                 Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(Color(hex: "#4CAF50"))
+                                    .foregroundColor(BFColors.success)
                                     .padding(.leading, 8)
                             }
                         }
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(viewModel.selectedPlan == .monthly ? Color(hex: "#4CAF50").opacity(0.2) : Color.white.opacity(0.1))
+                        .background(viewModel.selectedPlan == .monthly ? BFColors.success.opacity(0.2) : BFColors.cardBackground.opacity(0.1))
                         .cornerRadius(12)
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -664,7 +672,7 @@ struct PaywallScreen: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color(hex: "#4CAF50"))
+                        .background(BFColors.success)
                         .cornerRadius(12)
                 }
                 .buttonStyle(PlainButtonStyle())
@@ -676,14 +684,14 @@ struct PaywallScreen: View {
                 } label: {
                     Text("Restore Purchases")
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(BFColors.textSecondary)
                 }
                 .buttonStyle(PlainButtonStyle())
                 .padding(.top, 8)
                 
                 Text("Auto-renews. Cancel anytime. Terms & Privacy Policy apply.")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(BFColors.textTertiary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
                     .padding(.bottom, 20)
@@ -694,7 +702,7 @@ struct PaywallScreen: View {
             .padding()
         }
         .frame(maxWidth: .infinity)
-        .background(Color(hex: "#2C3550"))
+        .background(BFColors.background)
     }
 }
 
@@ -760,7 +768,7 @@ struct NotificationPrivacyScreen: View {
             .padding(.bottom)
         }
         .padding(.horizontal)
-        .background(Color(hex: "#2C3550"))
+        .background(BFColors.background)
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 animateContent = true
@@ -786,16 +794,17 @@ struct NotificationToggleRow: View {
         HStack {
             Image(systemName: notification.icon)
                 .font(.system(size: 24))
-                .foregroundColor(Color(hex: "#4CAF50"))
+                .foregroundColor(BFColors.primary)
                 .frame(width: 40, height: 40)
                 .background(
                     Circle()
-                        .fill(Color(hex: "#4CAF50").opacity(0.2))
+                        .fill(BFColors.primary.opacity(0.2))
                 )
                 .padding(.trailing, 5)
             
             Text(notification.name)
                 .font(.body)
+                .foregroundColor(BFColors.textPrimary)
             
             Spacer()
             
@@ -806,7 +815,7 @@ struct NotificationToggleRow: View {
         .padding(.horizontal, 12)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
+                .fill(BFColors.cardBackground)
                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
         )
         .scaleEffect(isAnimated ? 1 : 0.95)
@@ -826,28 +835,28 @@ struct CompletionScreen: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 30) {
-                // Success animation - SIMPLIFIED, NO ANIMATIONS
+                // Success animation with BFColors
                 ZStack {
                     // Outer circle
                     Circle()
-                        .stroke(Color(hex: "#4CAF50").opacity(0.7), lineWidth: 2)
+                        .stroke(BFColors.success.opacity(0.7), lineWidth: 2)
                         .frame(width: 160, height: 160)
                     
                     // Middle circle
                     Circle()
-                        .fill(Color(hex: "#4CAF50").opacity(0.15))
+                        .fill(BFColors.success.opacity(0.15))
                         .frame(width: 130, height: 130)
                     
                     // Inner circle
                     Circle()
-                        .fill(Color(hex: "#4CAF50").opacity(0.25))
+                        .fill(BFColors.success.opacity(0.25))
                         .frame(width: 110, height: 110)
                     
                     // Checkmark
                     Image(systemName: "checkmark.circle.fill")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .foregroundColor(Color(hex: "#4CAF50"))
+                        .foregroundColor(BFColors.success)
                         .frame(width: 80, height: 80)
                 }
                 .opacity(showContent ? 1 : 0)
@@ -859,13 +868,13 @@ struct CompletionScreen: View {
                     Text("You're All Set!")
                         .font(.title)
                         .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundColor(BFColors.textPrimary)
                         .opacity(showContent ? 1 : 0)
                         .offset(y: showContent ? 0 : -10)
                     
                     Text("Your 7-day free trial has started")
                         .font(.title3)
-                        .foregroundColor(.white.opacity(0.9))
+                        .foregroundColor(BFColors.textSecondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 20)
                         .opacity(showContent ? 1 : 0)
@@ -940,7 +949,7 @@ struct CompletionScreen: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 18)
                     .background(
-                        Color(hex: "#4CAF50")
+                        BFColors.success
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                             .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
                     )
@@ -953,7 +962,7 @@ struct CompletionScreen: View {
             }
             .padding(.bottom, 30)
         }
-        .background(Color(hex: "#2C3550"))
+        .background(BFColors.background)
         .onAppear {
             withAnimation(.easeOut(duration: 0.5)) {
                 showContent = true
@@ -987,7 +996,7 @@ struct NextStepRow: View {
         HStack(spacing: 15) {
             ZStack {
                 Circle()
-                    .fill(Color(hex: "#4CAF50").opacity(0.4))
+                    .fill(BFColors.success.opacity(0.4))
                     .frame(width: 40, height: 40)
                 
                 Image(systemName: icon)
@@ -997,7 +1006,7 @@ struct NextStepRow: View {
             
             Text(text)
                 .font(.callout)
-                .foregroundColor(.white)
+                .foregroundColor(BFColors.textPrimary)
             
             Spacer()
         }
@@ -1005,7 +1014,7 @@ struct NextStepRow: View {
         .padding(.horizontal, 16)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(0.1))
+                .fill(BFColors.cardBackground.opacity(0.5))
         )
         .opacity(appear ? 1 : 0)
         .onAppear {
