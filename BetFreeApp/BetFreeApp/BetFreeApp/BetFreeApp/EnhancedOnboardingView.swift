@@ -12,9 +12,7 @@ struct TriggerCategory: Identifiable {
 class OnboardingViewModel: ObservableObject {
     // MARK: - Constants
     let screens: [OnboardingScreen] = [
-        .valueProposition1,
-        .valueProposition2,
-        .valueProposition3,
+        .combinedValueProposition,
         .assessmentIntro,
         .assessmentQuiz,
         .assessmentResults,
@@ -392,10 +390,8 @@ struct EnhancedOnboardingView: View {
                     
                     Spacer()
                     
-                    // Skip button (only show for value proposition screens)
-                    if [OnboardingScreen.valueProposition1, 
-                        OnboardingScreen.valueProposition2, 
-                        OnboardingScreen.valueProposition3].contains(viewModel.currentScreen) {
+                    // Skip button (only show for value proposition screen)
+                    if viewModel.currentScreen == .combinedValueProposition {
                         Button {
                             withAnimation {
                                 viewModel.skipToPaywall()
@@ -439,12 +435,8 @@ struct EnhancedOnboardingView: View {
     @ViewBuilder
     private func screenForState(_ screen: OnboardingScreen) -> some View {
         switch screen {
-        case .valueProposition1:
-            ValuePropositionView1(viewModel: viewModel)
-        case .valueProposition2:
-            ValuePropositionView2(viewModel: viewModel)
-        case .valueProposition3:
-            ValuePropositionView3(viewModel: viewModel)
+        case .combinedValueProposition:
+            CombinedValuePropositionView(viewModel: viewModel)
         case .assessmentIntro:
             AssessmentIntroView(viewModel: viewModel)
         case .assessmentQuiz:
@@ -477,237 +469,210 @@ struct EnhancedOnboardingView: View {
 
 // MARK: - Value Proposition Views
 
-struct ValuePropositionView1: View {
+// New combined value proposition view with paging
+struct CombinedValuePropositionView: View {
     @ObservedObject var viewModel: OnboardingViewModel
-    @State private var animateIcon = false
-    @State private var animateText = false
+    @State private var currentPage = 0
+    @State private var animateContent = false
     
     var body: some View {
         ZStack {
             // Use standardized background
             BFScreenBackground()
             
-            VStack(spacing: BFSpacing.xlarge) {
-                Spacer()
-                
-                // Enhanced animated icon/logo with pulsating effect
-                ZStack {
-                    // Outer pulse effect
-                    Circle()
-                        .fill(BFColors.accent.opacity(0.15))
-                        .frame(width: 140, height: 140)
-                        .scaleEffect(animateIcon ? 1.2 : 0.9)
-                        .opacity(animateIcon ? 0.6 : 0.0)
-                        .animation(
-                            Animation.easeInOut(duration: 1.8)
-                                .repeatForever(autoreverses: true),
-                            value: animateIcon
-                        )
+            VStack(spacing: 0) {
+                // Improved header with navigation controls
+                HStack {
+                    // Show back button only if not on first page
+                    if currentPage > 0 {
+                        Button {
+                            withAnimation {
+                                currentPage -= 1
+                            }
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "chevron.left")
+                                    .font(.system(size: 16, weight: .semibold))
+                                Text("Back")
+                                    .fontWeight(.medium)
+                            }
+                            .foregroundColor(.white)
+                        }
+                        .padding(.leading, BFSpacing.medium)
+                    } else {
+                        Spacer()
+                            .frame(width: 80) // Keep layout balanced
+                    }
                     
-                    // Icon container
-                    Image(systemName: "heart.fill")
-                        .font(.system(size: 70))
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(
-                            Circle()
-                                .fill(BFColors.accent.opacity(0.3))
-                        )
-                        .mediumShadow()
-                        .scaleEffect(animateIcon ? 1.05 : 1.0)
-                        .animation(
-                            Animation.easeInOut(duration: 1.5)
-                                .repeatForever(autoreverses: true),
-                            value: animateIcon
-                        )
+                    Spacer()
+                    
+                    // Skip to assessment button
+                    Button {
+                        withAnimation {
+                            viewModel.nextScreen()
+                        }
+                    } label: {
+                        Text("Skip")
+                            .fontWeight(.medium)
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                    .padding(.trailing, BFSpacing.medium)
                 }
-                .onAppear {
-                    animateIcon = true
-                    
-                    // Slight delay before text animation
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        animateText = true
+                .padding(.top, BFSpacing.large)
+                .padding(.bottom, BFSpacing.small)
+                
+                // Page indicators
+                HStack(spacing: 8) {
+                    ForEach(0..<3) { index in
+                        Circle()
+                            .fill(currentPage == index ? 
+                                Color.white : Color.white.opacity(0.3))
+                            .frame(width: 8, height: 8)
+                            .scaleEffect(currentPage == index ? 1.2 : 1.0)
+                            .animation(.spring(), value: currentPage)
                     }
                 }
+                .padding(.bottom, BFSpacing.medium)
+                .opacity(animateContent ? 1 : 0)
+                .animation(.easeIn.delay(0.3), value: animateContent)
                 
-                // Welcome text with improved typography and animation
-                VStack(spacing: BFSpacing.medium) {
-                    Text("Break Free From Gambling")
-                        .heading1()
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, BFSpacing.medium)
-                        .opacity(animateText ? 1 : 0)
-                        .offset(y: animateText ? 0 : 20)
-                        .animation(BFAnimations.standardAppear, value: animateText)
+                // Paging view for the three value propositions
+                TabView(selection: $currentPage) {
+                    // First value proposition
+                    ValuePropositionContent(
+                        iconName: "heart.fill",
+                        iconColor: BFColors.accent.opacity(0.3),
+                        title: "Break Free From Gambling",
+                        description: "Take the first step toward a healthier relationship with gambling through evidence-based tools and support.",
+                        animateIcon: true
+                    )
+                    .tag(0)
                     
-                    Text("Take the first step toward a healthier relationship with gambling through evidence-based tools and support.")
-                        .bodyLarge()
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, BFSpacing.xlarge)
-                        .opacity(animateText ? 1 : 0)
-                        .offset(y: animateText ? 0 : 15)
-                        .animation(BFAnimations.standardAppear.delay(0.2), value: animateText)
+                    // Second value proposition
+                    ValuePropositionContent(
+                        iconName: "chart.line.uptrend.xyaxis",
+                        iconColor: BFColors.secondary.opacity(0.2),
+                        title: "Track Your Progress",
+                        description: "Monitor your journey with personalized insights and celebrate your milestones along the way.",
+                        animateIcon: true
+                    )
+                    .tag(1)
+                    
+                    // Third value proposition
+                    ValuePropositionContent(
+                        iconName: "brain.head.profile",
+                        iconColor: BFColors.focus.opacity(0.2),
+                        title: "Find Your Calm",
+                        description: "Access mindfulness exercises and breathing techniques to help manage urges and reduce stress.",
+                        animateIcon: true
+                    )
+                    .tag(2)
                 }
+                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                .padding(.bottom, BFSpacing.medium)
                 
-                Spacer()
-                
-                // Use standardized primary button
+                // Next/Get Started button
                 BFPrimaryButton(
-                    text: "Continue",
+                    text: currentPage == 2 ? "Get Started" : "Next",
                     icon: "arrow.right",
                     action: {
-                        withAnimation {
+                        if currentPage < 2 {
+                            withAnimation {
+                                currentPage += 1
+                            }
+                        } else {
                             viewModel.nextScreen()
                         }
                     }
                 )
-                .opacity(animateText ? 1 : 0)
-                .offset(y: animateText ? 0 : 20)
-                .animation(BFAnimations.standardAppear.delay(0.4), value: animateText)
                 .padding(.horizontal, BFSpacing.xlarge)
                 .padding(.bottom, BFSpacing.xlarge)
+                .opacity(animateContent ? 1 : 0)
+                .offset(y: animateContent ? 0 : 20)
+                .animation(BFAnimations.standardAppear.delay(0.4), value: animateContent)
             }
+        }
+        .onAppear {
+            animateContent = true
         }
     }
 }
 
-struct ValuePropositionView2: View {
-    @ObservedObject var viewModel: OnboardingViewModel
-    @State private var animateChart = false
+// Reusable component for value proposition content
+struct ValuePropositionContent: View {
+    var iconName: String
+    var iconColor: Color
+    var title: String
+    var description: String
+    var animateIcon: Bool = false
+    
+    @State private var isAnimating = false
+    @State private var textVisible = false
     
     var body: some View {
-        ZStack {
-            // Use standardized background
-            BFScreenBackground()
+        VStack(spacing: BFSpacing.xlarge) {
+            Spacer()
             
-            VStack(spacing: BFSpacing.large) {
-                Spacer()
+            // Animated icon
+            ZStack {
+                // Outer pulse effect
+                Circle()
+                    .fill(iconColor)
+                    .frame(width: 140, height: 140)
+                    .scaleEffect(isAnimating && animateIcon ? 1.2 : 0.9)
+                    .opacity(isAnimating && animateIcon ? 0.6 : 0.0)
+                    .animation(
+                        Animation.easeInOut(duration: 1.8)
+                            .repeatForever(autoreverses: true),
+                        value: isAnimating
+                    )
                 
-                // Animated icon/illustration
-                Image(systemName: "chart.line.uptrend.xyaxis")
+                // Icon container
+                Image(systemName: iconName)
                     .font(.system(size: 70))
                     .foregroundColor(.white)
                     .padding()
                     .background(
                         Circle()
-                            .fill(BFColors.secondary.opacity(0.2))
+                            .fill(iconColor)
                     )
                     .mediumShadow()
-                    .rotationEffect(Angle(degrees: animateChart ? 5 : -5))
+                    .scaleEffect(isAnimating && animateIcon ? 1.05 : 1.0)
                     .animation(
-                        Animation.easeInOut(duration: 2)
+                        Animation.easeInOut(duration: 1.5)
                             .repeatForever(autoreverses: true),
-                        value: animateChart
+                        value: isAnimating
                     )
-                    .onAppear {
-                        animateChart = true
-                    }
-                
-                // Content text with improved typography
-                Text("Track Your Progress")
+            }
+            
+            // Content text
+            VStack(spacing: BFSpacing.medium) {
+                Text(title)
                     .heading1()
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, BFSpacing.medium)
+                    .opacity(textVisible ? 1 : 0)
+                    .offset(y: textVisible ? 0 : 20)
+                    .animation(BFAnimations.standardAppear, value: textVisible)
                 
-                Text("Monitor your journey with personalized insights and celebrate your milestones along the way.")
+                Text(description)
                     .bodyLarge()
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, BFSpacing.xlarge)
-                
-                Spacer()
-                
-                // Use standardized primary button
-                BFPrimaryButton(
-                    text: "Continue",
-                    icon: "arrow.right",
-                    action: {
-                        withAnimation {
-                            viewModel.nextScreen()
-                        }
-                    }
-                )
-                .padding(.horizontal, BFSpacing.xlarge)
-                .padding(.bottom, BFSpacing.xlarge)
+                    .opacity(textVisible ? 1 : 0)
+                    .offset(y: textVisible ? 0 : 15)
+                    .animation(BFAnimations.standardAppear.delay(0.2), value: textVisible)
             }
-        }
-    }
-}
-
-struct ValuePropositionView3: View {
-    @ObservedObject var viewModel: OnboardingViewModel
-    @State private var animateBrain = false
-    
-    var body: some View {
-        ZStack {
-            // Use standardized background
-            BFScreenBackground()
             
-            VStack(spacing: 24) {
-                Spacer()
-                
-                // Animated icon/illustration
-                Image(systemName: "brain.head.profile")
-                    .font(.system(size: 70))
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(
-                        Circle()
-                            .fill(BFColors.focus.opacity(0.2))
-                            .shadow(color: Color.black.opacity(0.2), radius: 10)
-                    )
-                    .scaleEffect(animateBrain ? 1.05 : 0.95)
-                    .animation(
-                        Animation.easeInOut(duration: 2)
-                            .repeatForever(autoreverses: true),
-                        value: animateBrain
-                    )
-                    .onAppear {
-                        animateBrain = true
-                    }
-                
-                // Content text with improved typography
-                Text("Find Your Calm")
-                    .heading1()
-                    .foregroundColor(.white)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 20)
-                
-                Text("Access mindfulness exercises and breathing techniques to help manage urges and reduce stress.")
-                    .bodyLarge()
-                    .foregroundColor(.white.opacity(0.9))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-                
-                Spacer()
-                
-                // Next button with consistent styling
-                Button {
-                    withAnimation {
-                        viewModel.nextScreen()
-                    }
-                } label: {
-                    HStack(spacing: 8) {
-                        Text("Get Started")
-                            .font(.headline)
-                            
-                        Image(systemName: "arrow.right")
-                            .font(.system(size: 14, weight: .semibold))
-                    }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(
-                        LinearGradient(
-                            gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.8)]),
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .shadow(color: BFColors.accent.opacity(0.4), radius: 8, x: 0, y: 4)
-                    )
-                }
-                .padding(.horizontal, 32)
-                .padding(.bottom, 32)
+            Spacer()
+            Spacer()
+        }
+        .onAppear {
+            isAnimating = true
+            
+            // Slight delay before text animation
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                textVisible = true
             }
         }
     }
@@ -805,7 +770,6 @@ struct AssessmentIntroView: View {
                 
                 Spacer().frame(height: BFSpacing.medium)
             }
-            .frame(maxWidth: .infinity)
         }
         .onAppear {
             withAnimation(BFAnimations.standardAppear) {

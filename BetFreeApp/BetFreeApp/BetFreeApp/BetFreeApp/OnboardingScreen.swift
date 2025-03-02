@@ -1,9 +1,7 @@
 import SwiftUI
 
 enum OnboardingScreen: Equatable {
-    case valueProposition1
-    case valueProposition2
-    case valueProposition3
+    case combinedValueProposition
     case assessmentIntro
     case assessmentQuiz
     case assessmentResults
