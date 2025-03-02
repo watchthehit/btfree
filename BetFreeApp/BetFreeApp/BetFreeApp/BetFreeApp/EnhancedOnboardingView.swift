@@ -473,107 +473,126 @@ struct EnhancedOnboardingView: View {
 struct CombinedValuePropositionView: View {
     @ObservedObject var viewModel: OnboardingViewModel
     @State private var currentPage = 0
-    @State private var animateContent = false
+    
+    // Content for each page
+    private let pages = [
+        ValuePropPage(
+            icon: "heart.fill",
+            title: "Break Free From Gambling",
+            description: "Take the first step toward a healthier relationship with gambling through evidence-based tools and support."
+        ),
+        ValuePropPage(
+            icon: "chart.line.uptrend.xyaxis",
+            title: "Track Your Progress",
+            description: "Monitor your journey with personalized insights and celebrate your milestones along the way."
+        ),
+        ValuePropPage(
+            icon: "brain.head.profile",
+            title: "Find Your Calm",
+            description: "Access mindfulness exercises and breathing techniques to help manage urges and reduce stress."
+        )
+    ]
     
     var body: some View {
         ZStack {
-            // Use turquoise background from screenshot
+            // Teal background color from screenshot
             Color(UIColor(hex: "#3DDFD3"))
                 .ignoresSafeArea()
             
-            VStack(spacing: 0) {
-                // Header with skip button
+            VStack {
+                // Skip button at top right
                 HStack {
                     Spacer()
-                    
-                    // Skip to assessment button
                     Button {
-                        withAnimation {
-                            viewModel.skipToPaywall()
-                        }
+                        viewModel.skipToPaywall()
                     } label: {
                         Text("Skip")
-                            .fontWeight(.medium)
                             .foregroundColor(.white)
+                            .fontWeight(.medium)
                     }
-                    .padding(.trailing, BFSpacing.medium)
-                    .padding(.top, BFSpacing.large)
+                    .padding(.trailing, 20)
                 }
+                .padding(.top, 10)
                 
                 // Page indicators
                 HStack(spacing: 8) {
-                    ForEach(0..<3) { index in
+                    ForEach(0..<pages.count, id: \.self) { index in
                         Circle()
-                            .fill(currentPage == index ? 
-                                Color.white : Color.white.opacity(0.3))
+                            .fill(currentPage == index ? Color.white : Color.white.opacity(0.3))
                             .frame(width: 8, height: 8)
-                            .scaleEffect(currentPage == index ? 1.2 : 1.0)
-                            .animation(.spring(), value: currentPage)
                     }
                 }
-                .padding(.top, BFSpacing.large)
-                .padding(.bottom, BFSpacing.large)
-                .opacity(animateContent ? 1 : 0)
-                .animation(.easeIn.delay(0.3), value: animateContent)
+                .padding(.top, 10)
                 
-                // Paging view for the three value propositions
+                // TabView for swiping between pages
                 TabView(selection: $currentPage) {
-                    // First value proposition
-                    ValuePropositionContent(
-                        iconName: "heart.fill",
-                        iconColor: Color.white,
-                        title: "Break Free From Gambling",
-                        description: "Take the first step toward a healthier relationship with gambling through evidence-based tools and support.",
-                        animateIcon: true
-                    )
-                    .tag(0)
-                    
-                    // Second value proposition
-                    ValuePropositionContent(
-                        iconName: "chart.line.uptrend.xyaxis",
-                        iconColor: Color.white,
-                        title: "Track Your Progress",
-                        description: "Monitor your journey with personalized insights and celebrate your milestones along the way.",
-                        animateIcon: true
-                    )
-                    .tag(1)
-                    
-                    // Third value proposition
-                    ValuePropositionContent(
-                        iconName: "brain.head.profile",
-                        iconColor: Color.white,
-                        title: "Find Your Calm",
-                        description: "Access mindfulness exercises and breathing techniques to help manage urges and reduce stress.",
-                        animateIcon: true
-                    )
-                    .tag(2)
+                    ForEach(0..<pages.count, id: \.self) { index in
+                        VStack {
+                            Spacer()
+                            
+                            // Icon with circles
+                            ZStack {
+                                Circle()
+                                    .fill(Color.white.opacity(0.15))
+                                    .frame(width: 160, height: 160)
+                                
+                                Circle()
+                                    .fill(Color.white.opacity(0.3))
+                                    .frame(width: 120, height: 120)
+                                
+                                Circle()
+                                    .fill(Color.gray.opacity(0.5))
+                                    .frame(width: 80, height: 80)
+                                    .overlay(
+                                        Image(systemName: pages[index].icon)
+                                            .font(.system(size: 40))
+                                            .foregroundColor(.white)
+                                    )
+                            }
+                            
+                            // Title and description
+                            Text(pages[index].title)
+                                .font(.system(size: 32, weight: .bold))
+                                .foregroundColor(.black)
+                                .multilineTextAlignment(.center)
+                                .padding(.top, 40)
+                                .padding(.horizontal, 20)
+                            
+                            Text(pages[index].description)
+                                .font(.system(size: 17))
+                                .foregroundColor(.black)
+                                .multilineTextAlignment(.center)
+                                .padding(.top, 10)
+                                .padding(.horizontal, 40)
+                            
+                            Spacer()
+                        }
+                        .tag(index)
+                    }
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                .padding(.bottom, BFSpacing.medium)
-                
-                Spacer()
                 
                 // Next/Get Started button
-                Button(action: {
-                    if currentPage < 2 {
+                Button {
+                    if currentPage < pages.count - 1 {
                         withAnimation {
                             currentPage += 1
                         }
                     } else {
                         viewModel.nextScreen()
                     }
-                }) {
+                } label: {
                     HStack {
-                        Text(currentPage == 2 ? "Get Started" : "Next")
+                        Text(currentPage == pages.count - 1 ? "Get Started" : "Next")
                             .font(.headline)
                             .foregroundColor(.white)
                         
                         Image(systemName: "arrow.right")
                             .font(.system(size: 16))
-                            .foregroundColor(.white)
                     }
-                    .padding()
+                    .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
+                    .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 10)
                             .fill(Color.red)
@@ -581,103 +600,16 @@ struct CombinedValuePropositionView: View {
                     .padding(.horizontal, 40)
                 }
                 .padding(.bottom, 40)
-                .opacity(animateContent ? 1 : 0)
-                .offset(y: animateContent ? 0 : 20)
-                .animation(BFAnimations.standardAppear.delay(0.4), value: animateContent)
-                
-                // Next/Get Started button
-                BFPrimaryButton(
-                    text: currentPage == 2 ? "Get Started" : "Next",
-                    icon: "arrow.right",
-                    action: {
-                        if currentPage < 2 {
-                            withAnimation {
-                                currentPage += 1
-                            }
-                        } else {
-                            viewModel.nextScreen()
-                        }
-                    }
-                )
-                .padding(.horizontal, BFSpacing.xlarge)
-                .padding(.bottom, BFSpacing.xlarge)
-                .opacity(animateContent ? 1 : 0)
-                .offset(y: animateContent ? 0 : 20)
-                .animation(BFAnimations.standardAppear.delay(0.4), value: animateContent)
             }
-        }
-        .onAppear {
-            animateContent = true
         }
     }
 }
 
-// Reusable component for value proposition content
-struct ValuePropositionContent: View {
-    var iconName: String
-    var iconColor: Color
-    var title: String
-    var description: String
-    var animateIcon: Bool = false
-    
-    @State private var isAnimating = false
-    @State private var textVisible = false
-    
-    var body: some View {
-        VStack(spacing: BFSpacing.xlarge) {
-            Spacer()
-            
-            // Animated icon
-            ZStack {
-                // Outer pulse effect
-                Circle()
-                    .fill(Color.white.opacity(0.15))
-                    .frame(width: 160, height: 160)
-                
-                // Middle circle
-                Circle()
-                    .fill(Color.white.opacity(0.3))
-                    .frame(width: 120, height: 120)
-                
-                // Inner circle with icon
-                Circle()
-                    .fill(Color.gray.opacity(0.5))
-                    .frame(width: 80, height: 80)
-                    .overlay(
-                        Image(systemName: iconName)
-                            .font(.system(size: 40))
-                            .foregroundColor(.white)
-                    )
-            }
-            .scaleEffect(isAnimating ? 1.05 : 1.0)
-            .animation(
-                Animation.easeInOut(duration: 3)
-                    .repeatForever(autoreverses: true),
-                value: isAnimating
-            )
-            
-            // Content text
-            VStack(spacing: BFSpacing.medium) {
-                Text(title)
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundColor(.black)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, BFSpacing.medium)
-                
-                Text(description)
-                    .font(.system(size: 17))
-                    .foregroundColor(.black)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, BFSpacing.xlarge)
-            }
-            
-            Spacer()
-        }
-        .onAppear {
-            isAnimating = true
-            textVisible = true
-        }
-    }
+// Simple struct to hold page content
+struct ValuePropPage {
+    let icon: String
+    let title: String
+    let description: String
 }
 
 // MARK: - AssessmentIntroView
