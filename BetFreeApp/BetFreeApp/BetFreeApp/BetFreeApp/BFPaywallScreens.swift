@@ -188,7 +188,7 @@ struct SoftGateScreen: View {
                 VStack(spacing: 12) {
                     Button(action: {
                         // Start free trial and continue
-                        viewModel.hasAgreedToFreeTrial = true
+                        viewModel.isTrialActive = true
                         viewModel.nextScreen()
                     }) {
                         HStack {
@@ -199,8 +199,8 @@ struct SoftGateScreen: View {
                     .bfPrimaryButton(isWide: true)
                     
                     Button(action: {
-                        // Skip trial and continue
-                        viewModel.hasAgreedToFreeTrial = false
+                        // Skip subscription and continue to next step
+                        viewModel.isTrialActive = false
                         viewModel.nextScreen()
                     }) {
                         Text("Continue with Basic Version")

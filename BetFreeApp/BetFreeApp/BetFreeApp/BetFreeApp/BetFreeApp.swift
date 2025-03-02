@@ -13,7 +13,7 @@ struct BetFreeApp: App {
             BetFreeRootView()
                 .environmentObject(appState)
                 // Add a modifier to handle memory pressure
-                .onChange(of: scenePhase) { newPhase in
+                .onChange(of: scenePhase) { oldPhase, newPhase in
                     if newPhase == .background {
                         // Release any cached resources when going to background
                         print("App entering background - releasing resources")

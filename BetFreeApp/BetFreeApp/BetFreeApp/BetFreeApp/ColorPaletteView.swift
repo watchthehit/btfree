@@ -1,9 +1,9 @@
 import SwiftUI
 
 /**
- * ColorPaletteView - A view that displays the "Serene Strength" color scheme
+ * ColorPaletteView - A view that displays the "Serene Recovery" color scheme
  *
- * This view displays all the colors in the "Serene Strength" color scheme and can be
+ * This view displays all the colors in the "Serene Recovery" color scheme and can be
  * used as a reference by designers and developers.
  */
 struct ColorPaletteView: View {
@@ -12,7 +12,7 @@ struct ColorPaletteView: View {
             ScrollView {
                 VStack(spacing: 24) {
                     // Header
-                    Text("Serene Strength")
+                    Text("Serene Recovery")
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .foregroundColor(BFColors.textPrimary)
@@ -26,11 +26,11 @@ struct ColorPaletteView: View {
                     // Primary Colors
                     colorSection(
                         title: "Primary Colors",
-                        description: "The main colors of the Serene Strength theme",
+                        description: "The main colors of the Serene Recovery theme",
                         colors: [
-                            ColorInfo(name: "Primary (Deep Space Blue)", color: BFColors.primary, hex: "#0D1B2A"),
-                            ColorInfo(name: "Secondary (Vibrant Teal)", color: BFColors.secondary, hex: "#64FFDA"),
-                            ColorInfo(name: "Accent (Coral)", color: BFColors.accent, hex: "#FF7043")
+                            ColorInfo(name: "Primary (Deep Teal)", color: BFColors.primary, hex: "#2A6B7C"),
+                            ColorInfo(name: "Secondary (Soft Sage)", color: BFColors.secondary, hex: "#89B399"),
+                            ColorInfo(name: "Accent (Sunset Orange)", color: BFColors.accent, hex: "#E67E53")
                         ]
                     )
                     
@@ -39,9 +39,9 @@ struct ColorPaletteView: View {
                         title: "Theme Colors",
                         description: "Specialized colors for different emotional states",
                         colors: [
-                            ColorInfo(name: "Calm (Ocean Blue)", color: BFColors.calm, hex: "#415A77"),
-                            ColorInfo(name: "Focus (Aquamarine)", color: BFColors.focus, hex: "#00B4D8"),
-                            ColorInfo(name: "Hope (Warm Sand)", color: BFColors.hope, hex: "#E0E1DD")
+                            ColorInfo(name: "Calm (Calm Teal)", color: BFColors.calm, hex: "#4A8D9D"),
+                            ColorInfo(name: "Focus (Focus Sage)", color: BFColors.focus, hex: "#769C86"),
+                            ColorInfo(name: "Hope (Warm Sand)", color: BFColors.hope, hex: "#E6C9A8")
                         ]
                     )
                     
@@ -71,18 +71,18 @@ struct ColorPaletteView: View {
                         title: "Neutral Colors (Light Mode)",
                         description: "Base colors for backgrounds and text in light mode",
                         colors: [
-                            ColorInfo(name: "Background (Light Silver)", 
-                                    color: Color(hex: "#E0E1DD"), 
-                                    hex: "#E0E1DD"),
+                            ColorInfo(name: "Background (Light Sand)", 
+                                    color: Color(hex: "#F7F3EB"), 
+                                    hex: "#F7F3EB"),
                             ColorInfo(name: "Card Background (White)", 
                                     color: Color(hex: "#FFFFFF"), 
                                     hex: "#FFFFFF"),
-                            ColorInfo(name: "Text Primary (Deep Space)", 
-                                    color: Color(hex: "#0D1B2A"), 
-                                    hex: "#0D1B2A"),
-                            ColorInfo(name: "Text Secondary (Navy)", 
-                                    color: Color(hex: "#1B263B"), 
-                                    hex: "#1B263B")
+                            ColorInfo(name: "Text Primary (Dark Charcoal)", 
+                                    color: Color(hex: "#2D3142"), 
+                                    hex: "#2D3142"),
+                            ColorInfo(name: "Text Secondary (Medium Charcoal)", 
+                                    color: Color(hex: "#5C6079"), 
+                                    hex: "#5C6079")
                         ]
                     )
                     
@@ -91,18 +91,18 @@ struct ColorPaletteView: View {
                         title: "Neutral Colors (Dark Mode)",
                         description: "Base colors for backgrounds and text in dark mode",
                         colors: [
-                            ColorInfo(name: "Background (Deep Space)", 
-                                    color: Color(hex: "#0D1B2A"), 
-                                    hex: "#0D1B2A"),
-                            ColorInfo(name: "Card Background (Navy)", 
-                                    color: Color(hex: "#263F60"), 
-                                    hex: "#263F60"),
-                            ColorInfo(name: "Text Primary (Silver)", 
-                                    color: Color(hex: "#E0E1DD"), 
-                                    hex: "#E0E1DD"),
-                            ColorInfo(name: "Text Secondary (Light Silver)", 
-                                    color: Color(hex: "#CCD1D9"), 
-                                    hex: "#CCD1D9")
+                            ColorInfo(name: "Background (Dark Charcoal)", 
+                                    color: Color(hex: "#1C1F2E"), 
+                                    hex: "#1C1F2E"),
+                            ColorInfo(name: "Card Background (Charcoal)", 
+                                    color: Color(hex: "#2D3142"), 
+                                    hex: "#2D3142"),
+                            ColorInfo(name: "Text Primary (Light Sand)", 
+                                    color: Color(hex: "#F7F3EB"), 
+                                    hex: "#F7F3EB"),
+                            ColorInfo(name: "Text Secondary (Light Gray)", 
+                                    color: Color(hex: "#B5BAC9"), 
+                                    hex: "#B5BAC9")
                         ]
                     )
                     
@@ -118,7 +118,7 @@ struct ColorPaletteView: View {
                             .padding(.bottom, 8)
                         
                         gradientItem(name: "Primary Gradient", gradient: BFColors.primaryGradient())
-                        gradientItem(name: "Calm Gradient", gradient: BFColors.calmGradient())
+                        gradientItem(name: "Brand Gradient", gradient: BFColors.brandGradient())
                         gradientItem(name: "Energy Gradient", gradient: BFColors.energyGradient())
                         gradientItem(name: "Progress Gradient", gradient: BFColors.progressGradient())
                     }
@@ -138,19 +138,19 @@ struct ColorPaletteView: View {
                             usageGuidelineRow(
                                 icon: "paintbrush.fill",
                                 title: "Primary Buttons",
-                                description: "Use Deep Space Blue with white text"
+                                description: "Use Deep Teal with white text"
                             )
                             
                             usageGuidelineRow(
                                 icon: "paintbrush.pointed.fill",
                                 title: "Secondary Buttons",
-                                description: "Use Vibrant Teal with dark text"
+                                description: "Use Soft Sage with dark text"
                             )
                             
                             usageGuidelineRow(
                                 icon: "exclamationmark.triangle.fill",
                                 title: "Accent Color",
-                                description: "Use Coral sparingly for important actions"
+                                description: "Use Sunset Orange sparingly for important actions"
                             )
                             
                             usageGuidelineRow(
@@ -277,4 +277,4 @@ struct ColorPaletteView_Previews: PreviewProvider {
         ColorPaletteView()
             .preferredColorScheme(.dark)
     }
-} 
+}

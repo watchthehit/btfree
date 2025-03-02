@@ -82,8 +82,8 @@ struct ColorPaletteView: View {
                             .padding(.bottom, 8)
                         
                         gradientItem(name: "Primary Gradient", gradient: BFColors.primaryGradient())
-                        gradientItem(name: "Calm Gradient", gradient: BFColors.calmGradient())
-                        gradientItem(name: "Sunset Gradient", gradient: BFColors.sunsetGradient())
+                        gradientItem(name: "Brand Gradient", gradient: BFColors.brandGradient())
+                        gradientItem(name: "Energy Gradient", gradient: BFColors.energyGradient())
                         gradientItem(name: "Progress Gradient", gradient: BFColors.progressGradient())
                     }
                     .padding()

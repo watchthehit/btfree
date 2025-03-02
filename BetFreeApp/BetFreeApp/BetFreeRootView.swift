@@ -2,10 +2,31 @@ import SwiftUI
 
 struct BetFreeRootView: View {
     @EnvironmentObject private var appState: AppState
+    @State private var forceShowMainContent = false
     
     var body: some View {
-        if !appState.hasCompletedOnboarding {
-            EnhancedOnboardingView()
+        // Check both appState and UserDefaults to handle all completion scenarios
+        if !appState.hasCompletedOnboarding && !forceShowMainContent {
+            EnhancedOnboardingView(onComplete: {
+                // Multiple ways to complete onboarding
+                print("Enhanced onboarding completion callback")
+                
+                // 1. Set the app state
+                appState.hasCompletedOnboarding = true
+                
+                // 2. Write to UserDefaults as backup
+                UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
+                
+                // 3. Force UI update
+                forceShowMainContent = true
+            })
+            .onDisappear {
+                // Check if onboarding is marked as completed in UserDefaults
+                if UserDefaults.standard.bool(forKey: "hasCompletedOnboarding") {
+                    appState.hasCompletedOnboarding = true
+                    forceShowMainContent = true
+                }
+            }
         } else {
             MainContentView()
         }
@@ -501,6 +522,10 @@ struct SettingsView: View {
                     .pickerStyle(.menu)
                     
                     Toggle("Use Calming Mode", isOn: $appState.useCalming)
+                    
+                    NavigationLink(destination: ColorPaletteView()) {
+                        Text("Serene Recovery Color Palette")
+                    }
                 }
                 
                 Section(header: Text("Your Triggers")) {

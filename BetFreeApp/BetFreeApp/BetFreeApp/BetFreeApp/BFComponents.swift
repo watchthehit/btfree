@@ -101,92 +101,122 @@ struct BFCard<Content: View>: View {
     }
 }
 
-// MARK: - Background Views
-
+// MARK: - Background View
 struct BFBackgroundView: View {
     enum Style {
-        case plain, waves, circles
+        case waves
+        case circles
+        case dots
     }
     
-    var style: Style
-    var gradient: LinearGradient = BFColors.calmGradient()
+    let style: Style
+    let gradient: LinearGradient
     
     var body: some View {
         ZStack {
-            gradient
+            // Base gradient
+            Rectangle()
+                .fill(gradient)
                 .ignoresSafeArea()
             
-            switch style {
-            case .plain:
-                EmptyView()
-            case .waves:
-                WavesView()
-                    .opacity(0.1)
-                    .ignoresSafeArea()
-            case .circles:
-                CirclesView()
-                    .opacity(0.1)
-                    .ignoresSafeArea()
+            // Pattern overlay
+            GeometryReader { geometry in
+                switch style {
+                case .waves:
+                    wavesPattern(in: geometry.size)
+                case .circles:
+                    circlesPattern(in: geometry.size)
+                case .dots:
+                    dotsPattern(in: geometry.size)
+                }
             }
         }
     }
-}
-
-private struct WavesView: View {
-    @State private var phase: CGFloat = 0
     
-    var body: some View {
+    // Wave pattern
+    private func wavesPattern(in size: CGSize) -> some View {
         ZStack {
+            // Multiple wave layers with different opacities
             ForEach(0..<3) { i in
-                sineWave(frequency: Double(i + 1) * 0.5, phase: phase)
-                    .stroke(Color.white, lineWidth: 3.0 - Double(i) * 0.5)
-                    .opacity(0.5 - Double(i) * 0.1)
-            }
-        }
-        .onAppear {
-            withAnimation(Animation.linear(duration: 10).repeatForever(autoreverses: false)) {
-                phase = .pi * 2
+                let opacity = 0.1 - Double(i) * 0.03
+                
+                WaveShape(amplitude: 50 + CGFloat(i * 20), 
+                          frequency: 0.6 - CGFloat(i) * 0.1, 
+                          phase: CGFloat(i) * 0.5)
+                    .fill(Color.white.opacity(opacity))
+                    .frame(height: size.height)
             }
         }
     }
     
-    func sineWave(frequency: Double, phase: CGFloat) -> Path {
-        Path { path in
-            let width = UIScreen.main.bounds.width
-            let height = UIScreen.main.bounds.height
-            let midHeight = height / 2
-            let amplitude = height * 0.1
-            
-            path.move(to: CGPoint(x: 0, y: midHeight))
-            
-            for x in stride(from: 0, through: width, by: 5) {
-                let relativeX = x / width
-                let sine = sin(2 * .pi * Double(relativeX) * frequency + Double(phase))
-                let y = midHeight + CGFloat(sine) * amplitude
-                path.addLine(to: CGPoint(x: x, y: y))
+    // Circles pattern
+    private func circlesPattern(in size: CGSize) -> some View {
+        ZStack {
+            // Random circles
+            ForEach(0..<20, id: \.self) { i in
+                Circle()
+                    .fill(Color.white.opacity(0.05 + Double.random(in: 0...0.05)))
+                    .frame(width: 50 + CGFloat.random(in: 0...150),
+                           height: 50 + CGFloat.random(in: 0...150))
+                    .position(
+                        x: CGFloat.random(in: 0...size.width),
+                        y: CGFloat.random(in: 0...size.height)
+                    )
+            }
+        }
+    }
+    
+    // Dots pattern
+    private func dotsPattern(in size: CGSize) -> some View {
+        ZStack {
+            // Grid of dots
+            ForEach(0..<Int(size.width/20), id: \.self) { x in
+                ForEach(0..<Int(size.height/20), id: \.self) { y in
+                    if (x + y) % 2 == 0 {
+                        Circle()
+                            .fill(Color.white.opacity(0.1))
+                            .frame(width: 4, height: 4)
+                            .position(
+                                x: CGFloat(x) * 20,
+                                y: CGFloat(y) * 20
+                            )
+                    }
+                }
             }
         }
     }
 }
 
-private struct CirclesView: View {
-    let circles = 6
-    @State private var scale: CGFloat = 1.0
+// Wave shape for background
+struct WaveShape: Shape {
+    var amplitude: CGFloat
+    var frequency: CGFloat
+    var phase: CGFloat
     
-    var body: some View {
-        ZStack {
-            ForEach(0..<circles, id: \.self) { i in
-                Circle()
-                    .stroke(Color.white, lineWidth: 1.5)
-                    .scaleEffect(scale - CGFloat(i) * 0.05)
-                    .opacity(0.4 - Double(i) * 0.05)
-            }
+    var animatableData: CGFloat {
+        get { phase }
+        set { phase = newValue }
+    }
+    
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath()
+        
+        // Start at the bottom left
+        path.move(to: CGPoint(x: 0, y: rect.height))
+        
+        // Draw the wave
+        for x in stride(from: 0, to: rect.width, by: 1) {
+            let relativeX = x / rect.width
+            let sine = sin(relativeX * .pi * frequency * 8 + phase)
+            let y = rect.height - amplitude * sine - amplitude
+            path.addLine(to: CGPoint(x: x, y: max(0, y)))
         }
-        .onAppear {
-            withAnimation(Animation.easeInOut(duration: 8).repeatForever(autoreverses: true)) {
-                scale = 1.2
-            }
-        }
+        
+        // Complete the path
+        path.addLine(to: CGPoint(x: rect.width, y: rect.height))
+        path.close()
+        
+        return Path(path.cgPath)
     }
 }
 

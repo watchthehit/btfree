@@ -55,7 +55,7 @@ struct BFAssets {
         static func goalSetting(size: CGFloat = 200) -> some View {
             ZStack {
                 RoundedRectangle(cornerRadius: 20)
-                    .fill(BFColors.healing.opacity(0.3))
+                    .fill(BFColors.secondary.opacity(0.3))
                     .frame(width: size, height: size * 0.75)
                 
                 Image(systemName: "target")
@@ -97,13 +97,13 @@ struct BFAssets {
         static func features(size: CGFloat = 200) -> some View {
             ZStack {
                 RoundedRectangle(cornerRadius: 20)
-                    .fill(BFColors.info.opacity(0.2))
+                    .fill(BFColors.primary.opacity(0.2))
                     .frame(width: size, height: size * 0.75)
                 
                 Image(systemName: "star.fill")
                     .resizable()
                     .scaledToFit()
-                    .foregroundColor(BFColors.info)
+                    .foregroundColor(BFColors.primary)
                     .frame(width: size * 0.4, height: size * 0.4)
             }
         }
@@ -136,4 +136,4 @@ struct BFAssets {
             }
         }
     }
-} 
+}

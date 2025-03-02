@@ -4,7 +4,7 @@ import SwiftUI
  * BFColors - Color management for the BetFree app
  *
  * This file implements the "Serene Strength" color scheme, which uses a palette of
- * deep blues, vibrant teals, and warm coral accents to create a powerful,
+ * deep blues, vibrant teals, and coral accents to create a powerful,
  * motivating environment for users on their recovery journey.
  */
 public struct BFColors {
@@ -22,19 +22,19 @@ public struct BFColors {
     
     /// Coral Accent - Accent color providing warmth and encouragement
     public static var accent: Color {
-        dynamicColor(light: Color(hex: "#FF7043"), dark: Color(hex: "#FF8A65"))
+        dynamicColor(light: Color(hex: "#F95738"), dark: Color(hex: "#FF7043"))
     }
     
     // MARK: - Theme Colors
     
     /// Ocean Blue - Used in relaxation-focused features
     public static var calm: Color {
-        dynamicColor(light: Color(hex: "#415A77"), dark: Color(hex: "#546A8C"))
+        dynamicColor(light: Color(hex: "#00B4D8"), dark: Color(hex: "#00BCD4"))
     }
     
     /// Aquamarine - Used in focus and mindfulness features
     public static var focus: Color {
-        dynamicColor(light: Color(hex: "#00B4D8"), dark: Color(hex: "#00E5FF"))
+        dynamicColor(light: Color(hex: "#64FFDA"), dark: Color(hex: "#00E5FF"))
     }
     
     /// Warm Sand - Used in supportive content areas
@@ -63,49 +63,49 @@ public struct BFColors {
     
     /// Warning Amber - Used for cautionary messages requiring attention
     public static var warning: Color {
-        dynamicColor(light: Color(hex: "#FF9800"), dark: Color(hex: "#FFB74D"))
+        dynamicColor(light: Color(hex: "#FFB74D"), dark: Color(hex: "#FFC107"))
     }
     
     /// Error Red - Signals error states and critical alerts
     public static var error: Color {
-        dynamicColor(light: Color(hex: "#F44336"), dark: Color(hex: "#FF5252"))
+        dynamicColor(light: Color(hex: "#F95738"), dark: Color(hex: "#FF5252"))
     }
     
     // MARK: - Neutral Colors
     
     /// Background color - Light Silver in light mode, Deep Space in dark mode
     public static var background: Color {
-        dynamicColor(light: Color(hex: "#E0E1DD"), dark: Color(hex: "#0D1B2A"))
+        dynamicColor(light: Color(hex: "#F5F8FA"), dark: Color(hex: "#0D1B2A"))
     }
     
     /// Secondary background color - Slightly darker than primary background
     public static var secondaryBackground: Color {
-        dynamicColor(light: Color(hex: "#D2D3D9"), dark: Color(hex: "#1B263B"))
+        dynamicColor(light: Color(hex: "#E6EBF0"), dark: Color(hex: "#1B263B"))
     }
     
-    /// Card background - White in light mode, Navy in dark mode
+    /// Card background - White in light mode, Oxford Blue in dark mode
     public static var cardBackground: Color {
-        dynamicColor(light: Color(hex: "#FFFFFF"), dark: Color(hex: "#263F60"))
+        dynamicColor(light: Color(hex: "#FFFFFF"), dark: Color(hex: "#1B263B"))
     }
     
-    /// Primary text - Deep Space in light mode, Silver in dark mode
+    /// Primary text - Deep Space in light mode, White in dark mode
     public static var textPrimary: Color {
-        dynamicColor(light: Color(hex: "#0D1B2A"), dark: Color(hex: "#E0E1DD"))
+        dynamicColor(light: Color(hex: "#0D1B2A"), dark: Color(hex: "#FFFFFF"))
     }
     
-    /// Secondary text - Navy in light mode, Light Silver in dark mode
+    /// Secondary text - Oxford Blue in light mode, Light Silver in dark mode
     public static var textSecondary: Color {
-        dynamicColor(light: Color(hex: "#1B263B"), dark: Color(hex: "#CCD1D9"))
+        dynamicColor(light: Color(hex: "#1B263B"), dark: Color(hex: "#BFCDE0"))
     }
     
-    /// Tertiary text - Blue Gray in both modes
+    /// Tertiary text - Light Gray in both modes
     public static var textTertiary: Color {
-        dynamicColor(light: Color(hex: "#415A77"), dark: Color(hex: "#778DA9"))
+        dynamicColor(light: Color(hex: "#718096"), dark: Color(hex: "#90A4AE"))
     }
     
-    /// Divider - Light Gray in light mode, Dark Navy in dark mode
+    /// Divider - Light Gray in light mode, Dark Blue in dark mode
     public static var divider: Color {
-        dynamicColor(light: Color(hex: "#CCD1D9"), dark: Color(hex: "#263F60"))
+        dynamicColor(light: Color(hex: "#E6EBF0"), dark: Color(hex: "#2C3E50"))
     }
     
     // MARK: - Dynamic Colors
@@ -125,28 +125,28 @@ public struct BFColors {
     
     // MARK: - Gradients
     
-    /// Primary gradient - From Deep Space Blue to a slightly lighter shade
+    /// Primary gradient - From Deep Space Blue to Oxford Blue
     public static func primaryGradient() -> LinearGradient {
         LinearGradient(
-            gradient: Gradient(colors: [primary, Color(hex: "#1B263B")]),
+            gradient: Gradient(colors: [Color(hex: "#0D1B2A"), Color(hex: "#1B263B")]),
             startPoint: .leading,
             endPoint: .trailing
         )
     }
     
-    /// Calm gradient - A soothing gradient for meditation features
-    public static func calmGradient() -> LinearGradient {
+    /// Brand gradient - From Vibrant Teal to Ocean Blue
+    public static func brandGradient() -> LinearGradient {
         LinearGradient(
-            gradient: Gradient(colors: [calm, Color(hex: "#778DA9")]),
+            gradient: Gradient(colors: [Color(hex: "#64FFDA"), Color(hex: "#00B4D8")]),
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
     }
     
-    /// Energy gradient - A vibrant, energizing gradient for achievements
+    /// Energy gradient - From Ocean Blue to Coral
     public static func energyGradient() -> LinearGradient {
         LinearGradient(
-            gradient: Gradient(colors: [secondary, Color(hex: "#00BFA5")]),
+            gradient: Gradient(colors: [Color(hex: "#00B4D8"), Color(hex: "#F95738")]),
             startPoint: .leading,
             endPoint: .trailing
         )
@@ -155,7 +155,7 @@ public struct BFColors {
     /// Progress gradient - Used for progress indicators
     public static func progressGradient() -> LinearGradient {
         LinearGradient(
-            gradient: Gradient(colors: [secondary, focus]),
+            gradient: Gradient(colors: [secondary, calm]),
             startPoint: .leading,
             endPoint: .trailing
         )
@@ -189,4 +189,4 @@ extension Color {
             opacity: Double(a) / 255
         )
     }
-} 
+}
