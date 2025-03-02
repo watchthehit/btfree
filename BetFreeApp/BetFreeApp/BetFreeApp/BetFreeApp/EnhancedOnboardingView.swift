@@ -477,49 +477,28 @@ struct CombinedValuePropositionView: View {
     
     var body: some View {
         ZStack {
-            // Use standardized background
-            BFScreenBackground()
+            // Use turquoise background from screenshot
+            Color(UIColor(hex: "#3DDFD3"))
+                .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Improved header with navigation controls
+                // Header with skip button
                 HStack {
-                    // Show back button only if not on first page
-                    if currentPage > 0 {
-                        Button {
-                            withAnimation {
-                                currentPage -= 1
-                            }
-                        } label: {
-                            HStack(spacing: 6) {
-                                Image(systemName: "chevron.left")
-                                    .font(.system(size: 16, weight: .semibold))
-                                Text("Back")
-                                    .fontWeight(.medium)
-                            }
-                            .foregroundColor(.white)
-                        }
-                        .padding(.leading, BFSpacing.medium)
-                    } else {
-                        Spacer()
-                            .frame(width: 80) // Keep layout balanced
-                    }
-                    
                     Spacer()
                     
                     // Skip to assessment button
                     Button {
                         withAnimation {
-                            viewModel.nextScreen()
+                            viewModel.skipToPaywall()
                         }
                     } label: {
                         Text("Skip")
                             .fontWeight(.medium)
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(.white)
                     }
                     .padding(.trailing, BFSpacing.medium)
+                    .padding(.top, BFSpacing.large)
                 }
-                .padding(.top, BFSpacing.large)
-                .padding(.bottom, BFSpacing.small)
                 
                 // Page indicators
                 HStack(spacing: 8) {
@@ -532,7 +511,8 @@ struct CombinedValuePropositionView: View {
                             .animation(.spring(), value: currentPage)
                     }
                 }
-                .padding(.bottom, BFSpacing.medium)
+                .padding(.top, BFSpacing.large)
+                .padding(.bottom, BFSpacing.large)
                 .opacity(animateContent ? 1 : 0)
                 .animation(.easeIn.delay(0.3), value: animateContent)
                 
@@ -541,7 +521,7 @@ struct CombinedValuePropositionView: View {
                     // First value proposition
                     ValuePropositionContent(
                         iconName: "heart.fill",
-                        iconColor: BFColors.accent.opacity(0.3),
+                        iconColor: Color.white,
                         title: "Break Free From Gambling",
                         description: "Take the first step toward a healthier relationship with gambling through evidence-based tools and support.",
                         animateIcon: true
@@ -551,7 +531,7 @@ struct CombinedValuePropositionView: View {
                     // Second value proposition
                     ValuePropositionContent(
                         iconName: "chart.line.uptrend.xyaxis",
-                        iconColor: BFColors.secondary.opacity(0.2),
+                        iconColor: Color.white,
                         title: "Track Your Progress",
                         description: "Monitor your journey with personalized insights and celebrate your milestones along the way.",
                         animateIcon: true
@@ -561,7 +541,7 @@ struct CombinedValuePropositionView: View {
                     // Third value proposition
                     ValuePropositionContent(
                         iconName: "brain.head.profile",
-                        iconColor: BFColors.focus.opacity(0.2),
+                        iconColor: Color.white,
                         title: "Find Your Calm",
                         description: "Access mindfulness exercises and breathing techniques to help manage urges and reduce stress.",
                         animateIcon: true
@@ -570,6 +550,40 @@ struct CombinedValuePropositionView: View {
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 .padding(.bottom, BFSpacing.medium)
+                
+                Spacer()
+                
+                // Next/Get Started button
+                Button(action: {
+                    if currentPage < 2 {
+                        withAnimation {
+                            currentPage += 1
+                        }
+                    } else {
+                        viewModel.nextScreen()
+                    }
+                }) {
+                    HStack {
+                        Text(currentPage == 2 ? "Get Started" : "Next")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                        
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 16))
+                            .foregroundColor(.white)
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color.red)
+                    )
+                    .padding(.horizontal, 40)
+                }
+                .padding(.bottom, 40)
+                .opacity(animateContent ? 1 : 0)
+                .offset(y: animateContent ? 0 : 20)
+                .animation(BFAnimations.standardAppear.delay(0.4), value: animateContent)
                 
                 // Next/Get Started button
                 BFPrimaryButton(
@@ -617,63 +631,51 @@ struct ValuePropositionContent: View {
             ZStack {
                 // Outer pulse effect
                 Circle()
-                    .fill(iconColor)
-                    .frame(width: 140, height: 140)
-                    .scaleEffect(isAnimating && animateIcon ? 1.2 : 0.9)
-                    .opacity(isAnimating && animateIcon ? 0.6 : 0.0)
-                    .animation(
-                        Animation.easeInOut(duration: 1.8)
-                            .repeatForever(autoreverses: true),
-                        value: isAnimating
-                    )
+                    .fill(Color.white.opacity(0.15))
+                    .frame(width: 160, height: 160)
                 
-                // Icon container
-                Image(systemName: iconName)
-                    .font(.system(size: 70))
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(
-                        Circle()
-                            .fill(iconColor)
-                    )
-                    .mediumShadow()
-                    .scaleEffect(isAnimating && animateIcon ? 1.05 : 1.0)
-                    .animation(
-                        Animation.easeInOut(duration: 1.5)
-                            .repeatForever(autoreverses: true),
-                        value: isAnimating
+                // Middle circle
+                Circle()
+                    .fill(Color.white.opacity(0.3))
+                    .frame(width: 120, height: 120)
+                
+                // Inner circle with icon
+                Circle()
+                    .fill(Color.gray.opacity(0.5))
+                    .frame(width: 80, height: 80)
+                    .overlay(
+                        Image(systemName: iconName)
+                            .font(.system(size: 40))
+                            .foregroundColor(.white)
                     )
             }
+            .scaleEffect(isAnimating ? 1.05 : 1.0)
+            .animation(
+                Animation.easeInOut(duration: 3)
+                    .repeatForever(autoreverses: true),
+                value: isAnimating
+            )
             
             // Content text
             VStack(spacing: BFSpacing.medium) {
                 Text(title)
-                    .heading1()
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundColor(.black)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, BFSpacing.medium)
-                    .opacity(textVisible ? 1 : 0)
-                    .offset(y: textVisible ? 0 : 20)
-                    .animation(BFAnimations.standardAppear, value: textVisible)
                 
                 Text(description)
-                    .bodyLarge()
+                    .font(.system(size: 17))
+                    .foregroundColor(.black)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, BFSpacing.xlarge)
-                    .opacity(textVisible ? 1 : 0)
-                    .offset(y: textVisible ? 0 : 15)
-                    .animation(BFAnimations.standardAppear.delay(0.2), value: textVisible)
             }
             
-            Spacer()
             Spacer()
         }
         .onAppear {
             isAnimating = true
-            
-            // Slight delay before text animation
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                textVisible = true
-            }
+            textVisible = true
         }
     }
 }
