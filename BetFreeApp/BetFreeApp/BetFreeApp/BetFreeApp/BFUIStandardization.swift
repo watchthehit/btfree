@@ -107,6 +107,109 @@ extension View {
     }
 }
 
+// MARK: - Animation Standardization Extensions
+
+extension Animation {
+    /// Standard appear animation
+    static var bfAppear: Animation {
+        .easeOut(duration: BFAnimations.standardDuration)
+    }
+    
+    /// Standard disappear animation
+    static var bfDisappear: Animation {
+        .easeIn(duration: BFAnimations.quickDuration)
+    }
+    
+    /// Standard button press animation
+    static var bfButtonPress: Animation {
+        .spring(response: 0.3, dampingFraction: 0.6)
+    }
+    
+    /// Standard emphasis animation for drawing attention
+    static var bfEmphasis: Animation {
+        .spring(response: 0.5, dampingFraction: 0.7)
+    }
+    
+    /// Create a standard delayed animation
+    static func bfDelayed(delay: Double = 0.2, animation: Animation = .bfAppear) -> Animation {
+        animation.delay(delay)
+    }
+    
+    /// Standard staggered animation for lists
+    static func bfStaggered(index: Int, baseDelay: Double = 0.1) -> Animation {
+        .easeOut(duration: BFAnimations.standardDuration)
+            .delay(baseDelay + (Double(index) * 0.05))
+    }
+}
+
+// MARK: - Animation View Extensions
+
+extension View {
+    /// Apply standard fade-in animation
+    func fadeInAnimation(isActive: Bool, delay: Double = 0) -> some View {
+        self.opacity(isActive ? 1 : 0)
+            .animation(
+                .easeInOut(duration: BFAnimations.standardDuration)
+                    .delay(delay),
+                value: isActive
+            )
+    }
+    
+    /// Apply standard slide-in animation from a direction
+    func slideInAnimation(isActive: Bool, from edge: Edge, delay: Double = 0) -> some View {
+        self.opacity(isActive ? 1 : 0)
+            .offset(x: edge == .leading ? (isActive ? 0 : -20) : 
+                     (edge == .trailing ? (isActive ? 0 : 20) : 0),
+                   y: edge == .top ? (isActive ? 0 : -20) : 
+                     (edge == .bottom ? (isActive ? 0 : 20) : 0))
+            .animation(
+                .easeOut(duration: BFAnimations.standardDuration)
+                    .delay(delay),
+                value: isActive
+            )
+    }
+    
+    /// Apply standard scale animation
+    func scaleAnimation(isActive: Bool, delay: Double = 0) -> some View {
+        self.scaleEffect(isActive ? 1.0 : 0.95)
+            .opacity(isActive ? 1 : 0)
+            .animation(
+                .spring(response: 0.4, dampingFraction: 0.8)
+                    .delay(delay),
+                value: isActive
+            )
+    }
+    
+    /// Apply standard button tap animation
+    func buttonTapAnimation() -> some View {
+        self.scaleEffect(0.98)
+            .animation(.bfButtonPress, value: true)
+    }
+    
+    /// Apply animated entrance for content with staggered children
+    func animatedEntrance<Content: View>(
+        isActive: Bool,
+        @ViewBuilder content: @escaping () -> Content
+    ) -> some View {
+        ZStack {
+            if isActive {
+                content()
+            }
+        }
+        .animation(.bfAppear, value: isActive)
+        .transition(.opacity.combined(with: .scale(scale: 0.95)))
+    }
+    
+    /// Apply accessibility-aware animation (respects reduced motion setting)
+    func accessibleAnimation<Value: Equatable>(_ animation: Animation?, value: Value, reduceMotion: Bool = false) -> some View {
+        if reduceMotion {
+            return self.animation(nil, value: value)
+        } else {
+            return self.animation(animation, value: value)
+        }
+    }
+}
+
 // MARK: - Usage Guide
 /**
  * How to use this standardization file:
