@@ -2776,7 +2776,8 @@ struct TriggerMappingView: View {
                                               BFColors.accent : Color.white.opacity(0.15))
                                 )
                                 .foregroundColor(selectedCategoryIndex == index ? 
-                                                .white : .white.opacity(0.8))
+                                                .white : .white.opacity(0.9))  // Increased opacity from 0.8 to 0.9
+                                .fontWeight(selectedCategoryIndex == index ? .semibold : .medium)  // Added font weight difference
                         }
                     }
                 }
@@ -2793,21 +2794,26 @@ struct TriggerMappingView: View {
                         }) {
                     HStack {
                                 Text(trigger)
-                                    .font(.system(size: 16))
+                                    .font(.system(size: 16, weight: viewModel.selectedTriggers.contains(trigger) ? .semibold : .regular))  // Added weight difference
                                     .foregroundColor(viewModel.selectedTriggers.contains(trigger) ? .white : .white.opacity(0.9))
                                     .multilineTextAlignment(.leading)
                                 
                                 Spacer()
                                 
                                 Image(systemName: viewModel.selectedTriggers.contains(trigger) ? "checkmark.circle.fill" : "circle")
-                                    .foregroundColor(viewModel.selectedTriggers.contains(trigger) ? BFColors.accent : .white.opacity(0.5))
+                                    .font(.system(size: 20))  // Increased size from default to 20
+                                    .foregroundColor(viewModel.selectedTriggers.contains(trigger) ? BFColors.accent : .white.opacity(0.7))  // Increased opacity from 0.5 to 0.7
                             }
                             .padding(.vertical, 12)
                             .padding(.horizontal, 16)
                             .background(
                                 RoundedRectangle(cornerRadius: 10)
                                     .fill(viewModel.selectedTriggers.contains(trigger) ? 
-                                          BFColors.accent.opacity(0.2) : Color.white.opacity(0.1))
+                                          BFColors.accent.opacity(0.3) : Color.white.opacity(0.15))  // Increased opacity values
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(viewModel.selectedTriggers.contains(trigger) ? BFColors.accent.opacity(0.5) : Color.white.opacity(0.3), lineWidth: 1)  // Added border
+                                    )
                             )
                         }
                     }
@@ -2847,19 +2853,24 @@ struct TriggerMappingView: View {
             }) {
                 Text("Continue")
                     .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
+                    .foregroundColor(.white)
                     .frame(height: 24)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(
                         LinearGradient(
-                            gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.8)]),
+                            gradient: Gradient(colors: [BFColors.primary, BFColors.primary.opacity(0.9)]),  // Changed from accent to primary color (deeper blue)
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                         .cornerRadius(12)
                         .opacity(viewModel.selectedTriggers.isEmpty ? 0.5 : 1.0)
                     )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.white.opacity(0.3), lineWidth: 1)  // Added white border for better visibility
+                    )
+                    .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)  // Added shadow for depth
             }
             .disabled(viewModel.selectedTriggers.isEmpty)
             .padding(.horizontal, 20)

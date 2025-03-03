@@ -25,7 +25,7 @@ struct BFPrimaryButton: View {
                 
                 if let icon = icon {
                     Image(systemName: icon)
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: 16, weight: .semibold))
                 }
             }
             .foregroundColor(.white)
@@ -41,12 +41,17 @@ struct BFPrimaryButton: View {
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
+                .cornerRadius(BFCornerRadius.medium)
             )
-            .cornerRadius(BFCornerRadius.medium)
-            .shadow(color: isDisabled ? Color.clear : BFColors.accent.opacity(0.4), 
+            .overlay(
+                RoundedRectangle(cornerRadius: BFCornerRadius.medium)
+                    .stroke(isDisabled ? Color.clear : Color.white.opacity(0.2), lineWidth: 1)
+            )
+            .shadow(color: isDisabled ? Color.clear : BFColors.accent.opacity(0.5), 
                    radius: 10, x: 0, y: 4)
         }
         .disabled(isDisabled)
+        .accessibilityLabel(text)
     }
 }
 
@@ -109,6 +114,13 @@ struct BFTextButton: View {
             }
             .foregroundColor(foregroundColor.opacity(opacity))
             .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.black.opacity(0.1))
+                    .padding(.horizontal, -6)
+            )
+            .contentShape(Rectangle())
+            .accessibilityLabel(text)
         }
     }
 }
@@ -119,7 +131,7 @@ struct BFTextButton: View {
 extension BFCard {
     /// Creates a card with standardized styling from the design system
     func styledBody(padding: EdgeInsets = EdgeInsets(top: BFSpacing.medium, leading: BFSpacing.medium, bottom: BFSpacing.medium, trailing: BFSpacing.medium), 
-                   opacity: Double = 0.25) -> some View {
+                   opacity: Double = 0.95) -> some View {
         self
             .padding(padding)
             .background(
@@ -130,6 +142,10 @@ extension BFCard {
                         radius: 6,
                         x: 0,
                         y: 3
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: BFCornerRadius.medium)
+                            .stroke(Color.white.opacity(0.5), lineWidth: 1)
                     )
             )
     }
@@ -182,26 +198,27 @@ struct BFOptionButton: View {
                 ZStack {
                     if allowsMultiple {
                         RoundedRectangle(cornerRadius: 4)
-                            .stroke(isSelected ? BFColors.accent : Color.white.opacity(0.6), lineWidth: 2)
-                            .frame(width: 20, height: 20)
+                            .stroke(isSelected ? BFColors.accent : Color.white.opacity(0.7), lineWidth: 2)
+                            .frame(width: 22, height: 22)
                         
                         if isSelected {
                             Image(systemName: "checkmark")
-                                .font(.system(size: 12, weight: .bold))
+                                .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(BFColors.accent)
                         }
                     } else {
                         Circle()
-                            .stroke(isSelected ? BFColors.accent : Color.white.opacity(0.6), lineWidth: 2)
-                            .frame(width: 20, height: 20)
+                            .stroke(isSelected ? BFColors.accent : Color.white.opacity(0.7), lineWidth: 2)
+                            .frame(width: 22, height: 22)
                         
                         if isSelected {
                             Circle()
                                 .fill(BFColors.accent)
-                                .frame(width: 12, height: 12)
+                                .frame(width: 14, height: 14)
                         }
                     }
                 }
+                .accessibilityHidden(true)
                 
                 // Option text
                 Text(text)
@@ -214,14 +231,19 @@ struct BFOptionButton: View {
             .padding(.horizontal, 16)
             .background(
                 RoundedRectangle(cornerRadius: BFCornerRadius.medium)
-                    .fill(Color.white.opacity(isSelected ? 0.9 : 0.8))
+                    .fill(Color.white.opacity(isSelected ? 0.95 : 0.9))
                     .overlay(
                         RoundedRectangle(cornerRadius: BFCornerRadius.medium)
-                            .stroke(isSelected ? BFColors.accent.opacity(0.7) : Color.white.opacity(0.3), lineWidth: isSelected ? 1.5 : 1)
+                            .stroke(isSelected ? BFColors.accent.opacity(0.7) : Color.white.opacity(0.5), lineWidth: isSelected ? 2 : 1)
                     )
+                    .shadow(color: isSelected ? BFColors.accent.opacity(0.3) : Color.black.opacity(0.1), 
+                           radius: 4, x: 0, y: 2)
             )
         }
         .buttonStyle(PlainButtonStyle())
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(text)
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 }
 
@@ -230,23 +252,39 @@ struct BFOptionButton: View {
 /// Standard progress bar component
 struct BFProgressBar: View {
     var progress: Float
-    var height: CGFloat = 4
+    var height: CGFloat = 6
+    var showPercentage: Bool = false
     
     var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                Rectangle()
-                    .fill(Color.white.opacity(0.1))
-                    .cornerRadius(BFCornerRadius.small)
-                
-                Rectangle()
-                    .fill(BFColors.accent)
-                    .cornerRadius(BFCornerRadius.small)
-                    .frame(width: CGFloat(self.progress) * geometry.size.width)
-                    .animation(.easeInOut, value: progress)
+        VStack(alignment: .leading, spacing: 4) {
+            if showPercentage {
+                Text("\(Int(progress * 100))%")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.white)
             }
+            
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    Rectangle()
+                        .fill(Color.white.opacity(0.2))
+                        .cornerRadius(BFCornerRadius.small)
+                    
+                    Rectangle()
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.8)]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .cornerRadius(BFCornerRadius.small)
+                        .frame(width: CGFloat(self.progress) * geometry.size.width)
+                        .animation(.easeInOut, value: progress)
+                }
+            }
+            .frame(height: height)
+            .accessibilityValue("\(Int(progress * 100)) percent")
         }
-        .frame(height: height)
     }
 }
 
@@ -261,13 +299,13 @@ extension BFTextField {
             Text(title)
                 .font(BFTypography.bodySmall)
                 .foregroundColor(.white)
-                .fontWeight(.medium)
+                .fontWeight(.semibold)
             
             // Text input field
             HStack(spacing: BFSpacing.small) {
                 if let icon = icon {
                     Image(systemName: icon)
-                        .foregroundColor(isFocused.wrappedValue ? BFColors.accent : .white.opacity(0.85))
+                        .foregroundColor(isFocused.wrappedValue ? BFColors.accent : .white.opacity(0.9))
                         .font(.system(size: 16))
                 }
                 
@@ -281,13 +319,13 @@ extension BFTextField {
                     .tint(BFColors.accent)
                     .placeholder(when: text.isEmpty) {
                         Text(placeholder)
-                            .foregroundColor(.white.opacity(0.6))
+                            .foregroundColor(.white.opacity(0.7))
                     }
             }
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: BFCornerRadius.medium)
-                    .fill(Color.white.opacity(0.25))
+                    .fill(Color.white.opacity(0.3))
                     .shadow(color: isFocused.wrappedValue ? BFColors.accent.opacity(0.5) : Color.black.opacity(0.2), 
                            radius: isFocused.wrappedValue ? 6 : 3, 
                            x: 0, 
@@ -295,15 +333,16 @@ extension BFTextField {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: BFCornerRadius.medium)
-                    .stroke(errorMessage != nil ? BFColors.error : (isFocused.wrappedValue ? BFColors.accent : Color.white.opacity(0.3)), lineWidth: 1.5)
+                    .stroke(errorMessage != nil ? BFColors.error : (isFocused.wrappedValue ? BFColors.accent : Color.white.opacity(0.5)), lineWidth: 2)
             )
             
             // Error message if any
             if let errorMessage = errorMessage {
                 Text(errorMessage)
-                    .font(.caption)
+                    .font(.system(size: 12, weight: .medium))
                     .foregroundColor(BFColors.error)
                     .padding(.leading, 4)
+                    .accessibilityLabel("Error: \(errorMessage)")
             }
         }
     }
