@@ -1,6 +1,18 @@
 import SwiftUI
 import Foundation
 
+// MARK: - Support Types
+public struct TriggerCategory: Identifiable {
+    public var id = UUID()
+    public var name: String
+    public var triggers: [String]
+    
+    public init(name: String, triggers: [String]) {
+        self.name = name
+        self.triggers = triggers
+    }
+}
+
 // MARK: - TriggerMappingView
 struct TriggerMappingView: View {
     @ObservedObject var viewModel: OnboardingViewModel
@@ -384,7 +396,7 @@ struct ProfileSummaryRow: View {
 
 // MARK: - Main OnboardingViewModel
 @MainActor
-class OnboardingViewModel: ObservableObject {
+public class OnboardingViewModel: ObservableObject {
     // MARK: - Constants
     let screens: [OnboardingScreen] = [
         .welcome,

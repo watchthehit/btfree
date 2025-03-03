@@ -1,6 +1,7 @@
 import SwiftUI
+import Foundation
 
-enum OnboardingScreen: Equatable {
+public enum OnboardingScreen: Equatable {
     // New PuffCount-inspired flow (now the primary flow)
     case welcome
     case goalSelection
