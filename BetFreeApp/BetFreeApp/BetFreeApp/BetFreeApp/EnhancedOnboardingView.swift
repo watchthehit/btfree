@@ -610,11 +610,11 @@ struct EnhancedOnboardingView: View {
                     // Progress indicator
                     ProgressView(value: viewModel.screenProgress)
                         .progressViewStyle(LinearProgressViewStyle(tint: .white))
-                        .frame(width: 100)
+                        .frame(minWidth: 100, maxWidth: 100)
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 16)
-                .frame(height: 60)
+                .frame(minHeight: 60)
                 
                 // Current screen content
                 Spacer(minLength: 0)
@@ -734,7 +734,7 @@ struct PuffInspiredWelcomeView: View {
                 Text("Get Started")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.white)
-                    .frame(height: 56)
+                    .frame(minHeight: 56)
                     .frame(maxWidth: .infinity)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
@@ -811,7 +811,7 @@ struct GoalSelectionView: View {
                 Text("Continue")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.white)
-                    .frame(height: 56)
+                    .frame(minHeight: 56)
                     .frame(maxWidth: .infinity)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
@@ -888,7 +888,7 @@ struct TrackingMethodView: View {
                 Text("Continue")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.white)
-                    .frame(height: 56)
+                    .frame(minHeight: 56)
                     .frame(maxWidth: .infinity)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
@@ -1076,7 +1076,7 @@ struct CompleteProfileSetupView: View {
                 Text("Continue to Account Creation")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.white)
-                    .frame(height: 56)
+                    .frame(minHeight: 56)
                     .frame(maxWidth: .infinity)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
@@ -1177,7 +1177,7 @@ struct SignInView: View {
                     Text("Create Account")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.white)
-                        .frame(height: 56)
+                        .frame(minHeight: 56)
                         .frame(maxWidth: .infinity)
                         .background(
                             RoundedRectangle(cornerRadius: 16)
@@ -1205,7 +1205,7 @@ struct SignInView: View {
                             .font(.system(size: 18, weight: .semibold))
                     }
                     .foregroundColor(.white)
-                    .frame(height: 56)
+                    .frame(minHeight: 56)
                     .frame(maxWidth: .infinity)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
@@ -1302,7 +1302,7 @@ struct PersonalSetupView: View {
                 Text("Continue")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.white)
-                    .frame(height: 56)
+                    .frame(minHeight: 56)
                     .frame(maxWidth: .infinity)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
@@ -1399,7 +1399,7 @@ struct NotificationsView: View {
                 Text("Continue")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.white)
-                    .frame(height: 56)
+                    .frame(minHeight: 56)
                     .frame(maxWidth: .infinity)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
@@ -1542,15 +1542,16 @@ struct PaywallView: View {
                     Text("Start Free Trial")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.white)
-                        .frame(height: 56)
+                        .frame(minHeight: 56)
                         .frame(maxWidth: .infinity)
                         .background(
                             RoundedRectangle(cornerRadius: 16)
                                 .fill(
                                     LinearGradient(
                                         gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.8)]), 
-                                        startPoint: .leading, 
-                                        endPoint: .trailing
+                                            startPoint: .leading, 
+                                            endPoint: .trailing
+                                        )
                                     )
                                 )
                         )
