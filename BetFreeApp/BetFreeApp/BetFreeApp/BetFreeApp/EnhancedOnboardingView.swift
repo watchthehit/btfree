@@ -68,12 +68,12 @@ struct TriggerMappingView: View {
                                 ZStack {
                                     Circle()
                                         .stroke(viewModel.selectedTriggers.contains(trigger) ? BFColors.accent : Color.white.opacity(0.3), lineWidth: 2)
-                                        .frame(width: 26, height: 26)
+                                        .frame(minWidth: 26, minHeight: 26, alignment: .center)
                                     
                                     if viewModel.selectedTriggers.contains(trigger) {
                                         Circle()
                                             .fill(BFColors.accent)
-                                            .frame(width: 18, height: 18)
+                                            .frame(minWidth: 18, minHeight: 18, alignment: .center)
                                     }
                                 }
                                 
@@ -130,7 +130,7 @@ struct TriggerMappingView: View {
                 Text("Continue")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.white)
-                    .frame(height: 24)
+                    .frame(minHeight: 24)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(
@@ -180,7 +180,7 @@ struct FeatureRow: View {
             Image(systemName: iconName)
                 .font(.system(size: 24))
                 .foregroundColor(BFColors.accent)
-                .frame(width: 50, height: 50)
+                .frame(minWidth: 50, minHeight: 50, alignment: .center)
                 .background(Circle().fill(Color.white.opacity(0.1)))
             
             VStack(alignment: .leading, spacing: 4) {
@@ -231,12 +231,12 @@ struct GoalOptionButton: View {
                 ZStack {
                     Circle()
                         .stroke(isSelected ? BFColors.accent : Color.white.opacity(0.3), lineWidth: 2)
-                        .frame(width: 26, height: 26)
+                        .frame(minWidth: 26, minHeight: 26, alignment: .center)
                     
                     if isSelected {
                         Circle()
                             .fill(BFColors.accent)
-                            .frame(width: 18, height: 18)
+                            .frame(minWidth: 18, minHeight: 18, alignment: .center)
                     }
                 }
             }
@@ -301,12 +301,12 @@ struct TrackingMethodButton: View {
                 ZStack {
                     Circle()
                         .stroke(isSelected ? BFColors.accent : Color.white.opacity(0.3), lineWidth: 2)
-                        .frame(width: 26, height: 26)
+                        .frame(minWidth: 26, minHeight: 26, alignment: .center)
                     
                     if isSelected {
                         Circle()
                             .fill(BFColors.accent)
-                            .frame(width: 18, height: 18)
+                            .frame(minWidth: 18, minHeight: 18, alignment: .center)
                     }
                 }
             }
@@ -547,7 +547,7 @@ class OnboardingViewModel: ObservableObject {
         print("Saving user data:")
         print("Email: \(email)")
         print("Username: \(username)")
-        print("Daily goal: \(dailyGoal) minutes")
+        print("Daily Goal: \(dailyGoal) minutes")
         print("Selected goal: \(selectedGoal)")
         print("Tracking method: \(trackingMethod)")
         print("Triggers: \(selectedTriggers.joined(separator: ", "))")
@@ -632,6 +632,17 @@ struct EnhancedOnboardingView: View {
         .onAppear {
             // Setup the completion handler for the view model
             viewModel.onComplete = onComplete
+            
+            withAnimation(.easeOut(duration: 0.8)) {
+                animateContent = true
+            }
+            
+            // Automatically complete in case user doesn't tap button
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                if animateContent {
+                    viewModel.saveToAppState()
+                }
+            }
         }
     }
     
@@ -680,6 +691,7 @@ struct PuffInspiredWelcomeView: View {
                     .padding(20)
                     .background(Circle().fill(Color.white).opacity(0.15))
                     .scaleEffect(animateContent ? 1.0 : 0.8)
+                    .opacity(animateContent ? 1.0 : 0.0)
                 
                 Text("Welcome to BetFree")
                     .font(.system(size: 28, weight: .bold))
@@ -942,7 +954,7 @@ struct ScheduleSetupView: View {
                         } label: {
                             Text(weekdays[index])
                                 .font(.system(size: 15, weight: .medium))
-                                .frame(width: 40, height: 40)
+                                .frame(minWidth: 40, minHeight: 40, alignment: .center)
                                 .background(
                                     Circle()
                                         .fill(viewModel.reminderDays[index] ? BFColors.accent : Color.white.opacity(0.1))
@@ -1021,7 +1033,7 @@ struct CompleteProfileSetupView: View {
             ZStack {
                 Circle()
                     .fill(BFColors.accent.opacity(0.2))
-                    .frame(width: 120, height: 120)
+                    .frame(minWidth: 120, minHeight: 120, alignment: .center)
                 
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 60))
@@ -1259,7 +1271,7 @@ struct PersonalSetupView: View {
                 VStack(spacing: 15) {
                     Slider(value: $sliderValue, in: 0...120, step: 5)
                         .accentColor(BFColors.accent)
-                        .onChange(of: sliderValue) { newValue in
+                        .onChange(of: sliderValue) { _ in
                             viewModel.dailyGoal = Int(sliderValue)
                         }
                     
@@ -1484,12 +1496,12 @@ struct PaywallView: View {
                             ZStack {
                                 Circle()
                                     .stroke(viewModel.selectedPlan == plan.id ? BFColors.accent : Color.white.opacity(0.3), lineWidth: 2)
-                                    .frame(width: 26, height: 26)
+                                    .frame(minWidth: 26, minHeight: 26, alignment: .center)
                                 
                                 if viewModel.selectedPlan == plan.id {
                                     Circle()
                                         .fill(BFColors.accent)
-                                        .frame(width: 18, height: 18)
+                                        .frame(minWidth: 18, minHeight: 18, alignment: .center)
                                 }
                             }
                         }
@@ -1579,7 +1591,7 @@ struct CompletionView: View {
             ZStack {
                 Circle()
                     .fill(BFColors.accent.opacity(0.2))
-                    .frame(width: 150, height: 150)
+                    .frame(minWidth: 150, minHeight: 150, alignment: .center)
                 
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 80))
