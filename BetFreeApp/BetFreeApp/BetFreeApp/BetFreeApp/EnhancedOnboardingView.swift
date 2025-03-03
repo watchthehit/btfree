@@ -652,13 +652,6 @@ struct EnhancedOnboardingView: View {
             withAnimation(.easeOut(duration: 0.8)) {
                 animateContent = true
             }
-            
-            // Automatically complete in case user doesn't tap button
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                if animateContent {
-                    viewModel.saveToAppState()
-                }
-            }
         }
     }
     
@@ -1660,13 +1653,6 @@ struct CompletionView: View {
         .onAppear {
             withAnimation(.easeOut(duration: 0.8)) {
                 animateContent = true
-            }
-            
-            // Automatically complete in case user doesn't tap button
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                if animateContent {
-                    viewModel.saveToAppState()
-                }
             }
         }
     }
