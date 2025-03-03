@@ -360,4 +360,532 @@ extension View {
             self
         }
     }
+}
+
+// MARK: - Dashboard Card Components
+
+/// A modern dashboard card component inspired by PuffCount's minimal UI style
+struct BFDashboardCard<Content: View>: View {
+    var title: String
+    var icon: String? = nil
+    var iconColor: Color = BFColors.accent
+    var showBadge: Bool = false
+    var badgeText: String = ""
+    var badgeColor: Color = BFColors.accent
+    var content: Content
+    
+    init(title: String, 
+         icon: String? = nil, 
+         iconColor: Color = BFColors.accent,
+         showBadge: Bool = false,
+         badgeText: String = "",
+         badgeColor: Color = BFColors.accent,
+         @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.icon = icon
+        self.iconColor = iconColor
+        self.showBadge = showBadge
+        self.badgeText = badgeText
+        self.badgeColor = badgeColor
+        self.content = content()
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Header
+            HStack(spacing: 8) {
+                if let icon = icon {
+                    Image(systemName: icon)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(iconColor)
+                        .frame(width: 28, height: 28)
+                        .background(
+                            Circle()
+                                .fill(iconColor.opacity(0.15))
+                        )
+                        .padding(2)
+                }
+                
+                Text(title)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(Color(hex: "#1B263B"))
+                
+                Spacer()
+                
+                if showBadge {
+                    Text(badgeText)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(badgeColor)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(
+                            Capsule()
+                                .fill(badgeColor.opacity(0.15))
+                        )
+                }
+            }
+            
+            // Content
+            content
+                .padding(.top, 4)
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.white.opacity(0.96))
+                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.white, lineWidth: 1)
+        )
+    }
+}
+
+/// A stat item component for use within dashboard cards
+struct BFStatItem: View {
+    var title: String
+    var value: String
+    var subtitle: String? = nil
+    var valueColor: Color = BFColors.primary
+    var icon: String? = nil
+    var iconColor: Color = BFColors.accent
+    var showTrend: Bool = false
+    var trendUp: Bool = false
+    var trendValue: String = ""
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Title
+            Text(title)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(Color(hex: "#1B263B").opacity(0.7))
+            
+            HStack(alignment: .bottom, spacing: 8) {
+                // Value
+                Text(value)
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(valueColor)
+                
+                // Trend if shown
+                if showTrend {
+                    HStack(spacing: 2) {
+                        Image(systemName: trendUp ? "arrow.up" : "arrow.down")
+                            .font(.system(size: 12))
+                            .foregroundColor(trendUp ? BFColors.success : BFColors.error)
+                        
+                        Text(trendValue)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(trendUp ? BFColors.success : BFColors.error)
+                    }
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background(
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill((trendUp ? BFColors.success : BFColors.error).opacity(0.1))
+                    )
+                    .padding(.bottom, 4)
+                }
+                
+                Spacer()
+                
+                // Icon if provided
+                if let icon = icon {
+                    Image(systemName: icon)
+                        .font(.system(size: 16))
+                        .foregroundColor(iconColor)
+                        .frame(width: 32, height: 32)
+                        .background(
+                            Circle()
+                                .fill(iconColor.opacity(0.1))
+                        )
+                }
+            }
+            
+            // Subtitle if provided
+            if let subtitle = subtitle {
+                Text(subtitle)
+                    .font(.system(size: 13))
+                    .foregroundColor(Color(hex: "#1B263B").opacity(0.6))
+                    .padding(.top, 2)
+            }
+        }
+    }
+}
+
+/// A modern progress stat component inspired by PuffCount
+struct BFProgressStat: View {
+    var title: String
+    var currentValue: Double
+    var targetValue: Double
+    var units: String = ""
+    var color: Color = BFColors.accent
+    
+    private var percentage: Double {
+        min(currentValue / targetValue, 1.0)
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Title and values
+            HStack {
+                Text(title)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(Color(hex: "#1B263B").opacity(0.7))
+                
+                Spacer()
+                
+                Text("\(Int(currentValue)) / \(Int(targetValue)) \(units)")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(Color(hex: "#1B263B"))
+            }
+            
+            // Progress bar
+            ZStack(alignment: .leading) {
+                // Background
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.gray.opacity(0.1))
+                    .frame(height: 8)
+                
+                // Fill
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(colors: [color, color.opacity(0.7)]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .frame(width: max(8, CGFloat(percentage) * UIScreen.main.bounds.width - 64), height: 8)
+            }
+            
+            // Percentage text
+            Text("\(Int(percentage * 100))% Complete")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(color)
+        }
+    }
+}
+
+// Example usage of the new dashboard components:
+// BFDashboardCard(title: "Weekly Progress", icon: "chart.bar.fill") {
+//     BFStatItem(
+//         title: "Days Without Gambling", 
+//         value: "5", 
+//         subtitle: "Personal best: 14 days",
+//         showTrend: true, 
+//         trendUp: true, 
+//         trendValue: "40%"
+//     )
+//     
+//     BFProgressStat(
+//         title: "Weekly Goal", 
+//         currentValue: 5, 
+//         targetValue: 7, 
+//         units: "days"
+//     )
+// }
+
+/// A tap counter button inspired by PuffCount's minimalist design
+struct BFCounterButton: View {
+    var count: Int
+    var title: String
+    var subtitle: String
+    var incrementAction: () -> Void
+    var resetAction: () -> Void
+    var color: Color = BFColors.accent
+    @State private var isPressed: Bool = false
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            // Title
+            Text(title)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundColor(Color(hex: "#1B263B"))
+                .multilineTextAlignment(.center)
+                .padding(.top, 8)
+            
+            // Counter circle button
+            ZStack {
+                // Background circle
+                Circle()
+                    .fill(color.opacity(0.07))
+                    .frame(width: 180, height: 180)
+                
+                // Middle circle with subtle gradient
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                color.opacity(isPressed ? 0.3 : 0.15),
+                                color.opacity(isPressed ? 0.2 : 0.1)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 150, height: 150)
+                    .overlay(
+                        Circle()
+                            .stroke(color.opacity(0.3), lineWidth: 2)
+                    )
+                
+                // Counter text
+                VStack(spacing: 6) {
+                    Text("\(count)")
+                        .font(.system(size: 56, weight: .bold))
+                        .foregroundColor(Color(hex: "#1B263B"))
+                    
+                    Text(subtitle)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(Color(hex: "#1B263B").opacity(0.7))
+                }
+            }
+            .scaleEffect(isPressed ? 0.95 : 1.0)
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isPressed)
+            .onTapGesture {
+                // Visual feedback
+                withAnimation {
+                    isPressed = true
+                }
+                // Haptic feedback
+                let impactGenerator = UIImpactFeedbackGenerator(style: .medium)
+                impactGenerator.impactOccurred()
+                
+                // Increment counter
+                incrementAction()
+                
+                // Reset visual state
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                    withAnimation {
+                        isPressed = false
+                    }
+                }
+            }
+            .onLongPressGesture(minimumDuration: 1.5) {
+                // Haptic feedback
+                let impactGenerator = UINotificationFeedbackGenerator()
+                impactGenerator.notificationOccurred(.success)
+                
+                // Reset counter
+                resetAction()
+            }
+            
+            // Hint for resetting
+            Text("Long press to reset")
+                .font(.system(size: 12))
+                .foregroundColor(Color(hex: "#1B263B").opacity(0.5))
+                .padding(.bottom, 8)
+        }
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 24)
+                .fill(Color.white.opacity(0.97))
+                .shadow(color: Color.black.opacity(0.07), radius: 15, x: 0, y: 4)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 24)
+                .stroke(Color.white, lineWidth: 1)
+        )
+    }
+}
+
+/// A clean bar chart component inspired by PuffCount's data visualization
+struct BFBarChart: View {
+    struct DataPoint {
+        var value: Double
+        var label: String
+        var color: Color = BFColors.accent
+    }
+    
+    var title: String
+    var subtitle: String? = nil
+    var dataPoints: [DataPoint]
+    var maxValue: Double? = nil
+    
+    private var calculatedMaxValue: Double {
+        maxValue ?? (dataPoints.map { $0.value }.max() ?? 0) * 1.2
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Header
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(Color(hex: "#1B263B"))
+                
+                if let subtitle = subtitle {
+                    Text(subtitle)
+                        .font(.system(size: 14))
+                        .foregroundColor(Color(hex: "#1B263B").opacity(0.6))
+                }
+            }
+            
+            // Chart
+            VStack(spacing: 24) {
+                // Bars
+                HStack(alignment: .bottom, spacing: 8) {
+                    ForEach(0..<dataPoints.count, id: \.self) { index in
+                        VStack(spacing: 8) {
+                            // Value text
+                            Text("\(Int(dataPoints[index].value))")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(dataPoints[index].color)
+                                .opacity(dataPoints[index].value > 0 ? 1 : 0)
+                                .frame(height: 14)
+                            
+                            // Bar
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [
+                                            dataPoints[index].color,
+                                            dataPoints[index].color.opacity(0.7)
+                                        ]),
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
+                                .frame(height: dataPoints[index].value > 0 
+                                       ? CGFloat(dataPoints[index].value / calculatedMaxValue) * 150
+                                       : 4)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .stroke(dataPoints[index].color.opacity(0.3), lineWidth: 1)
+                                )
+                                .shadow(color: dataPoints[index].color.opacity(0.2), radius: 2, x: 0, y: 2)
+                                .animation(.easeOut(duration: 0.5), value: dataPoints[index].value)
+                            
+                            // Label text
+                            Text(dataPoints[index].label)
+                                .font(.system(size: 12))
+                                .foregroundColor(Color(hex: "#1B263B").opacity(0.7))
+                                .frame(height: 14)
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                }
+                .padding(.top, 10)
+                
+                // Bottom line
+                Rectangle()
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(height: 1)
+            }
+            .padding(.top, 10)
+        }
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.white.opacity(0.97))
+                .shadow(color: Color.black.opacity(0.07), radius: 10, x: 0, y: 3)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.white, lineWidth: 1)
+        )
+    }
+}
+
+/// A streak counter component inspired by PuffCount's achievement tracking
+struct BFStreakCounter: View {
+    var streakCount: Int
+    var streakLabel: String
+    var bestStreak: Int
+    var showFireIcon: Bool = true
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            // Current streak header
+            HStack {
+                Text("Current Streak")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(Color(hex: "#1B263B"))
+                
+                Spacer()
+                
+                if showFireIcon && streakCount > 0 {
+                    HStack(spacing: 4) {
+                        Image(systemName: "flame.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(BFColors.accent)
+                        
+                        Text("\(streakCount)")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(BFColors.accent)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule()
+                            .fill(BFColors.accent.opacity(0.1))
+                    )
+                }
+            }
+            
+            // Main streak counter
+            HStack(alignment: .bottom) {
+                VStack(alignment: .leading) {
+                    Text("\(streakCount)")
+                        .font(.system(size: 48, weight: .bold))
+                        .foregroundColor(streakCount > 0 ? BFColors.accent : Color(hex: "#1B263B"))
+                    
+                    Text(streakLabel)
+                        .font(.system(size: 16))
+                        .foregroundColor(Color(hex: "#1B263B").opacity(0.7))
+                }
+                
+                Spacer()
+                
+                VStack(alignment: .trailing) {
+                    Text("Best")
+                        .font(.system(size: 14))
+                        .foregroundColor(Color(hex: "#1B263B").opacity(0.6))
+                    
+                    Text("\(bestStreak)")
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundColor(Color(hex: "#1B263B"))
+                }
+                .padding(.bottom, 8)
+            }
+            
+            // Day circles
+            HStack(spacing: 12) {
+                ForEach(1...7, id: \.self) { day in
+                    VStack(spacing: 6) {
+                        // Circle
+                        ZStack {
+                            Circle()
+                                .fill(day <= streakCount ? BFColors.accent : Color.gray.opacity(0.1))
+                                .frame(width: 26, height: 26)
+                            
+                            if day <= streakCount {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
+                        }
+                        
+                        // Day label
+                        Text("\(day)")
+                            .font(.system(size: 12))
+                            .foregroundColor(day <= streakCount ? BFColors.accent : Color(hex: "#1B263B").opacity(0.5))
+                    }
+                }
+            }
+            .padding(.horizontal, 6)
+            .padding(.top, 6)
+        }
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.white.opacity(0.97))
+                .shadow(color: Color.black.opacity(0.07), radius: 10, x: 0, y: 3)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.white, lineWidth: 1)
+        )
+    }
 } 
