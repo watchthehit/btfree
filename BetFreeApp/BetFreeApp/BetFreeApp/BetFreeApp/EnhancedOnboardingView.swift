@@ -1099,8 +1099,9 @@ struct AssessmentResultsView: View {
                     ForEach(Array(viewModel.personalizationAreas.enumerated()), id: \.offset) { index, area in
                         BFCard {
                             HStack(spacing: BFSpacing.medium) {
+                                // Area icon
                                 ZStack {
-                    Circle()
+                                    Circle()
                                         .fill(BFColors.accent.opacity(0.2))
                                         .frame(width: 36, height: 36)
                                     
@@ -1109,14 +1110,22 @@ struct AssessmentResultsView: View {
                                         .foregroundColor(BFColors.accent)
                                 }
                                 
-                                Text(area)
-                                    .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.white)
+                                // Area content
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(area)
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(Color(hex: "#1B263B"))
+                                    
+                                    Text(getDescriptionForArea(area))
+                                        .font(.system(size: 14))
+                                        .foregroundColor(Color(hex: "#1B263B").opacity(0.7))
+                                        .lineLimit(2)
+                                }
                                 
                                 Spacer()
                             }
                         }
-                        .styledBody()
+                        .styledBody(opacity: 0.95)
                         .opacity(animateAreas ? 1.0 : 0.0)
                         .offset(y: animateAreas ? 0 : 20)
                         .animation(
@@ -1183,6 +1192,21 @@ struct AssessmentResultsView: View {
         case _ where area.contains("progress"): return "chart.line.uptrend.xyaxis"
         case _ where area.contains("community"): return "person.3.fill"
         default: return "star.fill"
+        }
+    }
+    
+    private func getDescriptionForArea(_ area: String) -> String {
+        switch area {
+        case "Intensive daily support": return "This area focuses on daily mindfulness practice and stress reduction techniques."
+        case "Regular check-ins and strategies": return "This area includes regular check-ins with a trusted person and strategies for managing urges."
+        case "Preventive techniques and maintenance": return "This area covers general techniques for preventing gambling urges and maintaining a healthy lifestyle."
+        case "Financial health restoration": return "This area focuses on improving financial health and reducing stress related to money."
+        case "Rebuilding relationship trust": return "This area focuses on rebuilding trust in relationships and social support."
+        case "Mental health and mindfulness": return "This area covers mindfulness exercises and mental health strategies."
+        case "Craving management techniques": return "This area focuses on managing cravings and urges related to gambling."
+        case "Healthy habit replacement": return "This area focuses on finding healthy alternatives to gambling."
+        case "Stress reduction strategies": return "This area covers strategies for managing stress and reducing gambling urges."
+        default: return ""
         }
     }
 }
