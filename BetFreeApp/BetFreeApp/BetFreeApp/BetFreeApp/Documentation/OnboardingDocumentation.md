@@ -1,7 +1,7 @@
 # Enhanced Onboarding Documentation
 
 ## Overview
-The Enhanced Onboarding system provides a comprehensive, user-friendly introduction to the BetFree app. It follows industry best practices with a value-first approach, guiding users through the app's benefits, personalization options, and subscription offerings with a free trial. The flow is designed to maximize engagement and conversion while providing a smooth user experience.
+The Enhanced Onboarding system provides a comprehensive, user-friendly introduction to the BetFree app. It follows industry best practices with a value-first approach, guiding users through the app's benefits, personalization options, and subscription offerings. The flow is designed to maximize engagement and conversion while providing a smooth user experience.
 
 ## Project Structure
 The onboarding implementation is integrated into the BetFreeApp Xcode project with the following components:
@@ -48,7 +48,7 @@ Each onboarding step is implemented as a separate view:
 3. **ValuePropositionView3**: Showcases "Find Your Calm" with mindfulness benefits
 4. **PersonalSetupView**: Collects the user's name and sets daily mindfulness goals
 5. **NotificationsView**: Configures notification preferences with toggles for different notification types
-6. **PaywallView**: Presents premium features and subscription options with free trial
+6. **EnhancedPaywallView**: Presents detailed subscription options with pricing and feature comparison
 7. **CompletionView**: Confirms setup and transitions to main app
 
 ### Supporting Types
@@ -76,20 +76,21 @@ The onboarding process follows a strategic flow with flexibility:
 - **Skip Option**: Provides a "Skip" button on value proposition screens to jump directly to the paywall
 - **Linear Progression**: Users can move forward with the "Continue" button on each screen
 - **Back Navigation**: Users can go back to previous steps with the back button
-- **Hard Paywall**: Presents subscription options before completion
+- **Single Paywall**: Presents comprehensive subscription options with detailed pricing before completion
 - **Free Trial**: Offers a 7-day free trial to increase conversion
 - **Completion**: The final "Start My Journey" button completes onboarding and transitions to the main app
 
 ## Subscription Options
 
-The paywall screen presents two subscription options:
+The enhanced paywall screen presents multiple subscription options:
 - **Monthly Plan**: Basic monthly subscription
 - **Annual Plan**: Discounted annual subscription with savings highlighted
+- **Lifetime Plan**: One-time payment option (if applicable)
 
-Features of the paywall:
-- Visual highlighting of the selected plan
+Features of the enhanced paywall:
+- Visual highlighting of the recommended plan
 - Clear display of pricing and savings
-- Feature list with icons
+- Comprehensive feature comparison table
 - Prominent "Start Free Trial" button
 - Terms and conditions notice
 

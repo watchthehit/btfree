@@ -154,7 +154,7 @@ The app includes a comprehensive onboarding flow with the following screens:
 1. Welcome
 2. Name Input (Personal Setup)
 3. Trigger Selection
-4. Paywall (Premium Features)
+4. Enhanced Paywall (Detailed Subscription Options)
 5. Notification Setup
 6. Completion
 
