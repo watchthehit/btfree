@@ -2,6 +2,7 @@ import SwiftUI
 
 struct BetFreeRootView: View {
     @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var paywallManager: PaywallManager
     
     var body: some View {
         if !appState.hasCompletedOnboarding {
@@ -16,6 +17,7 @@ struct BetFreeRootView: View {
 
 struct MainContentView: View {
     @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var paywallManager: PaywallManager
     
     var body: some View {
         TabView {
@@ -34,6 +36,7 @@ struct MainContentView: View {
                     Label("Settings", systemImage: "gear")
                 }
         }
+        .withPaywall(manager: paywallManager)
     }
 }
 

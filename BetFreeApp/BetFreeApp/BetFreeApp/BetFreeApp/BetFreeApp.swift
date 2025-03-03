@@ -5,6 +5,9 @@ struct BetFreeApp: App {
     // Create AppState with lazy initialization to prevent excessive memory usage on launch
     @StateObject private var appState = AppState()
     
+    // Create PaywallManager instance
+    @StateObject private var paywallManager = PaywallManager()
+    
     // Add an environment value to monitor memory warnings
     @Environment(\.scenePhase) private var scenePhase
     
@@ -12,6 +15,7 @@ struct BetFreeApp: App {
         WindowGroup {
             BetFreeRootView()
                 .environmentObject(appState)
+                .environmentObject(paywallManager)
                 // Add a modifier to handle memory pressure
                 .onChange(of: scenePhase) { oldPhase, newPhase in
                     if newPhase == .background {
