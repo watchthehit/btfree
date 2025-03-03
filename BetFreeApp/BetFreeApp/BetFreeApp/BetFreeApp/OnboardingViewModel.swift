@@ -39,8 +39,8 @@ public class OnboardingViewModel: ObservableObject {
         .goalSelection,
         .combinedProfileSetup, // Using the newly added case
         .notificationSetup,
+        .enhancedPaywall, // Hard paywall at the end of onboarding
         .completion
-        // enhancedPaywall moved to post-onboarding
     ]
     
     // User profile properties

@@ -58,6 +58,29 @@
 ### Focus States
 - Ensure all interactive elements have clear focus states
 
+## Paywall Accessibility Considerations
+
+### Hard Paywall Implementation
+- The app now includes a mandatory paywall at the end of the onboarding flow
+- Users are presented with two clear options:
+  - "Start My 7-Day Free Trial" - For full premium features
+  - "Try Limited Features" - For a restricted feature set
+- No option to completely bypass the paywall, ensuring monetization opportunities
+
+### Paywall Accessibility Features
+- All interactive elements on the paywall screen meet AA contrast requirements
+- Payment options are clearly labeled with descriptive text
+- Premium features are identified with appropriate icons
+- Limited trial mode shows locked state indicators on premium features
+- Upgrade paths are always available for users on limited trials
+- Legal text is presented with appropriate sizing and spacing
+
+### User Control Considerations
+- Users in limited trial can easily upgrade at any time
+- Payment terms are clearly presented with appropriate links
+- Text legibility is maintained even during animations
+- Completion screen adapts to show appropriate content based on subscription status
+
 ## Testing Protocol
 
 ### Manual Testing

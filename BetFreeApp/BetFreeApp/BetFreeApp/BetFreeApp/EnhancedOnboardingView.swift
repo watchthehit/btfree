@@ -238,6 +238,7 @@ public struct EnhancedOnboardingView: View {
     @StateObject private var viewModel = OnboardingViewModel()
     @Environment(\.colorScheme) var colorScheme
     @State private var animateContent = false
+    @EnvironmentObject var paywallManager: PaywallManager
     
     // Add completion handler property
     var onComplete: (() -> Void)?
@@ -325,7 +326,9 @@ public struct EnhancedOnboardingView: View {
                 case .notificationSetup:
                     CombinedNotificationScreen(viewModel: viewModel)
                 case .enhancedPaywall:
-                    EnhancedPaywallScreen().environmentObject(viewModel)
+                    EnhancedPaywallScreen()
+                        .environmentObject(viewModel)
+                        .environmentObject(paywallManager)
                 case .completion:
                     CompletionScreen(viewModel: viewModel)
                 default:
@@ -1216,6 +1219,7 @@ private struct CompletionScreen: View {
     @ObservedObject var viewModel: OnboardingViewModel
     @State private var animateContent = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var isLimitedTrial = false
     
     var body: some View {
         VStack(spacing: 40) {
@@ -1227,7 +1231,7 @@ private struct CompletionScreen: View {
                     .fill(Color.white.opacity(0.15))
                     .frame(width: 120, height: 120)
                 
-                Image(systemName: "checkmark.circle.fill")
+                Image(systemName: isLimitedTrial ? "checkmark.circle" : "checkmark.circle.fill")
                     .font(.system(size: 60))
                     .foregroundColor(.white)
                     .scaleEffect(animateContent ? 1.0 : 0.7)
@@ -1237,7 +1241,7 @@ private struct CompletionScreen: View {
             
             // Celebration text
             VStack(spacing: 16) {
-                Text("You're All Set!")
+                Text(isLimitedTrial ? "You're Ready to Start!" : "You're All Set!")
                     .font(.system(size: 32, weight: .bold))
                     .foregroundColor(.white)
                 
@@ -1254,6 +1258,16 @@ private struct CompletionScreen: View {
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 20)
                 }
+                
+                // Show additional text for limited trial users
+                if isLimitedTrial {
+                    Text("You've chosen the limited feature set. You can upgrade anytime to access all premium features.")
+                        .font(.system(size: 15))
+                        .foregroundColor(.white.opacity(0.8))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 8)
+                }
             }
             .opacity(animateContent ? 1.0 : 0.0)
             .offset(y: animateContent ? 0 : 20)
@@ -1263,19 +1277,22 @@ private struct CompletionScreen: View {
                 FeatureItem(
                     iconName: "calendar",
                     title: "Daily Check-Ins",
-                    description: "Regular check-ins help track your progress"
+                    description: "Regular check-ins help track your progress",
+                    isLocked: false
                 )
                 
                 FeatureItem(
                     iconName: "brain.head.profile",
                     title: "Mindfulness Tools",
-                    description: "Proven techniques to manage urges"
+                    description: "Proven techniques to manage urges", 
+                    isLocked: isLimitedTrial
                 )
                 
                 FeatureItem(
                     iconName: "chart.bar.fill",
                     title: "Progress Tracking",
-                    description: "Visual insights to track your journey"
+                    description: "Visual insights to track your journey",
+                    isLocked: isLimitedTrial
                 )
             }
             .padding(.horizontal, 20)
@@ -1284,10 +1301,26 @@ private struct CompletionScreen: View {
             
             Spacer()
             
-            // Start button
-            BFButton(title: "Start My Journey", isEnabled: true) {
-                if let onComplete = viewModel.onComplete {
-                    onComplete()
+            // Start button with upgrade option for limited trial
+            VStack(spacing: 12) {
+                BFButton(title: "Start My Journey", isEnabled: true) {
+                    if let onComplete = viewModel.onComplete {
+                        onComplete()
+                    }
+                }
+                
+                if isLimitedTrial {
+                    Button(action: {
+                        // Return to paywall to upgrade
+                        if let paywallIndex = viewModel.screens.firstIndex(of: .enhancedPaywall) {
+                            viewModel.skipToScreen(paywallIndex)
+                        }
+                    }) {
+                        Text("Upgrade to Premium")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(BFColors.accent)
+                            .padding(.vertical, 8)
+                    }
                 }
             }
             .padding(.bottom, 40)
@@ -1295,6 +1328,9 @@ private struct CompletionScreen: View {
         }
         .padding(.horizontal, 20)
         .onAppear {
+            // Check if user is on limited trial
+            isLimitedTrial = UserDefaults.standard.bool(forKey: "limitedTrialMode")
+            
             withAnimation(reduceMotion ? nil : .easeOut(duration: 0.6).delay(0.1)) {
                 animateContent = true
             }
@@ -1302,34 +1338,51 @@ private struct CompletionScreen: View {
     }
 }
 
-// Feature item component for the completion screen
+// Update FeatureItem to support locked state
 private struct FeatureItem: View {
-    let iconName: String
-    let title: String
-    let description: String
+    var iconName: String
+    var title: String
+    var description: String
+    var isLocked: Bool = false
     
     var body: some View {
         HStack(spacing: 16) {
-            Image(systemName: iconName)
-                .font(.system(size: 24))
-                .foregroundColor(.white)
-                .frame(width: 32, height: 32)
+            ZStack {
+                Circle()
+                    .fill(Color.white.opacity(0.1))
+                    .frame(width: 48, height: 48)
+                
+                Image(systemName: iconName)
+                    .font(.system(size: 20))
+                    .foregroundColor(.white)
+            }
             
             VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.headline)
-                    .foregroundColor(.white)
+                HStack {
+                    Text(title)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                    
+                    if isLocked {
+                        Image(systemName: "lock.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(BFColors.accent)
+                    }
+                }
                 
                 Text(description)
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.8))
+                    .font(.system(size: 14))
+                    .foregroundColor(.white.opacity(0.7))
             }
             
             Spacer()
         }
-        .padding()
-        .background(Color.white.opacity(0.1))
-        .cornerRadius(12)
+        .padding(.vertical, 10)
+        .padding(.horizontal, 16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.08))
+        )
     }
 }
 

@@ -432,6 +432,7 @@ struct HardPaywallScreen: View {
 // MARK: - Enhanced Paywall Screen
 struct EnhancedPaywallScreen: View {
     @EnvironmentObject private var viewModel: OnboardingViewModel
+    @EnvironmentObject private var paywallManager: PaywallManager
     @State private var selectedPlan = 1 // Default to annual
     @State private var animateGradient = false
     @State private var showPromo = false
@@ -478,6 +479,9 @@ struct EnhancedPaywallScreen: View {
                 }
                 .padding(.top, 30)
                 .onAppear {
+                    // Record that user has seen the hard paywall
+                    paywallManager.recordHardPaywallSeen()
+                    
                     animateGradient = true
                     
                     // Show special promo after a delay
@@ -662,18 +666,42 @@ struct EnhancedPaywallScreen: View {
                 }
                 .padding(.horizontal)
                 
-                // Secondary CTA
+                // Secondary CTA - Changed to 'Limited Trial' instead of skipping
                 Button(action: {
-                    // Skip subscription
-                    viewModel.isTrialActive = false
+                    // Offer a limited experience but still activate a trial
+                    viewModel.isTrialActive = true // Still activate trial but with limited features
+                    // Add a user default to indicate limited trial mode
+                    UserDefaults.standard.set(true, forKey: "limitedTrialMode")
                     viewModel.nextScreen()
                 }) {
-                    Text("Continue with basic version")
-                        .font(.system(size: 16))
-                        .foregroundColor(Color.white.opacity(0.7))
-                        .underline()
+                    HStack {
+                        Image(systemName: "hourglass")
+                            .font(.system(size: 14))
+                        Text("Try Limited Features")
+                            .font(.system(size: 16, weight: .medium))
+                    }
+                    .foregroundColor(Color.white.opacity(0.9))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                            .background(Color.white.opacity(0.1))
+                            .cornerRadius(12)
+                    )
                 }
+                .padding(.horizontal)
                 .padding(.top, 10)
+                
+                // Terms and privacy links
+                HStack(spacing: 8) {
+                    Link("Terms of Service", destination: URL(string: "https://betfree.com/terms")!)
+                    Text("•")
+                    Link("Privacy Policy", destination: URL(string: "https://betfree.com/privacy")!)
+                }
+                .font(.system(size: 12))
+                .foregroundColor(Color.white.opacity(0.7))
+                .padding(.top, 12)
                 .padding(.bottom, 15)
                 
                 // Legal text

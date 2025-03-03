@@ -8,6 +8,7 @@ class PaywallManager: ObservableObject {
     @Published var paywallTriggerCounter = 0
     @Published var lastPaywallDismissalDate: Date?
     @Published var hasSeenInitialPaywall = false
+    @Published var hasSeenHardPaywall = false  // Track hard paywall at end of onboarding
     
     // MARK: - Constants
     private let minSessionsBeforePaywall = 3
@@ -17,6 +18,8 @@ class PaywallManager: ObservableObject {
     private let keyPaywallTriggerCounter = "bf_paywall_trigger_counter"
     private let keyLastPaywallDismissal = "bf_last_paywall_dismissal"
     private let keyHasSeenInitialPaywall = "bf_has_seen_initial_paywall"
+    private let keyHasSeenHardPaywall = "bf_has_seen_hard_paywall"
+    private let keyLimitedTrialMode = "limitedTrialMode"
     
     // MARK: - Initialization
     init() {
@@ -33,6 +36,11 @@ class PaywallManager: ObservableObject {
     ) -> Bool {
         // Skip evaluation if user is already a subscriber
         if UserDefaults.standard.bool(forKey: "is_premium_user") {
+            return false
+        }
+        
+        // Don't show deferred paywalls if user is in hard paywall flow
+        if !hasSeenHardPaywall {
             return false
         }
         
@@ -85,7 +93,20 @@ class PaywallManager: ObservableObject {
         paywallTriggerCounter = 0
         lastPaywallDismissalDate = nil
         hasSeenInitialPaywall = false
+        hasSeenHardPaywall = false
         saveState()
+    }
+    
+    /// Records that user has seen the hard paywall during onboarding
+    func recordHardPaywallSeen() {
+        hasSeenHardPaywall = true
+        hasSeenInitialPaywall = true  // Hard paywall counts as initial paywall too
+        saveState()
+    }
+    
+    /// Checks if user is on a limited trial (chosen "Try Limited Features")
+    func isOnLimitedTrial() -> Bool {
+        return UserDefaults.standard.bool(forKey: keyLimitedTrialMode)
     }
     
     // MARK: - Private Methods
@@ -96,6 +117,7 @@ class PaywallManager: ObservableObject {
         UserDefaults.standard.set(paywallTriggerCounter, forKey: keyPaywallTriggerCounter)
         UserDefaults.standard.set(lastPaywallDismissalDate, forKey: keyLastPaywallDismissal)
         UserDefaults.standard.set(hasSeenInitialPaywall, forKey: keyHasSeenInitialPaywall)
+        UserDefaults.standard.set(hasSeenHardPaywall, forKey: keyHasSeenHardPaywall)
     }
     
     /// Loads paywall state from UserDefaults
@@ -104,6 +126,7 @@ class PaywallManager: ObservableObject {
         paywallTriggerCounter = UserDefaults.standard.integer(forKey: keyPaywallTriggerCounter)
         lastPaywallDismissalDate = UserDefaults.standard.object(forKey: keyLastPaywallDismissal) as? Date
         hasSeenInitialPaywall = UserDefaults.standard.bool(forKey: keyHasSeenInitialPaywall)
+        hasSeenHardPaywall = UserDefaults.standard.bool(forKey: keyHasSeenHardPaywall)
     }
 }
 
