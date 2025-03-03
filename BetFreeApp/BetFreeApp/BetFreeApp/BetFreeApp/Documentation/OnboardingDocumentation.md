@@ -169,3 +169,14 @@ If there are issues with the subscription or trial functionality:
 2. Check that the selectedPlan index corresponds to a valid plan in the plans array
 3. Ensure the trialEndDate is being calculated correctly
 4. Verify that the subscription information is being properly saved to AppState
+
+### Premature Navigation to Main App
+
+If users are unexpectedly taken to the main app during onboarding:
+
+1. Check that there are no automatic timeouts or delayed callbacks that might be triggering completion
+2. Ensure that the onboarding flow only completes when the user explicitly takes action (like pressing the "Start Now" button)
+3. Verify that the `saveToAppState()` method is only called when appropriate
+4. Monitor the `hasCompletedOnboarding` flag to ensure it's not being set prematurely
+
+> **Note:** Previous versions contained an automatic 5-second timeout that would complete onboarding if the user didn't interact, which was removed to prevent unexpected navigation.

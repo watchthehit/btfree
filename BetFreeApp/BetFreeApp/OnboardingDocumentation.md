@@ -47,6 +47,7 @@ The onboarding process proceeds linearly but offers flexibility:
 - Users can skip steps with the "Skip" button
 - Users can go back to previous steps with the back button
 - The final "Get Started" button completes onboarding and transitions to the main app
+- Navigation to the main app occurs ONLY through explicit user action, never automatically
 
 ## Data Persistence
 
@@ -77,4 +78,15 @@ When testing the onboarding flow:
 1. Verify that navigation works correctly in all directions
 2. Confirm that user input is properly saved to AppState
 3. Test that the "Skip" functionality properly bypasses screens
-4. Ensure that returning users don't see the onboarding again 
+4. Ensure that returning users don't see the onboarding again
+5. Verify that users are not unexpectedly taken to the main app during the flow
+
+## Troubleshooting
+
+### Premature Navigation
+If users report being unexpectedly taken to the main app during onboarding:
+- Check that there are no automatic timeouts or delayed callbacks in the onboarding flow
+- Ensure the onboarding completion occurs only through explicit user actions
+- Verify that `viewModel.saveToAppState()` is only called when intended
+
+> **Important**: A previous issue where onboarding would automatically complete after 5 seconds has been fixed in the current version. 
