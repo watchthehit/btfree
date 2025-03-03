@@ -36,15 +36,15 @@ struct BFPrimaryButton: View {
             .background(
                 LinearGradient(
                     gradient: Gradient(colors: isDisabled ? 
-                                       [Color.gray.opacity(0.6), Color.gray.opacity(0.4)] :
-                                       [BFColors.accent, BFColors.accent.opacity(0.8)]),
+                                       [Color.gray.opacity(0.8), Color.gray.opacity(0.6)] :
+                                       [BFColors.accent, BFColors.accent.opacity(0.9)]),
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
             )
             .cornerRadius(BFCornerRadius.medium)
-            .shadow(color: isDisabled ? Color.clear : BFColors.accent.opacity(0.3), 
-                   radius: 8, x: 0, y: 4)
+            .shadow(color: isDisabled ? Color.clear : BFColors.accent.opacity(0.4), 
+                   radius: 10, x: 0, y: 4)
         }
         .disabled(isDisabled)
     }
@@ -94,17 +94,17 @@ struct BFTextButton: View {
     var icon: String? = nil
     var action: () -> Void
     var foregroundColor: Color = .white
-    var opacity: Double = 0.7
+    var opacity: Double = 0.9
     
     var body: some View {
         Button(action: action) {
             HStack(spacing: BFSpacing.small) {
                 Text(text)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: 16, weight: .semibold))
                 
                 if let icon = icon {
                     Image(systemName: icon)
-                        .font(.system(size: 14, weight: .medium))
+                        .font(.system(size: 14, weight: .semibold))
                 }
             }
             .foregroundColor(foregroundColor.opacity(opacity))
@@ -206,7 +206,7 @@ struct BFOptionButton: View {
                 // Option text
                 Text(text)
                     .font(.system(size: 16, weight: isSelected ? .semibold : .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(Color(hex: "#1B263B"))
                 
                 Spacer()
             }
@@ -214,7 +214,7 @@ struct BFOptionButton: View {
             .padding(.horizontal, 16)
             .background(
                 RoundedRectangle(cornerRadius: BFCornerRadius.medium)
-                    .fill(Color.white.opacity(isSelected ? 0.3 : 0.15))
+                    .fill(Color.white.opacity(isSelected ? 0.9 : 0.8))
                     .overlay(
                         RoundedRectangle(cornerRadius: BFCornerRadius.medium)
                             .stroke(isSelected ? BFColors.accent.opacity(0.7) : Color.white.opacity(0.3), lineWidth: isSelected ? 1.5 : 1)

@@ -780,6 +780,11 @@ struct AssessmentQuizView: View {
                         isDisabled: !canContinue()
                     )
                     .padding(.horizontal, BFSpacing.medium)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: BFCornerRadius.medium)
+                            .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                    )
+                    .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 3)
                     
                     BFTextButton(
                         text: "Skip Assessment",
