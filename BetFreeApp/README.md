@@ -150,13 +150,21 @@ The "Serene Recovery" color scheme has been tested to ensure all color combinati
 - Consistent color theme using navy blue (#2C3550) and green accent (#4CAF50)
 
 ## Onboarding Flow
-The app includes a comprehensive onboarding flow with the following screens:
-1. Welcome
-2. Name Input (Personal Setup)
-3. Trigger Selection
-4. Enhanced Paywall (Detailed Subscription Options)
+The app includes an optimized onboarding flow with a value-first approach:
+1. Welcome (with resume capability)
+2. Value Proposition Screens (3)
+3. Goal Selection (simplified options)
+4. Combined Profile Setup (streamlined data collection)
 5. Notification Setup
 6. Completion
+
+## Deferred Paywall Strategy
+The app implements a strategic deferred paywall approach:
+- Enhanced subscription screen shown after users experience app value
+- Multiple contextual triggers based on user engagement
+- Smart frequency controls to prevent subscription fatigue
+- Clear value proposition for premium features
+- A/B testing ready implementation
 
 ## Performance Optimizations
 - Static backgrounds instead of animated waves to prevent memory issues
@@ -164,6 +172,8 @@ The app includes a comprehensive onboarding flow with the following screens:
 - Proper memory management with resource release on backgrounding
 - Use of PlainButtonStyle() to ensure reliable touch interactions
 - Optimized text field interactions with @FocusState
+- Progress persistence for interrupted sessions
+- Lazy loading of view components
 
 ## UI Design
 - Consistent navy blue background across all screens

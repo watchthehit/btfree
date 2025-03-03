@@ -4,6 +4,9 @@ import Foundation
 /// Represents different screens in the onboarding flow
 public enum OnboardingScreen: Equatable {
     case welcome
+    case valueProposition1
+    case valueProposition2
+    case valueProposition3
     case goalSelection
     case trackingMethodSelection
     case triggerIdentification
@@ -29,12 +32,14 @@ public class OnboardingViewModel: ObservableObject {
     // MARK: - Constants
     let screens: [OnboardingScreen] = [
         .welcome,
+        .valueProposition1,
+        .valueProposition2,
+        .valueProposition3,
         .goalSelection,
-        .profileCompletion,
-        .personalSetup,
+        .combinedProfileSetup, // New consolidated screen that will replace profileCompletion and personalSetup
         .notificationSetup,
-        .enhancedPaywall,
         .completion
+        // enhancedPaywall moved to post-onboarding
     ]
     
     // User profile properties
@@ -53,6 +58,10 @@ public class OnboardingViewModel: ObservableObject {
     @Published var isSigningInWithApple = false
     @Published var dailyGoal = 20  // Default to 20 minutes
     @Published var isTrialActive = false  // Default to not in trial
+    
+    // Added for partial progress tracking
+    @Published var hasStartedOnboarding = false
+    @Published var lastCompletedScreenIndex = -1
     
     // Trigger identification properties
     @Published var userTriggers: [String] = []
@@ -83,6 +92,9 @@ public class OnboardingViewModel: ObservableObject {
     public func nextScreen() {
         if currentScreenIndex < screens.count - 1 {
             currentScreenIndex += 1
+            lastCompletedScreenIndex = max(lastCompletedScreenIndex, currentScreenIndex - 1)
+            hasStartedOnboarding = true
+            savePartialProgress()
         }
     }
     
@@ -91,6 +103,47 @@ public class OnboardingViewModel: ObservableObject {
         if currentScreenIndex > 0 {
             currentScreenIndex -= 1
         }
+    }
+    
+    /// Skip to a specific screen (e.g., for resuming onboarding)
+    public func skipToScreen(_ screenIndex: Int) {
+        guard screenIndex >= 0 && screenIndex < screens.count else { return }
+        currentScreenIndex = screenIndex
+        hasStartedOnboarding = true
+    }
+    
+    /// Skip directly to the paywall screen (now removed from onboarding flow)
+    public func skipToPaywall() {
+        // Save this for when we add the paywall back outside of onboarding
+        // Functionality remains for future use in the main app
+    }
+    
+    /// Save partial progress to UserDefaults
+    private func savePartialProgress() {
+        UserDefaults.standard.set(currentScreenIndex, forKey: "onboarding_last_screen")
+        UserDefaults.standard.set(username, forKey: "onboarding_username")
+        UserDefaults.standard.set(dailyGoal, forKey: "onboarding_daily_goal")
+        
+        // Save more state as needed
+    }
+    
+    /// Restore partial progress from UserDefaults
+    public func restorePartialProgress() {
+        if let lastScreen = UserDefaults.standard.object(forKey: "onboarding_last_screen") as? Int {
+            lastCompletedScreenIndex = lastScreen
+            // Optionally set current screen to the last completed one
+            // currentScreenIndex = lastScreen
+        }
+        
+        if let savedUsername = UserDefaults.standard.string(forKey: "onboarding_username") {
+            username = savedUsername
+        }
+        
+        if let savedDailyGoal = UserDefaults.standard.object(forKey: "onboarding_daily_goal") as? Int {
+            dailyGoal = savedDailyGoal
+        }
+        
+        // Restore more state as needed
     }
     
     /// Toggles a trigger in the selected triggers list

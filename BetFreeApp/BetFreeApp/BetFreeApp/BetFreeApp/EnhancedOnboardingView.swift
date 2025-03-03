@@ -292,16 +292,36 @@ public struct EnhancedOnboardingView: View {
                 switch viewModel.screens[viewModel.currentScreenIndex] {
                 case .welcome:
                     WelcomeScreen(viewModel: viewModel)
+                case .valueProposition1:
+                    ValuePropositionScreen(
+                        viewModel: viewModel,
+                        title: "Track Your Progress",
+                        subtitle: "Monitor your gambling habits and see how far you've come on your journey.",
+                        iconName: "chart.line.uptrend.xyaxis",
+                        showSkip: true
+                    )
+                case .valueProposition2:
+                    ValuePropositionScreen(
+                        viewModel: viewModel,
+                        title: "Identify Triggers",
+                        subtitle: "Learn what situations lead to gambling urges so you can develop healthier responses.",
+                        iconName: "exclamationmark.triangle",
+                        showSkip: true
+                    )
+                case .valueProposition3:
+                    ValuePropositionScreen(
+                        viewModel: viewModel,
+                        title: "Find Your Calm",
+                        subtitle: "Access proven mindfulness techniques to manage urges and reduce stress.",
+                        iconName: "leaf",
+                        showSkip: true
+                    )
                 case .goalSelection:
                     GoalSelectionScreen(viewModel: viewModel)
-                case .profileCompletion:
-                    ProfileCompletionScreen(viewModel: viewModel)
-                case .personalSetup:
-                    CombinedPersonalSetupScreen(viewModel: viewModel)
+                case .combinedProfileSetup:
+                    CombinedProfileSetupScreen(viewModel: viewModel)
                 case .notificationSetup:
                     CombinedNotificationScreen(viewModel: viewModel)
-                case .enhancedPaywall:
-                    EnhancedPaywallScreen().environmentObject(viewModel)
                 case .completion:
                     CompletionScreen(viewModel: viewModel)
                 default:
@@ -323,72 +343,84 @@ public struct EnhancedOnboardingView: View {
 private struct WelcomeScreen: View {
     @ObservedObject var viewModel: OnboardingViewModel
     @State private var animateContent = false
+    @State private var showResumeOption = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
     var body: some View {
-        NoTabSpaceWrapper {
-            VStack(spacing: 0) {
-                ScrollView {
-                    VStack(spacing: 32) {
-                        // Illustration
-                        BFAssets.BFOnboardingIllustrations.BreakingFree(size: 200)
-                            .padding(.top, 40)
-                            .opacity(animateContent ? 1 : 0)
-                            .offset(y: animateContent ? 0 : 20)
-                        
-                        VStack(spacing: 16) {
-                            Text("Welcome to BetFree")
-                                .font(.system(size: 32, weight: .bold))
-                                .foregroundColor(.white)
-                                .multilineTextAlignment(.center)
-                                .opacity(animateContent ? 1 : 0)
-                                .offset(y: animateContent ? 0 : 10)
-                            
-                            Text("Your journey to freedom from gambling addiction starts here. We'll help you build a personalized recovery plan that works for you.")
-                                .font(.system(size: 17))
-                                .foregroundColor(.white.opacity(0.8))
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 24)
-                                .opacity(animateContent ? 1 : 0)
-                                .offset(y: animateContent ? 0 : 10)
-                        }
-                        
-                        // Features list
-                        VStack(spacing: 16) {
-                            FeatureRow(icon: "chart.line.uptrend.xyaxis", title: "Track Your Progress", description: "Monitor your recovery journey with detailed insights")
-                            FeatureRow(icon: "brain.head.profile", title: "Mindfulness Tools", description: "Access proven techniques to manage urges")
-                            FeatureRow(icon: "bell.badge", title: "Smart Notifications", description: "Get support when you need it most")
-                        }
-                        .padding(.horizontal, 24)
-                        .opacity(animateContent ? 1 : 0)
-                        .offset(y: animateContent ? 0 : 20)
+        VStack(spacing: 40) {
+            Spacer()
+            
+            // App Logo/Icon
+            ZStack {
+                Circle()
+                    .fill(Color.white.opacity(0.15))
+                    .frame(width: 120, height: 120)
+                
+                Image(systemName: "heart.fill")
+                    .font(.system(size: 50))
+                    .foregroundColor(.white)
+                    .scaleEffect(animateContent ? 1.0 : 0.7)
+                    .opacity(animateContent ? 1.0 : 0.0)
+            }
+            .padding(.bottom, 20)
+            
+            // Welcome Text
+            VStack(spacing: 16) {
+                Text("Welcome to BetFree")
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Text("Your personal companion for overcoming gambling addiction and building healthier habits.")
+                    .font(.system(size: 17))
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+            }
+            .opacity(animateContent ? 1.0 : 0.0)
+            .offset(y: animateContent ? 0 : 20)
+            
+            Spacer()
+            
+            // Buttons
+            VStack(spacing: 16) {
+                BFButton(title: "Get Started", isEnabled: true) {
+                    withAnimation {
+                        viewModel.nextScreen()
                     }
                 }
                 
-                // Get Started Button
-                Button(action: {
-                            viewModel.nextScreen()
-                }) {
-                    Text("Get Started")
-                        .font(.system(size: 17, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                        .frame(height: 56)
-                            .background(
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(BFColors.accent)
-                            )
-                    .padding(.horizontal, 24)
-                        .padding(.vertical, 16)
+                if showResumeOption {
+                    Button {
+                        // Restore and go to last completed screen + 1
+                        viewModel.restorePartialProgress()
+                        if viewModel.lastCompletedScreenIndex >= 0 && 
+                           viewModel.lastCompletedScreenIndex < viewModel.screens.count - 1 {
+                            withAnimation {
+                                viewModel.skipToScreen(viewModel.lastCompletedScreenIndex + 1)
+                            }
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.counterclockwise")
+                            Text("Resume Where I Left Off")
+                        }
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.white.opacity(0.8))
+                        .padding(.vertical, 8)
+                    }
                 }
-                .opacity(animateContent ? 1 : 0)
             }
+            .padding(.bottom, 40)
+            .opacity(animateContent ? 1.0 : 0.0)
         }
+        .padding(.horizontal, 30)
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                animateWithReducedMotion(.easeOut(duration: 0.6), reduceMotion: reduceMotion) {
-                    animateContent = true
-                }
+            // Check if we have partial progress saved
+            viewModel.restorePartialProgress()
+            showResumeOption = viewModel.hasStartedOnboarding || viewModel.lastCompletedScreenIndex >= 0
+            
+            withAnimation(reduceMotion ? nil : .easeOut(duration: 0.6).delay(0.1)) {
+                animateContent = true
             }
         }
     }
@@ -438,8 +470,7 @@ private struct GoalSelectionScreen: View {
     private enum Goal: String, CaseIterable {
         case quitCompletely = "Quit Completely"
         case reduceGradually = "Reduce Gradually"
-        case setLimits = "Set Strict Limits"
-        case needGuidance = "Need Guidance"
+        case notSure = "I'm Not Sure Yet"
         
         var description: String {
             switch self {
@@ -447,10 +478,8 @@ private struct GoalSelectionScreen: View {
                 return "Stop gambling entirely and build a gambling-free life"
             case .reduceGradually:
                 return "Gradually decrease gambling activity over time"
-            case .setLimits:
-                return "Set and maintain strict limits on gambling activity"
-            case .needGuidance:
-                return "Get professional help to determine the best path"
+            case .notSure:
+                return "I'd like guidance to help determine my best path"
             }
         }
         
@@ -460,128 +489,115 @@ private struct GoalSelectionScreen: View {
                 return "hand.raised.slash"
             case .reduceGradually:
                 return "chart.line.downtrend.xyaxis"
-            case .setLimits:
-                return "timer"
-            case .needGuidance:
-                return "person.2"
+            case .notSure:
+                return "questionmark.circle"
             }
         }
     }
     
     var body: some View {
-        NoTabSpaceWrapper {
-            VStack(spacing: 0) {
-                ScrollView {
-                    VStack(spacing: 32) {
-                        // Illustration
-                        BFAssets.BFOnboardingIllustrations.GrowthJourney(size: 200)
-                            .padding(.top, 40)
-                            .opacity(animateContent ? 1 : 0)
-                            .offset(y: animateContent ? 0 : 20)
-                        
-                        VStack(spacing: 16) {
-                            Text("Set Your Goal")
-                                .font(.system(size: 32, weight: .bold))
-                                    .foregroundColor(.white)
-                                .multilineTextAlignment(.center)
-                                .opacity(animateContent ? 1 : 0)
-                                .offset(y: animateContent ? 0 : 10)
-                            
-                            Text("Choose a goal that aligns with your recovery journey. You can always adjust this later.")
-                                .font(.system(size: 17))
-                                .foregroundColor(.white.opacity(0.8))
-                                    .multilineTextAlignment(.center)
-                                .padding(.horizontal, 24)
-                                .opacity(animateContent ? 1 : 0)
-                                .offset(y: animateContent ? 0 : 10)
-                        }
-                        
-                        // Goals list
-                        VStack(spacing: 16) {
-                            ForEach(Goal.allCases, id: \.self) { goal in
-                                Button(action: {
-                                    selectedGoal = goal
-                                }) {
-                                    GoalRow(
-                                        icon: goal.icon,
-                                        title: goal.rawValue,
-                                        description: goal.description,
-                                        isSelected: selectedGoal == goal
-                                    )
-                                }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                HeaderView(
+                    title: "What's Your Goal?",
+                    subtitle: "Having a clear goal helps us personalize your journey."
+                )
+                .padding(.top, 20)
+                .padding(.bottom, 12)
+                
+                VStack(spacing: 16) {
+                    ForEach(Goal.allCases, id: \.self) { goal in
+                        Button {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                selectedGoal = goal
                             }
+                        } label: {
+                            HStack(spacing: 16) {
+                                Image(systemName: goal.icon)
+                                    .font(.system(size: 24))
+                                    .foregroundColor(.white)
+                                    .frame(width: 32, height: 32)
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(goal.rawValue)
+                                        .font(.headline)
+                                        .foregroundColor(.white)
+                                    
+                                    Text(goal.description)
+                                        .font(.subheadline)
+                                        .foregroundColor(.white.opacity(0.8))
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                                
+                                Spacer()
+                                
+                                Image(systemName: selectedGoal == goal ? "checkmark.circle.fill" : "circle")
+                                    .foregroundColor(selectedGoal == goal ? .white : .white.opacity(0.5))
+                                    .font(.system(size: 22))
+                            }
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.white.opacity(selectedGoal == goal ? 0.25 : 0.1))
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.white.opacity(selectedGoal == goal ? 0.5 : 0.2), lineWidth: 1)
+                            )
                         }
-                        .padding(.horizontal, 24)
-                        .opacity(animateContent ? 1 : 0)
-                        .offset(y: animateContent ? 0 : 20)
+                        .buttonStyle(PlainButtonStyle())
                     }
                 }
+                .opacity(animateContent ? 1 : 0)
+                .offset(y: animateContent ? 0 : 20)
                 
-                // Continue Button
-                Button(action: {
-                    viewModel.nextScreen()
-                }) {
-                    Text("Continue")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 56)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(BFColors.accent)
-                        )
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 16)
+                Spacer(minLength: 30)
+                
+                // Info text
+                Text("You can always change this later in your profile settings.")
+                    .font(.footnote)
+                    .foregroundColor(.white.opacity(0.7))
+                    .padding(.bottom, 8)
+                    .opacity(animateContent ? 1 : 0)
+                
+                // Continue button
+                BFButton(title: "Continue", isEnabled: true) {
+                    // Map selected goal to viewModel
+                    switch selectedGoal {
+                    case .quitCompletely:
+                        viewModel.selectedGoal = "Quit"
+                    case .reduceGradually:
+                        viewModel.selectedGoal = "Reduce"
+                    case .notSure:
+                        viewModel.selectedGoal = "Maintain control"
+                    }
+                    
+                    withAnimation {
+                        viewModel.nextScreen()
+                    }
                 }
                 .opacity(animateContent ? 1 : 0)
             }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 24)
         }
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                animateWithReducedMotion(.easeOut(duration: 0.6), reduceMotion: reduceMotion) {
-                    animateContent = true
-                }
-            }
-        }
-    }
-}
-
-// MARK: - Goal Row Component
-private struct GoalRow: View {
-    let icon: String
-    let title: String
-    let description: String
-    let isSelected: Bool
-    
-    var body: some View {
-        HStack(spacing: 16) {
-                Image(systemName: icon)
-                .font(.system(size: 24))
-                .foregroundColor(isSelected ? .white : BFColors.accent)
-                .frame(width: 32)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.white)
-                
-                Text(description)
-                    .font(.system(size: 15))
-                    .foregroundColor(.white.opacity(0.7))
+            // Set initial goal based on viewModel if available
+            switch viewModel.selectedGoal {
+            case "Quit":
+                selectedGoal = .quitCompletely
+            case "Reduce":
+                selectedGoal = .reduceGradually
+            case "Maintain control":
+                selectedGoal = .notSure
+            default:
+                selectedGoal = .reduceGradually
             }
             
-            Spacer()
-            
-            Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                .font(.system(size: 22))
-                .foregroundColor(isSelected ? BFColors.accent : .white.opacity(0.3))
+            withAnimation(.easeOut(duration: 0.5)) {
+                animateContent = true
+            }
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 16)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(isSelected ? BFColors.accent.opacity(0.2) : Color.white.opacity(0.05))
-        )
     }
 }
 
@@ -1195,153 +1211,121 @@ private struct DayButton: View {
 private struct CompletionScreen: View {
     @ObservedObject var viewModel: OnboardingViewModel
     @State private var animateContent = false
-    @State private var showConfetti = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
     var body: some View {
-        NoTabSpaceWrapper {
-            VStack(spacing: 0) {
-                ScrollView {
-                    VStack(spacing: 32) {
-                        // Success animation
-                        ZStack {
-                            Circle()
-                                .fill(BFColors.accent.opacity(0.2))
-                                .frame(width: 200, height: 200)
-                                .scaleEffect(showConfetti ? 1.2 : 0.8)
-                                .opacity(showConfetti ? 0 : 1)
-                            
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 80))
-                                .foregroundColor(BFColors.accent)
-                                .opacity(animateContent ? 1 : 0)
-                                .scaleEffect(animateContent ? 1 : 0.5)
-                        }
-                        .padding(.top, 40)
-                        
-                        VStack(spacing: 16) {
-                            Text("You're All Set!")
-                                .font(.system(size: 32, weight: .bold))
-                                .foregroundColor(.white)
-                                .multilineTextAlignment(.center)
-                                .opacity(animateContent ? 1 : 0)
-                                .offset(y: animateContent ? 0 : 10)
-                            
-                            Text("Your personalized recovery journey begins now. We're here to support you every step of the way.")
-                                .font(.system(size: 17))
-                                .foregroundColor(.white.opacity(0.8))
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 24)
-                                .opacity(animateContent ? 1 : 0)
-                                .offset(y: animateContent ? 0 : 10)
-                        }
-                        
-                        // Next steps
-                        VStack(spacing: 16) {
-                            Text("What's Next")
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.white)
-                            
-                            VStack(spacing: 12) {
-                                NextStepRow(
-                                    icon: "chart.line.uptrend.xyaxis",
-                                    title: "Track Your Progress",
-                                    description: "Monitor your recovery journey with detailed insights"
-                                )
-                                
-                                NextStepRow(
-                                    icon: "brain.head.profile",
-                                    title: "Access Tools",
-                                    description: "Explore mindfulness exercises and coping strategies"
-                                )
-                                
-                                NextStepRow(
-                                    icon: "person.2",
-                                    title: "Join Community",
-                                    description: "Connect with others on similar journeys"
-                                )
-                                
-                                NextStepRow(
-                                    icon: "bell.badge",
-                                    title: "Stay Motivated",
-                                    description: "Receive personalized notifications and reminders"
-                                )
-                            }
-                        }
-                        .padding(.horizontal, 24)
-                        .opacity(animateContent ? 1 : 0)
-                        .offset(y: animateContent ? 0 : 20)
-                    }
-                }
+        VStack(spacing: 40) {
+            Spacer()
+            
+            // Success icon
+            ZStack {
+                Circle()
+                    .fill(Color.white.opacity(0.15))
+                    .frame(width: 120, height: 120)
                 
-                // Get Started Button
-                Button(action: {
-                    viewModel.onComplete?()
-                }) {
-                    Text("Start Your Journey")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 56)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(BFColors.accent)
-                        )
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 16)
-                }
-                .opacity(animateContent ? 1 : 0)
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 60))
+                    .foregroundColor(.white)
+                    .scaleEffect(animateContent ? 1.0 : 0.7)
+                    .opacity(animateContent ? 1.0 : 0.0)
             }
-        }
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                animateWithReducedMotion(.easeOut(duration: 0.6), reduceMotion: reduceMotion) {
-                    animateContent = true
-                    
-                    // Trigger confetti animation
-                    withAnimation(
-                        Animation.easeInOut(duration: 1.5)
-                            .repeatForever(autoreverses: true)
-                    ) {
-                        showConfetti = true
-                    }
+            .padding(.bottom, 10)
+            
+            // Celebration text
+            VStack(spacing: 16) {
+                Text("You're All Set!")
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundColor(.white)
+                
+                if !viewModel.username.isEmpty {
+                    Text("Welcome \(viewModel.username), your personal recovery journey is ready to begin.")
+                        .font(.system(size: 17))
+                        .foregroundColor(.white.opacity(0.8))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 20)
+                } else {
+                    Text("Your personal recovery journey is ready to begin.")
+                        .font(.system(size: 17))
+                        .foregroundColor(.white.opacity(0.8))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 20)
                 }
+            }
+            .opacity(animateContent ? 1.0 : 0.0)
+            .offset(y: animateContent ? 0 : 20)
+            
+            // Features overview
+            VStack(spacing: 12) {
+                FeatureItem(
+                    iconName: "calendar",
+                    title: "Daily Check-Ins",
+                    description: "Regular check-ins help track your progress"
+                )
+                
+                FeatureItem(
+                    iconName: "brain.head.profile",
+                    title: "Mindfulness Tools",
+                    description: "Proven techniques to manage urges"
+                )
+                
+                FeatureItem(
+                    iconName: "chart.bar.fill",
+                    title: "Progress Tracking",
+                    description: "Visual insights to track your journey"
+                )
+            }
+            .padding(.horizontal, 20)
+            .opacity(animateContent ? 1.0 : 0.0)
+            .offset(y: animateContent ? 0 : 30)
+            
+            Spacer()
+            
+            // Start button
+            BFButton(title: "Start My Journey", isEnabled: true) {
+                if let onComplete = viewModel.onComplete {
+                    onComplete()
+                }
+            }
+            .padding(.bottom, 40)
+            .opacity(animateContent ? 1.0 : 0.0)
+        }
+        .padding(.horizontal, 20)
+        .onAppear {
+            withAnimation(reduceMotion ? nil : .easeOut(duration: 0.6).delay(0.1)) {
+                animateContent = true
             }
         }
     }
 }
 
-// MARK: - Next Step Row Component
-private struct NextStepRow: View {
-    let icon: String
+// Feature item component for the completion screen
+private struct FeatureItem: View {
+    let iconName: String
     let title: String
     let description: String
     
     var body: some View {
         HStack(spacing: 16) {
-                Image(systemName: icon)
+            Image(systemName: iconName)
                 .font(.system(size: 24))
-                .foregroundColor(BFColors.accent)
-                .frame(width: 32)
+                .foregroundColor(.white)
+                .frame(width: 32, height: 32)
             
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.headline)
                     .foregroundColor(.white)
                 
                 Text(description)
-                    .font(.system(size: 15))
-                    .foregroundColor(.white.opacity(0.7))
+                    .font(.subheadline)
+                    .foregroundColor(.white.opacity(0.8))
             }
             
             Spacer()
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 16)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(0.05))
-        )
+        .padding()
+        .background(Color.white.opacity(0.1))
+        .cornerRadius(12)
     }
 }
 
@@ -1402,5 +1386,243 @@ fileprivate struct BFNotificationTypeButton: View {
             .cornerRadius(12)
         }
         .buttonStyle(PlainButtonStyle())
+    }
+}
+
+// MARK: - Combined Profile and Personal Setup Screen
+private struct CombinedProfileSetupScreen: View {
+    @ObservedObject var viewModel: OnboardingViewModel
+    @State private var animateContent = false
+    @State private var selectedPreferences: Set<Preference> = []
+    @State private var username = ""
+    @FocusState private var isUsernameFocused: Bool
+    @State private var dailyMindfulnessGoal = 10
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    
+    // Personal preferences types
+    private enum Preference: String, CaseIterable, Identifiable {
+        case dailyMotivation = "Daily Motivation"
+        case progressTracking = "Progress Tracking"
+        case mindfulnessExercises = "Mindfulness Exercises"
+        case communitySupport = "Community Support"
+        
+        var id: String { rawValue }
+        
+        var icon: String {
+            switch self {
+            case .dailyMotivation: return "quote.bubble"
+            case .progressTracking: return "chart.bar"
+            case .mindfulnessExercises: return "leaf"
+            case .communitySupport: return "person.3"
+            }
+        }
+    }
+    
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                HeaderView(
+                    title: "Set Up Your Profile",
+                    subtitle: "Let's personalize your experience to help you achieve your goals."
+                )
+                .padding(.bottom, 8)
+                
+                // First Name Input
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("What would you like to be called?")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                    
+                    TextField("Your name", text: $username)
+                        .padding()
+                        .background(Color.white.opacity(0.2))
+                        .cornerRadius(10)
+                        .foregroundColor(.white)
+                        .focused($isUsernameFocused)
+                        .submitLabel(.done)
+                        .onSubmit {
+                            isUsernameFocused = false
+                        }
+                }
+                .padding(.bottom, 8)
+                
+                // Daily Mindfulness Goal
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Daily mindfulness goal")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                    
+                    Text("Set a daily goal for mindfulness exercises")
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.8))
+                    
+                    HStack {
+                        ForEach([5, 10, 15, 20], id: \.self) { minutes in
+                            Button {
+                                dailyMindfulnessGoal = minutes
+                            } label: {
+                                Text("\(minutes) min")
+                                    .padding()
+                                    .frame(maxWidth: .infinity)
+                                    .background(dailyMindfulnessGoal == minutes ? Color.white : Color.white.opacity(0.2))
+                                    .foregroundColor(dailyMindfulnessGoal == minutes ? Color(UIColor.systemBlue) : .white)
+                                    .cornerRadius(10)
+                            }
+                        }
+                    }
+                }
+                .padding(.bottom, 12)
+                
+                // Preferences Selection
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("What are you interested in?")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                    
+                    Text("Select all that apply")
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.8))
+                    
+                    VStack(spacing: 12) {
+                        ForEach(Preference.allCases) { preference in
+                            Button {
+                                if selectedPreferences.contains(preference) {
+                                    selectedPreferences.remove(preference)
+                                } else {
+                                    selectedPreferences.insert(preference)
+                                }
+                            } label: {
+                                HStack {
+                                    Image(systemName: selectedPreferences.contains(preference) ? "checkmark.circle.fill" : "circle")
+                                        .foregroundColor(selectedPreferences.contains(preference) ? .white : .white.opacity(0.6))
+                                    
+                                    Image(systemName: preference.icon)
+                                        .padding(.horizontal, 8)
+                                    
+                                    Text(preference.rawValue)
+                                        .foregroundColor(.white)
+                                    
+                                    Spacer()
+                                }
+                                .padding()
+                                .background(Color.white.opacity(0.2))
+                                .cornerRadius(10)
+                            }
+                        }
+                    }
+                }
+                
+                Spacer(minLength: 20)
+                
+                // Continue Button
+                BFButton(title: "Continue", isEnabled: !username.isEmpty) {
+                    // Save the data to view model
+                    viewModel.username = username
+                    viewModel.dailyGoal = dailyMindfulnessGoal
+                    
+                    // Continue to next screen
+                    withAnimation {
+                        viewModel.nextScreen()
+                    }
+                }
+                .padding(.vertical, 10)
+            }
+            .padding(.horizontal, 24)
+            .padding(.vertical, 20)
+            .opacity(animateContent ? 1 : 0)
+            .offset(y: animateContent ? 0 : 20)
+        }
+        .onAppear {
+            // Populate fields with existing data if available
+            username = viewModel.username
+            dailyMindfulnessGoal = viewModel.dailyGoal
+            
+            withAnimation(.easeOut(duration: 0.5)) {
+                animateContent = true
+            }
+        }
+    }
+}
+
+// MARK: - Value Proposition Screen
+private struct ValuePropositionScreen: View {
+    @ObservedObject var viewModel: OnboardingViewModel
+    let title: String
+    let subtitle: String
+    let iconName: String
+    let showSkip: Bool
+    
+    @State private var animateContent = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    
+    var body: some View {
+        VStack(spacing: 30) {
+            Spacer()
+            
+            // Icon
+            ZStack {
+                Circle()
+                    .fill(Color.white.opacity(0.15))
+                    .frame(width: 120, height: 120)
+                
+                Image(systemName: iconName)
+                    .font(.system(size: 50))
+                    .foregroundColor(.white)
+                    .scaleEffect(animateContent ? 1.0 : 0.7)
+                    .opacity(animateContent ? 1.0 : 0.0)
+            }
+            .padding(.bottom, 20)
+            
+            // Content
+            VStack(spacing: 16) {
+                Text(title)
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                
+                Text(subtitle)
+                    .font(.system(size: 17, weight: .regular))
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+            }
+            .opacity(animateContent ? 1.0 : 0.0)
+            .offset(y: animateContent ? 0 : 20)
+            
+            Spacer()
+            
+            // Buttons
+            VStack(spacing: 12) {
+                BFButton(title: "Continue", isEnabled: true) {
+                    withAnimation {
+                        viewModel.nextScreen()
+                    }
+                }
+                
+                if showSkip {
+                    Button {
+                        // Skip to goal selection
+                        if let goalSelectionIndex = viewModel.screens.firstIndex(of: .goalSelection) {
+                            withAnimation {
+                                viewModel.skipToScreen(goalSelectionIndex)
+                            }
+                        }
+                    } label: {
+                        Text("Skip")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.white.opacity(0.7))
+                            .padding(.vertical, 8)
+                    }
+                }
+            }
+            .padding(.bottom, 40)
+            .opacity(animateContent ? 1.0 : 0.0)
+        }
+        .padding(.horizontal, 20)
+        .onAppear {
+            withAnimation(reduceMotion ? nil : .easeOut(duration: 0.6).delay(0.1)) {
+                animateContent = true
+            }
+        }
     }
 } 
