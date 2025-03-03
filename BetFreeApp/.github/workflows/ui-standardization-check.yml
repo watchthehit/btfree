@@ -1,0 +1,101 @@
+name: UI Standardization Check
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - '**.swift'
+  workflow_dispatch:
+
+jobs:
+  check-ui-standardization:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y grep
+
+      - name: Make audit script executable
+        run: chmod +x BetFreeApp/BetFreeApp/BetFreeApp/BetFreeApp/Scripts/ui_audit.sh
+      
+      - name: Run UI Standardization Check
+        id: ui_check
+        run: |
+          cd BetFreeApp/BetFreeApp/BetFreeApp/BetFreeApp/Scripts
+          ./ui_audit.sh > audit_results.txt
+          
+          # Count total issues
+          TOTAL_ISSUES=$(grep -o "Total standardization issues found: [0-9]*" audit_results.txt | awk '{print $5}')
+          echo "::set-output name=total_issues::$TOTAL_ISSUES"
+          
+          # Check severity
+          SEVERITY=$(grep -o "Standardization status: [A-Za-z]*" audit_results.txt | awk '{print $3}')
+          echo "::set-output name=severity::$SEVERITY"
+          
+          # Print contents of audit results
+          cat audit_results.txt
+          
+      - name: Add PR Comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const auditResults = fs.readFileSync('BetFreeApp/BetFreeApp/BetFreeApp/BetFreeApp/Scripts/audit_results.txt', 'utf8');
+            
+            const totalIssues = '${{ steps.ui_check.outputs.total_issues }}';
+            const severity = '${{ steps.ui_check.outputs.severity }}';
+            
+            let statusEmoji;
+            switch(severity) {
+              case 'Low':
+                statusEmoji = '✅';
+                break;
+              case 'Medium':
+                statusEmoji = '⚠️';
+                break;
+              case 'High':
+                statusEmoji = '❌';
+                break;
+              default:
+                statusEmoji = '⚠️';
+            }
+            
+            const comment = `## UI Standardization Check Results ${statusEmoji}
+
+            This PR contains **${totalIssues}** UI standardization issues.
+            
+            **Severity**: ${severity}
+
+            <details>
+            <summary>Click to see detailed results</summary>
+            
+            \`\`\`
+            ${auditResults}
+            \`\`\`
+            
+            </details>
+            
+            ### Recommendations
+
+            Please review our [UI Standardization Migration Guide](../../blob/main/BetFreeApp/BetFreeApp/BetFreeApp/BetFreeApp/Documentation/UIStandardizationMigrationGuide.md) for help resolving these issues.
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+            
+      - name: Check status
+        if: ${{ steps.ui_check.outputs.severity == 'High' }}
+        run: |
+          echo "UI Standardization check failed with High severity. Please fix the issues before merging."
+          exit 1 
