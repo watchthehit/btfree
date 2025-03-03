@@ -199,7 +199,7 @@ struct BFOptionButton: View {
                     if allowsMultiple {
                         RoundedRectangle(cornerRadius: 4)
                             .stroke(isSelected ? BFColors.accent : Color.white.opacity(0.7), lineWidth: 2)
-                            .frame(width: 22, height: 22)
+                            .frame(minWidth: 22, minHeight: 22, alignment: .center)
                         
                         if isSelected {
                             Image(systemName: "checkmark")
@@ -209,12 +209,12 @@ struct BFOptionButton: View {
                     } else {
                         Circle()
                             .stroke(isSelected ? BFColors.accent : Color.white.opacity(0.7), lineWidth: 2)
-                            .frame(width: 22, height: 22)
+                            .frame(minWidth: 22, minHeight: 22, alignment: .center)
                         
                         if isSelected {
                             Circle()
                                 .fill(BFColors.accent)
-                                .frame(width: 14, height: 14)
+                                .frame(minWidth: 14, minHeight: 14, alignment: .center)
                         }
                     }
                 }
@@ -278,7 +278,7 @@ struct BFProgressBar: View {
                             )
                         )
                         .cornerRadius(BFCornerRadius.small)
-                        .frame(width: CGFloat(self.progress) * geometry.size.width)
+                        .frame(width: max(8, CGFloat(max(0, progress)) * max(0, geometry.size.width - 64))
                         .animation(.easeInOut, value: progress)
                 }
             }
@@ -398,12 +398,11 @@ struct BFDashboardCard<Content: View>: View {
                     Image(systemName: icon)
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(iconColor)
-                        .frame(width: 28, height: 28)
+                        .frame(minWidth: 28, minHeight: 28, alignment: .center)
                         .background(
                             Circle()
                                 .fill(iconColor.opacity(0.15))
                         )
-                        .padding(2)
                 }
                 
                 Text(title)
@@ -494,7 +493,7 @@ struct BFStatItem: View {
                     Image(systemName: icon)
                         .font(.system(size: 16))
                         .foregroundColor(iconColor)
-                        .frame(width: 32, height: 32)
+                        .frame(minWidth: 32, minHeight: 32, alignment: .center)
                         .background(
                             Circle()
                                 .fill(iconColor.opacity(0.1))
@@ -556,7 +555,7 @@ struct BFProgressStat: View {
                             endPoint: .trailing
                         )
                     )
-                    .frame(width: max(8, CGFloat(percentage) * UIScreen.main.bounds.width - 64), height: 8)
+                    .frame(width: max(8, CGFloat(max(0, percentage)) * max(0, UIScreen.main.bounds.width - 64), height: 8)
             }
             
             // Percentage text
@@ -610,7 +609,7 @@ struct BFCounterButton: View {
                 // Background circle
                 Circle()
                     .fill(color.opacity(0.07))
-                    .frame(width: 180, height: 180)
+                    .frame(minWidth: 180, minHeight: 180, alignment: .center)
                 
                 // Middle circle with subtle gradient
                 Circle()
@@ -624,7 +623,7 @@ struct BFCounterButton: View {
                             endPoint: .bottomTrailing
                         )
                     )
-                    .frame(width: 150, height: 150)
+                    .frame(minWidth: 150, minHeight: 150, alignment: .center)
                     .overlay(
                         Circle()
                             .stroke(color.opacity(0.3), lineWidth: 2)
@@ -858,7 +857,7 @@ struct BFStreakCounter: View {
                         ZStack {
                             Circle()
                                 .fill(day <= streakCount ? BFColors.accent : Color.gray.opacity(0.1))
-                                .frame(width: 26, height: 26)
+                                .frame(minWidth: 26, minHeight: 26, alignment: .center)
                             
                             if day <= streakCount {
                                 Image(systemName: "checkmark")
