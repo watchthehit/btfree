@@ -388,7 +388,7 @@ struct EnhancedOnboardingView: View {
                         Text("") // Spacer element for alignment
                     }
                     
-                    Spacer()
+                        Spacer()
                     
                     // Skip button (only show for value proposition screen)
                     if viewModel.currentScreen == .combinedValueProposition {
@@ -517,8 +517,8 @@ struct CombinedValuePropositionView: View {
                 TabView(selection: $currentPage) {
                     ForEach(0..<pages.count, id: \.self) { index in
                         VStack {
-                            Spacer()
-                            
+                    Spacer()
+                    
                             // Icon with circles
                             ZStack {
                                 Circle()
@@ -553,8 +553,8 @@ struct CombinedValuePropositionView: View {
                                 .multilineTextAlignment(.center)
                                 .padding(.top, 10)
                                 .padding(.horizontal, 40)
-                            
-                            Spacer()
+                    
+                    Spacer()
                         }
                         .tag(index)
                     }
@@ -571,9 +571,9 @@ struct CombinedValuePropositionView: View {
                                 currentPage += 1
                             }
                         } else {
-                            viewModel.nextScreen()
-                        }
-                    }
+                                    viewModel.nextScreen()
+                                }
+                            }
                 )
                 .padding(.horizontal, BFSpacing.medium)
                 .padding(.bottom, BFSpacing.xlarge)
@@ -607,7 +607,7 @@ struct AssessmentIntroView: View {
                     .font(.system(size: 60))
                     .foregroundColor(BFColors.accent)
                     .padding(30)
-                    .background(
+                                .background(
                         Circle()
                             .fill(Color.white.opacity(0.15))
                             .overlay(
@@ -644,19 +644,19 @@ struct AssessmentIntroView: View {
                             .foregroundColor(BFColors.accent)
                         
                         Text("Your answers are private and only used to personalize your experience")
-                            .font(.subheadline)
-                            .foregroundColor(.white)
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(Color(hex: "#1B263B")) // Dark text color for better contrast
                     }
                     .padding(.horizontal, BFSpacing.small)
-                    .padding(.vertical, BFSpacing.tiny)
+                    .padding(.vertical, BFSpacing.small)
                 }
-                .styledBody(opacity: 0.1)
+                .styledBody(opacity: 0.9) // Use high opacity white background
                 .padding(.horizontal, BFSpacing.medium)
                 .padding(.top, BFSpacing.small)
                 .opacity(animateContent ? 1.0 : 0.0)
                 .offset(y: animateContent ? 0 : 10)
                 
-                Spacer()
+                        Spacer()
                 
                 // Primary button for begin assessment
                 BFPrimaryButton(
@@ -920,8 +920,8 @@ struct AssessmentQuizView: View {
         } else {
             // Completed the assessment quiz
             viewModel.generatePersonalizedAreas()
-            viewModel.nextScreen()
-        }
+                            viewModel.nextScreen()
+                        }
     }
     
     private func initializeStateForCurrentQuestion() {
@@ -997,22 +997,22 @@ struct OptionButton: View {
                 // Option text
                 Text(text)
                     .font(.system(size: 16, weight: isSelected ? .semibold : .regular))
-                    .foregroundColor(.white)
+                            .foregroundColor(.white)
                 
                 Spacer()
             }
             .padding(.vertical, 14)
             .padding(.horizontal, 16)
-            .background(
+                            .background(
                 RoundedRectangle(cornerRadius: 12)
                     .fill(Color.white.opacity(isSelected ? 0.2 : 0.1))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(isSelected ? BFColors.accent.opacity(0.5) : Color.white.opacity(0.1), lineWidth: 1)
                     )
-            )
-        }
-        .buttonStyle(PlainButtonStyle())
+                            )
+                    }
+                    .buttonStyle(PlainButtonStyle())
     }
 }
 
@@ -1095,7 +1095,7 @@ struct AssessmentResultsView: View {
                         BFCard {
                             HStack(spacing: BFSpacing.medium) {
                                 ZStack {
-                                    Circle()
+                    Circle()
                                         .fill(BFColors.accent.opacity(0.2))
                                         .frame(width: 36, height: 36)
                                     
@@ -1106,7 +1106,7 @@ struct AssessmentResultsView: View {
                                 
                                 Text(area)
                                     .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(.white)
+                        .foregroundColor(.white)
                                 
                                 Spacer()
                             }
@@ -1205,7 +1205,7 @@ struct SignInView: View {
     }
     
     var body: some View {
-        ZStack {
+            ZStack {
             // Consistent background style across all screens
             BFBackgroundView(style: .waves, gradient: BFColors.brandGradient())
                 .ignoresSafeArea()
@@ -1219,7 +1219,7 @@ struct SignInView: View {
                         .foregroundColor(.white)
                         .padding()
                         .background(
-                            Circle()
+                Circle()
                                 .fill(Color.white.opacity(0.2))
                                 .shadow(color: Color.black.opacity(0.1), radius: 10)
                         )
@@ -1234,7 +1234,7 @@ struct SignInView: View {
                     // Header text
                     Text("Create Your Account")
                         .heading2()
-                        .foregroundColor(.white)
+                    .foregroundColor(.white)
                         .padding(.bottom, 10)
                         .multilineTextAlignment(.center)
                     
@@ -1308,7 +1308,7 @@ struct SignInView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Password")
                                 .font(BFTypography.bodySmall)
-                                .foregroundColor(.white)
+                    .foregroundColor(.white)
                                 .fontWeight(.medium)
                             
                             HStack {
@@ -1343,8 +1343,8 @@ struct SignInView: View {
                                 }
                             }
                             .padding()
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
                                     .fill(Color.white.opacity(0.9))
                                     .shadow(color: isPasswordFocused ? BFColors.accent.opacity(0.4) : Color.black.opacity(0.15), 
                                             radius: isPasswordFocused ? 6 : 3, 
@@ -1486,19 +1486,19 @@ struct PersonalSetupView: View {
             BFBackgroundView(style: .waves, gradient: BFColors.brandGradient())
                 .ignoresSafeArea()
             
-            ScrollView {
+        ScrollView {
                 VStack(spacing: 30) {
                     // Header with animation
                     VStack(spacing: 12) {
                         Text("Personalize Your Experience")
                             .heading2()
-                            .foregroundColor(.white)
+                    .foregroundColor(.white)
                             .multilineTextAlignment(.center)
-                        
+                
                         Text("Let's customize the app to fit your needs")
                             .bodyMedium()
                             .foregroundColor(.white.opacity(0.8))
-                            .multilineTextAlignment(.center)
+                    .multilineTextAlignment(.center)
                             .padding(.horizontal, 24)
                     }
                     .padding(.top, 20)
@@ -1507,8 +1507,8 @@ struct PersonalSetupView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("What should we call you?")
                             .font(BFTypography.heading3)
-                            .foregroundColor(.white)
-                        
+                    .foregroundColor(.white)
+                
                         HStack {
                             Image(systemName: "person.fill")
                                 .foregroundColor(isUsernameFocused ? BFColors.accent : .white.opacity(0.7))
@@ -1516,7 +1516,7 @@ struct PersonalSetupView: View {
                             
                             TextField("Your name", text: $viewModel.username)
                                 .font(BFTypography.bodyMedium)
-                                .focused($isUsernameFocused)
+                        .focused($isUsernameFocused)
                                 .foregroundColor(BFColors.textPrimary)
                                 .submitLabel(.done)
                         }
@@ -1546,7 +1546,7 @@ struct PersonalSetupView: View {
                                     .frame(width: 36, height: 36)
                                 
                                 Image(systemName: "timer")
-                                    .foregroundColor(.white)
+                    .foregroundColor(.white)
                                     .font(.system(size: 18))
                             }
                             
@@ -1566,12 +1566,12 @@ struct PersonalSetupView: View {
                                 ForEach(0..<goalPresets.count, id: \.self) { index in
                                     let preset = goalPresets[index]
                                     
-                                    Button {
+                        Button {
                                         withAnimation(.spring()) {
                                             viewModel.dailyGoal = preset.minutes
                                             selectedGoalPreset = index
-                                        }
-                                    } label: {
+                            }
+                        } label: {
                                         VStack(spacing: 4) {
                                             Text(preset.label)
                                                 .font(.system(size: 14, weight: .medium))
@@ -1585,10 +1585,10 @@ struct PersonalSetupView: View {
                                                 .fixedSize(horizontal: false, vertical: true)
                                         }
                                         .foregroundColor(selectedGoalPreset == index ? BFColors.accent : .white)
-                                        .padding(.vertical, 12)
+                            .padding(.vertical, 12)
                                         .padding(.horizontal, 8)
-                                        .frame(maxWidth: .infinity)
-                                        .background(
+                            .frame(maxWidth: .infinity)
+                            .background(
                                             RoundedRectangle(cornerRadius: 10)
                                                 .fill(selectedGoalPreset == index ? Color.white.opacity(0.9) : Color.white.opacity(0.15))
                                         )
@@ -1631,8 +1631,8 @@ struct PersonalSetupView: View {
                                     Text("5")
                                         .font(.caption2)
                                         .foregroundColor(.white.opacity(0.7))
-                                    
-                                    Spacer()
+                
+                Spacer()
                                     
                                     Text("30")
                                         .font(.caption2)
@@ -1724,7 +1724,7 @@ struct PersonalSetupView: View {
                                 .font(.system(size: 14, weight: .semibold))
                         }
                         .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                         .background(
                             LinearGradient(
@@ -1764,7 +1764,7 @@ struct NotificationsView: View {
             BFBackgroundView(style: .waves, gradient: BFColors.brandGradient())
                 .ignoresSafeArea()
             
-            ScrollView {
+        ScrollView {
                 VStack(spacing: 30) {
                     // Animated notification icon
                     ZStack {
@@ -1787,7 +1787,7 @@ struct NotificationsView: View {
                         Image(systemName: "bell.badge.fill")
                             .font(.system(size: 50))
                             .symbolRenderingMode(.hierarchical)
-                            .foregroundColor(.white)
+                        .foregroundColor(.white)
                             .padding(24)
                             .background(
                                 Circle()
@@ -1806,7 +1806,7 @@ struct NotificationsView: View {
                         Text("Stay Connected")
                             .heading2()
                             .foregroundColor(.white)
-                            .multilineTextAlignment(.center)
+                        .multilineTextAlignment(.center)
                         
                         Text("Customize your notifications to get the most out of your recovery journey")
                             .bodyMedium()
@@ -1820,7 +1820,7 @@ struct NotificationsView: View {
                         ForEach(0..<viewModel.notificationTypes.count, id: \.self) { index in
                             let notificationType = viewModel.notificationTypes[index]
                             
-                            HStack {
+                        HStack {
                                 // Icon based on notification type
                                 Image(systemName: iconFor(index: index))
                                     .font(.system(size: 24))
@@ -1832,7 +1832,7 @@ struct NotificationsView: View {
                                     )
                                 
                                 // Notification details
-                                VStack(alignment: .leading, spacing: 4) {
+                            VStack(alignment: .leading, spacing: 4) {
                                     Text(notificationType.name)
                                         .font(BFTypography.bodyMedium)
                                         .fontWeight(.medium)
@@ -1840,13 +1840,13 @@ struct NotificationsView: View {
                                     if let detail = notificationType.detail {
                                         Text(detail)
                                             .font(BFTypography.bodySmall)
-                                            .foregroundColor(.white.opacity(0.8))
+                                    .foregroundColor(.white.opacity(0.8))
                                             .lineLimit(2)
-                                    }
+                            }
                                 }
                                 
-                                Spacer()
-                                
+                            Spacer()
+                            
                                 // Toggle switch
                                 Toggle("", isOn: Binding(
                                     get: { viewModel.notificationTypes[index].isEnabled },
@@ -1906,7 +1906,7 @@ struct NotificationsView: View {
                     } label: {
                         HStack(spacing: 8) {
                             Text("Continue")
-                                .font(.headline)
+                                    .font(.headline)
                             
                             Image(systemName: "arrow.right")
                                 .font(.system(size: 14, weight: .semibold))
@@ -1974,7 +1974,7 @@ struct PaywallView: View {
                         
                         Text("Start your recovery journey with premium tools")
                             .font(.system(size: 16))
-                            .foregroundColor(.white.opacity(0.8))
+                                .foregroundColor(.white.opacity(0.8))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 16)
                     }
@@ -2091,7 +2091,7 @@ struct PaywallView: View {
                                     }
                                 }
                                 .padding(.vertical, 16)
-                                .frame(maxWidth: .infinity)
+                        .frame(maxWidth: .infinity)
                                 .background(
                                     ZStack {
                                         // Base background
@@ -2154,18 +2154,18 @@ struct PaywallView: View {
                     viewModel.isTrialActive = true
                     
                     withAnimation {
-                        viewModel.nextScreen()
+                    viewModel.nextScreen()
                     }
                 } label: {
                     HStack(spacing: 8) {
-                        Text("Start 7-Day Free Trial")
-                            .font(.headline)
+                    Text("Start 7-Day Free Trial")
+                        .font(.headline)
                         
                         Image(systemName: "arrow.right")
                             .font(.system(size: 14, weight: .semibold))
                     }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(
                         LinearGradient(
@@ -2186,14 +2186,14 @@ struct PaywallView: View {
                         .foregroundColor(.white.opacity(0.7))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 32)
-                    
-                    Button {
+                
+                Button {
                         withAnimation {
                             viewModel.nextScreen()
                         }
-                    } label: {
+                } label: {
                         Text("Continue with Limited Version")
-                            .font(.subheadline)
+                        .font(.subheadline)
                             .foregroundColor(.white.opacity(0.8))
                             .underline()
                     }
@@ -2368,7 +2368,7 @@ struct CompletionView: View {
                     // Next steps with animation
                     VStack(spacing: 20) {
                         Text("Your Next Steps")
-                            .font(.headline)
+                    .font(.headline)
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal, 24)
@@ -2479,7 +2479,7 @@ struct CompletionView: View {
         }
         .padding(.vertical, 12)
         .padding(.horizontal, 16)
-        .background(
+                .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.white.opacity(0.15))
                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
@@ -2577,7 +2577,7 @@ struct ConfettiPiece: View {
             .position(x: position.x + (isAnimating ? CGFloat.random(in: -100...100) : 0),
                       y: position.y + (isAnimating ? UIScreen.main.bounds.height + 100 : 0))
             .opacity(isAnimating ? 0 : 1)
-            .onAppear {
+        .onAppear {
                 withAnimation(Animation.easeOut(duration: 3).delay(delay)) {
                     isAnimating = true
                 }
@@ -2609,7 +2609,7 @@ struct TriggerIdentificationIntroView: View {
     @State private var animateContent = false
     
     var body: some View {
-        VStack(spacing: 30) {
+            VStack(spacing: 30) {
             Spacer().frame(height: 20)
             
             // Header image
@@ -2667,7 +2667,7 @@ struct TriggerIdentificationIntroView: View {
                     Image(systemName: "arrow.right")
                         .font(.system(size: 14, weight: .semibold))
                 }
-                .foregroundColor(.white)
+                        .foregroundColor(.white)
                 .frame(height: 24)
                 .padding(.vertical, 16)
                 .padding(.horizontal, 30)
@@ -2719,7 +2719,7 @@ struct TriggerMappingView: View {
                 Text("Identify Your Triggers")
                     .font(.system(size: 26, weight: .bold))
                     .foregroundColor(.white)
-                    .multilineTextAlignment(.center)
+                        .multilineTextAlignment(.center)
                 
                 Text("Select all that apply in each category")
                     .font(.system(size: 16))
@@ -2751,7 +2751,7 @@ struct TriggerMappingView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 20)
+                        .padding(.horizontal, 20)
             }
             .opacity(animateContent ? 1.0 : 0.0)
             
@@ -2762,7 +2762,7 @@ struct TriggerMappingView: View {
                         Button(action: {
                             toggleTrigger(trigger)
                         }) {
-                            HStack {
+                    HStack {
                                 Text(trigger)
                                     .font(.system(size: 16))
                                     .foregroundColor(viewModel.selectedTriggers.contains(trigger) ? .white : .white.opacity(0.9))
@@ -2818,7 +2818,7 @@ struct TriggerMappingView: View {
             }) {
                 Text("Continue")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.white)
+                            .foregroundColor(.white)
                     .frame(height: 24)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
@@ -2904,7 +2904,7 @@ struct TriggerIntensityView: View {
                     }
                 }
                 .frame(height: 6)
-                .padding(.vertical, 8)
+                    .padding(.vertical, 8)
             }
             .padding(.horizontal, 20)
             .opacity(animateContent ? 1.0 : 0.0)
@@ -2934,7 +2934,7 @@ struct TriggerIntensityView: View {
                     HStack {
                         Text("Mild")
                             .font(.system(size: 14))
-                            .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(.white.opacity(0.7))
                         
                         Spacer()
                         
@@ -3088,7 +3088,7 @@ struct TriggerStrategiesView: View {
             VStack(spacing: 8) {
                 Text("Develop Your Strategies")
                     .font(.system(size: 26, weight: .bold))
-                    .foregroundColor(.white)
+                            .foregroundColor(.white)
                     .multilineTextAlignment(.center)
                 
                 Text("Select strategies that will help you manage this trigger")
@@ -3130,7 +3130,7 @@ struct TriggerStrategiesView: View {
             VStack(spacing: 8) {
                 Text(currentTrigger)
                     .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.white)
+                            .foregroundColor(.white)
                 
                 HStack {
                     Text("Intensity:")
@@ -3147,8 +3147,8 @@ struct TriggerStrategiesView: View {
                 }
             }
             .padding(20)
-            .frame(maxWidth: .infinity)
-            .background(
+                    .frame(maxWidth: .infinity)
+                    .background(
                 RoundedRectangle(cornerRadius: 16)
                     .fill(Color.white.opacity(0.1))
             )
@@ -3353,26 +3353,26 @@ struct TriggerSummaryView: View {
                     ForEach(topTriggers, id: \.self) { trigger in
                         HStack(alignment: .top, spacing: 16) {
                             // Intensity indicator
-                            ZStack {
-                                Circle()
+            ZStack {
+                Circle()
                                     .fill(
                                         (viewModel.triggerIntensities[trigger] ?? 0) <= 3 ? Color.green :
                                         (viewModel.triggerIntensities[trigger] ?? 0) <= 6 ? Color.yellow :
                                         Color.red
                                     )
-                                    .frame(width: 40, height: 40)
-                                
+                    .frame(width: 40, height: 40)
+                
                                 Text("\(viewModel.triggerIntensities[trigger] ?? 0)")
                                     .font(.system(size: 16, weight: .bold))
-                                    .foregroundColor(.white)
-                            }
-                            
+                    .foregroundColor(.white)
+            }
+            
                             VStack(alignment: .leading, spacing: 8) {
                                 // Trigger name
                                 Text(trigger)
                                     .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(.white)
-                                
+                .foregroundColor(.white)
+            
                                 // Strategies
                                 if let strategies = viewModel.triggerStrategies[trigger], !strategies.isEmpty {
                                     VStack(alignment: .leading, spacing: 4) {
@@ -3405,10 +3405,10 @@ struct TriggerSummaryView: View {
                             }
                         }
                         .padding(16)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.white.opacity(0.1))
-                        )
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.1))
+        )
                     }
                 }
                 .padding(.horizontal, 20)
