@@ -996,7 +996,7 @@ struct ScheduleSetupView: View {
                 Text("Continue")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.white)
-                    .frame(height: 56)
+                    .frame(minHeight: 56)
                     .frame(maxWidth: .infinity)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
@@ -1623,7 +1623,7 @@ struct CompletionView: View {
                 Text("Start Now")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.white)
-                    .frame(height: 56)
+                    .frame(minHeight: 56)
                     .frame(maxWidth: .infinity)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
