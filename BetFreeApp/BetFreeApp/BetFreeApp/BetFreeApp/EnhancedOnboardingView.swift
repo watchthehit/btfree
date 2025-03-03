@@ -7,6 +7,16 @@ struct TriggerCategory: Identifiable {
     var triggers: [String]
 }
 
+// Add PuffCount-inspired minimalist onboarding enum
+enum OnboardingProfileStep {
+    case welcome
+    case goalSetting
+    case deviceSelection  // For tracking methods
+    case triggerIdentification
+    case schedule
+    case notifications
+}
+
 // MARK: - OnboardingViewModel
 @MainActor
 class OnboardingViewModel: ObservableObject {
@@ -25,8 +35,18 @@ class OnboardingViewModel: ObservableObject {
         .personalSetup,
         .notificationPrivacy,
         .paywall,
-        .completion
+        .completion,
+        .puffInspiredProfileSetup // Added the PuffCount-inspired flow
     ]
+    
+    // Add new PuffCount-inspired profile setup properties
+    @Published var profileSetupStep = OnboardingProfileStep.welcome
+    @Published var trackingMethod = "Manual"  // Default tracking method
+    @Published var availableTrackingMethods = ["Manual", "Location-based", "Schedule-based", "Urge detection"]
+    @Published var selectedGoal = "Reduce"  // Default goal
+    @Published var availableGoals = ["Reduce", "Quit", "Maintain control"]
+    @Published var reminderDays: [Bool] = [true, true, true, true, true, true, true] // Default all days
+    @Published var reminderTime = Date() // Default to current time
     
     // MARK: - Published Properties
     @Published var currentScreenIndex = 0
@@ -347,6 +367,29 @@ class OnboardingViewModel: ObservableObject {
         // Call the completion callback if provided
         onComplete?()
     }
+    
+    // MARK: - Functions
+    
+    func switchToPuffInspiredOnboarding() {
+        // Reset profile setup to welcome screen
+        profileSetupStep = .welcome
+        
+        // Find the index of puffInspiredProfileSetup in the screens array
+        if let index = screens.firstIndex(of: .puffInspiredProfileSetup) {
+            currentScreenIndex = index
+        } else {
+            // If not found in the array, add it
+            let customScreens = screens + [.puffInspiredProfileSetup]
+            currentScreenIndex = customScreens.count - 1
+        }
+    }
+    
+    func returnToMainOnboarding() {
+        // Find the index of signIn screen to continue with account creation
+        if let signInIndex = screens.firstIndex(of: .signIn) {
+            currentScreenIndex = signInIndex
+        }
+    }
 }
 
 // MARK: - Main Onboarding View
@@ -463,6 +506,8 @@ struct EnhancedOnboardingView: View {
             PaywallView(viewModel: viewModel)
         case .completion:
             CompletionView(viewModel: viewModel)
+        case .puffInspiredProfileSetup:
+            PuffInspiredProfileSetupView(viewModel: viewModel)
         }
     }
 }
@@ -576,6 +621,28 @@ struct CombinedValuePropositionView: View {
                             }
                 )
                 .padding(.horizontal, BFSpacing.medium)
+                
+                // Add button for PuffCount-inspired onboarding option
+                Button {
+                    withAnimation {
+                        viewModel.switchToPuffInspiredOnboarding()
+                    }
+                } label: {
+                    HStack {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 14))
+                        Text("Try Modern Design")
+                            .font(.system(size: 16, weight: .medium))
+                    }
+                    .foregroundColor(.black.opacity(0.7))
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 16)
+                    .background(
+                        Capsule()
+                            .fill(Color.white.opacity(0.4))
+                    )
+                }
+                .padding(.top, 12)
                 .padding(.bottom, BFSpacing.xlarge)
             }
         }
@@ -2741,6 +2808,11 @@ struct TriggerMappingView: View {
     @State private var animateContent = false
     @State private var customTrigger = ""
     
+    // Check if we're in the PuffCount-inspired flow
+    private var isInPuffCountFlow: Bool {
+        return viewModel.currentScreen == .puffInspiredProfileSetup
+    }
+    
     var body: some View {
         VStack(spacing: 24) {
             // Header
@@ -2748,16 +2820,16 @@ struct TriggerMappingView: View {
                 Text("Identify Your Triggers")
                     .font(.system(size: 26, weight: .bold))
                     .foregroundColor(.white)
-                        .multilineTextAlignment(.center)
+                    .multilineTextAlignment(.center)
                 
                 Text("Select all that apply in each category")
                     .font(.system(size: 16))
                     .foregroundColor(.white.opacity(0.8))
             }
-            .padding(.top, 20)
+            .padding(.top, isInPuffCountFlow ? 0 : 20)
             .opacity(animateContent ? 1.0 : 0.0)
             
-            // Category selector
+            // Category selector - more modern styling when in PuffCount flow
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     ForEach(0..<viewModel.triggerCategories.count, id: \.self) { index in
@@ -2776,45 +2848,83 @@ struct TriggerMappingView: View {
                                               BFColors.accent : Color.white.opacity(0.15))
                                 )
                                 .foregroundColor(selectedCategoryIndex == index ? 
-                                                .white : .white.opacity(0.9))  // Increased opacity from 0.8 to 0.9
-                                .fontWeight(selectedCategoryIndex == index ? .semibold : .medium)  // Added font weight difference
+                                                .white : .white.opacity(0.9))
+                                .fontWeight(selectedCategoryIndex == index ? .semibold : .medium)
                         }
                     }
                 }
-                        .padding(.horizontal, 20)
+                .padding(.horizontal, 20)
             }
             .opacity(animateContent ? 1.0 : 0.0)
             
-            // Triggers grid
+            // Triggers grid - use modern styling for PuffCount flow
             ScrollView {
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                LazyVGrid(
+                    columns: isInPuffCountFlow ? 
+                        [GridItem(.flexible())] : // Single column for PuffCount style
+                        [GridItem(.flexible()), GridItem(.flexible())], // Two columns for original style
+                    spacing: 16
+                ) {
                     ForEach(viewModel.triggerCategories[selectedCategoryIndex].triggers, id: \.self) { trigger in
                         Button(action: {
                             toggleTrigger(trigger)
                         }) {
-                    HStack {
-                                Text(trigger)
-                                    .font(.system(size: 16, weight: viewModel.selectedTriggers.contains(trigger) ? .semibold : .regular))  // Added weight difference
-                                    .foregroundColor(viewModel.selectedTriggers.contains(trigger) ? .white : .white.opacity(0.9))
-                                    .multilineTextAlignment(.leading)
-                                
-                                Spacer()
-                                
-                                Image(systemName: viewModel.selectedTriggers.contains(trigger) ? "checkmark.circle.fill" : "circle")
-                                    .font(.system(size: 20))  // Increased size from default to 20
-                                    .foregroundColor(viewModel.selectedTriggers.contains(trigger) ? BFColors.accent : .white.opacity(0.7))  // Increased opacity from 0.5 to 0.7
+                            if isInPuffCountFlow {
+                                // Modern PuffCount-inspired style
+                                HStack {
+                                    // Selection indicator
+                                    ZStack {
+                                        Circle()
+                                            .stroke(viewModel.selectedTriggers.contains(trigger) ? BFColors.accent : Color.white.opacity(0.3), lineWidth: 2)
+                                            .frame(width: 26, height: 26)
+                                        
+                                        if viewModel.selectedTriggers.contains(trigger) {
+                                            Circle()
+                                                .fill(BFColors.accent)
+                                                .frame(width: 18, height: 18)
+                                        }
+                                    }
+                                    
+                                    Text(trigger)
+                                        .font(.system(size: 16, weight: viewModel.selectedTriggers.contains(trigger) ? .semibold : .regular))
+                                        .foregroundColor(.white)
+                                        .padding(.leading, 10)
+                                    
+                                    Spacer()
+                                }
+                                .padding(.vertical, 14)
+                                .padding(.horizontal, 18)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(viewModel.selectedTriggers.contains(trigger) ? 
+                                              BFColors.accent.opacity(0.15) : Color.white.opacity(0.08))
+                                )
+                            } else {
+                                // Original style
+                                HStack {
+                                    Text(trigger)
+                                        .font(.system(size: 16, weight: viewModel.selectedTriggers.contains(trigger) ? .semibold : .regular))
+                                        .foregroundColor(viewModel.selectedTriggers.contains(trigger) ? .white : .white.opacity(0.9))
+                                        .multilineTextAlignment(.leading)
+                                    
+                                    Spacer()
+                                    
+                                    Image(systemName: viewModel.selectedTriggers.contains(trigger) ? "checkmark.circle.fill" : "circle")
+                                        .font(.system(size: 20))
+                                        .foregroundColor(viewModel.selectedTriggers.contains(trigger) ? BFColors.accent : .white.opacity(0.7))
+                                }
+                                .padding(.vertical, 12)
+                                .padding(.horizontal, 16)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .fill(viewModel.selectedTriggers.contains(trigger) ? 
+                                              BFColors.accent.opacity(0.3) : Color.white.opacity(0.15))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .stroke(viewModel.selectedTriggers.contains(trigger) ? BFColors.accent.opacity(0.5) : Color.white.opacity(0.3), lineWidth: 1)
+                                        )
+                                )
                             }
-                            .padding(.vertical, 12)
-                            .padding(.horizontal, 16)
-                            .background(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .fill(viewModel.selectedTriggers.contains(trigger) ? 
-                                          BFColors.accent.opacity(0.3) : Color.white.opacity(0.15))  // Increased opacity values
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(viewModel.selectedTriggers.contains(trigger) ? BFColors.accent.opacity(0.5) : Color.white.opacity(0.3), lineWidth: 1)  // Added border
-                                    )
-                            )
                         }
                     }
                     
@@ -2826,7 +2936,7 @@ struct TriggerMappingView: View {
                             .padding(.vertical, 12)
                             .padding(.horizontal, 16)
                             .background(
-                                RoundedRectangle(cornerRadius: 10)
+                                RoundedRectangle(cornerRadius: isInPuffCountFlow ? 16 : 10)
                                     .fill(Color.white.opacity(0.1))
                             )
                             .submitLabel(.done)
@@ -2847,9 +2957,13 @@ struct TriggerMappingView: View {
             
             Spacer()
             
-            // Continue button
+            // Continue button - different styling based on flow
             Button(action: {
-                viewModel.nextScreen()
+                if isInPuffCountFlow {
+                    viewModel.profileSetupStep = .schedule
+                } else {
+                    viewModel.nextScreen()
+                }
             }) {
                 Text("Continue")
                     .font(.system(size: 18, weight: .semibold))
@@ -2859,18 +2973,20 @@ struct TriggerMappingView: View {
                     .padding(.vertical, 16)
                     .background(
                         LinearGradient(
-                            gradient: Gradient(colors: [BFColors.primary, BFColors.primary.opacity(0.9)]),  // Changed from accent to primary color (deeper blue)
+                            gradient: Gradient(colors: isInPuffCountFlow ? 
+                                              [BFColors.accent, BFColors.accent.opacity(0.8)] :
+                                              [BFColors.primary, BFColors.primary.opacity(0.9)]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
-                        .cornerRadius(12)
+                        .cornerRadius(isInPuffCountFlow ? 16 : 12)
                         .opacity(viewModel.selectedTriggers.isEmpty ? 0.5 : 1.0)
                     )
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.white.opacity(0.3), lineWidth: 1)  // Added white border for better visibility
+                        RoundedRectangle(cornerRadius: isInPuffCountFlow ? 16 : 12)
+                            .stroke(Color.white.opacity(0.3), lineWidth: 1)
                     )
-                    .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)  // Added shadow for depth
+                    .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
             }
             .disabled(viewModel.selectedTriggers.isEmpty)
             .padding(.horizontal, 20)
@@ -3507,5 +3623,706 @@ struct TriggerSummaryView: View {
                 animateContent = true
             }
         }
+    }
+}
+
+// MARK: - PuffCount-Inspired Onboarding Components
+
+// 1. Minimalist welcome screen
+struct PuffInspiredWelcomeView: View {
+    @ObservedObject var viewModel: OnboardingViewModel
+    @State private var animateContent = false
+    
+    var body: some View {
+        VStack(spacing: 30) {
+            // Logo and title section
+            VStack(spacing: 16) {
+                Image(systemName: "heart.fill")
+                    .font(.system(size: 60))
+                    .foregroundColor(BFColors.accent)
+                    .padding(20)
+                    .background(Circle().fill(Color.white).opacity(0.15))
+                    .scaleEffect(animateContent ? 1.0 : 0.8)
+                
+                Text("Welcome to BetFree")
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(.white)
+                    .opacity(animateContent ? 1.0 : 0.0)
+                
+                Text("Your journey to freedom starts here")
+                    .font(.system(size: 18))
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+                    .opacity(animateContent ? 1.0 : 0.0)
+            }
+            .padding(.top, 60)
+            
+            Spacer()
+            
+            // Brief overview of app
+            VStack(spacing: 20) {
+                FeatureRow(iconName: "chart.bar.fill", title: "Track Progress", description: "Monitor your journey with personalized insights")
+                    .opacity(animateContent ? 1.0 : 0.0)
+                    .offset(y: animateContent ? 0 : 20)
+                
+                FeatureRow(iconName: "brain.head.profile", title: "Understand Triggers", description: "Identify what leads to gambling urges")
+                    .opacity(animateContent ? 1.0 : 0.0)
+                    .offset(y: animateContent ? 0 : 20)
+                
+                FeatureRow(iconName: "heart.text.square.fill", title: "Build Better Habits", description: "Replace gambling with healthy alternatives")
+                    .opacity(animateContent ? 1.0 : 0.0)
+                    .offset(y: animateContent ? 0 : 20)
+            }
+            .padding(.horizontal, 30)
+            
+            Spacer()
+            
+            // Continue button
+            Button {
+                viewModel.profileSetupStep = .goalSetting
+            } label: {
+                Text("Get Started")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(height: 56)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.8)]), 
+                                    startPoint: .leading, 
+                                    endPoint: .trailing
+                                )
+                            )
+                    )
+                    .shadow(color: BFColors.accent.opacity(0.3), radius: 8, x: 0, y: 4)
+            }
+            .padding(.horizontal, 30)
+            .padding(.bottom, 40)
+            .opacity(animateContent ? 1.0 : 0.0)
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.8)) {
+                animateContent = true
+            }
+        }
+    }
+}
+
+// Helper view for welcome screen
+struct FeatureRow: View {
+    let iconName: String
+    let title: String
+    let description: String
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            Image(systemName: iconName)
+                .font(.system(size: 24))
+                .foregroundColor(BFColors.accent)
+                .frame(width: 50, height: 50)
+                .background(Circle().fill(Color.white.opacity(0.1)))
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.white)
+                
+                Text(description)
+                    .font(.system(size: 15))
+                    .foregroundColor(.white.opacity(0.7))
+                    .lineLimit(2)
+            }
+            
+            Spacer()
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.white.opacity(0.08))
+        )
+    }
+}
+
+// 2. Goal selection view
+struct GoalSelectionView: View {
+    @ObservedObject var viewModel: OnboardingViewModel
+    @State private var animateContent = false
+    
+    var body: some View {
+        VStack(spacing: 30) {
+            // Header
+            VStack(spacing: 12) {
+                Text("Set Your Goal")
+                    .font(.system(size: 26, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Text("What would you like to achieve with BetFree?")
+                    .font(.system(size: 17))
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+            }
+            .opacity(animateContent ? 1.0 : 0.0)
+            .padding(.top, 40)
+            
+            Spacer()
+            
+            // Goal options
+            VStack(spacing: 16) {
+                ForEach(viewModel.availableGoals, id: \.self) { goal in
+                    GoalOptionButton(
+                        title: goal,
+                        isSelected: viewModel.selectedGoal == goal,
+                        action: {
+                            withAnimation {
+                                viewModel.selectedGoal = goal
+                            }
+                        }
+                    )
+                    .offset(y: animateContent ? 0 : 20)
+                    .opacity(animateContent ? 1.0 : 0.0)
+                }
+            }
+            .padding(.horizontal, 30)
+            
+            Spacer()
+            
+            // Continue button
+            Button {
+                viewModel.profileSetupStep = .deviceSelection
+            } label: {
+                Text("Continue")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(height: 56)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.8)]), 
+                                    startPoint: .leading, 
+                                    endPoint: .trailing
+                                )
+                            )
+                    )
+                    .shadow(color: BFColors.accent.opacity(0.3), radius: 8, x: 0, y: 4)
+            }
+            .padding(.horizontal, 30)
+            .padding(.bottom, 40)
+            .opacity(animateContent ? 1.0 : 0.0)
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.8)) {
+                animateContent = true
+            }
+        }
+    }
+}
+
+// Helper view for goal selection
+struct GoalOptionButton: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(title)
+                        .font(.system(size: 18, weight: isSelected ? .bold : .medium))
+                        .foregroundColor(.white)
+                    
+                    // Description text based on goal type
+                    Text(descriptionFor(goal: title))
+                        .font(.system(size: 14))
+                        .foregroundColor(.white.opacity(0.7))
+                        .lineLimit(2)
+                }
+                
+                Spacer()
+                
+                // Selection indicator
+                ZStack {
+                    Circle()
+                        .stroke(isSelected ? BFColors.accent : Color.white.opacity(0.3), lineWidth: 2)
+                        .frame(width: 26, height: 26)
+                    
+                    if isSelected {
+                        Circle()
+                            .fill(BFColors.accent)
+                            .frame(width: 18, height: 18)
+                    }
+                }
+            }
+            .padding(20)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(isSelected ? BFColors.accent.opacity(0.2) : Color.white.opacity(0.08))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(isSelected ? BFColors.accent.opacity(0.5) : Color.clear, lineWidth: 1)
+                    )
+            )
+        }
+    }
+    
+    private func descriptionFor(goal: String) -> String {
+        switch goal {
+        case "Reduce":
+            return "Cut back gradually and gain more control"
+        case "Quit":
+            return "Stop gambling completely"
+        case "Maintain control":
+            return "Keep your current habits in check"
+        default:
+            return ""
+        }
+    }
+}
+
+// 3. Tracking method selection (similar to device selection in PuffCount)
+struct TrackingMethodView: View {
+    @ObservedObject var viewModel: OnboardingViewModel
+    @State private var animateContent = false
+    
+    var body: some View {
+        VStack(spacing: 30) {
+            // Header
+            VStack(spacing: 12) {
+                Text("How Will You Track?")
+                    .font(.system(size: 26, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Text("Choose how you'd like to monitor your gambling activity")
+                    .font(.system(size: 17))
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+            }
+            .opacity(animateContent ? 1.0 : 0.0)
+            .padding(.top, 40)
+            
+            Spacer()
+            
+            // Tracking method options
+            VStack(spacing: 16) {
+                ForEach(viewModel.availableTrackingMethods, id: \.self) { method in
+                    TrackingMethodButton(
+                        title: method,
+                        isSelected: viewModel.trackingMethod == method,
+                        action: {
+                            withAnimation {
+                                viewModel.trackingMethod = method
+                            }
+                        }
+                    )
+                    .offset(y: animateContent ? 0 : 20)
+                    .opacity(animateContent ? 1.0 : 0.0)
+                }
+            }
+            .padding(.horizontal, 30)
+            
+            Spacer()
+            
+            // Continue button
+            Button {
+                viewModel.profileSetupStep = .triggerIdentification
+            } label: {
+                Text("Continue")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(height: 56)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.8)]), 
+                                    startPoint: .leading, 
+                                    endPoint: .trailing
+                                )
+                            )
+                    )
+                    .shadow(color: BFColors.accent.opacity(0.3), radius: 8, x: 0, y: 4)
+            }
+            .padding(.horizontal, 30)
+            .padding(.bottom, 40)
+            .opacity(animateContent ? 1.0 : 0.0)
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.8)) {
+                animateContent = true
+            }
+        }
+    }
+}
+
+// Helper view for tracking method selection
+struct TrackingMethodButton: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Image(systemName: iconFor(method: title))
+                    .font(.system(size: 20))
+                    .foregroundColor(isSelected ? BFColors.accent : .white.opacity(0.7))
+                    .frame(width: 40, height: 40)
+                    .background(
+                        Circle()
+                            .fill(isSelected ? BFColors.accent.opacity(0.2) : Color.white.opacity(0.1))
+                    )
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.system(size: 16, weight: isSelected ? .bold : .medium))
+                        .foregroundColor(.white)
+                    
+                    Text(descriptionFor(method: title))
+                        .font(.system(size: 14))
+                        .foregroundColor(.white.opacity(0.7))
+                        .lineLimit(2)
+                }
+                
+                Spacer()
+                
+                // Selection indicator
+                ZStack {
+                    Circle()
+                        .stroke(isSelected ? BFColors.accent : Color.white.opacity(0.3), lineWidth: 2)
+                        .frame(width: 26, height: 26)
+                    
+                    if isSelected {
+                        Circle()
+                            .fill(BFColors.accent)
+                            .frame(width: 18, height: 18)
+                    }
+                }
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(isSelected ? BFColors.accent.opacity(0.15) : Color.white.opacity(0.08))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(isSelected ? BFColors.accent.opacity(0.5) : Color.clear, lineWidth: 1)
+                    )
+            )
+        }
+    }
+    
+    private func iconFor(method: String) -> String {
+        switch method {
+        case "Manual":
+            return "hand.tap.fill"
+        case "Location-based":
+            return "location.fill"
+        case "Schedule-based":
+            return "calendar"
+        case "Urge detection":
+            return "waveform.path.ecg"
+        default:
+            return "questionmark.circle"
+        }
+    }
+    
+    private func descriptionFor(method: String) -> String {
+        switch method {
+        case "Manual":
+            return "You'll log each gambling activity or urge"
+        case "Location-based":
+            return "Get reminders when near gambling venues"
+        case "Schedule-based":
+            return "Set times when you typically gamble for reminders"
+        case "Urge detection":
+            return "Advanced AI detection of behavioral patterns"
+        default:
+            return ""
+        }
+    }
+}
+
+// 4. Schedule setup view (inspired by PuffCount reminders)
+struct ScheduleSetupView: View {
+    @ObservedObject var viewModel: OnboardingViewModel
+    @State private var animateContent = false
+    
+    private let weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    
+    var body: some View {
+        VStack(spacing: 30) {
+            // Header
+            VStack(spacing: 12) {
+                Text("Set Your Schedule")
+                    .font(.system(size: 26, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Text("When would you like to receive check-ins and reminders?")
+                    .font(.system(size: 17))
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+            }
+            .opacity(animateContent ? 1.0 : 0.0)
+            .padding(.top, 40)
+            
+            Spacer()
+            
+            // Day selection
+            VStack(spacing: 24) {
+                Text("Days")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                HStack(spacing: 8) {
+                    ForEach(0..<7) { index in
+                        Button {
+                            viewModel.reminderDays[index].toggle()
+                        } label: {
+                            Text(weekdays[index])
+                                .font(.system(size: 15, weight: .medium))
+                                .frame(width: 40, height: 40)
+                                .background(
+                                    Circle()
+                                        .fill(viewModel.reminderDays[index] ? BFColors.accent : Color.white.opacity(0.1))
+                                )
+                                .foregroundColor(viewModel.reminderDays[index] ? .white : .white.opacity(0.6))
+                        }
+                    }
+                }
+                
+                // Time picker
+                VStack(spacing: 12) {
+                    Text("Time")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    DatePicker("", selection: $viewModel.reminderTime, displayedComponents: .hourAndMinute)
+                        .datePickerStyle(WheelDatePickerStyle())
+                        .labelsHidden()
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color.white.opacity(0.1))
+                        )
+                        .accentColor(BFColors.accent)
+                        .colorScheme(.dark) // Force dark mode for better visibility
+                }
+            }
+            .padding(.horizontal, 30)
+            .offset(y: animateContent ? 0 : 30)
+            .opacity(animateContent ? 1.0 : 0.0)
+            
+            Spacer()
+            
+            // Continue button
+            Button {
+                viewModel.profileSetupStep = .notifications
+            } label: {
+                Text("Continue")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(height: 56)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.8)]), 
+                                    startPoint: .leading, 
+                                    endPoint: .trailing
+                                )
+                            )
+                    )
+                    .shadow(color: BFColors.accent.opacity(0.3), radius: 8, x: 0, y: 4)
+            }
+            .padding(.horizontal, 30)
+            .padding(.bottom, 40)
+            .opacity(animateContent ? 1.0 : 0.0)
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.8)) {
+                animateContent = true
+            }
+        }
+    }
+}
+
+// 5. PuffCount-inspired container view to navigate between onboarding steps
+struct PuffInspiredProfileSetupView: View {
+    @ObservedObject var viewModel: OnboardingViewModel
+    
+    var body: some View {
+        ZStack {
+            // Background
+            LinearGradient(
+                gradient: Gradient(colors: [BFColors.primary, BFColors.primary.opacity(0.85)]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .edgesIgnoringSafeArea(.all)
+            
+            VStack(spacing: 0) {
+                // Header with back/cancel button
+                HStack {
+                    Button(action: {
+                        viewModel.returnToMainOnboarding()
+                    }) {
+                        Text("Back to Classic")
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundColor(.white.opacity(0.8))
+                    }
+                    .padding(.leading, 20)
+                    .padding(.top, 20)
+                    
+                    Spacer()
+                }
+                .frame(height: 60)
+                
+                // Content based on current step
+                Spacer()
+                
+                Group {
+                    switch viewModel.profileSetupStep {
+                    case .welcome:
+                        PuffInspiredWelcomeView(viewModel: viewModel)
+                    case .goalSetting:
+                        GoalSelectionView(viewModel: viewModel)
+                    case .deviceSelection:
+                        TrackingMethodView(viewModel: viewModel)
+                    case .triggerIdentification:
+                        // Use existing trigger mapping but with updated styling
+                        TriggerMappingView(viewModel: viewModel)
+                            .transition(.opacity)
+                    case .schedule:
+                        ScheduleSetupView(viewModel: viewModel)
+                    case .notifications:
+                        // Complete setup view - the last step before account creation
+                        CompleteProfileSetupView(viewModel: viewModel)
+                            .transition(.opacity)
+                    }
+                }
+                .transition(.asymmetric(
+                    insertion: .move(edge: .trailing),
+                    removal: .move(edge: .leading)
+                ))
+                
+                Spacer()
+            }
+        }
+    }
+}
+
+// New view for final step of PuffCount-inspired flow
+struct CompleteProfileSetupView: View {
+    @ObservedObject var viewModel: OnboardingViewModel
+    @State private var animateContent = false
+    
+    var body: some View {
+        VStack(spacing: 30) {
+            // Success icon
+            ZStack {
+                Circle()
+                    .fill(BFColors.accent.opacity(0.2))
+                    .frame(width: 120, height: 120)
+                
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 60))
+                    .foregroundColor(BFColors.accent)
+            }
+            .scaleEffect(animateContent ? 1.0 : 0.8)
+            .opacity(animateContent ? 1.0 : 0.0)
+            .padding(.top, 40)
+            
+            // Title and description
+            VStack(spacing: 12) {
+                Text("Profile Complete!")
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Text("You're ready to create your account and start your journey to freedom")
+                    .font(.system(size: 17))
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+            }
+            .opacity(animateContent ? 1.0 : 0.0)
+            
+            // Profile summary
+            VStack(spacing: 24) {
+                ProfileSummaryRow(title: "Goal", value: viewModel.selectedGoal)
+                ProfileSummaryRow(title: "Tracking Method", value: viewModel.trackingMethod)
+                ProfileSummaryRow(title: "Selected Triggers", value: "\(viewModel.selectedTriggers.count) triggers identified")
+            }
+            .padding(.horizontal, 30)
+            .padding(.top, 20)
+            .opacity(animateContent ? 1.0 : 0.0)
+            
+            Spacer()
+            
+            // Continue to account creation button
+            Button {
+                viewModel.returnToMainOnboarding()
+            } label: {
+                Text("Continue to Account Creation")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(height: 56)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.8)]), 
+                                    startPoint: .leading, 
+                                    endPoint: .trailing
+                                )
+                            )
+                    )
+                    .shadow(color: BFColors.accent.opacity(0.3), radius: 8, x: 0, y: 4)
+            }
+            .padding(.horizontal, 30)
+            .padding(.bottom, 40)
+            .opacity(animateContent ? 1.0 : 0.0)
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.8)) {
+                animateContent = true
+            }
+        }
+    }
+}
+
+struct ProfileSummaryRow: View {
+    let title: String
+    let value: String
+    
+    var body: some View {
+        HStack {
+            Text(title)
+                .font(.system(size: 16))
+                .foregroundColor(.white.opacity(0.7))
+            
+            Spacer()
+            
+            Text(value)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.white)
+        }
+        .padding(.vertical, 12)
+        .padding(.horizontal, 20)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.white.opacity(0.1))
+        )
     }
 }

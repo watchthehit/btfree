@@ -15,4 +15,5 @@ enum OnboardingScreen: Equatable {
     case notificationPrivacy
     case paywall
     case completion
+    case puffInspiredProfileSetup
 }
