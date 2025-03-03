@@ -269,6 +269,11 @@ struct BFProgressBar: View {
                         .fill(Color.white.opacity(0.2))
                         .cornerRadius(BFCornerRadius.small)
                     
+                    // Breaking up the complex expression for better compiler performance
+                    let progressClamped = max(0, progress)
+                    let availableWidth = max(0, geometry.size.width - 64)
+                    let barWidth = max(8, CGFloat(progressClamped) * availableWidth)
+                    
                     Rectangle()
                         .fill(
                             LinearGradient(
@@ -278,7 +283,7 @@ struct BFProgressBar: View {
                             )
                         )
                         .cornerRadius(BFCornerRadius.small)
-                        .frame(width: max(8, CGFloat(max(0, progress)) * max(0, geometry.size.width - 64))
+                        .frame(width: barWidth)
                         .animation(.easeInOut, value: progress)
                 }
             }
