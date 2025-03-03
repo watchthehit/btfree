@@ -322,6 +322,8 @@ public struct EnhancedOnboardingView: View {
                     CombinedProfileSetupScreen(viewModel: viewModel)
                 case .notificationSetup:
                     CombinedNotificationScreen(viewModel: viewModel)
+                case .enhancedPaywall:
+                    EnhancedPaywallScreen().environmentObject(viewModel)
                 case .completion:
                     CompletionScreen(viewModel: viewModel)
                 default:
