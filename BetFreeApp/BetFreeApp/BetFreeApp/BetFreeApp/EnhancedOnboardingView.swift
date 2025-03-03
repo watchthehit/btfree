@@ -1,3 +1,6 @@
+import SwiftUI
+import Foundation
+
 // MARK: - TriggerMappingView
 struct TriggerMappingView: View {
     @ObservedObject var viewModel: OnboardingViewModel
