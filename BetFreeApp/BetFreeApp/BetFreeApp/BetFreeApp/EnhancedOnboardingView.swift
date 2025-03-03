@@ -58,7 +58,7 @@ struct TriggerMappingView: View {
                                               BFColors.accent : Color.white.opacity(0.15))
                                 )
                                 .foregroundColor(selectedCategoryIndex == index ? 
-                                                .white : .white.opacity(0.9))
+                                                Color.white : Color.white.opacity(0.9))
                                 .fontWeight(selectedCategoryIndex == index ? .semibold : .medium)
                         }
                     }
@@ -1205,7 +1205,7 @@ struct SignInView: View {
                                     )
                                 )
                         )
-                        .opacity(viewModel.email.isEmpty || viewModel.password.isEmpty ? 0.5 : 1.0)
+                        .shadow(color: BFColors.accent.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
                 .disabled(viewModel.email.isEmpty || viewModel.password.isEmpty)
                 
@@ -1557,19 +1557,18 @@ struct PaywallView: View {
                 } label: {
                     Text("Start Free Trial")
                         .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
+                        .foregroundColor(.white)
                         .frame(minHeight: 56)
-                    .frame(maxWidth: .infinity)
-                    .background(
+                        .frame(maxWidth: .infinity)
+                        .background(
                             RoundedRectangle(cornerRadius: 16)
                                 .fill(
                                     LinearGradient(
                                         gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.8)]), 
-                                            startPoint: .leading, 
-                                            endPoint: .trailing
+                                        startPoint: .leading, 
+                                        endPoint: .trailing
                                     )
                                 )
-                            )
                         )
                         .shadow(color: BFColors.accent.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
