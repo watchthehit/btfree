@@ -278,7 +278,7 @@ struct TrackingMethodButton: View {
                 Image(systemName: iconFor(method: title))
                     .font(.system(size: 20))
                     .foregroundColor(isSelected ? BFColors.accent : .white.opacity(0.7))
-                    .frame(width: 40, height: 40)
+                    .frame(minWidth: 40, minHeight: 40, alignment: .center)
                     .background(
                         Circle()
                             .fill(isSelected ? BFColors.accent.opacity(0.2) : Color.white.opacity(0.1))
