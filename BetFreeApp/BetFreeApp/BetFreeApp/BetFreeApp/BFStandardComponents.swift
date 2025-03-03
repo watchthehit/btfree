@@ -555,7 +555,7 @@ struct BFProgressStat: View {
                             endPoint: .trailing
                         )
                     )
-                    .frame(width: max(8, CGFloat(max(0, percentage)) * max(0, UIScreen.main.bounds.width - 64), height: 8)
+                    .frame(width: max(8, CGFloat(max(0, percentage)) * (UIScreen.main.bounds.width - 64)), height: 8)
             }
             
             // Percentage text
