@@ -1,19 +1,18 @@
 import SwiftUI
 
 enum OnboardingScreen: Equatable {
-    case combinedValueProposition
-    case assessmentIntro
-    case assessmentQuiz
-    case assessmentResults
-    case triggerIdentificationIntro
-    case triggerMapping
-    case triggerIntensity
-    case triggerStrategies
-    case triggerSummary
+    // New PuffCount-inspired flow (now the primary flow)
+    case welcome
+    case goalSelection
+    case trackingMethodSelection
+    case triggerIdentification
+    case scheduleSetup
+    case profileCompletion
+    
+    // Account creation and finalization (kept from original flow)
     case signIn
     case personalSetup
-    case notificationPrivacy
+    case notificationSetup
     case paywall
     case completion
-    case puffInspiredProfileSetup
 }

@@ -22,25 +22,20 @@ enum OnboardingProfileStep {
 class OnboardingViewModel: ObservableObject {
     // MARK: - Constants
     let screens: [OnboardingScreen] = [
-        .combinedValueProposition,
-        .assessmentIntro,
-        .assessmentQuiz,
-        .assessmentResults,
-        .triggerIdentificationIntro,
-        .triggerMapping,
-        .triggerIntensity,
-        .triggerStrategies,
-        .triggerSummary,
+        .welcome,
+        .goalSelection,
+        .trackingMethodSelection,
+        .triggerIdentification,
+        .scheduleSetup,
+        .profileCompletion,
         .signIn,
         .personalSetup,
-        .notificationPrivacy,
+        .notificationSetup,
         .paywall,
-        .completion,
-        .puffInspiredProfileSetup // Added the PuffCount-inspired flow
+        .completion
     ]
     
-    // Add new PuffCount-inspired profile setup properties
-    @Published var profileSetupStep = OnboardingProfileStep.welcome
+    // User profile properties
     @Published var trackingMethod = "Manual"  // Default tracking method
     @Published var availableTrackingMethods = ["Manual", "Location-based", "Schedule-based", "Urge detection"]
     @Published var selectedGoal = "Reduce"  // Default goal
@@ -56,17 +51,6 @@ class OnboardingViewModel: ObservableObject {
     @Published var isSigningInWithApple = false
     @Published var dailyGoal = 20  // Default to 20 minutes
     
-    // Assessment quiz properties
-    @Published var currentQuizQuestionIndex = 0
-    @Published var gamblingFrequency = ""
-    @Published var gamblingTypes: [String] = []
-    @Published var primaryMotivation = ""
-    @Published var biggestChallenge = ""
-    @Published var supportNetwork: [String] = []
-    @Published var customMotivation = ""
-    @Published var customChallenge = ""
-    @Published var personalizationAreas: [String] = []
-    
     // Trigger identification properties
     @Published var userTriggers: [String] = []
     @Published var triggerCategories: [TriggerCategory] = [
@@ -79,15 +63,15 @@ class OnboardingViewModel: ObservableObject {
     @Published var triggerIntensities: [String: Int] = [:]
     @Published var triggerStrategies: [String: [String]] = [:]
     @Published var customTrigger = ""
-    @Published var currentTriggerCategory = 0
-    @Published var currentTriggerForIntensity = ""
-    @Published var currentTriggerForStrategy = ""
     
+    // Notification settings
     @Published var notificationTypes: [OnboardingNotificationType] = [
         OnboardingNotificationType(name: "Daily reminders", detail: "Get daily reminders to practice mindfulness", isEnabled: true),
         OnboardingNotificationType(name: "Progress milestones", detail: "Celebrate when you reach important milestones", isEnabled: true),
         OnboardingNotificationType(name: "Tips & advice", detail: "Receive helpful advice when you need it most", isEnabled: false)
     ]
+    
+    // Subscription settings
     @Published var isTrialActive = false
     @Published var trialEndDate = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
     @Published var selectedPlan = 1  // Default to annual plan (used by paywall screens)
@@ -97,90 +81,6 @@ class OnboardingViewModel: ObservableObject {
         SubscriptionPlan(id: 0, name: "Monthly", price: "$9.99", period: "month", savings: ""),
         SubscriptionPlan(id: 1, name: "Annual", price: "$59.99", period: "year", savings: "Save 50%")
     ]
-    
-    // Assessment quiz questions
-    let assessmentQuestions = [
-        "How often have you gambled in the past month?",
-        "What types of gambling have you engaged with?",
-        "What's your primary reason for wanting to reduce or stop gambling?",
-        "When you've tried to cut back before, what has been most difficult?",
-        "Who knows about your decision to address your gambling habits?"
-    ]
-    
-    let frequencyOptions = [
-        "Not at all",
-        "Once or twice",
-        "Weekly",
-        "Several times a week",
-        "Daily"
-    ]
-    
-    let gamblingTypeOptions = [
-        "Sports betting",
-        "Casino games (slots, poker, etc.)",
-        "Lottery tickets",
-        "Online gambling",
-        "Mobile gambling apps",
-        "Other"
-    ]
-    
-    let motivationOptions = [
-        "Financial concerns",
-        "Relationship impact",
-        "Mental wellbeing",
-        "Work performance",
-        "Taking back control",
-        "Other"
-    ]
-    
-    let challengeOptions = [
-        "Dealing with cravings",
-        "Finding alternative activities",
-        "Social pressure",
-        "Stress management",
-        "Never tried before",
-        "Other"
-    ]
-    
-    let supportNetworkOptions = [
-        "Close family",
-        "Friends",
-        "Partner/spouse",
-        "Professional support",
-        "No one yet",
-        "Prefer not to say"
-    ]
-    
-    // Strategy suggestions for triggers
-    let strategyOptions: [String: [String]] = [
-        "Emotional": [
-            "5-minute guided breathing exercise",
-            "Mindfulness meditation for emotions",
-            "Journal about your feelings",
-            "Call a supportive friend"
-        ],
-        "Social": [
-            "Practice saying 'no' with confidence",
-            "Suggest alternative activities",
-            "Have an exit plan ready",
-            "Remind yourself of your goals before events"
-        ],
-        "Environmental": [
-            "Take alternative routes to avoid triggers",
-            "Block gambling websites and apps",
-            "Unsubscribe from promotional emails",
-            "Use ad blockers to limit exposure"
-        ],
-        "Financial": [
-            "Set up automatic savings transfers",
-            "Create spending alerts on your accounts",
-            "Give account access to a trusted person",
-            "Use cash-only budgeting for a period"
-        ]
-    ]
-    
-    // Completion callback
-    var onComplete: (() -> Void)?
     
     // MARK: - Computed Properties
     var currentScreen: OnboardingScreen {
@@ -201,113 +101,6 @@ class OnboardingViewModel: ObservableObject {
     
     var selectedPlanDetails: SubscriptionPlan {
         plans[selectedPlan]
-    }
-    
-    var currentAssessmentQuestion: String {
-        assessmentQuestions[currentQuizQuestionIndex]
-    }
-    
-    var quizProgress: Float {
-        Float(currentQuizQuestionIndex) / Float(assessmentQuestions.count)
-    }
-    
-    var currentTriggerCategoryName: String {
-        triggerCategories[currentTriggerCategory].name
-    }
-    
-    var currentTriggerCategoryTriggers: [String] {
-        triggerCategories[currentTriggerCategory].triggers
-    }
-    
-    var highIntensityTriggers: [String] {
-        triggerIntensities.filter { $0.value >= 7 }.map { $0.key }
-    }
-    
-    var mediumIntensityTriggers: [String] {
-        triggerIntensities.filter { $0.value >= 4 && $0.value < 7 }.map { $0.key }
-    }
-    
-    // MARK: - Methods
-    func addTrigger() {
-        guard !customTrigger.isEmpty,
-              !userTriggers.contains(customTrigger),
-              userTriggers.count < 5 else {
-            return
-        }
-        
-        userTriggers.append(customTrigger)
-        customTrigger = ""
-    }
-    
-    func removeTrigger(_ trigger: String) {
-        userTriggers.removeAll { $0 == trigger }
-    }
-    
-    func toggleTriggerSelection(_ trigger: String) {
-        if selectedTriggers.contains(trigger) {
-            selectedTriggers.removeAll { $0 == trigger }
-            triggerIntensities.removeValue(forKey: trigger)
-            triggerStrategies.removeValue(forKey: trigger)
-        } else {
-            selectedTriggers.append(trigger)
-        }
-    }
-    
-    func setTriggerIntensity(for trigger: String, intensity: Int) {
-        triggerIntensities[trigger] = intensity
-    }
-    
-    func addTriggerStrategy(for trigger: String, strategy: String) {
-        if triggerStrategies[trigger] == nil {
-            triggerStrategies[trigger] = [strategy]
-        } else {
-            triggerStrategies[trigger]?.append(strategy)
-        }
-    }
-    
-    func removeTriggerStrategy(for trigger: String, strategy: String) {
-        triggerStrategies[trigger]?.removeAll { $0 == strategy }
-    }
-    
-    func generatePersonalizedAreas() {
-        personalizationAreas = []
-        
-        // Generate based on gambling frequency
-        if gamblingFrequency == "Daily" || gamblingFrequency == "Several times a week" {
-            personalizationAreas.append("Intensive daily support")
-        } else if gamblingFrequency == "Weekly" {
-            personalizationAreas.append("Regular check-ins and strategies")
-        } else {
-            personalizationAreas.append("Preventive techniques and maintenance")
-        }
-        
-        // Generate based on motivation
-        if primaryMotivation == "Financial concerns" {
-            personalizationAreas.append("Financial health restoration")
-        } else if primaryMotivation == "Relationship impact" {
-            personalizationAreas.append("Rebuilding relationship trust")
-        } else if primaryMotivation == "Mental wellbeing" {
-            personalizationAreas.append("Mental health and mindfulness")
-        }
-        
-        // Generate based on challenge
-        if biggestChallenge == "Dealing with cravings" {
-            personalizationAreas.append("Craving management techniques")
-        } else if biggestChallenge == "Finding alternative activities" {
-            personalizationAreas.append("Healthy habit replacement")
-        } else if biggestChallenge == "Stress management" {
-            personalizationAreas.append("Stress reduction strategies")
-        }
-        
-        // Ensure we have at least 3 areas
-        if personalizationAreas.count < 3 {
-            let defaultAreas = ["Mindfulness practice", "Progress tracking", "Community support"]
-            for area in defaultAreas {
-                if !personalizationAreas.contains(area) && personalizationAreas.count < 3 {
-                    personalizationAreas.append(area)
-                }
-            }
-        }
     }
     
     // MARK: - Navigation
@@ -336,6 +129,11 @@ class OnboardingViewModel: ObservableObject {
         }
     }
     
+    func completeProfileAndContinue() {
+        // Go to sign in screen after completing profile
+        skipToSignIn()
+    }
+    
     // MARK: - Authentication
     func signInWithEmail() {
         // In a real app, this would authenticate with a backend service
@@ -357,7 +155,9 @@ class OnboardingViewModel: ObservableObject {
         print("Email: \(email)")
         print("Username: \(username)")
         print("Daily goal: \(dailyGoal) minutes")
-        print("Triggers: \(userTriggers.joined(separator: ", "))")
+        print("Selected goal: \(selectedGoal)")
+        print("Tracking method: \(trackingMethod)")
+        print("Triggers: \(selectedTriggers.joined(separator: ", "))")
         print("Notifications enabled: \(notificationTypes.filter { $0.isEnabled }.map { $0.name }.joined(separator: ", "))")
         print("Trial status: \(isTrialActive ? "Active" : "Inactive"), Expires: \(trialEndDate)")
         
@@ -366,29 +166,6 @@ class OnboardingViewModel: ObservableObject {
         
         // Call the completion callback if provided
         onComplete?()
-    }
-    
-    // MARK: - Functions
-    
-    func switchToPuffInspiredOnboarding() {
-        // Reset profile setup to welcome screen
-        profileSetupStep = .welcome
-        
-        // Find the index of puffInspiredProfileSetup in the screens array
-        if let index = screens.firstIndex(of: .puffInspiredProfileSetup) {
-            currentScreenIndex = index
-        } else {
-            // If not found in the array, add it
-            let customScreens = screens + [.puffInspiredProfileSetup]
-            currentScreenIndex = customScreens.count - 1
-        }
-    }
-    
-    func returnToMainOnboarding() {
-        // Find the index of signIn screen to continue with account creation
-        if let signInIndex = screens.firstIndex(of: .signIn) {
-            currentScreenIndex = signInIndex
-        }
     }
 }
 
@@ -406,9 +183,13 @@ struct EnhancedOnboardingView: View {
     
     var body: some View {
         ZStack {
-            // Teal background color from screenshot
-            Color(hex: "#3DDFD3")
-                .ignoresSafeArea()
+            // Background color gradient
+            LinearGradient(
+                gradient: Gradient(colors: [BFColors.primary, BFColors.primary.opacity(0.85)]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
             
             VStack(spacing: 0) {
                 // Header with navigation and progress
@@ -425,35 +206,22 @@ struct EnhancedOnboardingView: View {
                                 Text("Back")
                                     .fontWeight(.medium)
                             }
-                            .foregroundColor(BFColors.primary)
+                            .foregroundColor(.white)
                         }
                     } else {
                         Text("") // Spacer element for alignment
                     }
                     
-                        Spacer()
+                    Spacer()
                     
-                    // Skip button (only show for value proposition screen)
-                    if viewModel.currentScreen == .combinedValueProposition {
-                        Button {
-                            withAnimation {
-                                viewModel.skipToPaywall()
-                            }
-                        } label: {
-                            Text("Skip")
-                                .fontWeight(.medium)
-                                .foregroundColor(BFColors.textSecondary)
-                        }
-                    } else {
-                        // Linear progress indicator
-                        ProgressView(value: viewModel.screenProgress)
-                            .progressViewStyle(LinearProgressViewStyle(tint: BFColors.textPrimary))
-                            .frame(width: 100)
-                    }
+                    // Progress indicator
+                    ProgressView(value: viewModel.screenProgress)
+                        .progressViewStyle(LinearProgressViewStyle(tint: .white))
+                        .frame(width: 100)
                 }
-                .padding(.horizontal)
+                .padding(.horizontal, 24)
                 .padding(.top, 16)
-                .frame(height: 44)
+                .frame(height: 60)
                 
                 // Current screen content
                 Spacer(minLength: 0)
@@ -478,36 +246,28 @@ struct EnhancedOnboardingView: View {
     @ViewBuilder
     private func screenForState(_ screen: OnboardingScreen) -> some View {
         switch screen {
-        case .combinedValueProposition:
-            CombinedValuePropositionView(viewModel: viewModel)
-        case .assessmentIntro:
-            AssessmentIntroView(viewModel: viewModel)
-        case .assessmentQuiz:
-            AssessmentQuizView(viewModel: viewModel)
-        case .assessmentResults:
-            AssessmentResultsView(viewModel: viewModel)
-        case .triggerIdentificationIntro:
-            TriggerIdentificationIntroView(viewModel: viewModel)
-        case .triggerMapping:
+        case .welcome:
+            PuffInspiredWelcomeView(viewModel: viewModel)
+        case .goalSelection:
+            GoalSelectionView(viewModel: viewModel)
+        case .trackingMethodSelection:
+            TrackingMethodView(viewModel: viewModel)
+        case .triggerIdentification:
             TriggerMappingView(viewModel: viewModel)
-        case .triggerIntensity:
-            TriggerIntensityView(viewModel: viewModel)
-        case .triggerStrategies:
-            TriggerStrategiesView(viewModel: viewModel)
-        case .triggerSummary:
-            TriggerSummaryView(viewModel: viewModel)
+        case .scheduleSetup:
+            ScheduleSetupView(viewModel: viewModel)
+        case .profileCompletion:
+            CompleteProfileSetupView(viewModel: viewModel)
         case .signIn:
             SignInView(viewModel: viewModel)
         case .personalSetup:
             PersonalSetupView(viewModel: viewModel)
-        case .notificationPrivacy:
+        case .notificationSetup:
             NotificationsView(viewModel: viewModel)
         case .paywall:
             PaywallView(viewModel: viewModel)
         case .completion:
             CompletionView(viewModel: viewModel)
-        case .puffInspiredProfileSetup:
-            PuffInspiredProfileSetupView(viewModel: viewModel)
         }
     }
 }
@@ -2808,11 +2568,6 @@ struct TriggerMappingView: View {
     @State private var animateContent = false
     @State private var customTrigger = ""
     
-    // Check if we're in the PuffCount-inspired flow
-    private var isInPuffCountFlow: Bool {
-        return viewModel.currentScreen == .puffInspiredProfileSetup
-    }
-    
     var body: some View {
         VStack(spacing: 24) {
             // Header
@@ -4049,7 +3804,7 @@ struct TrackingMethodButton: View {
     }
 }
 
-// 4. Schedule setup view (inspired by PuffCount reminders)
+// 4. Schedule setup view
 struct ScheduleSetupView: View {
     @ObservedObject var viewModel: OnboardingViewModel
     @State private var animateContent = false
@@ -4071,7 +3826,7 @@ struct ScheduleSetupView: View {
                     .padding(.horizontal, 20)
             }
             .opacity(animateContent ? 1.0 : 0.0)
-            .padding(.top, 40)
+            .padding(.top, 0)
             
             Spacer()
             
@@ -4126,7 +3881,7 @@ struct ScheduleSetupView: View {
             
             // Continue button
             Button {
-                viewModel.profileSetupStep = .notifications
+                viewModel.nextScreen()
             } label: {
                 Text("Continue")
                     .font(.system(size: 18, weight: .semibold))
@@ -4271,7 +4026,7 @@ struct CompleteProfileSetupView: View {
             
             // Continue to account creation button
             Button {
-                viewModel.returnToMainOnboarding()
+                viewModel.completeProfileAndContinue()
             } label: {
                 Text("Continue to Account Creation")
                     .font(.system(size: 18, weight: .semibold))
