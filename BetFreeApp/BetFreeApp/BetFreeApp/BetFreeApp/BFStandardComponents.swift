@@ -118,19 +118,40 @@ struct BFTextButton: View {
 
 extension BFCard {
     /// Creates a card with standardized styling from the design system
-    init(padding: CGFloat = BFSpacing.cardPadding, opacity: Double = 0.1, @ViewBuilder content: () -> Content) {
-        self.init(content: content)
-        // Pass the styling through the styledBody modifier
-    }
-    
-    /// Returns the content with design system standard styling applied
-    func styledBody(padding: CGFloat = BFSpacing.cardPadding, opacity: Double = 0.1) -> some View {
-        content
+    func styledBody(padding: EdgeInsets = EdgeInsets(top: BFSpacing.medium, leading: BFSpacing.medium, bottom: BFSpacing.medium, trailing: BFSpacing.medium), 
+                   opacity: Double = 0.25) -> some View {
+        self
             .padding(padding)
             .background(
                 RoundedRectangle(cornerRadius: BFCornerRadius.medium)
                     .fill(Color.white.opacity(opacity))
-                    .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
+                    .shadow(
+                        color: Color.black.opacity(0.15),
+                        radius: 6,
+                        x: 0,
+                        y: 3
+                    )
+            )
+    }
+    
+    /// Creates a card with more prominent styling for important content
+    func prominentStyle(padding: EdgeInsets = EdgeInsets(top: BFSpacing.medium, leading: BFSpacing.medium, bottom: BFSpacing.medium, trailing: BFSpacing.medium)) -> some View {
+        self
+            .padding(padding)
+            .background(
+                ZStack {
+                    RoundedRectangle(cornerRadius: BFCornerRadius.medium)
+                        .fill(Color.white.opacity(0.3))
+                    
+                    RoundedRectangle(cornerRadius: BFCornerRadius.medium)
+                        .stroke(BFColors.accent.opacity(0.4), lineWidth: 1.5)
+                }
+                .shadow(
+                    color: Color.black.opacity(0.15),
+                    radius: 8,
+                    x: 0,
+                    y: 4
+                )
             )
     }
 }
@@ -161,7 +182,7 @@ struct BFOptionButton: View {
                 ZStack {
                     if allowsMultiple {
                         RoundedRectangle(cornerRadius: 4)
-                            .stroke(isSelected ? BFColors.accent : Color.white.opacity(0.4), lineWidth: 2)
+                            .stroke(isSelected ? BFColors.accent : Color.white.opacity(0.6), lineWidth: 2)
                             .frame(width: 20, height: 20)
                         
                         if isSelected {
@@ -171,7 +192,7 @@ struct BFOptionButton: View {
                         }
                     } else {
                         Circle()
-                            .stroke(isSelected ? BFColors.accent : Color.white.opacity(0.4), lineWidth: 2)
+                            .stroke(isSelected ? BFColors.accent : Color.white.opacity(0.6), lineWidth: 2)
                             .frame(width: 20, height: 20)
                         
                         if isSelected {
@@ -184,7 +205,7 @@ struct BFOptionButton: View {
                 
                 // Option text
                 Text(text)
-                    .font(.system(size: 16, weight: isSelected ? .semibold : .regular))
+                    .font(.system(size: 16, weight: isSelected ? .semibold : .medium))
                     .foregroundColor(.white)
                 
                 Spacer()
@@ -193,10 +214,10 @@ struct BFOptionButton: View {
             .padding(.horizontal, 16)
             .background(
                 RoundedRectangle(cornerRadius: BFCornerRadius.medium)
-                    .fill(Color.white.opacity(isSelected ? 0.2 : 0.1))
+                    .fill(Color.white.opacity(isSelected ? 0.3 : 0.15))
                     .overlay(
                         RoundedRectangle(cornerRadius: BFCornerRadius.medium)
-                            .stroke(isSelected ? BFColors.accent.opacity(0.5) : Color.white.opacity(0.1), lineWidth: 1)
+                            .stroke(isSelected ? BFColors.accent.opacity(0.7) : Color.white.opacity(0.3), lineWidth: isSelected ? 1.5 : 1)
                     )
             )
         }
@@ -240,12 +261,13 @@ extension BFTextField {
             Text(title)
                 .font(BFTypography.bodySmall)
                 .foregroundColor(.white)
+                .fontWeight(.medium)
             
             // Text input field
             HStack(spacing: BFSpacing.small) {
                 if let icon = icon {
                     Image(systemName: icon)
-                        .foregroundColor(isFocused.wrappedValue ? BFColors.accent : .white.opacity(0.7))
+                        .foregroundColor(isFocused.wrappedValue ? BFColors.accent : .white.opacity(0.85))
                         .font(.system(size: 16))
                 }
                 
@@ -257,19 +279,23 @@ extension BFTextField {
                     .disableAutocorrection(true)
                     .focused(isFocused)
                     .tint(BFColors.accent)
+                    .placeholder(when: text.isEmpty) {
+                        Text(placeholder)
+                            .foregroundColor(.white.opacity(0.6))
+                    }
             }
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: BFCornerRadius.medium)
-                    .fill(Color.white.opacity(0.15))
-                    .shadow(color: isFocused.wrappedValue ? BFColors.accent.opacity(0.4) : Color.black.opacity(0.15), 
+                    .fill(Color.white.opacity(0.25))
+                    .shadow(color: isFocused.wrappedValue ? BFColors.accent.opacity(0.5) : Color.black.opacity(0.2), 
                            radius: isFocused.wrappedValue ? 6 : 3, 
                            x: 0, 
                            y: isFocused.wrappedValue ? 3 : 2)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: BFCornerRadius.medium)
-                    .stroke(errorMessage != nil ? BFColors.error : (isFocused.wrappedValue ? BFColors.accent : Color.clear), lineWidth: 1.5)
+                    .stroke(errorMessage != nil ? BFColors.error : (isFocused.wrappedValue ? BFColors.accent : Color.white.opacity(0.3)), lineWidth: 1.5)
             )
             
             // Error message if any
@@ -279,6 +305,20 @@ extension BFTextField {
                     .foregroundColor(BFColors.error)
                     .padding(.leading, 4)
             }
+        }
+    }
+}
+
+// Helper extension for placeholder styling
+extension View {
+    func placeholder<Content: View>(
+        when shouldShow: Bool,
+        alignment: Alignment = .leading,
+        @ViewBuilder placeholder: () -> Content) -> some View {
+        
+        ZStack(alignment: alignment) {
+            placeholder().opacity(shouldShow ? 1 : 0)
+            self
         }
     }
 } 

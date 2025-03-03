@@ -500,19 +500,8 @@ struct CombinedValuePropositionView: View {
                 .ignoresSafeArea()
             
             VStack {
-                // Skip button at top right
-                HStack {
-                    Spacer()
-                    Button {
-                        viewModel.skipToPaywall()
-                    } label: {
-                        Text("Skip")
-                            .foregroundColor(.white)
-                            .fontWeight(.medium)
-                    }
-                    .padding(.trailing, 20)
-                }
-                .padding(.top, 10)
+                // Skip button at top right - we'll remove this to avoid duplication with the main Skip button
+                Spacer().frame(height: 50) // Replace duplicate button with spacer
                 
                 // Page indicators
                 HStack(spacing: 8) {
@@ -533,19 +522,19 @@ struct CombinedValuePropositionView: View {
                             // Icon with circles
                             ZStack {
                                 Circle()
-                                    .fill(Color.white.opacity(0.15))
+                                    .fill(Color.white.opacity(0.2))
                                     .frame(width: 160, height: 160)
                                 
                                 Circle()
-                                    .fill(Color.white.opacity(0.3))
+                                    .fill(Color.white.opacity(0.35))
                                     .frame(width: 120, height: 120)
                                 
                                 Circle()
-                                    .fill(Color.gray.opacity(0.5))
+                                    .fill(Color.white.opacity(0.5))
                                     .frame(width: 80, height: 80)
                                     .overlay(
                                         Image(systemName: pages[index].icon)
-                                            .font(.system(size: 40))
+                                            .font(.system(size: 40, weight: .semibold))
                                             .foregroundColor(.white)
                                     )
                             }
@@ -559,7 +548,7 @@ struct CombinedValuePropositionView: View {
                                 .padding(.horizontal, 20)
                             
                             Text(pages[index].description)
-                                .font(.system(size: 17))
+                                .font(.system(size: 17, weight: .medium))
                                 .foregroundColor(.black)
                                 .multilineTextAlignment(.center)
                                 .padding(.top, 10)
@@ -572,34 +561,22 @@ struct CombinedValuePropositionView: View {
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 
-                // Next/Get Started button
-                Button {
-                    if currentPage < pages.count - 1 {
-                        withAnimation {
-                            currentPage += 1
+                // Replace custom button with BFPrimaryButton
+                BFPrimaryButton(
+                    text: currentPage == pages.count - 1 ? "Get Started" : "Next",
+                    icon: "arrow.right",
+                    action: {
+                        if currentPage < pages.count - 1 {
+                            withAnimation {
+                                currentPage += 1
+                            }
+                        } else {
+                            viewModel.nextScreen()
                         }
-                    } else {
-                        viewModel.nextScreen()
                     }
-                } label: {
-                    HStack {
-                        Text(currentPage == pages.count - 1 ? "Get Started" : "Next")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                        
-                        Image(systemName: "arrow.right")
-                            .font(.system(size: 16))
-                    }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color.red)
-                    )
-                    .padding(.horizontal, 40)
-                }
-                .padding(.bottom, 40)
+                )
+                .padding(.horizontal, BFSpacing.medium)
+                .padding(.bottom, BFSpacing.xlarge)
             }
         }
     }
@@ -1275,6 +1252,7 @@ struct SignInView: View {
                             Text("Email")
                                 .font(BFTypography.bodySmall)
                                 .foregroundColor(.white)
+                                .fontWeight(.medium)
                             
                             HStack {
                                 Image(systemName: "envelope.fill")
@@ -1286,7 +1264,7 @@ struct SignInView: View {
                                     .autocapitalization(.none)
                                     .disableAutocorrection(true)
                                     .focused($isEmailFocused)
-                                    .foregroundColor(BFColors.textPrimary)
+                                    .foregroundColor(Color(hex: "#1B263B")) // Darker text for better contrast
                                     .onChange(of: viewModel.email) { oldValue, newValue in
                                         // Clear error when typing
                                         emailErrorMessage = nil
@@ -1298,7 +1276,7 @@ struct SignInView: View {
                                         emailErrorMessage = nil
                                     }) {
                                         Image(systemName: "xmark.circle.fill")
-                                            .foregroundColor(.gray)
+                                            .foregroundColor(Color(hex: "#718096")) // Darker gray for better contrast
                                             .font(.system(size: 16))
                                     }
                                 }
@@ -1314,7 +1292,7 @@ struct SignInView: View {
                             )
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .stroke(emailErrorMessage != nil ? Color.red : (isEmailFocused ? BFColors.accent : Color.clear), lineWidth: 1.5)
+                                    .stroke(emailErrorMessage != nil ? BFColors.error : (isEmailFocused ? BFColors.accent : Color.clear), lineWidth: 1.5)
                             )
                             
                             if let errorMessage = emailErrorMessage {
@@ -1331,6 +1309,7 @@ struct SignInView: View {
                             Text("Password")
                                 .font(BFTypography.bodySmall)
                                 .foregroundColor(.white)
+                                .fontWeight(.medium)
                             
                             HStack {
                                 Image(systemName: "lock.fill")
@@ -1340,7 +1319,7 @@ struct SignInView: View {
                                 if showingPassword {
                                     TextField("Your password", text: $viewModel.password)
                                         .focused($isPasswordFocused)
-                                        .foregroundColor(BFColors.textPrimary)
+                                        .foregroundColor(Color(hex: "#1B263B"))
                                         .onChange(of: viewModel.password) { oldValue, newValue in
                                             // Clear error when typing
                                             passwordErrorMessage = nil
@@ -1348,7 +1327,7 @@ struct SignInView: View {
                                 } else {
                                     SecureField("Your password", text: $viewModel.password)
                                         .focused($isPasswordFocused)
-                                        .foregroundColor(BFColors.textPrimary)
+                                        .foregroundColor(Color(hex: "#1B263B"))
                                         .onChange(of: viewModel.password) { oldValue, newValue in
                                             // Clear error when typing
                                             passwordErrorMessage = nil
@@ -1359,7 +1338,7 @@ struct SignInView: View {
                                     showingPassword.toggle()
                                 }) {
                                     Image(systemName: showingPassword ? "eye.slash.fill" : "eye.fill")
-                                        .foregroundColor(.gray)
+                                        .foregroundColor(Color(hex: "#718096"))
                                         .font(.system(size: 16))
                                 }
                             }
@@ -1374,7 +1353,7 @@ struct SignInView: View {
                             )
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .stroke(passwordErrorMessage != nil ? Color.red : (isPasswordFocused ? BFColors.accent : Color.clear), lineWidth: 1.5)
+                                    .stroke(passwordErrorMessage != nil ? BFColors.error : (isPasswordFocused ? BFColors.accent : Color.clear), lineWidth: 1.5)
                             )
                             
                             if let errorMessage = passwordErrorMessage {
