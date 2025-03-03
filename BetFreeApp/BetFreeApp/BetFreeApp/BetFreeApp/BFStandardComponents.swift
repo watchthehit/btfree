@@ -547,6 +547,7 @@ struct BFProgressStat: View {
                     .frame(height: 8)
                 
                 // Fill
+                let progressWidth = max(8, CGFloat(max(0, percentage)) * (UIScreen.main.bounds.width - 64))
                 RoundedRectangle(cornerRadius: 4)
                     .fill(
                         LinearGradient(
@@ -555,7 +556,7 @@ struct BFProgressStat: View {
                             endPoint: .trailing
                         )
                     )
-                    .frame(width: max(8, CGFloat(max(0, percentage)) * (UIScreen.main.bounds.width - 64)), height: 8)
+                    .frame(width: progressWidth, height: 8)
             }
             
             // Percentage text
