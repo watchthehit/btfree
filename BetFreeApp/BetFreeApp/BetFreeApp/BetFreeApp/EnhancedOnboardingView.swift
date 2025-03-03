@@ -581,6 +581,7 @@ public class OnboardingViewModel: ObservableObject {
 struct EnhancedOnboardingView: View {
     @StateObject private var viewModel = OnboardingViewModel()
     @Environment(\.colorScheme) var colorScheme
+    @State private var animateContent = false
     
     // Add completion handler property
     var onComplete: (() -> Void)?
@@ -597,7 +598,7 @@ struct EnhancedOnboardingView: View {
                 startPoint: .top,
                 endPoint: .bottom
             )
-            .ignoresSafeArea()
+                .ignoresSafeArea()
             
             VStack(spacing: 0) {
                 // Header with navigation and progress
@@ -620,7 +621,7 @@ struct EnhancedOnboardingView: View {
                         Text("") // Spacer element for alignment
                     }
                     
-                    Spacer()
+                        Spacer()
                     
                     // Progress indicator
                     ProgressView(value: viewModel.screenProgress)
@@ -721,9 +722,9 @@ struct PuffInspiredWelcomeView: View {
                     .opacity(animateContent ? 1.0 : 0.0)
             }
             .padding(.top, 60)
-            
-            Spacer()
-            
+                    
+                    Spacer()
+                    
             // Brief overview of app
             VStack(spacing: 20) {
                 FeatureRow(iconName: "chart.bar.fill", title: "Track Progress", description: "Monitor your journey with personalized insights")
@@ -739,19 +740,19 @@ struct PuffInspiredWelcomeView: View {
                     .offset(y: animateContent ? 0 : 20)
             }
             .padding(.horizontal, 30)
-            
-            Spacer()
-            
+                    
+                    Spacer()
+                    
             // Continue button
-            Button {
-                viewModel.nextScreen()
-            } label: {
+                        Button {
+                                    viewModel.nextScreen()
+                        } label: {
                 Text("Get Started")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.white)
                     .frame(minHeight: 56)
                     .frame(maxWidth: .infinity)
-                    .background(
+                                .background(
                         RoundedRectangle(cornerRadius: 16)
                             .fill(
                                 LinearGradient(
@@ -818,17 +819,17 @@ struct GoalSelectionView: View {
             .padding(.horizontal, 30)
             
             Spacer()
-            
-            // Continue button
-            Button {
-                viewModel.nextScreen()
-            } label: {
-                Text("Continue")
+                
+                // Continue button
+                    Button {
+                            viewModel.nextScreen()
+                    } label: {
+                        Text("Continue")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.white)
+                            .foregroundColor(.white)
                     .frame(minHeight: 56)
-                    .frame(maxWidth: .infinity)
-                    .background(
+                            .frame(maxWidth: .infinity)
+                            .background(
                         RoundedRectangle(cornerRadius: 16)
                             .fill(
                                 LinearGradient(
@@ -863,12 +864,12 @@ struct TrackingMethodView: View {
             VStack(spacing: 12) {
                 Text("How Will You Track?")
                     .font(.system(size: 26, weight: .bold))
-                    .foregroundColor(.white)
+                        .foregroundColor(.white)
                 
                 Text("Choose how you'd like to monitor your gambling activity")
                     .font(.system(size: 17))
                     .foregroundColor(.white.opacity(0.8))
-                    .multilineTextAlignment(.center)
+                        .multilineTextAlignment(.center)
                     .padding(.horizontal, 20)
             }
             .opacity(animateContent ? 1.0 : 0.0)
@@ -892,7 +893,7 @@ struct TrackingMethodView: View {
                     .opacity(animateContent ? 1.0 : 0.0)
                 }
             }
-            .padding(.horizontal, 30)
+                        .padding(.horizontal, 30)
             
             Spacer()
             
@@ -959,8 +960,8 @@ struct ScheduleSetupView: View {
             VStack(spacing: 24) {
                 Text("Days")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 
                 HStack(spacing: 8) {
                     ForEach(0..<7) { index in
@@ -989,8 +990,8 @@ struct ScheduleSetupView: View {
                     DatePicker("", selection: $viewModel.reminderTime, displayedComponents: .hourAndMinute)
                         .datePickerStyle(WheelDatePickerStyle())
                         .labelsHidden()
-                        .frame(maxWidth: .infinity)
-                        .background(
+                            .frame(maxWidth: .infinity)
+                            .background(
                             RoundedRectangle(cornerRadius: 16)
                                 .fill(Color.white.opacity(0.1))
                         )
@@ -1093,7 +1094,7 @@ struct CompleteProfileSetupView: View {
                     .foregroundColor(.white)
                     .frame(minHeight: 56)
                     .frame(maxWidth: .infinity)
-                    .background(
+        .background(
                         RoundedRectangle(cornerRadius: 16)
                             .fill(
                                 LinearGradient(
@@ -1177,12 +1178,12 @@ struct SignInView: View {
                                 .fill(Color.white.opacity(0.1))
                         )
                 }
-            }
-            .padding(.horizontal, 30)
+                }
+                .padding(.horizontal, 30)
             .opacity(animateContent ? 1.0 : 0.0)
-            
-            Spacer()
-            
+                
+                Spacer()
+                
             // Sign in buttons
             VStack(spacing: 16) {
                 // Email sign in
@@ -1191,7 +1192,7 @@ struct SignInView: View {
                 } label: {
                     Text("Create Account")
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.white)
+                    .foregroundColor(.white)
                         .frame(minHeight: 56)
                         .frame(maxWidth: .infinity)
                         .background(
@@ -1209,20 +1210,20 @@ struct SignInView: View {
                 .disabled(viewModel.email.isEmpty || viewModel.password.isEmpty)
                 
                 // Apple sign in
-                Button {
+                        Button {
                     viewModel.signInWithApple()
-                } label: {
-                    HStack {
+                        } label: {
+                            HStack {
                         Image(systemName: "apple.logo")
-                            .font(.system(size: 20))
+                                    .font(.system(size: 20))
                         
                         Text("Sign in with Apple")
                             .font(.system(size: 18, weight: .semibold))
-                    }
+                            }
                     .foregroundColor(.white)
                     .frame(minHeight: 56)
-                    .frame(maxWidth: .infinity)
-                    .background(
+                            .frame(maxWidth: .infinity)
+                            .background(
                         RoundedRectangle(cornerRadius: 16)
                             .fill(Color.black)
                             .overlay(
@@ -1256,19 +1257,19 @@ struct PersonalSetupView: View {
             VStack(spacing: 12) {
                 Text("Personal Setup")
                     .font(.system(size: 26, weight: .bold))
-                    .foregroundColor(.white)
-                
+                        .foregroundColor(.white)
+                    
                 Text("Set your daily time limit for gambling activities")
                     .font(.system(size: 17))
                     .foregroundColor(.white.opacity(0.8))
-                    .multilineTextAlignment(.center)
+                        .multilineTextAlignment(.center)
                     .padding(.horizontal, 20)
             }
             .opacity(animateContent ? 1.0 : 0.0)
             .padding(.top, 30)
             
-            Spacer()
-            
+                            Spacer()
+                            
             // Daily goal slider
             VStack(spacing: 30) {
                 // Current value display
@@ -1286,18 +1287,18 @@ struct PersonalSetupView: View {
                 VStack(spacing: 15) {
                     Slider(value: $sliderValue, in: 0...120, step: 5)
                         .accentColor(BFColors.accent)
-                        .onChange(of: sliderValue) { _ in
-                            viewModel.dailyGoal = Int(sliderValue)
+                        .onChange(of: sliderValue) { oldValue, newValue in
+                            viewModel.dailyGoal = Int(newValue)
                         }
                     
                     // Labels
-                    HStack {
+                        HStack {
                         Text("0 min")
                             .font(.system(size: 14))
                             .foregroundColor(.white.opacity(0.6))
                         
-                        Spacer()
-                        
+                            Spacer()
+                            
                         Text("120 min")
                             .font(.system(size: 14))
                             .foregroundColor(.white.opacity(0.6))
@@ -1311,14 +1312,14 @@ struct PersonalSetupView: View {
             Spacer()
             
             // Continue button
-            Button {
-                viewModel.nextScreen()
-            } label: {
+                Button {
+                    viewModel.nextScreen()
+                } label: {
                 Text("Continue")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.white)
+                        .foregroundColor(.white)
                     .frame(minHeight: 56)
-                    .frame(maxWidth: .infinity)
+                        .frame(maxWidth: .infinity)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
                             .fill(
@@ -1416,7 +1417,7 @@ struct NotificationsView: View {
                     .foregroundColor(.white)
                     .frame(minHeight: 56)
                     .frame(maxWidth: .infinity)
-                    .background(
+        .background(
                         RoundedRectangle(cornerRadius: 16)
                             .fill(
                                 LinearGradient(
@@ -1446,18 +1447,18 @@ struct PaywallView: View {
     @State private var animateContent = false
     
     var body: some View {
-        VStack(spacing: 30) {
+            VStack(spacing: 30) {
             // Header
-            VStack(spacing: 12) {
+                VStack(spacing: 12) {
                 Text("Upgrade to Premium")
                     .font(.system(size: 26, weight: .bold))
-                    .foregroundColor(.white)
+                        .foregroundColor(.white)
                 
                 Text("Get unlimited access to all BetFree features")
                     .font(.system(size: 17))
                     .foregroundColor(.white.opacity(0.8))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 20)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 20)
             }
             .opacity(animateContent ? 1.0 : 0.0)
             .padding(.top, 30)
@@ -1493,16 +1494,16 @@ struct PaywallView: View {
                                             .font(.system(size: 14, weight: .medium))
                                                 .padding(.horizontal, 8)
                                                 .padding(.vertical, 3)
-                                                .background(
+                    .background(
                                                     Capsule()
                                                         .fill(BFColors.accent)
-                                                )
+                    )
                                     }
                                 }
-                                
+                    
                                 Text("\(plan.price) per \(plan.period)")
                                     .font(.system(size: 15))
-                                    .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(.white.opacity(0.7))
                             }
                             
                             Spacer()
@@ -1556,19 +1557,19 @@ struct PaywallView: View {
                 } label: {
                     Text("Start Free Trial")
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.white)
+                            .foregroundColor(.white)
                         .frame(minHeight: 56)
-                        .frame(maxWidth: .infinity)
-                        .background(
+                    .frame(maxWidth: .infinity)
+                    .background(
                             RoundedRectangle(cornerRadius: 16)
                                 .fill(
                                     LinearGradient(
                                         gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.8)]), 
                                             startPoint: .leading, 
                                             endPoint: .trailing
-                                        )
                                     )
                                 )
+                            )
                         )
                         .shadow(color: BFColors.accent.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
@@ -1620,8 +1621,8 @@ struct CompletionView: View {
             VStack(spacing: 16) {
                 Text("You're All Set!")
                     .font(.system(size: 32, weight: .bold))
-                    .foregroundColor(.white)
-                
+                .foregroundColor(.white)
+            
                 Text("Your journey to freedom begins today. We're here to support you every step of the way.")
                     .font(.system(size: 18))
                     .foregroundColor(.white.opacity(0.8))
@@ -1641,7 +1642,7 @@ struct CompletionView: View {
                     .foregroundColor(.white)
                     .frame(minHeight: 56)
                     .frame(maxWidth: .infinity)
-                    .background(
+        .background(
                         RoundedRectangle(cornerRadius: 16)
                             .fill(
                                 LinearGradient(
