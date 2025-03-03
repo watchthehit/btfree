@@ -94,7 +94,7 @@ struct BFEnhancedDashboardView: View {
                                     ZStack {
                                         // Background for better text contrast
                                         RoundedRectangle(cornerRadius: 12)
-                                            .fill(Color.black.opacity(0.6))
+                                            .fill(Color.bfOverlay(opacity: 0.6))
                                             .frame(height: 80)
                                             .padding(.horizontal, 20)
                                         
@@ -102,14 +102,14 @@ struct BFEnhancedDashboardView: View {
                                             Text("Unlock 20+ Premium Exercises")
                                                 .font(.headline)
                                                 .fontWeight(.semibold)
-                                                .foregroundColor(.white)
+                                                .foregroundColor(.bfWhite)
                                             
                                             Button(action: {
                                                 showPaywall = true
                                             }) {
                                                 Text("Upgrade to Pro")
                                                     .font(BFTypography.button)
-                                                    .foregroundColor(.white)
+                                                    .foregroundColor(.bfWhite)
                                                     .padding(.horizontal, 16)
                                                     .padding(.vertical, 8)
                                                     .background(
@@ -137,22 +137,29 @@ struct BFEnhancedDashboardView: View {
     private func statView(value: String, label: String) -> some View {
         VStack(spacing: 4) {
             Text(value)
-                .font(.system(size: 24, weight: .bold))
-                .foregroundColor(BFColors.primary)
+                .font(BFTypography.heading3)
+                .foregroundColor(BFColors.textPrimary)
             
             Text(label)
-                .font(BFTypography.caption)
+                .font(BFTypography.bodySmall)
                 .foregroundColor(BFColors.textSecondary)
         }
-        .frame(maxWidth: .infinity)
     }
     
     private func exerciseRow(name: String, duration: String, category: String, isPremium: Bool = false) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text(name)
-                    .font(BFTypography.bodyMedium)
-                    .foregroundColor(BFColors.textPrimary)
+                HStack {
+                    Text(name)
+                        .font(BFTypography.bodyMedium)
+                        .foregroundColor(BFColors.textPrimary)
+                    
+                    if isPremium {
+                        Image(systemName: "lock.fill")
+                            .font(.caption2)
+                            .foregroundColor(BFColors.accent)
+                    }
+                }
                 
                 Text(category)
                     .font(BFTypography.caption)
@@ -161,27 +168,11 @@ struct BFEnhancedDashboardView: View {
             
             Spacer()
             
-            if isPremium {
-                Image(systemName: "crown.fill")
-                    .foregroundColor(BFColors.accent)
-                    .padding(.trailing, 4)
-            }
-            
             Text(duration)
                 .font(BFTypography.bodySmall)
-                .foregroundColor(BFColors.textSecondary)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(BFColors.secondaryBackground)
-                )
+                .foregroundColor(BFColors.textTertiary)
         }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.03), radius: 2)
-        )
+        .padding()
+        .standardCardBackground()
     }
 } 

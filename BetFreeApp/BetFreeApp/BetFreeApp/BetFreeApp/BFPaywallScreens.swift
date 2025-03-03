@@ -464,14 +464,14 @@ struct EnhancedPaywallScreen: View {
                     Image(systemName: "crown.fill")
                         .resizable()
                         .scaledToFit()
-                        .foregroundColor(.white)
+                        .foregroundColor(.bfWhite)
                         .frame(width: 44, height: 44)
-                        .shadow(color: .white.opacity(0.5), radius: 5, x: 0, y: 0)
+                        .shadow(color: .bfWhite.opacity(0.5), radius: 5, x: 0, y: 0)
                     
                     // Shine effect
                     Circle()
                         .trim(from: 0, to: 0.2)
-                        .stroke(Color.white, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                        .stroke(.bfWhite, style: StrokeStyle(lineWidth: 2, lineCap: .round))
                         .frame(width: 90, height: 90)
                         .rotationEffect(.degrees(-45))
                         .rotationEffect(Angle(degrees: animateGradient ? 360 : 0))
@@ -497,20 +497,20 @@ struct EnhancedPaywallScreen: View {
                     Text("Unlock Your Full Potential")
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundColor(.bfWhite)
                         .multilineTextAlignment(.center)
                         .accessibilityAddTraits(.isHeader)
                     
                     ZStack {
                         // Semi-transparent background for better contrast
                         RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.black.opacity(0.3))
+                            .fill(Color.bfOverlay(opacity: 0.3))
                             .frame(height: 28)
                             .padding(.horizontal, -8)
                         
                         Text("Join thousands who have transformed their lives with BetFree Pro")
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundColor(.bfWhite)
                             .multilineTextAlignment(.center)
                     }
                 }

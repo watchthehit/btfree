@@ -70,7 +70,7 @@ private struct TriggerHeader: View {
             Text("Identify Your Triggers")
                 .font(.title)
                 .fontWeight(.bold)
-                .foregroundColor(.white)
+                .foregroundColor(.bfWhite)
                 .multilineTextAlignment(.center)
                 .opacity(animateContent ? 1.0 : 0.0)
                 .offset(y: animateContent ? 0 : -10)
@@ -78,7 +78,7 @@ private struct TriggerHeader: View {
             
             Text("Select all that apply in each category")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(.bfWhite)
                 .multilineTextAlignment(.center)
                 .opacity(animateContent ? 1.0 : 0.0)
         }
@@ -100,18 +100,14 @@ private struct CategorySelector: View {
                     }) {
                         Text(viewModel.triggerCategories[index].name)
                             .font(.system(size: 15, weight: .medium))
-                            .foregroundColor(selectedCategoryIndex == index ? .white : .white.opacity(0.6))
+                            .foregroundColor(selectedCategoryIndex == index ? .bfWhite : .bfWhite.opacity(0.7))
                             .padding(.horizontal, 16)
                             .padding(.vertical, 8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .fill(selectedCategoryIndex == index ? BFColors.accent : Color.clear)
-                            )
+                            .standardSelectionBackground(isSelected: selectedCategoryIndex == index, cornerRadius: 20)
                     }
                 }
             }
-            .padding(.horizontal, 24)
-            .padding(.top, 32)
+            .padding(.horizontal, 20)
         }
     }
 }
