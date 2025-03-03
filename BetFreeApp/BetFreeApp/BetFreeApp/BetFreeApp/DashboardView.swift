@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 struct BFEnhancedDashboardView: View {
     @EnvironmentObject private var appState: AppState
@@ -14,6 +15,7 @@ struct BFEnhancedDashboardView: View {
                             Text("Welcome, \(appState.username.isEmpty ? "Friend" : appState.username)")
                                 .font(BFTypography.heading2)
                                 .foregroundColor(BFColors.textPrimary)
+                                .accessibilityAddTraits(.isHeader)
                             
                             Text("Today is a great day to stay on track")
                                 .font(BFTypography.bodyMedium)
@@ -78,7 +80,7 @@ struct BFEnhancedDashboardView: View {
                                     exerciseRow(name: "Gratitude Practice", duration: "7 min", category: "Gratitude")
                                 }
                             } else {
-                                // Limited library with locked overlay
+                                // Limited library with locked overlay and improved contrast
                                 ZStack {
                                     VStack(spacing: 12) {
                                         exerciseRow(name: "Deep Breathing", duration: "5 min", category: "Breathing")
@@ -86,34 +88,37 @@ struct BFEnhancedDashboardView: View {
                                         exerciseRow(name: "Urge Surfing", duration: "10 min", category: "Urge Management", isPremium: true)
                                         exerciseRow(name: "Gratitude Practice", duration: "7 min", category: "Gratitude", isPremium: true)
                                     }
-                                    .opacity(0.4)
+                                    .opacity(0.7) // Increased from 0.4 for better contrast
                                     
-                                    // Upgrade prompt
-                                    VStack(spacing: 8) {
-                                        Text("Unlock 20+ Premium Exercises")
-                                            .font(BFTypography.bodyMedium)
-                                            .fontWeight(.semibold)
+                                    // Upgrade prompt with improved contrast
+                                    ZStack {
+                                        // Background for better text contrast
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Color.black.opacity(0.6))
+                                            .frame(height: 80)
+                                            .padding(.horizontal, 20)
                                         
-                                        Button(action: {
-                                            showPaywall = true
-                                        }) {
-                                            Text("Upgrade to Pro")
-                                                .font(BFTypography.button)
+                                        VStack(spacing: 8) {
+                                            Text("Unlock 20+ Premium Exercises")
+                                                .font(.headline)
+                                                .fontWeight(.semibold)
                                                 .foregroundColor(.white)
-                                                .padding(.horizontal, 16)
-                                                .padding(.vertical, 8)
-                                                .background(
-                                                    RoundedRectangle(cornerRadius: 8)
-                                                        .fill(BFColors.accent)
-                                                )
+                                            
+                                            Button(action: {
+                                                showPaywall = true
+                                            }) {
+                                                Text("Upgrade to Pro")
+                                                    .font(BFTypography.button)
+                                                    .foregroundColor(.white)
+                                                    .padding(.horizontal, 16)
+                                                    .padding(.vertical, 8)
+                                                    .background(
+                                                        RoundedRectangle(cornerRadius: 8)
+                                                            .fill(BFColors.accent)
+                                                    )
+                                            }
                                         }
                                     }
-                                    .padding()
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(Color.white.opacity(0.9))
-                                            .shadow(color: Color.black.opacity(0.05), radius: 8)
-                                    )
                                 }
                             }
                         }

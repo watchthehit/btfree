@@ -16,6 +16,7 @@ public enum OnboardingScreen: Equatable {
     case personalSetup
     case notificationSetup
     case enhancedPaywall
+    case combinedProfileSetup
     case completion
 }
 
@@ -36,7 +37,7 @@ public class OnboardingViewModel: ObservableObject {
         .valueProposition2,
         .valueProposition3,
         .goalSelection,
-        .combinedProfileSetup, // New consolidated screen that will replace profileCompletion and personalSetup
+        .combinedProfileSetup, // Using the newly added case
         .notificationSetup,
         .completion
         // enhancedPaywall moved to post-onboarding

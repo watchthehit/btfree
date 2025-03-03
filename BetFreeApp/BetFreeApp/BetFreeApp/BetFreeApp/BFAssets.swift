@@ -136,4 +136,62 @@ struct BFAssets {
             }
         }
     }
+
+    struct BFOnboardingIllustrations {
+        static func BreakingFree(size: CGFloat = 200) -> some View {
+            ZStack {
+                Circle()
+                    .fill(BFColors.primary.opacity(0.2))
+                    .frame(width: size, height: size)
+                
+                Image(systemName: "arrow.up.forward.circle.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundColor(BFColors.primary)
+                    .frame(width: size * 0.6, height: size * 0.6)
+            }
+        }
+        
+        static func GrowthJourney(size: CGFloat = 200) -> some View {
+            ZStack {
+                Circle()
+                    .fill(BFColors.success.opacity(0.2))
+                    .frame(width: size, height: size)
+                
+                Image(systemName: "leaf.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundColor(BFColors.success)
+                    .frame(width: size * 0.6, height: size * 0.6)
+            }
+        }
+        
+        static func CalmMind(size: CGFloat = 200) -> some View {
+            ZStack {
+                Circle()
+                    .fill(BFColors.calm.opacity(0.2))
+                    .frame(width: size, height: size)
+                
+                Image(systemName: "brain.head.profile")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundColor(BFColors.calm)
+                    .frame(width: size * 0.6, height: size * 0.6)
+            }
+        }
+        
+        static func SupportNetwork(size: CGFloat = 200) -> some View {
+            ZStack {
+                Circle()
+                    .fill(BFColors.accent.opacity(0.2))
+                    .frame(width: size, height: size)
+                
+                Image(systemName: "person.3.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundColor(BFColors.accent)
+                    .frame(width: size * 0.6, height: size * 0.6)
+            }
+        }
+    }
 }

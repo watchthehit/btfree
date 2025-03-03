@@ -7,25 +7,26 @@ import SwiftUI
  * It provides a consistent container for content with appropriate styling and optional
  * header, footer, and accent color.
  */
+@available(iOS 15.0, macOS 12.0, *)
 public struct BFCard<Content: View>: View {
     // MARK: - Properties
     
-    private let content: Content
     private let title: String?
     private let subtitle: String?
     private let footer: String?
     private let accentColor: Color?
     private let isSelectable: Bool
     private let action: (() -> Void)?
+    private let content: Content
     
     // MARK: - Initializers
     
     /// Creates a new card with the specified parameters
     /// - Parameters:
-    ///   - title: Optional title to display in the header
-    ///   - subtitle: Optional subtitle to display in the header
-    ///   - footer: Optional footer text to display at the bottom
-    ///   - accentColor: Optional accent color for the top border
+    ///   - title: Optional title to display at the top of the card
+    ///   - subtitle: Optional subtitle to display below the title
+    ///   - footer: Optional footer text to display at the bottom of the card
+    ///   - accentColor: Optional color for the accent bar at the top of the card
     ///   - isSelectable: Whether the card can be tapped
     ///   - action: Optional action to perform when the card is tapped
     ///   - content: The content to display in the card
@@ -55,40 +56,41 @@ public struct BFCard<Content: View>: View {
             if let accentColor = accentColor {
                 accentColor
                     .frame(height: 4)
-                    .frame(maxWidth: .infinity)
             }
             
-            // Card header if title is provided
-            if let title = title {
+            // Title and subtitle if provided
+            if title != nil || subtitle != nil {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(BFColors.textPrimary)
+                    if let title = title {
+                        Text(title)
+                            .font(.headline)
+                            .foregroundColor(BFColors.textPrimary)
+                    }
                     
                     if let subtitle = subtitle {
                         Text(subtitle)
-                            .font(.system(size: 14))
+                            .font(.subheadline)
                             .foregroundColor(BFColors.textSecondary)
                     }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
-                .padding(.bottom, 8)
+                .padding(.bottom, 12)
             }
             
-            // Card content
+            // Main content
             content
                 .padding(.horizontal, 16)
-                .padding(.vertical, title == nil ? 16 : 8)
+                .padding(.vertical, title == nil && subtitle == nil ? 16 : 0)
             
-            // Card footer if provided
+            // Footer if provided
             if let footer = footer {
                 Divider()
                     .padding(.horizontal, 16)
                 
                 Text(footer)
-                    .font(.system(size: 12))
-                    .foregroundColor(BFColors.textTertiary)
+                    .font(.footnote)
+                    .foregroundColor(BFColors.textSecondary)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
             }
@@ -101,22 +103,22 @@ public struct BFCard<Content: View>: View {
                 .stroke(BFColors.divider, lineWidth: 1)
         )
         .onTapGesture {
-            if isSelectable, let action = action {
-                action()
+            if isSelectable {
+                action?()
             }
         }
-        .opacity(isSelectable ? 0.99 : 1.0) // Slight opacity change for selectable cards
     }
 }
 
 // MARK: - Preview
 
+@available(iOS 15.0, macOS 12.0, *)
 struct BFCard_Previews: PreviewProvider {
     static var previews: some View {
         VStack(spacing: 20) {
             BFCard(title: "Recovery Progress", subtitle: "Last 7 days") {
-                Text("Card content goes here")
-                    .frame(maxWidth: .infinity, minHeight: 100, alignment: .center)
+                Text("Card content")
+                    .frame(maxWidth: .infinity, minHeight: 80, alignment: .center)
             }
             
             BFCard(title: "Mindfulness Exercise", accentColor: BFColors.calm) {
@@ -124,20 +126,12 @@ struct BFCard_Previews: PreviewProvider {
                     .frame(maxWidth: .infinity, minHeight: 80, alignment: .center)
             }
             
-            BFCard(footer: "Updated 2 hours ago") {
-                Text("Card with footer only")
-                    .frame(maxWidth: .infinity, minHeight: 60, alignment: .center)
-            }
-            
-            BFCard(title: "Tap Me", isSelectable: true, action: {
-                print("Card tapped")
-            }) {
-                Text("This card is tappable")
-                    .frame(maxWidth: .infinity, minHeight: 60, alignment: .center)
+            BFCard(title: "Daily Challenge", subtitle: "Complete for rewards", footer: "Tap to start") {
+                Text("Challenge content")
+                    .frame(maxWidth: .infinity, minHeight: 80, alignment: .center)
             }
         }
         .padding()
-        .background(BFColors.background)
         .previewLayout(.sizeThatFits)
     }
 } 

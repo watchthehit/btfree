@@ -1,11 +1,10 @@
 import SwiftUI
 
 /**
- * BetFreeApp - Main app entry point
- *
- * This file provides the main app structure and entry point for the BetFree app.
+ * The main app entry point for BetFreeApp.
  * It uses the "Serene Recovery" color scheme components.
  */
+@available(iOS 15.0, macOS 12.0, *)
 @main
 public struct BetFreeApp: App {
     public init() {}

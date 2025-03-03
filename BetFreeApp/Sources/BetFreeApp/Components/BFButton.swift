@@ -7,59 +7,49 @@ import SwiftUI
  * It provides primary, secondary, and tertiary button styles with appropriate
  * visual feedback for different states.
  */
+
+/// The style of the button
+public enum BFButtonStyle {
+    case primary
+    case secondary
+    case tertiary
+    case destructive
+}
+
+/// The position of the icon in the button
+public enum BFIconPosition {
+    case leading
+    case trailing
+}
+
+/// A customizable button component that provides consistent styling
+/// and visual feedback for different states.
+@available(iOS 15.0, macOS 12.0, *)
 public struct BFButton: View {
     // MARK: - Button Style
     
-    /// The style of the button
-    public enum ButtonStyle {
-        /// Primary button with deep teal background and white text
-        case primary
-        /// Secondary button with soft sage background and dark text
-        case secondary
-        /// Tertiary button with transparent background and colored text
-        case tertiary
-        /// Destructive button with error red background
-        case destructive
-    }
-    
-    // MARK: - Properties
-    
     private let title: String
-    private let style: ButtonStyle
-    private let action: () -> Void
-    private let isEnabled: Bool
+    private let style: BFButtonStyle
     private let icon: Image?
-    private let iconPosition: IconPosition
+    private let iconPosition: BFIconPosition
+    private let isEnabled: Bool
+    private let action: () -> Void
     
-    /// Position of the icon relative to the text
-    public enum IconPosition {
-        case leading
-        case trailing
-    }
+    // MARK: - Initialization
     
-    // MARK: - Initializers
-    
-    /// Creates a new button with the specified parameters
-    /// - Parameters:
-    ///   - title: The text to display on the button
-    ///   - style: The visual style of the button
-    ///   - isEnabled: Whether the button is enabled
-    ///   - icon: Optional icon to display alongside the text
-    ///   - iconPosition: Position of the icon relative to the text
-    ///   - action: The action to perform when the button is tapped
     public init(
         _ title: String,
-        style: ButtonStyle = .primary,
-        isEnabled: Bool = true,
+        style: BFButtonStyle = .primary,
         icon: Image? = nil,
-        iconPosition: IconPosition = .leading,
+        iconPosition: BFIconPosition = .leading,
+        isEnabled: Bool = true,
         action: @escaping () -> Void
     ) {
         self.title = title
         self.style = style
-        self.isEnabled = isEnabled
         self.icon = icon
         self.iconPosition = iconPosition
+        self.isEnabled = isEnabled
         self.action = action
     }
     
@@ -95,8 +85,6 @@ public struct BFButton: View {
         }
         .disabled(!isEnabled)
     }
-    
-    // MARK: - Helper Properties
     
     /// The background color of the button based on its style
     private var backgroundColor: Color {
@@ -137,6 +125,7 @@ public struct BFButton: View {
 
 // MARK: - Preview
 
+@available(iOS 15.0, macOS 12.0, *)
 struct BFButton_Previews: PreviewProvider {
     static var previews: some View {
         VStack(spacing: 20) {

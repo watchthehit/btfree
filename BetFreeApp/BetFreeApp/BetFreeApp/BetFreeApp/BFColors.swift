@@ -17,24 +17,29 @@ public struct BFColors {
     
     /// Vibrant Teal - Secondary color representing energy and clarity
     public static var secondary: Color {
-        dynamicColor(light: Color(hex: "#64FFDA"), dark: Color(hex: "#00E676"))
+        dynamicColor(light: Color(hex: "#00B2A9"), dark: Color(hex: "#00A896"))
     }
     
     /// Coral Accent - Accent color providing warmth and encouragement
     public static var accent: Color {
-        dynamicColor(light: Color(hex: "#F95738"), dark: Color(hex: "#FF7043"))
+        dynamicColor(light: Color(hex: "#E94E34"), dark: Color(hex: "#E74C3C"))
+    }
+    
+    /// Accent Red - Accent color providing warmth and encouragement
+    public static var accentRed: Color {
+        dynamicColor(light: Color(hex: "#E53935"), dark: Color(hex: "#F44336"))
     }
     
     // MARK: - Theme Colors
     
     /// Ocean Blue - Used in relaxation-focused features
     public static var calm: Color {
-        dynamicColor(light: Color(hex: "#00B4D8"), dark: Color(hex: "#00BCD4"))
+        dynamicColor(light: Color(hex: "#0097A7"), dark: Color(hex: "#00ACC1"))
     }
     
     /// Aquamarine - Used in focus and mindfulness features
     public static var focus: Color {
-        dynamicColor(light: Color(hex: "#64FFDA"), dark: Color(hex: "#00E5FF"))
+        dynamicColor(light: Color(hex: "#00897B"), dark: Color(hex: "#00ACC1"))
     }
     
     /// Warm Sand - Used in supportive content areas
@@ -73,19 +78,19 @@ public struct BFColors {
     
     // MARK: - Neutral Colors
     
-    /// Background color - Light Silver in light mode, Deep Space in dark mode
+    /// Background color - Light Sand in light mode, Dark Charcoal in dark mode
     public static var background: Color {
-        dynamicColor(light: Color(hex: "#F5F8FA"), dark: Color(hex: "#0D1B2A"))
+        dynamicColor(light: Color(hex: "#F7F3EB"), dark: Color(hex: "#1C1F2E"))
     }
     
     /// Secondary background color - Slightly darker than primary background
     public static var secondaryBackground: Color {
-        dynamicColor(light: Color(hex: "#E6EBF0"), dark: Color(hex: "#1B263B"))
+        dynamicColor(light: Color(hex: "#EAE6DE"), dark: Color(hex: "#252837"))
     }
     
-    /// Card background - White in light mode, Oxford Blue in dark mode
+    /// Card background - White in light mode, Charcoal in dark mode
     public static var cardBackground: Color {
-        dynamicColor(light: Color(hex: "#FFFFFF"), dark: Color(hex: "#1B263B"))
+        dynamicColor(light: Color(hex: "#FFFFFF"), dark: Color(hex: "#2D3142"))
     }
     
     /// Primary text - Deep Space in light mode, White in dark mode
@@ -95,12 +100,12 @@ public struct BFColors {
     
     /// Secondary text - Oxford Blue in light mode, Light Silver in dark mode
     public static var textSecondary: Color {
-        dynamicColor(light: Color(hex: "#1B263B"), dark: Color(hex: "#BFCDE0"))
+        dynamicColor(light: Color(hex: "#1B263B"), dark: Color(hex: "#E0E0E0"))
     }
     
     /// Tertiary text - Light Gray in both modes
     public static var textTertiary: Color {
-        dynamicColor(light: Color(hex: "#718096"), dark: Color(hex: "#90A4AE"))
+        dynamicColor(light: Color(hex: "#505F79"), dark: Color(hex: "#BDBDBD"))
     }
     
     /// Divider - Light Gray in light mode, Dark Blue in dark mode
@@ -162,31 +167,5 @@ public struct BFColors {
     }
 }
 
-/// Extension to create colors from hex values
-extension Color {
-    /// Initialize a Color from a hex string
-    /// - Parameter hex: A hex string in the format "#RRGGBB" or "RRGGBB"
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
-        switch hex.count {
-        case 3: // RGB (12-bit)
-            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: // RGB (24-bit)
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: // ARGB (32-bit)
-            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default:
-            (a, r, g, b) = (1, 1, 1, 0)
-        }
-        self.init(
-            .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue: Double(b) / 255,
-            opacity: Double(a) / 255
-        )
-    }
-}
+// MARK: - Color extension has been moved to avoid duplication
+// The Color extension with hex support should be imported from ColorExtensions.swift instead of being defined here

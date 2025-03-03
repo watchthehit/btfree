@@ -132,28 +132,37 @@ extension MindfulnessExercise {
     ]
 }
 
-// Notification type model for onboarding
-struct NotificationType: Identifiable, Hashable {
-    var id = UUID()
-    var name: String
-    var icon: String
-    var isEnabled: Bool
+// MARK: - NotificationType
+public struct NotificationType: Identifiable, Hashable {
+    public var id = UUID()
+    public var name: String
+    public var icon: String
+    public var detail: String?
+    public var isEnabled: Bool
     
-    func hash(into hasher: inout Hasher) {
+    public init(id: UUID = UUID(), name: String, icon: String, detail: String? = nil, isEnabled: Bool) {
+        self.id = id
+        self.name = name
+        self.icon = icon
+        self.detail = detail
+        self.isEnabled = isEnabled
+    }
+    
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
     
-    static func == (lhs: NotificationType, rhs: NotificationType) -> Bool {
+    public static func == (lhs: NotificationType, rhs: NotificationType) -> Bool {
         lhs.id == rhs.id
     }
 }
 
 // MARK: - PricingPlan
-enum PricingPlan: String, Codable, CaseIterable {
+public enum PricingPlan: String, Codable, CaseIterable {
     case yearly
     case monthly
     
-    var displayName: String {
+    public var displayName: String {
         switch self {
         case .yearly:
             return "Annual Plan"
@@ -162,7 +171,7 @@ enum PricingPlan: String, Codable, CaseIterable {
         }
     }
     
-    var price: Double {
+    public var price: Double {
         switch self {
         case .yearly:
             return 49.99
@@ -171,7 +180,7 @@ enum PricingPlan: String, Codable, CaseIterable {
         }
     }
     
-    var billingPeriod: String {
+    public var billingPeriod: String {
         switch self {
         case .yearly:
             return "per year"
@@ -180,7 +189,7 @@ enum PricingPlan: String, Codable, CaseIterable {
         }
     }
     
-    var savingsDescription: String? {
+    public var savingsDescription: String? {
         switch self {
         case .yearly:
             return "Save 50% compared to monthly"

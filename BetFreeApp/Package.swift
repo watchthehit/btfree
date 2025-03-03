@@ -11,6 +11,9 @@ let package = Package(
         .library(
             name: "BetFreeApp",
             targets: ["BetFreeApp"]),
+        .library(
+            name: "OnboardingViewTypes",
+            targets: ["OnboardingViewTypes"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -21,6 +24,12 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "BetFreeApp",
+            dependencies: ["OnboardingViewTypes"],
+            resources: [
+                .process("Resources/Colors.xcassets")
+            ]),
+        .target(
+            name: "OnboardingViewTypes",
             dependencies: []),
         .testTarget(
             name: "BetFreeAppTests",

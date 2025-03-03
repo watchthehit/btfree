@@ -5,79 +5,113 @@ struct FreeTrialTeaserScreen: View {
     @EnvironmentObject private var viewModel: OnboardingViewModel
     
     var body: some View {
-        BFCard {
-            VStack(spacing: 25) {
-                // Premium badge with shine effect
-                ZStack {
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.7)]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
+        VStack(spacing: 30) {
+            // Premium badge with shine effect
+            ZStack {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.7)]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
                         )
-                        .frame(width: 100, height: 100)
-                        .shadow(color: BFColors.accent.opacity(0.3), radius: 10, x: 0, y: 5)
-                    
-                    Image(systemName: "crown.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .foregroundColor(.white)
-                        .frame(width: 44, height: 44)
-                    
-                    // Shine effect
-                    Circle()
-                        .trim(from: 0, to: 0.2)
-                        .stroke(Color.white.opacity(0.8), style: StrokeStyle(lineWidth: 2, lineCap: .round))
-                        .frame(width: 90, height: 90)
-                        .rotationEffect(.degrees(-45))
-                }
-                .padding(.top, 20)
+                    )
+                    .frame(width: 100, height: 100)
+                    .shadow(color: BFColors.accent.opacity(0.3), radius: 10, x: 0, y: 5)
                 
-                Text("Unlock Premium Features")
-                    .heading2()
-                    .multilineTextAlignment(.center)
+                Image(systemName: "crown.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundColor(.white)
+                    .frame(width: 44, height: 44)
                 
-                Text("Continue to set up your personal recovery journey and unlock a 7-day free trial of BetFree Pro.")
-                    .bodyMedium()
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-                
-                // Feature preview
-                VStack(spacing: 12) {
-                    premiumFeatureRow(icon: "chart.bar.fill", title: "Advanced Analytics")
-                    premiumFeatureRow(icon: "brain.head.profile", title: "All Mindfulness Exercises")
-                    premiumFeatureRow(icon: "bell.badge.fill", title: "Smart Notifications")
-                }
-                .padding(.vertical, 10)
-                
-                Text("You'll have full access during your trial with no obligation to continue.")
-                    .font(BFTypography.caption)
-                    .foregroundColor(BFColors.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-                    .padding(.bottom, 10)
+                // Shine effect
+                Circle()
+                    .trim(from: 0, to: 0.2)
+                    .stroke(Color.white.opacity(0.8), style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                    .frame(width: 90, height: 90)
+                    .rotationEffect(.degrees(-45))
             }
+            .padding(.top, 20)
+            
+            Text("Unlock Premium Features")
+                .font(.system(size: 28, weight: .bold))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+            
+            Text("Continue to set up your personal recovery journey and unlock a 7-day free trial of BetFree Pro.")
+                .font(.system(size: 16, weight: .regular))
+                .foregroundColor(Color.white.opacity(0.8))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+            
+            // Feature preview
+            VStack(spacing: 20) {
+                premiumFeatureRowWithCircle(icon: "chart.bar.fill", title: "Advanced Analytics")
+                premiumFeatureRowWithCircle(icon: "brain", title: "All Mindfulness Exercises")
+                premiumFeatureRowWithCircle(icon: "bell", title: "Smart Notifications")
+            }
+            .padding(.vertical, 10)
+            
+            Text("You'll have full access during your trial with no obligation to continue.")
+                .font(.system(size: 14))
+                .foregroundColor(Color.white.opacity(0.7))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+            
+            Button(action: {
+                // Use the standard navigation pattern from viewModel
+                viewModel.nextScreen()
+            }) {
+                Text("Continue")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 54)
+                    .background(BFColors.accent)
+                    .cornerRadius(12)
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 20)
         }
-        .padding(.vertical)
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(BFColors.primary)
+                .shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 4)
+        )
+        .padding(.horizontal)
     }
     
-    private func premiumFeatureRow(icon: String, title: String) -> some View {
+    private func premiumFeatureRowWithCircle(icon: String, title: String) -> some View {
         HStack(spacing: 15) {
-            Image(systemName: icon)
-                .foregroundColor(BFColors.accent)
-                .font(.system(size: 18))
-                .frame(width: 24)
+            // Icon with circular background
+            ZStack {
+                Circle()
+                    .fill(Color(red: 1.0, green: 0.9, blue: 0.85))
+                    .frame(width: 44, height: 44)
+                
+                Image(systemName: icon)
+                    .foregroundColor(BFColors.accent)
+                    .font(.system(size: 20))
+            }
             
             Text(title)
-                .font(BFTypography.bodyMedium)
-                .foregroundColor(BFColors.textPrimary)
+                .font(.system(size: 17, weight: .medium))
+                .foregroundColor(.white)
             
             Spacer()
             
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundColor(BFColors.success)
+            // Bright green checkmark
+            ZStack {
+                Circle()
+                    .fill(Color(red: 0.2, green: 0.85, blue: 0.4))
+                    .frame(width: 26, height: 26)
+                
+                Image(systemName: "checkmark")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.white)
+            }
         }
         .padding(.horizontal, 20)
     }
@@ -392,5 +426,388 @@ struct HardPaywallScreen: View {
                 .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
         )
+    }
+}
+
+// MARK: - Enhanced Paywall Screen
+struct EnhancedPaywallScreen: View {
+    @EnvironmentObject private var viewModel: OnboardingViewModel
+    @State private var selectedPlan = 1 // Default to annual
+    @State private var animateGradient = false
+    @State private var showPromo = false
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 25) {
+                // Premium crown logo with animated glow
+                ZStack {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [BFColors.accent, BFColors.accent]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 100, height: 100)
+                        .shadow(color: BFColors.accent.opacity(0.5), radius: 15, x: 0, y: 5)
+                    
+                    // Pulsing animation
+                    Circle()
+                        .stroke(BFColors.accent.opacity(0.5), lineWidth: 8)
+                        .frame(width: 120, height: 120)
+                        .scaleEffect(animateGradient ? 1.1 : 0.9)
+                        .opacity(animateGradient ? 0.2 : 0.6)
+                        .animation(Animation.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: animateGradient)
+                    
+                    Image(systemName: "crown.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .foregroundColor(.white)
+                        .frame(width: 44, height: 44)
+                        .shadow(color: .white.opacity(0.5), radius: 5, x: 0, y: 0)
+                    
+                    // Shine effect
+                    Circle()
+                        .trim(from: 0, to: 0.2)
+                        .stroke(Color.white, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                        .frame(width: 90, height: 90)
+                        .rotationEffect(.degrees(-45))
+                        .rotationEffect(Angle(degrees: animateGradient ? 360 : 0))
+                        .animation(Animation.linear(duration: 8).repeatForever(autoreverses: false), value: animateGradient)
+                }
+                .padding(.top, 30)
+                .onAppear {
+                    animateGradient = true
+                    
+                    // Show special promo after a delay
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        withAnimation(.easeIn(duration: 0.5)) {
+                            showPromo = true
+                        }
+                    }
+                }
+                
+                // Title and subtitle
+                VStack(spacing: 12) {
+                    Text("Unlock Your Full Potential")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
+                        .accessibilityAddTraits(.isHeader)
+                    
+                    ZStack {
+                        // Semi-transparent background for better contrast
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.black.opacity(0.3))
+                            .frame(height: 28)
+                            .padding(.horizontal, -8)
+                        
+                        Text("Join thousands who have transformed their lives with BetFree Pro")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                    }
+                }
+                
+                // Limited time offer
+                if showPromo {
+                    VStack {
+                        Text("🔥 SPECIAL OFFER 🔥")
+                            .font(.system(size: 14, weight: .heavy))
+                            .foregroundColor(BFColors.accent)
+                            .padding(.vertical, 4)
+                            .padding(.horizontal, 12)
+                            .background(
+                                Capsule()
+                                    .fill(BFColors.accent.opacity(0.15))
+                            )
+                        
+                        Text("Get 7 days FREE, then 50% off your first month")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 5)
+                    }
+                    .padding(.vertical, 10)
+                    .transition(.scale.combined(with: .opacity))
+                }
+                
+                // Plan selection
+                VStack(spacing: 18) {
+                    Text("Choose Your Plan")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal)
+                    
+                    // Plan selection cards
+                    subscriptionOption(
+                        title: "Monthly",
+                        price: "$9.99",
+                        period: "per month",
+                        benefits: ["Billed monthly", "Cancel anytime"],
+                        isPopular: false,
+                        index: 0
+                    )
+                    
+                    subscriptionOption(
+                        title: "Annual",
+                        price: "$79.99",
+                        period: "per year",
+                        benefits: ["Save 33% ($39.89)", "Best value"],
+                        isPopular: true,
+                        index: 1
+                    )
+                    
+                    subscriptionOption(
+                        title: "Lifetime",
+                        price: "$199.99",
+                        period: "one-time payment",
+                        benefits: ["Pay once, own forever", "No recurring charges"],
+                        isPopular: false,
+                        index: 2
+                    )
+                }
+                .padding(.vertical, 10)
+                
+                // Premium features
+                VStack(spacing: 5) {
+                    Text("Everything You Get:")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal)
+                    
+                    VStack(spacing: 16) {
+                        premiumFeatureRow(
+                            icon: "chart.bar.fill",
+                            title: "Advanced Analytics",
+                            description: "Gain deeper insights into your recovery journey"
+                        )
+                        
+                        premiumFeatureRow(
+                            icon: "brain.head.profile",
+                            title: "Complete Mindfulness Library",
+                            description: "Access all 50+ specialized exercises"
+                        )
+                        
+                        premiumFeatureRow(
+                            icon: "bell.badge.fill",
+                            title: "Intelligent Notifications",
+                            description: "Personalized alerts when you need support most"
+                        )
+                        
+                        premiumFeatureRow(
+                            icon: "person.fill.checkmark",
+                            title: "Unlimited Progress Tracking",
+                            description: "No limits on data or history"
+                        )
+                    }
+                    .padding(.top, 8)
+                }
+                .padding(.vertical, 15)
+                
+                // Testimonial
+                VStack(spacing: 15) {
+                    HStack {
+                        ForEach(0..<5) { _ in
+                            Image(systemName: "star.fill")
+                                .foregroundColor(BFColors.accent)
+                        }
+                    }
+                    
+                    Text("\"BetFree Pro changed my life. I've been gambling-free for 9 months now - the longest I've ever gone. The personalized insights and mindfulness tools made all the difference.\"")
+                        .font(.system(size: 16, weight: .regular))
+                        .italic()
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                    
+                    Text("— Michael T., Member since 2022")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(Color.white.opacity(0.7))
+                }
+                .padding(.vertical, 10)
+                .padding(.horizontal)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.white.opacity(0.05))
+                )
+                .padding(.horizontal)
+                
+                // CTA Button
+                Button(action: {
+                    // Start subscription
+                    viewModel.isTrialActive = true
+                    viewModel.nextScreen()
+                }) {
+                    HStack {
+                        Text("Start My 7-Day Free Trial")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 60)
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.8)]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(15)
+                    .shadow(color: BFColors.accent.opacity(0.5), radius: 10, x: 0, y: 5)
+                }
+                .padding(.horizontal)
+                
+                // Secondary CTA
+                Button(action: {
+                    // Skip subscription
+                    viewModel.isTrialActive = false
+                    viewModel.nextScreen()
+                }) {
+                    Text("Continue with basic version")
+                        .font(.system(size: 16))
+                        .foregroundColor(Color.white.opacity(0.7))
+                        .underline()
+                }
+                .padding(.top, 10)
+                .padding(.bottom, 15)
+                
+                // Legal text
+                Text("Payment will be charged to your Apple ID account at the confirmation of purchase. Subscription automatically renews unless it is canceled at least 24 hours before the end of the current period. Your account will be charged for renewal within 24 hours prior to the end of the current period. You can manage and cancel your subscriptions by going to your account settings on the App Store after purchase.")
+                    .font(.system(size: 10))
+                    .foregroundColor(Color.white.opacity(0.5))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
+            }
+        }
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(BFColors.primary)
+                .shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 4)
+        )
+        .padding(.horizontal)
+    }
+    
+    // Subscription option card
+    private func subscriptionOption(title: String, price: String, period: String, benefits: [String], isPopular: Bool, index: Int) -> some View {
+        VStack(spacing: 0) {
+            // Popular tag if applicable
+            if isPopular {
+                Text("MOST POPULAR")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 12)
+                    .background(BFColors.accent)
+                    .cornerRadius(12)
+                    .offset(y: -12)
+                    .zIndex(1)
+            }
+            
+            // Card content
+            VStack(alignment: .leading, spacing: 15) {
+                HStack {
+                    // Title
+                    Text(title)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.white)
+                    
+                    Spacer()
+                    
+                    // Selection circle
+                    ZStack {
+                        Circle()
+                            .strokeBorder(selectedPlan == index ? BFColors.accent : Color.white.opacity(0.4), lineWidth: 2)
+                            .frame(width: 24, height: 24)
+                        
+                        if selectedPlan == index {
+                            Circle()
+                                .fill(BFColors.accent)
+                                .frame(width: 16, height: 16)
+                        }
+                    }
+                }
+                
+                // Price
+                HStack(alignment: .firstTextBaseline) {
+                    Text(price)
+                        .font(.system(size: 26, weight: .bold))
+                        .foregroundColor(.white)
+                    
+                    Text(period)
+                        .font(.system(size: 14))
+                        .foregroundColor(Color.white.opacity(0.7))
+                        .padding(.leading, 2)
+                }
+                
+                // Benefits
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(benefits, id: \.self) { benefit in
+                        HStack(spacing: 8) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 14))
+                                .foregroundColor(BFColors.accent)
+                            
+                            Text(benefit)
+                                .font(.system(size: 14))
+                                .foregroundColor(Color.white.opacity(0.9))
+                        }
+                    }
+                }
+            }
+            .padding(.vertical, 15)
+            .padding(.horizontal, 20)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(selectedPlan == index ? BFColors.accent.opacity(0.15) : Color.white.opacity(0.05))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .strokeBorder(
+                                selectedPlan == index ? BFColors.accent : Color.clear,
+                                lineWidth: 2
+                            )
+                    )
+            )
+        }
+        .padding(.horizontal)
+        .onTapGesture {
+            withAnimation(.spring()) {
+                selectedPlan = index
+            }
+        }
+    }
+    
+    // Premium feature row
+    private func premiumFeatureRow(icon: String, title: String, description: String) -> some View {
+        HStack(spacing: 16) {
+            // Icon with circular background
+            ZStack {
+                Circle()
+                    .fill(Color.white.opacity(0.1))
+                    .frame(width: 44, height: 44)
+                
+                Image(systemName: icon)
+                    .font(.system(size: 20))
+                    .foregroundColor(BFColors.accent)
+            }
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                
+                Text(description)
+                    .font(.system(size: 14))
+                    .foregroundColor(Color.white.opacity(0.7))
+            }
+            
+            Spacer()
+        }
+        .padding(.horizontal)
     }
 } 

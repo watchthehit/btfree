@@ -68,15 +68,17 @@ private struct TriggerHeader: View {
     var body: some View {
         VStack(spacing: 12) {
             Text("Identify Your Triggers")
-                .font(.system(size: 28, weight: .bold))
+                .font(.title)
+                .fontWeight(.bold)
                 .foregroundColor(.white)
                 .multilineTextAlignment(.center)
                 .opacity(animateContent ? 1.0 : 0.0)
                 .offset(y: animateContent ? 0 : -10)
+                .accessibilityAddTraits(.isHeader)
             
             Text("Select all that apply in each category")
-                .font(.system(size: 17))
-                .foregroundColor(.white.opacity(0.8))
+                .font(.headline)
+                .foregroundColor(.white)
                 .multilineTextAlignment(.center)
                 .opacity(animateContent ? 1.0 : 0.0)
         }
@@ -1549,80 +1551,114 @@ private struct CombinedProfileSetupScreen: View {
 // MARK: - Value Proposition Screen
 private struct ValuePropositionScreen: View {
     @ObservedObject var viewModel: OnboardingViewModel
-    let title: String
-    let subtitle: String
-    let iconName: String
-    let showSkip: Bool
-    
-    @State private var animateContent = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var animateContent = false
+    
+    var title: String
+    var subtitle: String
+    var iconName: String
+    var showSkip: Bool = false
     
     var body: some View {
-        VStack(spacing: 30) {
-            Spacer()
+        ZStack {
+            // Improved background for better contrast
+            LinearGradient(
+                gradient: Gradient(colors: [BFColors.primary, BFColors.primary.darker(by: 15)]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .edgesIgnoringSafeArea(.all)
             
-            // Icon
-            ZStack {
-                Circle()
-                    .fill(Color.white.opacity(0.15))
-                    .frame(width: 120, height: 120)
+            VStack(spacing: 30) {
+                Spacer()
                 
-                Image(systemName: iconName)
-                    .font(.system(size: 50))
-                    .foregroundColor(.white)
-                    .scaleEffect(animateContent ? 1.0 : 0.7)
-                    .opacity(animateContent ? 1.0 : 0.0)
-            }
-            .padding(.bottom, 20)
-            
-            // Content
-            VStack(spacing: 16) {
-                Text(title)
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.white)
-                    .multilineTextAlignment(.center)
+                // Icon with motion
+                ZStack {
+                    Circle()
+                        .fill(BFColors.secondary)
+                        .frame(width: 100, height: 100)
+                        .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
+                    
+                    Image(systemName: iconName)
+                        .font(.system(size: 40))
+                        .foregroundColor(BFColors.primary)
+                }
+                .scaleEffect(animateContent ? 1.0 : 0.8)
+                .opacity(animateContent ? 1.0 : 0.0)
                 
-                Text(subtitle)
-                    .font(.system(size: 17, weight: .regular))
-                    .foregroundColor(.white.opacity(0.8))
-                    .multilineTextAlignment(.center)
+                // Title and subtitle with better contrast
+                VStack(spacing: 16) {
+                    Text(title)
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
+                        .accessibilityAddTraits(.isHeader)
+                    
+                    // Adding background for better contrast
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.black.opacity(0.3))
+                            .padding(.horizontal, -12)
+                        
+                        Text(subtitle)
+                            .font(.title3)
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
                     .padding(.horizontal, 20)
-            }
-            .opacity(animateContent ? 1.0 : 0.0)
-            .offset(y: animateContent ? 0 : 20)
-            
-            Spacer()
-            
-            // Buttons
-            VStack(spacing: 12) {
-                BFButton(title: "Continue", isEnabled: true) {
-                    withAnimation {
-                        viewModel.nextScreen()
-                    }
                 }
+                .opacity(animateContent ? 1.0 : 0.0)
+                .offset(y: animateContent ? 0 : 20)
                 
-                if showSkip {
-                    Button {
-                        // Skip to goal selection
-                        if let goalSelectionIndex = viewModel.screens.firstIndex(of: .goalSelection) {
-                            withAnimation {
-                                viewModel.skipToScreen(goalSelectionIndex)
+                Spacer()
+                Spacer()
+                
+                // Navigation buttons
+                VStack(spacing: 16) {
+                    Button(action: {
+                        viewModel.nextScreen()
+                    }) {
+                        Text("Continue")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(BFColors.accent)
+                            )
+                    }
+                    
+                    if showSkip {
+                        Button(action: {
+                            // Skip directly to the last value proposition screen
+                            if let index = viewModel.screens.firstIndex(of: .valueProposition3) {
+                                viewModel.skipToScreen(index)
+                            } else {
+                                viewModel.nextScreen()
                             }
+                        }) {
+                            Text("Skip")
+                                .font(.subheadline)
+                                .foregroundColor(.white)
+                                .padding(.vertical, 8)
                         }
-                    } label: {
-                        Text("Skip")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.white.opacity(0.7))
-                            .padding(.vertical, 8)
+                        .padding(.bottom, 8)
                     }
                 }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 30)
+                .opacity(animateContent ? 1.0 : 0.0)
             }
-            .padding(.bottom, 40)
-            .opacity(animateContent ? 1.0 : 0.0)
         }
-        .padding(.horizontal, 20)
         .onAppear {
-            withAnimation(reduceMotion ? nil : .easeOut(duration: 0.6).delay(0.1)) {
+            // Use reduced motion preference if enabled
+            let animation = reduceMotion ? nil : Animation.spring(response: 0.6, dampingFraction: 0.8)
+            
+            withAnimation(animation) {
                 animateContent = true
             }
         }

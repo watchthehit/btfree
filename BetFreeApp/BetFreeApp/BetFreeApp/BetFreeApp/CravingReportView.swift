@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 struct CravingReportView: View {
     @EnvironmentObject private var appState: AppState

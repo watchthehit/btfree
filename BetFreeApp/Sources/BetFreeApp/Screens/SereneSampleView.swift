@@ -1,12 +1,11 @@
 import SwiftUI
 
 /**
- * SereneSampleView - A sample view showcasing the "Serene Recovery" color scheme components
- *
- * This view demonstrates the use of the BFButton and BFCard components with the
- * "Serene Recovery" color scheme. It can be used to test the appearance and behavior
+ * A sample view that showcases the Serene Recovery design system components.
+ * This view provides a visual catalog and interactive demonstration
  * of these components.
  */
+@available(iOS 15.0, macOS 12.0, *)
 public struct SereneSampleView: View {
     @State private var showDetails = false
     
@@ -15,32 +14,19 @@ public struct SereneSampleView: View {
     public var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 24) {
-                    // Header
-                    Text("Serene Recovery")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(BFColors.textPrimary)
-                        .padding(.top, 20)
-                    
-                    Text("Color Scheme Components")
-                        .font(.subheadline)
-                        .foregroundColor(BFColors.textSecondary)
-                        .padding(.bottom, 16)
-                    
-                    // Colors section
+                VStack(spacing: 32) {
                     colorPalette
-                    
-                    // Buttons section
                     buttonSection
-                    
-                    // Cards section
                     cardSection
                 }
                 .padding()
             }
-            .background(BFColors.background.edgesIgnoringSafeArea(.all))
-            .navigationBarHidden(true)
+            .background(BFColors.background.ignoresSafeArea(.all))
+            .toolbar {
+                ToolbarItem(placement: .automatic) {
+                    EmptyView()
+                }
+            }
             .sheet(isPresented: $showDetails) {
                 detailView
             }
@@ -52,27 +38,21 @@ public struct SereneSampleView: View {
     private var colorPalette: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Color Palette")
-                .font(.headline)
+                .font(.title2)
+                .fontWeight(.bold)
                 .foregroundColor(BFColors.textPrimary)
             
-            HStack(spacing: 16) {
+            LazyVGrid(columns: [
+                GridItem(.flexible()),
+                GridItem(.flexible()),
+                GridItem(.flexible())
+            ], spacing: 16) {
                 colorItem(name: "Primary", color: BFColors.primary)
                 colorItem(name: "Secondary", color: BFColors.secondary)
-                colorItem(name: "Accent", color: BFColors.accent)
-            }
-            .padding(.bottom, 8)
-            
-            HStack(spacing: 16) {
-                colorItem(name: "Calm", color: BFColors.calm)
-                colorItem(name: "Focus", color: BFColors.focus)
-                colorItem(name: "Hope", color: BFColors.hope)
-            }
-            .padding(.bottom, 8)
-            
-            HStack(spacing: 16) {
-                colorItem(name: "Success", color: BFColors.success)
-                colorItem(name: "Warning", color: BFColors.warning)
                 colorItem(name: "Error", color: BFColors.error)
+                colorItem(name: "Text Primary", color: BFColors.textPrimary)
+                colorItem(name: "Text Secondary", color: BFColors.textSecondary)
+                colorItem(name: "Background", color: BFColors.background)
             }
         }
         .padding()
@@ -85,32 +65,29 @@ public struct SereneSampleView: View {
         VStack(spacing: 8) {
             RoundedRectangle(cornerRadius: 8)
                 .fill(color)
-                .frame(width: 70, height: 50)
+                .frame(height: 48)
             
             Text(name)
                 .font(.caption)
                 .foregroundColor(BFColors.textSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
     }
     
     private var buttonSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Buttons")
-                .font(.headline)
+                .font(.title2)
+                .fontWeight(.bold)
                 .foregroundColor(BFColors.textPrimary)
             
-            BFButton("Primary Button", style: .primary) {}
-            
-            BFButton("Secondary Button", style: .secondary) {}
-            
-            BFButton("Tertiary Button", style: .tertiary) {}
-            
-            BFButton("Destructive", style: .destructive) {}
-            
-            BFButton("With Icon", icon: Image(systemName: "star.fill")) {}
-            
-            BFButton("Learn More", style: .tertiary, icon: Image(systemName: "arrow.right"), iconPosition: .trailing) {
-                showDetails = true
+            VStack(spacing: 12) {
+                BFButton("Primary Button", style: .primary) {}
+                BFButton("Secondary Button", style: .secondary) {}
+                BFButton("Tertiary Button", style: .tertiary) {}
+                BFButton("Destructive Button", style: .destructive) {}
+                BFButton("Disabled Button", isEnabled: false) {}
             }
         }
         .padding()
@@ -122,40 +99,25 @@ public struct SereneSampleView: View {
     private var cardSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Cards")
-                .font(.headline)
+                .font(.title2)
+                .fontWeight(.bold)
                 .foregroundColor(BFColors.textPrimary)
             
-            BFCard(title: "Standard Card", subtitle: "With subtitle") {
-                Text("This is a standard card with a title and subtitle. It can contain any content you want.")
-                    .foregroundColor(BFColors.textPrimary)
-                    .padding(.vertical, 8)
-            }
-            
-            BFCard(title: "Card with Accent", accentColor: BFColors.primary) {
-                Text("This card has an accent color at the top.")
-                    .foregroundColor(BFColors.textPrimary)
-                    .padding(.vertical, 8)
-            }
-            
-            BFCard(title: "Selectable Card", isSelectable: true, action: {
-                showDetails = true
-            }) {
-                HStack {
-                    Text("Tap this card to see details")
-                        .foregroundColor(BFColors.textPrimary)
-                    
-                    Spacer()
-                    
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(BFColors.textTertiary)
+            VStack(spacing: 16) {
+                BFCard(title: "Recovery Progress", subtitle: "Last 7 days") {
+                    Text("Card content")
+                        .frame(maxWidth: .infinity, minHeight: 80, alignment: .center)
                 }
-                .padding(.vertical, 8)
-            }
-            
-            BFCard(footer: "Last updated: Today") {
-                Text("This card has a footer.")
-                    .foregroundColor(BFColors.textPrimary)
-                    .padding(.vertical, 8)
+                
+                BFCard(title: "Mindfulness Exercise", accentColor: BFColors.calm) {
+                    Text("Breathing exercise content")
+                        .frame(maxWidth: .infinity, minHeight: 80, alignment: .center)
+                }
+                
+                BFCard(title: "Daily Challenge", subtitle: "Complete for rewards", footer: "Tap to start") {
+                    Text("Challenge content")
+                        .frame(maxWidth: .infinity, minHeight: 80, alignment: .center)
+                }
             }
         }
         .padding()
@@ -167,51 +129,30 @@ public struct SereneSampleView: View {
     private var detailView: some View {
         NavigationView {
             VStack(spacing: 24) {
-                Image(systemName: "paintpalette.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(BFColors.primary)
-                    .padding(.top, 40)
-                
-                Text("Serene Recovery")
+                Text("Color Meanings")
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(BFColors.textPrimary)
                 
-                Text("This color scheme is designed to create a calming, supportive environment for users on their recovery journey.")
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(BFColors.textSecondary)
-                    .padding(.horizontal)
-                
-                BFCard(title: "Color Meaning", accentColor: BFColors.accent) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        meaningRow(color: BFColors.primary, name: "Deep Teal", meaning: "Stability and calm")
-                        meaningRow(color: BFColors.secondary, name: "Soft Sage", meaning: "Growth and healing")
-                        meaningRow(color: BFColors.accent, name: "Sunset Orange", meaning: "Energy and encouragement")
-                        meaningRow(color: BFColors.calm, name: "Calm Teal", meaning: "Relaxation and peace")
-                        meaningRow(color: BFColors.focus, name: "Focus Sage", meaning: "Concentration and clarity")
-                        meaningRow(color: BFColors.hope, name: "Warm Sand", meaning: "Comfort and safety")
-                    }
-                    .padding(.vertical, 8)
+                VStack(spacing: 16) {
+                    meaningRow(color: BFColors.primary, name: "Primary", meaning: "Trust, stability, and professionalism")
+                    meaningRow(color: BFColors.secondary, name: "Secondary", meaning: "Support, growth, and harmony")
+                    meaningRow(color: BFColors.error, name: "Error", meaning: "Attention, warning, and critical actions")
                 }
-                .padding(.horizontal)
-                
-                Spacer()
-                
-                BFButton("Close", action: {
-                    showDetails = false
-                })
-                .padding(.horizontal)
                 .padding(.bottom, 32)
             }
-            .background(BFColors.background.edgesIgnoringSafeArea(.all))
-            .navigationBarItems(trailing: Button(action: {
-                showDetails = false
-            }) {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundColor(BFColors.textTertiary)
-                    .font(.system(size: 24))
-            })
-            .navigationBarTitleDisplayMode(.inline)
+            .background(BFColors.background.ignoresSafeArea(.all))
+            .toolbar {
+                ToolbarItem(placement: .automatic) {
+                    Button(action: {
+                        showDetails = false
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(BFColors.textTertiary)
+                            .font(.system(size: 24))
+                    }
+                }
+            }
         }
     }
     
@@ -223,22 +164,20 @@ public struct SereneSampleView: View {
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(name)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
+                    .font(.headline)
                     .foregroundColor(BFColors.textPrimary)
                 
                 Text(meaning)
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundColor(BFColors.textSecondary)
             }
-            
-            Spacer()
         }
     }
 }
 
 // MARK: - Preview
 
+@available(iOS 15.0, macOS 12.0, *)
 struct SereneSampleView_Previews: PreviewProvider {
     static var previews: some View {
         SereneSampleView()

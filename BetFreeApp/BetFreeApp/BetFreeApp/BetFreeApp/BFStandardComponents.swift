@@ -21,11 +21,13 @@ struct BFPrimaryButton: View {
         Button(action: action) {
             HStack(spacing: BFSpacing.small) {
                 Text(text)
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.headline)
+                    .fontWeight(.semibold)
                 
                 if let icon = icon {
                     Image(systemName: icon)
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.headline)
+                        .fontWeight(.semibold)
                 }
             }
             .foregroundColor(.white)
@@ -36,8 +38,8 @@ struct BFPrimaryButton: View {
             .background(
                 LinearGradient(
                     gradient: Gradient(colors: isDisabled ? 
-                                       [Color.gray.opacity(0.8), Color.gray.opacity(0.6)] :
-                                       [BFColors.accent, BFColors.accent.opacity(0.9)]),
+                                       [Color(hex: "#757575"), Color(hex: "#616161")] :
+                                       [BFColors.accent, BFColors.accent]),
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -67,29 +69,32 @@ struct BFSecondaryButton: View {
         Button(action: action) {
             HStack(spacing: BFSpacing.small) {
                 Text(text)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.subheadline)
+                    .fontWeight(.medium)
                 
                 if let icon = icon {
                     Image(systemName: icon)
-                        .font(.system(size: 14, weight: .medium))
+                        .font(.subheadline)
+                        .fontWeight(.medium)
                 }
             }
-            .foregroundColor(isDisabled ? Color.gray.opacity(0.6) : BFColors.textPrimary)
+            .foregroundColor(isDisabled ? Color(hex: "#616161") : BFColors.textPrimary)
             .frame(height: 24)
             .padding(.vertical, 14)
             .frame(maxWidth: fullWidth ? .infinity : nil)
             .padding(.horizontal, fullWidth ? 0 : 24)
             .background(
                 RoundedRectangle(cornerRadius: BFCornerRadius.medium)
-                    .fill(Color.white.opacity(0.9))
+                    .fill(Color.white)
                     .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 2)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: BFCornerRadius.medium)
-                    .stroke(isDisabled ? Color.gray.opacity(0.3) : BFColors.textSecondary.opacity(0.2), lineWidth: 1)
+                    .stroke(isDisabled ? Color(hex: "#9E9E9E") : BFColors.textSecondary.opacity(0.2), lineWidth: 1)
             )
         }
         .disabled(isDisabled)
+        .accessibilityLabel(text)
     }
 }
 
@@ -892,5 +897,48 @@ struct BFStreakCounter: View {
             RoundedRectangle(cornerRadius: 16)
                 .stroke(Color.white, lineWidth: 1)
         )
+    }
+}
+
+// MARK: - Header Component
+struct HeaderView: View {
+    var title: String
+    var subtitle: String
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: BFSpacing.small) {
+            Text(title)
+                .font(.system(size: 24, weight: .bold))
+                .foregroundColor(BFColors.textPrimary)
+            
+            Text(subtitle)
+                .font(.system(size: 16, weight: .regular))
+                .foregroundColor(BFColors.textSecondary)
+                .lineSpacing(4)
+        }
+    }
+}
+
+// MARK: - Standard Button
+struct BFButton: View {
+    var title: String
+    var isEnabled: Bool
+    var action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 56)
+                .background(
+                    isEnabled ? 
+                        BFColors.accent :
+                        BFColors.accent.opacity(0.5)
+                )
+                .cornerRadius(BFCornerRadius.medium)
+        }
+        .disabled(!isEnabled)
     }
 } 
