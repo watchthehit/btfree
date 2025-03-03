@@ -5,7 +5,9 @@ struct BetFreeRootView: View {
     
     var body: some View {
         if !appState.hasCompletedOnboarding {
-            EnhancedOnboardingView()
+            EnhancedOnboardingView(onComplete: {
+                appState.hasCompletedOnboarding = true
+            })
         } else {
             MainContentView()
         }

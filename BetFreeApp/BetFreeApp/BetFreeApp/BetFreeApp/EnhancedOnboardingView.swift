@@ -1090,6 +1090,560 @@ struct CompleteProfileSetupView: View {
     }
 }
 
+// MARK: - SignInView
+struct SignInView: View {
+    @ObservedObject var viewModel: OnboardingViewModel
+    @State private var animateContent = false
+    
+    var body: some View {
+        VStack(spacing: 30) {
+            // Header
+            VStack(spacing: 12) {
+                Text("Create Account")
+                    .font(.system(size: 26, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Text("Set up your account to save your progress")
+                    .font(.system(size: 17))
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+            }
+            .opacity(animateContent ? 1.0 : 0.0)
+            .padding(.top, 30)
+            
+            Spacer()
+            
+            // Sign in form
+            VStack(spacing: 20) {
+                // Email field
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Email")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.white.opacity(0.8))
+                    
+                    TextField("", text: $viewModel.email)
+                        .font(.system(size: 17))
+                        .foregroundColor(.white)
+                        .keyboardType(.emailAddress)
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.white.opacity(0.1))
+                        )
+                }
+                
+                // Password field
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Password")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.white.opacity(0.8))
+                    
+                    SecureField("", text: $viewModel.password)
+                        .font(.system(size: 17))
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.white.opacity(0.1))
+                        )
+                }
+            }
+            .padding(.horizontal, 30)
+            .opacity(animateContent ? 1.0 : 0.0)
+            
+            Spacer()
+            
+            // Sign in buttons
+            VStack(spacing: 16) {
+                // Email sign in
+                Button {
+                    viewModel.signInWithEmail()
+                } label: {
+                    Text("Create Account")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(height: 56)
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.8)]), 
+                                        startPoint: .leading, 
+                                        endPoint: .trailing
+                                    )
+                                )
+                        )
+                        .opacity(viewModel.email.isEmpty || viewModel.password.isEmpty ? 0.5 : 1.0)
+                }
+                .disabled(viewModel.email.isEmpty || viewModel.password.isEmpty)
+                
+                // Apple sign in
+                Button {
+                    viewModel.signInWithApple()
+                } label: {
+                    HStack {
+                        Image(systemName: "apple.logo")
+                            .font(.system(size: 20))
+                        
+                        Text("Sign in with Apple")
+                            .font(.system(size: 18, weight: .semibold))
+                    }
+                    .foregroundColor(.white)
+                    .frame(height: 56)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.black)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                            )
+                    )
+                }
+            }
+            .padding(.horizontal, 30)
+            .padding(.bottom, 40)
+            .opacity(animateContent ? 1.0 : 0.0)
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.8)) {
+                animateContent = true
+            }
+        }
+    }
+}
+
+// MARK: - PersonalSetupView
+struct PersonalSetupView: View {
+    @ObservedObject var viewModel: OnboardingViewModel
+    @State private var animateContent = false
+    @State private var sliderValue: Double = 20 // Default to 20 minutes
+    
+    var body: some View {
+        VStack(spacing: 30) {
+            // Header
+            VStack(spacing: 12) {
+                Text("Personal Setup")
+                    .font(.system(size: 26, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Text("Set your daily time limit for gambling activities")
+                    .font(.system(size: 17))
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+            }
+            .opacity(animateContent ? 1.0 : 0.0)
+            .padding(.top, 30)
+            
+            Spacer()
+            
+            // Daily goal slider
+            VStack(spacing: 30) {
+                // Current value display
+                VStack(spacing: 4) {
+                    Text("\(Int(sliderValue))")
+                        .font(.system(size: 72, weight: .bold))
+                        .foregroundColor(BFColors.accent)
+                    
+                    Text("minutes per day")
+                        .font(.system(size: 18))
+                        .foregroundColor(.white.opacity(0.8))
+                }
+                
+                // Slider
+                VStack(spacing: 15) {
+                    Slider(value: $sliderValue, in: 0...120, step: 5)
+                        .accentColor(BFColors.accent)
+                        .onChange(of: sliderValue) { newValue in
+                            viewModel.dailyGoal = Int(sliderValue)
+                        }
+                    
+                    // Labels
+                    HStack {
+                        Text("0 min")
+                            .font(.system(size: 14))
+                            .foregroundColor(.white.opacity(0.6))
+                        
+                        Spacer()
+                        
+                        Text("120 min")
+                            .font(.system(size: 14))
+                            .foregroundColor(.white.opacity(0.6))
+                    }
+                }
+                .padding(.horizontal, 20)
+            }
+            .padding(.horizontal, 30)
+            .opacity(animateContent ? 1.0 : 0.0)
+            
+            Spacer()
+            
+            // Continue button
+            Button {
+                viewModel.nextScreen()
+            } label: {
+                Text("Continue")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(height: 56)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.8)]), 
+                                    startPoint: .leading, 
+                                    endPoint: .trailing
+                                )
+                            )
+                    )
+                    .shadow(color: BFColors.accent.opacity(0.3), radius: 8, x: 0, y: 4)
+            }
+            .padding(.horizontal, 30)
+            .padding(.bottom, 40)
+            .opacity(animateContent ? 1.0 : 0.0)
+        }
+        .onAppear {
+            // Set initial slider value to match viewModel
+            sliderValue = Double(viewModel.dailyGoal)
+            
+            withAnimation(.easeOut(duration: 0.8)) {
+                animateContent = true
+            }
+        }
+    }
+}
+
+// MARK: - NotificationsView
+struct NotificationsView: View {
+    @ObservedObject var viewModel: OnboardingViewModel
+    @State private var animateContent = false
+    
+    var body: some View {
+        VStack(spacing: 30) {
+            // Header
+            VStack(spacing: 12) {
+                Text("Notifications")
+                    .font(.system(size: 26, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Text("Choose which notifications you want to receive")
+                    .font(.system(size: 17))
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+            }
+            .opacity(animateContent ? 1.0 : 0.0)
+            .padding(.top, 30)
+            
+            Spacer()
+            
+            // Notification toggles
+            VStack(spacing: 16) {
+                ForEach(0..<viewModel.notificationTypes.count, id: \.self) { index in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(viewModel.notificationTypes[index].name)
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundColor(.white)
+                            
+                            if let detail = viewModel.notificationTypes[index].detail {
+                                Text(detail)
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.white.opacity(0.7))
+                                    .lineLimit(2)
+                            }
+                        }
+                        
+                        Spacer()
+                        
+                        Toggle("", isOn: Binding(
+                            get: { viewModel.notificationTypes[index].isEnabled },
+                            set: { viewModel.notificationTypes[index].isEnabled = $0 }
+                        ))
+                        .toggleStyle(SwitchToggleStyle(tint: BFColors.accent))
+                    }
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.white.opacity(0.1))
+                    )
+                }
+            }
+            .padding(.horizontal, 30)
+            .opacity(animateContent ? 1.0 : 0.0)
+            
+            Spacer()
+            
+            // Continue button
+            Button {
+                viewModel.nextScreen()
+            } label: {
+                Text("Continue")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(height: 56)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.8)]), 
+                                    startPoint: .leading, 
+                                    endPoint: .trailing
+                                )
+                            )
+                    )
+                    .shadow(color: BFColors.accent.opacity(0.3), radius: 8, x: 0, y: 4)
+            }
+            .padding(.horizontal, 30)
+            .padding(.bottom, 40)
+            .opacity(animateContent ? 1.0 : 0.0)
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.8)) {
+                animateContent = true
+            }
+        }
+    }
+}
+
+// MARK: - PaywallView
+struct PaywallView: View {
+    @ObservedObject var viewModel: OnboardingViewModel
+    @State private var animateContent = false
+    
+    var body: some View {
+        VStack(spacing: 30) {
+            // Header
+            VStack(spacing: 12) {
+                Text("Upgrade to Premium")
+                    .font(.system(size: 26, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Text("Get unlimited access to all BetFree features")
+                    .font(.system(size: 17))
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+            }
+            .opacity(animateContent ? 1.0 : 0.0)
+            .padding(.top, 30)
+            
+            // Premium features
+            VStack(spacing: 20) {
+                FeatureRow(iconName: "chart.bar.fill", title: "Advanced Analytics", description: "Get detailed insights about your gambling patterns")
+                
+                FeatureRow(iconName: "brain.head.profile", title: "AI-Powered Strategies", description: "Custom strategies based on your unique triggers")
+                
+                FeatureRow(iconName: "bell.badge.fill", title: "Smart Notifications", description: "Receive just-in-time support when you need it most")
+            }
+            .padding(.horizontal, 30)
+            .opacity(animateContent ? 1.0 : 0.0)
+            
+            Spacer()
+            
+            // Plan selection
+            VStack(spacing: 20) {
+                // Plan options
+                ForEach(viewModel.plans, id: \.id) { plan in
+                    Button {
+                        viewModel.selectedPlan = plan.id
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack {
+                                    Text(plan.name)
+                                        .font(.system(size: 18, weight: .semibold))
+                                    
+                                    if !plan.savings.isEmpty {
+                                        Text(plan.savings)
+                                            .font(.system(size: 14, weight: .medium))
+                                                .padding(.horizontal, 8)
+                                                .padding(.vertical, 3)
+                                                .background(
+                                                    Capsule()
+                                                        .fill(BFColors.accent)
+                                                )
+                                    }
+                                }
+                                
+                                Text("\(plan.price) per \(plan.period)")
+                                    .font(.system(size: 15))
+                                    .foregroundColor(.white.opacity(0.7))
+                            }
+                            
+                            Spacer()
+                            
+                            // Selection indicator
+                            ZStack {
+                                Circle()
+                                    .stroke(viewModel.selectedPlan == plan.id ? BFColors.accent : Color.white.opacity(0.3), lineWidth: 2)
+                                    .frame(width: 26, height: 26)
+                                
+                                if viewModel.selectedPlan == plan.id {
+                                    Circle()
+                                        .fill(BFColors.accent)
+                                        .frame(width: 18, height: 18)
+                                }
+                            }
+                        }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(viewModel.selectedPlan == plan.id ? BFColors.accent.opacity(0.15) : Color.white.opacity(0.1))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .stroke(viewModel.selectedPlan == plan.id ? BFColors.accent.opacity(0.5) : Color.clear, lineWidth: 1)
+                                )
+                        )
+                    }
+                    .foregroundColor(.white)
+                }
+                
+                // 7-day free trial note
+                HStack {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(BFColors.accent)
+                    
+                    Text("7-day free trial, cancel anytime")
+                        .font(.system(size: 15))
+                        .foregroundColor(.white.opacity(0.8))
+                }
+                .padding(.top, 10)
+            }
+            .padding(.horizontal, 30)
+            .opacity(animateContent ? 1.0 : 0.0)
+            
+            // Buttons
+            VStack(spacing: 16) {
+                // Subscribe button
+                Button {
+                    viewModel.isTrialActive = true
+                    viewModel.nextScreen()
+                } label: {
+                    Text("Start Free Trial")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(height: 56)
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.8)]), 
+                                        startPoint: .leading, 
+                                        endPoint: .trailing
+                                    )
+                                )
+                        )
+                        .shadow(color: BFColors.accent.opacity(0.3), radius: 8, x: 0, y: 4)
+                }
+                
+                // Skip button
+                Button {
+                    viewModel.nextScreen()
+                } label: {
+                    Text("Continue with Limited Version")
+                        .font(.system(size: 16))
+                        .foregroundColor(.white.opacity(0.8))
+                }
+            }
+            .padding(.horizontal, 30)
+            .padding(.bottom, 40)
+            .opacity(animateContent ? 1.0 : 0.0)
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.8)) {
+                animateContent = true
+            }
+        }
+    }
+}
+
+// MARK: - CompletionView
+struct CompletionView: View {
+    @ObservedObject var viewModel: OnboardingViewModel
+    @State private var animateContent = false
+    
+    var body: some View {
+        VStack(spacing: 30) {
+            Spacer()
+            
+            // Success animation and icon
+            ZStack {
+                Circle()
+                    .fill(BFColors.accent.opacity(0.2))
+                    .frame(width: 150, height: 150)
+                
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 80))
+                    .foregroundColor(BFColors.accent)
+            }
+            .scaleEffect(animateContent ? 1.0 : 0.8)
+            .opacity(animateContent ? 1.0 : 0.0)
+            
+            // Title and description
+            VStack(spacing: 16) {
+                Text("You're All Set!")
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Text("Your journey to freedom begins today. We're here to support you every step of the way.")
+                    .font(.system(size: 18))
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 30)
+            }
+            .opacity(animateContent ? 1.0 : 0.0)
+            
+            Spacer()
+            
+            // Start button
+            Button {
+                viewModel.saveToAppState()
+            } label: {
+                Text("Start Now")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(height: 56)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.8)]), 
+                                    startPoint: .leading, 
+                                    endPoint: .trailing
+                                )
+                            )
+                    )
+                    .shadow(color: BFColors.accent.opacity(0.3), radius: 8, x: 0, y: 4)
+            }
+            .padding(.horizontal, 30)
+            .padding(.bottom, 40)
+            .opacity(animateContent ? 1.0 : 0.0)
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.8)) {
+                animateContent = true
+            }
+            
+            // Automatically complete in case user doesn't tap button
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                if animateContent {
+                    viewModel.saveToAppState()
+                }
+            }
+        }
+    }
+}
+
 // MARK: - OnboardingNotificationType
 struct OnboardingNotificationType {
     var name: String
