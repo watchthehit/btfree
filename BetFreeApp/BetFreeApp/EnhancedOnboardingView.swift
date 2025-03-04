@@ -29,11 +29,11 @@ struct BetFreeLogo: View {
             // Background circle
             Circle()
                 .fill(
-                    LinearGradient(
-                        gradient: Gradient(colors: [
+                    .linearGradient(
+                        colors: [
                             Color(hex: "#1B263B"),
                             Color(hex: "#0D1B2A")
-                        ]),
+                        ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -48,7 +48,8 @@ struct BetFreeLogo: View {
                 ZStack(alignment: .center) {
                     Text("Bet")
                         .font(.system(size: style == .compact ? size * 0.30 : size * 0.35, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.primary)
+                        .dynamicTypeSize(.large ... .accessibility2)
                     
                     // Strikethrough line
                     Rectangle()
@@ -61,7 +62,14 @@ struct BetFreeLogo: View {
                 // "Free" part with emphasis
                 Text("Free")
                     .font(.system(size: style == .compact ? size * 0.32 : size * 0.38, weight: .heavy))
-                    .foregroundColor(Color(hex: "#64FFDA"))
+                    .foregroundStyle(
+                        .linearGradient(
+                            colors: [Color(hex: "#64FFDA"), Color(hex: "#00B4D8")],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .dynamicTypeSize(.large ... .accessibility2)
             }
             .offset(y: -size * 0.02) // Slight adjustment to center visually
             
@@ -79,6 +87,7 @@ struct BetFreeLogo: View {
                 .rotationEffect(.degrees(45))
                 .shadow(color: Color(hex: "#64FFDA").opacity(0.6), radius: 8, x: 0, y: 0)
         }
+        .accessibilityLabel("BetFree logo")
     }
 }
 
@@ -95,6 +104,7 @@ struct EnhancedOnboardingView: View {
     @State private var showBreatheAnimation = false
     @State private var breatheProgress: CGFloat = 0.0
     @State private var breatheIn = false
+    @State private var navigationPath = NavigationPath()
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     
     // Available goals
@@ -115,8 +125,8 @@ struct EnhancedOnboardingView: View {
         self.onCompleteOnboarding = onCompleteOnboarding
     }
     
-    // Onboarding pages
-    private let valuePropositionPages = [
+    // Onboarding pages - converted to static to improve performance
+    private static let valuePropositionPages = [
         OnboardingPage(
             title: "Break Free From Gambling",
             description: "Take the first step toward a healthier relationship with gambling through evidence-based tools and support.",
@@ -141,7 +151,7 @@ struct EnhancedOnboardingView: View {
     
     // Calculate total pages including value propositions and additional screens
     private var totalPages: Int {
-        return valuePropositionPages.count + 4 // +4 for personalization, goals, triggers, and notifications
+        return Self.valuePropositionPages.count + 4 // +4 for personalization, goals, triggers, and notifications
     }
     
     var body: some View {
@@ -155,13 +165,13 @@ struct EnhancedOnboardingView: View {
                 startPoint: .top,
                 endPoint: .bottom
             )
-            .edgesIgnoringSafeArea(.all)
+            .ignoresSafeArea()
             
             // Main content
             VStack(spacing: 0) {
                 // Logo (improved positioning)
                 HStack {
-                    BetFreeLogo(style: .compact, size: currentPage < valuePropositionPages.count ? 70 : 50)
+                    BetFreeLogo(style: .compact, size: currentPage < Self.valuePropositionPages.count ? 70 : 50)
                         .padding(.top, 20)
                         .padding(.leading, 20)
                     Spacer()
@@ -172,39 +182,39 @@ struct EnhancedOnboardingView: View {
                 // Increased vertical spacing
                 Spacer().frame(height: 30)
                 
-                if currentPage < valuePropositionPages.count {
+                if currentPage < Self.valuePropositionPages.count {
                     // Value proposition pages
                     TabView(selection: $currentPage) {
-                        ForEach(0..<valuePropositionPages.count, id: \.self) { index in
-                            OnboardingPageView(page: valuePropositionPages[index])
-                                .tag(index)
+                        ForEach(0..<Self.valuePropositionPages.count, id: \.self) { index in
+                            LazyView {
+                                OnboardingPageView(page: Self.valuePropositionPages[index])
+                                    .tag(index)
+                            }
                         }
                     }
                     .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                     .animation(.easeInOut, value: currentPage)
                     .transition(.slide)
                     .padding(.bottom, 40) // Increased bottom padding
-                } else if currentPage == valuePropositionPages.count {
+                } else if currentPage == Self.valuePropositionPages.count {
                     // Personalization screen
                     PersonalizationView(userName: $userName)
                         .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-                } else if currentPage == valuePropositionPages.count + 1 {
+                } else if currentPage == Self.valuePropositionPages.count + 1 {
                     // Goal setting screen
                     GoalSettingView(selectedGoal: $selectedGoal, availableGoals: goals, dailyMindfulnessGoal: $dailyMindfulnessGoal)
                         .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-                } else if currentPage == valuePropositionPages.count + 2 {
+                } else if currentPage == Self.valuePropositionPages.count + 2 {
                     // Trigger identification screen
                     TriggerIdentificationView(selectedTriggers: $selectedTriggers, availableTriggers: commonTriggers)
                         .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-                } else if currentPage == valuePropositionPages.count + 3 {
+                } else if currentPage == Self.valuePropositionPages.count + 3 {
                     // Notifications screen
                     NotificationsSetupView(notificationsEnabled: $notificationsEnabled, reminderTime: $reminderTime)
                         .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
                 }
-                
-                // Added spacing before bottom controls
-                Spacer().frame(height: 20)
-                
+            }
+            .safeAreaInset(edge: .bottom) {
                 // Bottom controls
                 VStack(spacing: 25) { // Increased spacing from 20 to 25
                     // Progress bar
@@ -220,6 +230,7 @@ struct EnhancedOnboardingView: View {
                                 withAnimation {
                                     currentPage -= 1
                                 }
+                                HapticManager.shared.selectionFeedback()
                             }) {
                                 HStack(spacing: 8) {
                                     Image(systemName: "arrow.left")
@@ -227,7 +238,7 @@ struct EnhancedOnboardingView: View {
                                     Text("Back")
                                         .font(.system(size: 16, weight: .medium))
                                 }
-                                .foregroundColor(.white.opacity(0.9))
+                                .foregroundStyle(.secondary)
                                 .padding(.horizontal, 20)
                                 .padding(.vertical, 14)
                             }
@@ -243,8 +254,10 @@ struct EnhancedOnboardingView: View {
                                 withAnimation {
                                     currentPage += 1
                                 }
+                                HapticManager.shared.selectionFeedback()
                             } else {
                                 // Complete onboarding and save user preferences
+                                HapticManager.shared.notificationFeedback(type: .success)
                                 completeOnboarding()
                             }
                         }) {
@@ -263,11 +276,11 @@ struct EnhancedOnboardingView: View {
                             .frame(minWidth: 0, maxWidth: .infinity)
                             .padding(.vertical, 16)
                             .background(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [
+                                .linearGradient(
+                                    colors: [
                                         Color(hex: "#64FFDA"),
                                         Color(hex: "#00B4D8")
-                                    ]),
+                                    ],
                                     startPoint: .leading,
                                     endPoint: .trailing
                                 )
@@ -275,26 +288,29 @@ struct EnhancedOnboardingView: View {
                             .cornerRadius(12)
                             .shadow(color: Color.black.opacity(0.2), radius: 3, x: 0, y: 2)
                         }
-                        .disabled(currentPage == valuePropositionPages.count && userName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                        .opacity(currentPage == valuePropositionPages.count && userName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.6 : 1.0)
+                        .disabled(currentPage == Self.valuePropositionPages.count && userName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .opacity(currentPage == Self.valuePropositionPages.count && userName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.6 : 1.0)
                     }
                     .padding(.horizontal)
-                    .padding(.bottom, 50) // Increased from 40 to 50
+                    .padding(.bottom, 25)
                 }
+                .padding(.horizontal)
+                .background(.ultraThinMaterial)
                 .opacity(isAnimating ? 1 : 0)
                 .animation(.easeIn(duration: 0.5).delay(0.4), value: isAnimating)
             }
-            
+        }
+        .overlay {
             // Breathing exercise overlay when completing onboarding
             if showBreatheAnimation {
                 ZStack {
                     Color.black.opacity(0.85)
-                        .edgesIgnoringSafeArea(.all)
+                        .ignoresSafeArea()
                     
                     VStack(spacing: 24) {
                         Text(breatheIn ? "Breathe In..." : "Breathe Out...")
                             .font(.system(size: 30, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                             .shadow(color: Color.black.opacity(0.3), radius: 2, x: 0, y: 1)
                         
                         ZStack {
@@ -309,11 +325,11 @@ struct EnhancedOnboardingView: View {
                             Circle()
                                 .trim(from: 0, to: breatheProgress)
                                 .stroke(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [
+                                    .linearGradient(
+                                        colors: [
                                             Color(hex: "#64FFDA"),
                                             Color(hex: "#00B4D8")
-                                        ]),
+                                        ],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     ),
@@ -324,11 +340,11 @@ struct EnhancedOnboardingView: View {
                             
                             Circle()
                                 .fill(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [
+                                    .linearGradient(
+                                        colors: [
                                             Color(hex: "#64FFDA").opacity(0.6),
                                             Color(hex: "#00B4D8").opacity(0.6)
-                                        ]),
+                                        ],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     )
@@ -340,7 +356,7 @@ struct EnhancedOnboardingView: View {
                         
                         Text("Starting your journey...")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                             .padding(.top, 20)
                     }
                 }
@@ -363,45 +379,57 @@ struct EnhancedOnboardingView: View {
         startBreathingCycle()
         
         // Set a timer to complete onboarding after breathing exercise
-        DispatchQueue.main.asyncAfter(deadline: .now() + 12) {
-            // Here you would save all the collected user preferences to your app's state
-            print("Saving user preferences:")
-            print("- User Name: \(userName)")
-            print("- Selected Goal: \(selectedGoal)")
-            print("- Daily Mindfulness Goal: \(dailyMindfulnessGoal) minutes")
-            print("- Selected Triggers: \(selectedTriggers)")
-            print("- Notifications Enabled: \(notificationsEnabled)")
-            if notificationsEnabled {
-                print("- Reminder Time: \(formatTime(reminderTime))")
+        Task {
+            try? await Task.sleep(for: .seconds(12))
+            
+            await MainActor.run {
+                // Here you would save all the collected user preferences to your app's state
+                print("Saving user preferences:")
+                print("- User Name: \(userName)")
+                print("- Selected Goal: \(selectedGoal)")
+                print("- Daily Mindfulness Goal: \(dailyMindfulnessGoal) minutes")
+                print("- Selected Triggers: \(selectedTriggers)")
+                print("- Notifications Enabled: \(notificationsEnabled)")
+                if notificationsEnabled {
+                    print("- Reminder Time: \(formatTime(reminderTime))")
+                }
+                
+                // Set onboarding as completed
+                hasCompletedOnboarding = true
+                UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
+                UserDefaults.standard.synchronize()
+                
+                // Call completion handler
+                onCompleteOnboarding()
             }
-            
-            // Set onboarding as completed
-            hasCompletedOnboarding = true
-            UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
-            UserDefaults.standard.synchronize()
-            
-            // Call completion handler
-            onCompleteOnboarding()
         }
     }
     
     // Start the breathing cycle animation
     private func startBreathingCycle() {
-        // Initial breath in
-        breatheIn = true
-        withAnimation(.easeInOut(duration: 4)) {
-            breatheProgress = 0.5
-        }
-        
-        // Schedule breath out after 4 seconds
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
-            breatheIn = false
+        Task {
+            // Initial breath in
+            breatheIn = true
             withAnimation(.easeInOut(duration: 4)) {
-                breatheProgress = 1.0
+                breatheProgress = 0.5
             }
             
-            // Schedule another breath in after 4 more seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+            // Wait 4 seconds
+            try? await Task.sleep(for: .seconds(4))
+            
+            // Breath out
+            await MainActor.run {
+                breatheIn = false
+                withAnimation(.easeInOut(duration: 4)) {
+                    breatheProgress = 1.0
+                }
+            }
+            
+            // Wait 4 more seconds
+            try? await Task.sleep(for: .seconds(4))
+            
+            // Another breath in
+            await MainActor.run {
                 breatheIn = true
                 withAnimation(.easeInOut(duration: 4)) {
                     breatheProgress = 0.5
@@ -418,6 +446,42 @@ struct EnhancedOnboardingView: View {
     }
 }
 
+// LazyView wrapper to improve performance
+struct LazyView<Content: View>: View {
+    let build: () -> Content
+    
+    init(_ build: @autoclosure @escaping () -> Content) {
+        self.build = build
+    }
+    
+    var body: Content {
+        build()
+    }
+}
+
+// Haptic feedback manager
+class HapticManager {
+    static let shared = HapticManager()
+    
+    func selectionFeedback() {
+        let generator = UISelectionFeedbackGenerator()
+        generator.prepare()
+        generator.selectionChanged()
+    }
+    
+    func impactFeedback(style: UIImpactFeedbackGenerator.FeedbackStyle = .medium) {
+        let generator = UIImpactFeedbackGenerator(style: style)
+        generator.prepare()
+        generator.impactOccurred()
+    }
+    
+    func notificationFeedback(type: UINotificationFeedbackGenerator.FeedbackType) {
+        let generator = UINotificationFeedbackGenerator()
+        generator.prepare()
+        generator.notificationOccurred(type)
+    }
+}
+
 // MARK: - Personalization View
 struct PersonalizationView: View {
     @Binding var userName: String
@@ -427,44 +491,61 @@ struct PersonalizationView: View {
     var body: some View {
         VStack(spacing: 30) {
             Text("Personalize Your Journey")
-                .font(.system(size: 26, weight: .bold))
-                .foregroundColor(.white)
+                .font(.title)
+                .fontWeight(.bold)
+                .foregroundStyle(
+                    .linearGradient(
+                        colors: [.white, .white.opacity(0.8)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
                 .multilineTextAlignment(.center)
                 .padding(.top, 20)
                 .opacity(hasAppeared ? 1 : 0)
                 .offset(y: hasAppeared ? 0 : 20)
                 .animation(.easeOut(duration: 0.5), value: hasAppeared)
+                .dynamicTypeSize(.large ... .accessibility3)
             
             Text("Let's personalize your experience to help you reach your goals.")
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.white.opacity(0.9))
+                .font(.callout)
+                .fontWeight(.medium)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 30)
                 .opacity(hasAppeared ? 1 : 0)
                 .offset(y: hasAppeared ? 0 : 20)
                 .animation(.easeOut(duration: 0.5).delay(0.1), value: hasAppeared)
+                .dynamicTypeSize(.large ... .accessibility2)
             
             VStack(alignment: .leading, spacing: 12) {
                 Text("What should we call you?")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white)
+                    .font(.headline)
+                    .foregroundStyle(.primary)
                 
                 TextField("", text: $userName)
                     .placeholder(when: userName.isEmpty) {
-                        Text("Your name").foregroundColor(.white.opacity(0.6))
+                        Text("Your name").foregroundStyle(.secondary.opacity(0.6))
                     }
                     .padding()
-                    .background(Color.white.opacity(0.15))
+                    .background(.regularMaterial)
                     .cornerRadius(10)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.primary)
                     .focused($isNameFieldFocused)
                     .submitLabel(.done)
                     .onSubmit {
                         isNameFieldFocused = false
                     }
+                    .onChange(of: userName) { _, _ in
+                        HapticManager.shared.selectionFeedback()
+                    }
             }
             .padding(.horizontal, 30)
             .padding(.top, 20)
+            .padding(.bottom, 10)
+            .background(.ultraThinMaterial.opacity(0.5))
+            .cornerRadius(16)
+            .padding(.horizontal)
             .opacity(hasAppeared ? 1 : 0)
             .offset(y: hasAppeared ? 0 : 20)
             .animation(.easeOut(duration: 0.5).delay(0.2), value: hasAppeared)
@@ -473,13 +554,21 @@ struct PersonalizationView: View {
         }
         .padding()
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                hasAppeared = true
-                isNameFieldFocused = true
+            Task {
+                try? await Task.sleep(for: .seconds(0.1))
+                await MainActor.run {
+                    hasAppeared = true
+                    isNameFieldFocused = true
+                }
             }
         }
         .onDisappear {
             hasAppeared = false
+        }
+        .accessibilityAction(.default) {
+            if userName.isEmpty {
+                isNameFieldFocused = true
+            }
         }
     }
 }
@@ -494,29 +583,44 @@ struct GoalSettingView: View {
     var body: some View {
         VStack(spacing: 30) {
             Text("Set Your Goals")
-                .font(.system(size: 26, weight: .bold))
-                .foregroundColor(.white)
+                .font(.title)
+                .fontWeight(.bold)
+                .foregroundStyle(
+                    .linearGradient(
+                        colors: [.white, .white.opacity(0.8)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
                 .multilineTextAlignment(.center)
                 .padding(.top, 20)
                 .opacity(hasAppeared ? 1 : 0)
                 .offset(y: hasAppeared ? 0 : 20)
                 .animation(.easeOut(duration: 0.5), value: hasAppeared)
+                .dynamicTypeSize(.large ... .accessibility3)
             
             Text("Choose your primary goal and set a daily mindfulness target.")
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.white.opacity(0.9))
+                .font(.callout)
+                .fontWeight(.medium)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 30)
                 .opacity(hasAppeared ? 1 : 0)
                 .offset(y: hasAppeared ? 0 : 20)
                 .animation(.easeOut(duration: 0.5).delay(0.1), value: hasAppeared)
+                .dynamicTypeSize(.large ... .accessibility2)
             
             // Goal selection
             VStack(alignment: .leading, spacing: 12) {
-                Text("I want to:")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white)
-                    .padding(.leading, 5)
+                Label {
+                    Text("I want to:")
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+                } icon: {
+                    Image(systemName: "target")
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(Color(hex: "#64FFDA"), .white.opacity(0.3))
+                }
                 
                 VStack(spacing: 12) {
                     ForEach(availableGoals, id: \.self) { goal in
@@ -530,7 +634,10 @@ struct GoalSettingView: View {
                     }
                 }
             }
-            .padding(.horizontal, 30)
+            .padding(24)
+            .background(.ultraThinMaterial.opacity(0.5))
+            .cornerRadius(16)
+            .padding(.horizontal)
             .opacity(hasAppeared ? 1 : 0)
             .offset(y: hasAppeared ? 0 : 20)
             .animation(.easeOut(duration: 0.5).delay(0.2), value: hasAppeared)
@@ -538,35 +645,50 @@ struct GoalSettingView: View {
             // Daily mindfulness goal
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Text("Daily mindfulness goal:")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.white)
+                    Label {
+                        Text("Daily mindfulness goal:")
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+                    } icon: {
+                        Image(systemName: "timer")
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(Color(hex: "#64FFDA"), .white.opacity(0.3))
+                    }
+                    
                     Spacer()
+                    
                     Text("\(dailyMindfulnessGoal) min")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(Color(hex: "#64FFDA"))
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(Color(hex: "#64FFDA"))
                 }
-                .padding(.leading, 5)
                 
                 Slider(value: Binding(
                     get: { Double(dailyMindfulnessGoal) },
-                    set: { dailyMindfulnessGoal = Int($0) }
+                    set: { 
+                        if dailyMindfulnessGoal != Int($0) {
+                            HapticManager.shared.selectionFeedback()
+                        }
+                        dailyMindfulnessGoal = Int($0) 
+                    }
                 ), in: 5...30, step: 5)
-                .accentColor(Color(hex: "#64FFDA"))
+                .tint(Color(hex: "#64FFDA"))
                 
                 HStack {
                     Text("5 min")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.white.opacity(0.8))
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                     Spacer()
                     Text("30 min")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.white.opacity(0.8))
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                 }
                 .padding(.horizontal, 5)
             }
-            .padding(.horizontal, 30)
-            .padding(.top, 20)
+            .padding(24)
+            .background(.ultraThinMaterial.opacity(0.5))
+            .cornerRadius(16)
+            .padding(.horizontal)
+            .padding(.top, 10)
             .opacity(hasAppeared ? 1 : 0)
             .offset(y: hasAppeared ? 0 : 20)
             .animation(.easeOut(duration: 0.5).delay(0.3), value: hasAppeared)
@@ -575,13 +697,17 @@ struct GoalSettingView: View {
         }
         .padding()
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                hasAppeared = true
+            Task {
+                try? await Task.sleep(for: .seconds(0.1))
+                await MainActor.run {
+                    hasAppeared = true
+                }
             }
         }
         .onDisappear {
             hasAppeared = false
         }
+        .accessibilityElement(children: .contain)
     }
 }
 
@@ -594,57 +720,108 @@ struct TriggerIdentificationView: View {
     var body: some View {
         VStack(spacing: 30) {
             Text("Identify Your Triggers")
-                .font(.system(size: 26, weight: .bold))
-                .foregroundColor(.white)
+                .font(.title)
+                .fontWeight(.bold)
+                .foregroundStyle(
+                    .linearGradient(
+                        colors: [.white, .white.opacity(0.8)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
                 .multilineTextAlignment(.center)
                 .padding(.top, 20)
                 .opacity(hasAppeared ? 1 : 0)
                 .offset(y: hasAppeared ? 0 : 20)
                 .animation(.easeOut(duration: 0.5), value: hasAppeared)
+                .dynamicTypeSize(.large ... .accessibility3)
             
             Text("Select situations that typically trigger gambling urges for you.")
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.white.opacity(0.9))
+                .font(.callout)
+                .fontWeight(.medium)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 30)
                 .opacity(hasAppeared ? 1 : 0)
                 .offset(y: hasAppeared ? 0 : 20)
                 .animation(.easeOut(duration: 0.5).delay(0.1), value: hasAppeared)
+                .dynamicTypeSize(.large ... .accessibility2)
             
             // Trigger selection
             VStack(alignment: .leading, spacing: 12) {
-                Text("Common triggers:")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white)
-                    .padding(.leading, 5)
-                
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                    ForEach(availableTriggers, id: \.self) { trigger in
-                        TriggerButton(
-                            title: trigger,
-                            isSelected: selectedTriggers.contains(trigger),
-                            action: {
-                                if selectedTriggers.contains(trigger) {
-                                    selectedTriggers.removeAll { $0 == trigger }
-                                } else {
-                                    selectedTriggers.append(trigger)
-                                }
-                            }
-                        )
-                    }
+                Label {
+                    Text("Common triggers:")
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+                } icon: {
+                    Image(systemName: "bolt.fill")
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(Color(hex: "#F6AE2D"), .white.opacity(0.3))
                 }
+                
+                ScrollView(.vertical, showsIndicators: false) {
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                        ForEach(availableTriggers, id: \.self) { trigger in
+                            TriggerButton(
+                                title: trigger,
+                                isSelected: selectedTriggers.contains(trigger),
+                                action: {
+                                    if selectedTriggers.contains(trigger) {
+                                        selectedTriggers.removeAll { $0 == trigger }
+                                    } else {
+                                        selectedTriggers.append(trigger)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                    .padding(.top, 8)
+                }
+                .frame(maxHeight: 300)
             }
-            .padding(.horizontal, 30)
+            .padding(24)
+            .background(.ultraThinMaterial.opacity(0.5))
+            .cornerRadius(16)
+            .padding(.horizontal)
             .opacity(hasAppeared ? 1 : 0)
             .offset(y: hasAppeared ? 0 : 20)
             .animation(.easeOut(duration: 0.5).delay(0.2), value: hasAppeared)
+            
+            if !selectedTriggers.isEmpty {
+                HStack {
+                    Text("Selected: \(selectedTriggers.count)")
+                        .font(.footnote.weight(.medium))
+                        .foregroundStyle(.secondary)
+                    
+                    Spacer()
+                    
+                    Button {
+                        withAnimation {
+                            selectedTriggers.removeAll()
+                        }
+                        HapticManager.shared.impactFeedback(style: .medium)
+                    } label: {
+                        Text("Clear All")
+                            .font(.footnote.weight(.medium))
+                            .foregroundStyle(Color(hex: "#64FFDA"))
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, 30)
+                .padding(.top, 10)
+                .opacity(hasAppeared ? 1 : 0)
+                .animation(.easeOut(duration: 0.5).delay(0.3), value: hasAppeared)
+            }
             
             Spacer()
         }
         .padding()
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                hasAppeared = true
+            Task {
+                try? await Task.sleep(for: .seconds(0.1))
+                await MainActor.run {
+                    hasAppeared = true
+                }
             }
         }
         .onDisappear {
@@ -662,50 +839,76 @@ struct NotificationsSetupView: View {
     var body: some View {
         VStack(spacing: 30) {
             Text("Stay on Track")
-                .font(.system(size: 26, weight: .bold))
-                .foregroundColor(.white)
+                .font(.title)
+                .fontWeight(.bold)
+                .foregroundStyle(
+                    .linearGradient(
+                        colors: [.white, .white.opacity(0.8)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
                 .multilineTextAlignment(.center)
                 .padding(.top, 20)
                 .opacity(hasAppeared ? 1 : 0)
                 .offset(y: hasAppeared ? 0 : 20)
                 .animation(.easeOut(duration: 0.5), value: hasAppeared)
+                .dynamicTypeSize(.large ... .accessibility3)
             
             Text("Set up reminders to help you maintain your mindfulness practice.")
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.white.opacity(0.9))
+                .font(.callout)
+                .fontWeight(.medium)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 30)
                 .opacity(hasAppeared ? 1 : 0)
                 .offset(y: hasAppeared ? 0 : 20)
                 .animation(.easeOut(duration: 0.5).delay(0.1), value: hasAppeared)
+                .dynamicTypeSize(.large ... .accessibility2)
             
             // Notifications toggle
             VStack(alignment: .leading, spacing: 20) {
-                Toggle(isOn: $notificationsEnabled) {
-                    Text("Enable daily reminders")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.white)
+                Toggle(isOn: $notificationsEnabled.animation()) {
+                    Label {
+                        Text("Enable daily reminders")
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+                    } icon: {
+                        Image(systemName: "bell.badge.fill")
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(Color(hex: "#64FFDA"), .white)
+                    }
                 }
                 .toggleStyle(SwitchToggleStyle(tint: Color(hex: "#64FFDA")))
+                .onChange(of: notificationsEnabled) { _, _ in
+                    HapticManager.shared.selectionFeedback()
+                }
                 
                 if notificationsEnabled {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Reminder time:")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.white)
+                            .font(.headline)
+                            .foregroundStyle(.primary)
                         
-                        DatePicker("", selection: $reminderTime, displayedComponents: .hourAndMinute)
+                        DatePicker("Daily reminder time", selection: $reminderTime, displayedComponents: .hourAndMinute)
                             .datePickerStyle(WheelDatePickerStyle())
                             .labelsHidden()
                             .frame(maxWidth: .infinity)
-                            .accentColor(Color(hex: "#64FFDA"))
+                            .tint(Color(hex: "#64FFDA"))
                             .colorScheme(.dark)
+                            .onChange(of: reminderTime) { _, _ in
+                                HapticManager.shared.selectionFeedback()
+                            }
                     }
                     .padding(.top, 5)
-                    .transition(.opacity)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
                 }
             }
             .padding(.horizontal, 30)
+            .padding(.vertical, 20)
+            .background(.ultraThinMaterial.opacity(0.5))
+            .cornerRadius(16)
+            .padding(.horizontal)
             .padding(.top, 20)
             .animation(.easeOut(duration: 0.3), value: notificationsEnabled)
             .opacity(hasAppeared ? 1 : 0)
@@ -714,19 +917,25 @@ struct NotificationsSetupView: View {
             
             // Privacy info
             VStack(alignment: .leading, spacing: 12) {
-                Text("Your privacy is important")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(Color(hex: "#64FFDA"))
+                Label {
+                    Text("Your privacy is important")
+                        .font(.headline)
+                        .foregroundStyle(Color(hex: "#64FFDA"))
+                } icon: {
+                    Image(systemName: "lock.shield.fill")
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(Color(hex: "#64FFDA"), .white.opacity(0.3))
+                }
                 
                 Text("Notifications are optional and will only be used to remind you of your mindfulness practice. You can change notification settings anytime.")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.white.opacity(0.9))
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(20)
-            .background(Color.white.opacity(0.08))
-            .cornerRadius(10)
-            .padding(.horizontal, 30)
+            .background(.ultraThinMaterial.opacity(0.3))
+            .cornerRadius(16)
+            .padding(.horizontal)
             .padding(.top, 10)
             .opacity(hasAppeared ? 1 : 0)
             .offset(y: hasAppeared ? 0 : 20)
@@ -736,12 +945,18 @@ struct NotificationsSetupView: View {
         }
         .padding()
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                hasAppeared = true
+            Task {
+                try? await Task.sleep(for: .seconds(0.1))
+                await MainActor.run {
+                    hasAppeared = true
+                }
             }
         }
         .onDisappear {
             hasAppeared = false
+        }
+        .accessibilityAction(.default) {
+            notificationsEnabled.toggle()
         }
     }
 }
@@ -752,30 +967,48 @@ struct ProgressBar: View {
     let totalSteps: Int
     
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
+            // Step indicators
+            HStack(spacing: 4) {
+                ForEach(0..<totalSteps, id: \.self) { step in
+                    Circle()
+                        .fill(step <= currentStep ? 
+                            .linearGradient(
+                                colors: [Color(hex: "#64FFDA"), Color(hex: "#00B4D8")],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            ) : 
+                            .secondary.opacity(0.2)
+                        )
+                        .frame(width: 8, height: 8)
+                        .shadow(color: step <= currentStep ? Color(hex: "#64FFDA").opacity(0.4) : .clear, radius: 2, x: 0, y: 0)
+                        .scaleEffect(step == currentStep ? 1.2 : 1.0)
+                        .animation(.spring(response: 0.3), value: currentStep)
+                }
+            }
+            .padding(.horizontal, 2)
+            
             // Progress bar
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
                     // Background
-                    Rectangle()
-                        .fill(Color.white.opacity(0.2))
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(.secondary.opacity(0.2))
                         .frame(height: 8)
-                        .cornerRadius(4)
                     
                     // Progress
-                    Rectangle()
+                    RoundedRectangle(cornerRadius: 4)
                         .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: [
+                            .linearGradient(
+                                colors: [
                                     Color(hex: "#64FFDA"),
                                     Color(hex: "#00B4D8")
-                                ]),
+                                ],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
                         )
                         .frame(width: geometry.size.width * CGFloat(currentStep + 1) / CGFloat(totalSteps), height: 8)
-                        .cornerRadius(4)
                 }
             }
             .frame(height: 8)
@@ -785,9 +1018,13 @@ struct ProgressBar: View {
                 Spacer()
                 Text("Step \(currentStep + 1) of \(totalSteps)")
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundStyle(.secondary)
+                    .dynamicTypeSize(.large ... .accessibility1)
             }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Progress: step \(currentStep + 1) of \(totalSteps)")
+        .accessibilityValue("\(Int((Float(currentStep + 1) / Float(totalSteps)) * 100))% complete")
     }
 }
 
@@ -798,18 +1035,25 @@ struct GoalButton: View {
     let action: () -> Void
     
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            withAnimation(.spring(response: 0.3)) {
+                action()
+            }
+            HapticManager.shared.selectionFeedback()
+        }) {
             HStack {
                 Text(title)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(isSelected ? Color(hex: "#0D1B2A") : .white)
+                    .font(.headline)
+                    .foregroundStyle(isSelected ? .primary : .secondary)
+                    .dynamicTypeSize(.large ... .accessibility2)
                 
                 Spacer()
                 
                 if isSelected {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(Color(hex: "#0D1B2A"))
+                    Image(systemName: "checkmark.circle.fill")
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(.white, Color(hex: "#64FFDA"))
+                        .font(.system(size: 18, weight: .semibold))
                 }
             }
             .padding(.horizontal, 16)
@@ -817,22 +1061,25 @@ struct GoalButton: View {
             .background(
                 Group {
                     if isSelected {
-                        LinearGradient(
-                            gradient: Gradient(colors: [
+                        .linearGradient(
+                            colors: [
                                 Color(hex: "#64FFDA"),
                                 Color(hex: "#00B4D8")
-                            ]),
+                            ],
                             startPoint: .leading,
                             endPoint: .trailing
                         )
                     } else {
-                        Color.white.opacity(0.15)
+                        .ultraThinMaterial
                     }
                 }
             )
             .cornerRadius(10)
         }
-        .shadow(color: isSelected ? Color.black.opacity(0.15) : Color.clear, radius: 2, x: 0, y: 1)
+        .buttonStyle(.plain)
+        .shadow(color: isSelected ? Color(hex: "#64FFDA").opacity(0.3) : Color.clear, radius: 4, x: 0, y: 2)
+        .contentShape(Rectangle())
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 }
 
@@ -843,42 +1090,52 @@ struct TriggerButton: View {
     let action: () -> Void
     
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            withAnimation(.spring(response: 0.3)) {
+                action()
+            }
+            HapticManager.shared.selectionFeedback()
+        }) {
             HStack {
                 Text(title)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(isSelected ? Color(hex: "#0D1B2A") : .white)
+                    .font(.subheadline.weight(isSelected ? .semibold : .medium))
+                    .foregroundStyle(isSelected ? .primary : .secondary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
+                    .dynamicTypeSize(.large ... .accessibility1)
                 
                 if isSelected {
                     Image(systemName: "checkmark")
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(Color(hex: "#0D1B2A"))
                         .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(Color(hex: "#0D1B2A"))
                 }
             }
             .padding(.horizontal, 12)
-            .padding(.vertical, 12)
-            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+            .frame(minHeight: 36)
             .background(
                 Group {
                     if isSelected {
-                        LinearGradient(
-                            gradient: Gradient(colors: [
+                        .linearGradient(
+                            colors: [
                                 Color(hex: "#64FFDA"),
                                 Color(hex: "#00B4D8")
-                            ]),
-                            startPoint: .leading,
+                            ],
+                            startPoint: .leading, 
                             endPoint: .trailing
                         )
                     } else {
-                        Color.white.opacity(0.15)
+                        .ultraThinMaterial.opacity(0.5)
                     }
                 }
             )
-            .cornerRadius(10)
+            .cornerRadius(8)
         }
-        .shadow(color: isSelected ? Color.black.opacity(0.15) : Color.clear, radius: 2, x: 0, y: 1)
+        .buttonStyle(.plain)
+        .shadow(color: isSelected ? Color(hex: "#64FFDA").opacity(0.3) : Color.clear, radius: 3, x: 0, y: 1)
+        .contentShape(Rectangle())
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 }
 
@@ -889,53 +1146,73 @@ struct OnboardingPageView: View {
     
     var body: some View {
         VStack(spacing: 40) {
-            // Illustration
+            // Illustration with improved rendering
             page.illustration
                 .padding(.top, 20)
                 .scaleEffect(hasAppeared ? 1.0 : 0.8)
                 .opacity(hasAppeared ? 1.0 : 0.0)
                 .brightness(0.1) // Add slight brightness
                 .shadow(color: Color(hex: "#64FFDA").opacity(0.5), radius: 15, x: 0, y: 0) // Add glow effect
+                .drawingGroup() // Use Metal rendering for better performance
                 .animation(.spring(response: 0.5, dampingFraction: 0.7), value: hasAppeared)
             
-            // Text content
+            // Text content in a material card
             VStack(spacing: 16) {
                 Text(page.title)
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.white)
+                    .font(.title2.weight(.bold))
+                    .foregroundStyle(
+                        .linearGradient(
+                            colors: [.white, .white.opacity(0.8)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                     .opacity(hasAppeared ? 1.0 : 0.0)
                     .offset(y: hasAppeared ? 0 : 20)
                     .animation(.easeOut(duration: 0.5).delay(0.2), value: hasAppeared)
+                    .dynamicTypeSize(.large ... .accessibility3)
                 
                 Text(page.description)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white.opacity(0.9))
+                    .font(.body)
+                    .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 24)
                     .opacity(hasAppeared ? 1.0 : 0.0)
                     .offset(y: hasAppeared ? 0 : 20)
                     .animation(.easeOut(duration: 0.5).delay(0.3), value: hasAppeared)
+                    .dynamicTypeSize(.large ... .accessibility2)
             }
+            .padding(24)
+            .background(.ultraThinMaterial.opacity(0.5))
+            .cornerRadius(20)
+            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+            .padding(.horizontal)
             
             Spacer()
         }
         .padding()
+        .contentTransition(.opacity)
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                hasAppeared = true
+            Task {
+                try? await Task.sleep(for: .seconds(0.1))
+                await MainActor.run {
+                    hasAppeared = true
+                }
             }
         }
         .onDisappear {
             hasAppeared = false
         }
+        .accessibilityElement(children: .combine)
     }
 }
 
 // MARK: - Onboarding Page (from existing implementation)
-struct OnboardingPage {
+struct OnboardingPage: Identifiable {
+    let id = UUID()
     let title: String
     let description: String
     let illustration: AnyView
