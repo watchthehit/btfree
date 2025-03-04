@@ -2,25 +2,25 @@
 
 ## Overview
 
-The BetFree brand embodies a balance of strength and serenity, designed to support individuals on their journey away from gambling addiction. Our "Strength Circle" concept visualizes the process of breaking free from negative patterns and embracing a new, empowered life path.
+The BetFree brand embodies a balance of strength and clarity, designed to support individuals on their journey away from gambling addiction. Our text-based logo visualizes the concept of breaking free from gambling through typography, using a strikethrough on "Bet" and highlighting "Free" to emphasize our mission.
 
 ## Logo
 
-### Primary Mark: Strength Circle
+### Primary Mark: BetFree Text Logo
 
-Our primary logo is the "Strength Circle" - a circular form with an opening at the top that symbolizes breaking free from addiction cycles while maintaining the strength and support of a complete circle. The gradient from vibrant teal to ocean blue represents the journey from challenging waters to calm seas.
+Our primary logo is the "BetFree" text logo - featuring the word "Bet" with a strikethrough line and "Free" in our vibrant teal color. This design directly communicates the app's purpose: freedom from betting and gambling addiction. The logo is set against a circular dark background with a partial teal accent that suggests movement and breaking free.
 
 **Logo Variations:**
 
-1. **Full Logo** - Circle mark with "BetFree" logotype below
+1. **Full Logo** - Text logo with "Bet" (strikethrough) and "Free" (teal) in circular container
    - Use for: Welcome screens, about pages, marketing materials
    - Minimum size: 40px height
 
-2. **Compact Logo** - Circle mark only
+2. **Compact Logo** - Simplified text mark
    - Use for: App icon, small spaces, favicon
    - Minimum size: 24px height
 
-3. **Horizontal Logo** - Circle mark with "BetFree" logotype to the right
+3. **Horizontal Logo** - Text logo with optional brand name to the right
    - Use for: Navigation bars, headers, letterheads
    - Minimum size: 30px height
 

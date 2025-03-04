@@ -33,6 +33,16 @@ The app uses the "Serene Recovery" color scheme, which features calming natural 
 - **Text Tertiary**: Medium Gray (#767B91) in both modes
 - **Divider**: Light Gray (#E1E2E8) in light mode, Dark Gray (#3D4259) in dark mode
 
+## Logo Design
+
+The BetFree app features a text-based logo that visually represents the core mission of the application:
+
+- The word "Bet" appears with a strikethrough, symbolizing "no more betting"
+- The word "Free" is highlighted in vibrant teal (#64FFDA), emphasizing the concept of freedom
+- A partial circular accent in teal suggests movement and breaking free
+- The logo is set against a circular dark background for strong contrast
+- This design directly communicates the app's purpose while maintaining visual appeal
+
 ## Project Structure
 
 The project is structured as a Swift Package that can be easily integrated into your Xcode project:
@@ -147,7 +157,7 @@ The "Serene Recovery" color scheme has been tested to ensure all color combinati
 - Supports iOS 15.0 and above
 - Uses @MainActor for thread safety
 - Static UI elements for improved performance and stability
-- Consistent color theme using navy blue (#2C3550) and green accent (#4CAF50)
+- Consistent color theme using deep space blue (#0D1B2A) and vibrant teal accent (#64FFDA)
 
 ## Onboarding Flow
 The app includes an optimized onboarding flow with a value-first approach:

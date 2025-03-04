@@ -1,16 +1,16 @@
 import SwiftUI
 
 /**
- * BetFree Logo - "Strength Circle" implementation in SwiftUI
+ * BetFree Logo - Text-based logo implementation in SwiftUI
  * 
  * This file provides reusable components for displaying the BetFree brand logo
  * in different configurations throughout the app.
  */
 struct BetFreeLogo: View {
     enum Style {
-        case full       // Circle with text below
-        case compact    // Circle only
-        case horizontal // Circle with text to the right
+        case full       // Text logo in circular container
+        case compact    // Text only version
+        case horizontal // Text logo with optional text to the right
     }
     
     var style: Style = .full
@@ -20,34 +20,33 @@ struct BetFreeLogo: View {
         switch style {
         case .full:
             VStack(spacing: size * 0.15) {
-                strengthCircle
-                logoText
+                textLogo
+                appName
             }
         case .compact:
-            strengthCircle
+            textLogo
         case .horizontal:
             HStack(spacing: size * 0.15) {
-                strengthCircle
+                textLogo
                     .frame(width: size)
-                logoText
+                appName
             }
         }
     }
     
-    // The main circle with opening at the top
-    private var strengthCircle: some View {
+    // The main text-based logo in a circular container
+    private var textLogo: some View {
         ZStack {
-            // Background circle for light mode
+            // Background circle
             Circle()
-                .strokeBorder(Color(hex: "#1B263B"), lineWidth: size * 0.03)
+                .fill(Color(hex: "#0D1B2A"))
                 .frame(width: size, height: size)
-                .opacity(colorScheme == .light ? 1.0 : 0.0)
+                .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
             
-            // Main circle with opening
+            // Partial circular accent
             Circle()
-                .trim(from: 0.1, to: 0.9) // Creates opening at the top
-                .rotation(.degrees(90))  // Rotates so opening is at top
-                .fill(
+                .trim(from: 0.55, to: 0.85)
+                .stroke(
                     LinearGradient(
                         gradient: Gradient(colors: [
                             Color(hex: "#64FFDA"),
@@ -55,16 +54,36 @@ struct BetFreeLogo: View {
                         ]),
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
-                    )
+                    ),
+                    style: StrokeStyle(lineWidth: size * 0.08, lineCap: .round)
                 )
-                .frame(width: size * 0.9, height: size * 0.9)
-                .shadow(color: Color(hex: "#64FFDA").opacity(0.3), radius: size * 0.05, x: 0, y: 0)
+                .frame(width: size * 0.85, height: size * 0.85)
+                .rotationEffect(Angle(degrees: 45))
+            
+            // Text logo
+            VStack(spacing: -size * 0.07) {
+                // "Bet" with strikethrough
+                Text("Bet")
+                    .font(.system(size: size * 0.24, weight: .bold))
+                    .foregroundColor(.white)
+                    .overlay(
+                        Rectangle()
+                            .frame(height: size * 0.05)
+                            .offset(y: size * 0.0)
+                            .foregroundColor(.white)
+                    )
+                
+                // "Free" in teal
+                Text("Free")
+                    .font(.system(size: size * 0.27, weight: .heavy))
+                    .foregroundColor(Color(hex: "#64FFDA"))
+            }
         }
         .frame(width: size, height: size)
     }
     
-    // Text component of the logo
-    private var logoText: some View {
+    // Text component of the logo for full and horizontal styles
+    private var appName: some View {
         Text("BetFree")
             .font(.system(size: min(size * 0.3, 34), weight: .bold, design: .default))
             .foregroundColor(colorScheme == .dark ? .white : Color(hex: "#0D1B2A"))
@@ -82,11 +101,10 @@ struct BetFreeAppIcon: View {
             // Background
             Color(hex: "#0D1B2A")
             
-            // The strength circle with a bit more spacing inside icon boundaries
+            // Partial circular accent
             Circle()
-                .trim(from: 0.1, to: 0.9)
-                .rotation(.degrees(90))
-                .fill(
+                .trim(from: 0.55, to: 0.85)
+                .stroke(
                     LinearGradient(
                         gradient: Gradient(colors: [
                             Color(hex: "#64FFDA"),
@@ -94,10 +112,30 @@ struct BetFreeAppIcon: View {
                         ]),
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
-                    )
+                    ),
+                    style: StrokeStyle(lineWidth: size * 0.08, lineCap: .round)
                 )
-                .frame(width: size * 0.7, height: size * 0.7)
-                .shadow(color: Color.black.opacity(0.1), radius: size * 0.05, x: 0, y: size * 0.02)
+                .frame(width: size * 0.6, height: size * 0.6)
+                .rotationEffect(Angle(degrees: 45))
+            
+            // Text logo
+            VStack(spacing: -size * 0.05) {
+                // "Bet" with strikethrough
+                Text("Bet")
+                    .font(.system(size: size * 0.2, weight: .bold))
+                    .foregroundColor(.white)
+                    .overlay(
+                        Rectangle()
+                            .frame(height: size * 0.04)
+                            .offset(y: size * 0.0)
+                            .foregroundColor(.white)
+                    )
+                
+                // "Free" in teal
+                Text("Free")
+                    .font(.system(size: size * 0.22, weight: .heavy))
+                    .foregroundColor(Color(hex: "#64FFDA"))
+            }
         }
         .frame(width: size, height: size)
         .cornerRadius(size * 0.2235) // iOS rounded corner standard

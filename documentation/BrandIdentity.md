@@ -2,23 +2,24 @@
 
 ## Core Brand Elements
 
-### Logo: "Strength Circle"
+### Logo: "BetFree" Text Logo
 
-The BetFree logo represents strength, clarity, and breaking free from addiction cycles. The primary logo consists of a circle with an opening at the top, filled with our signature vibrant teal gradient.
+The BetFree logo now features a text-based design that emphasizes the app's name and purpose. The logo consists of the word "Bet" in white with a strikethrough line and "Free" in vibrant teal (#64FFDA), creating a visual representation of freedom from gambling.
 
 #### Logo Specifications
-- **Primary Shape**: Circle with opening (approximately 45° opening angle)
-- **Primary Color**: Gradient from Vibrant Teal (#64FFDA) to Aquamarine (#00B4D8)
-- **Background Options**: 
-  - Dark version: Deep Space Blue (#0D1B2A) background
-  - Light version: White background with Navy (#1B263B) outline
-- **Minimum Size**: 44px (ensure visibility of the opening)
+- **Primary Elements**: 
+  - The word "Bet" in white with a strikethrough line
+  - The word "Free" in vibrant teal (#64FFDA)
+  - A partial circular accent in teal gradient
+- **Background**: Dark circular background (Deep Space Blue #0D1B2A)
+- **Color Scheme**: White text with Vibrant Teal (#64FFDA) to Aquamarine (#00B4D8) gradient accents
+- **Minimum Size**: 44px (ensure legibility of text)
 - **Clear Space**: At least 25% of the logo height on all sides
 
 #### Logo Variations
-1. **Primary Logo**: Circle with "BetFree" wordmark underneath
-2. **App Icon**: Circle only version, optimized for iOS app icon grid
-3. **Horizontal Logo**: Circle with "BetFree" wordmark to the right (for headers)
+1. **Primary Logo**: "BetFree" text in circular background
+2. **App Icon**: Compact version optimized for iOS app icon grid
+3. **Horizontal Logo**: Text logo with optional wordmark to the right (for headers)
 4. **Monochrome Version**: Single color for limited color environments
 
 ### Typography
