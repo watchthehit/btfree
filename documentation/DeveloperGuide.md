@@ -71,11 +71,42 @@ The application uses the BFColors system for all color management:
 We have completed the migration of most components to the BFColors system:
 - ✅ All Priority 1 Components (ReminderSettingsView, ProgressView, etc.)
 - ✅ All Priority 2 Components (EnhancedOnboardingView, BFButton, BFCard)
-- 🔄 Currently working on Priority 3 Components
+- ✅ All Priority 3 Components (BFOnboardingIllustrations, Shared Components)
+- 🔄 Currently implementing the `BFTypography` system to replace `BFTheme.Typography`
 
-**All new development should use BFColors exclusively.**
+**All new development should use BFColors and BFTypography exclusively.**
 
-> Note: The legacy BFTheme system has been deprecated and will be removed in a future update.
+> Note: The legacy BFTheme system has been deprecated and will be removed once the typography migration is complete.
+
+## Typography System
+
+The application now uses a dedicated typography system:
+
+**BFTypography** (`BetFreeApp/Assets/BFTypography.swift`): A consistent typography system for all text elements, featuring:
+- Standard font styles (title, headline, body, caption, button)
+- Size customization for each style
+- Rounded design for a friendly user experience
+- Convenience SwiftUI text modifiers with appropriate colors
+
+### Using Typography in Swift
+
+```swift
+// Basic font usage
+Text("Headline")
+    .font(BFTypography.headline())
+    
+// With custom size
+Text("Large Title")
+    .font(BFTypography.title(32))
+    
+// Using convenience modifiers (includes appropriate colors)
+Text("Body Text").bodyStyle()
+Text("Caption").captionStyle()
+Text("Button Text").buttonStyle()
+
+// Custom size with convenience modifier
+Text("Custom Headline").headlineStyle(22)
+```
 
 ### Updating Colors
 

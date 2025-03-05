@@ -19,7 +19,7 @@ struct ReminderSettingsView: View {
                     
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Receive a daily reminder to track your urges and progress")
-                            .font(BFTheme.Typography.caption())
+                            .font(BFTypography.caption())
                             .foregroundColor(BFColors.textSecondary)
                             .padding(.top, 4)
                     }
@@ -41,7 +41,7 @@ struct ReminderSettingsView: View {
                     
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Get a reminder if you haven't tracked any urges after the specified time period")
-                            .font(BFTheme.Typography.caption())
+                            .font(BFTypography.caption())
                             .foregroundColor(BFColors.textSecondary)
                             .padding(.top, 4)
                     }
@@ -89,14 +89,14 @@ struct ReminderSettingsView: View {
                             viewModel.addCustomRiskTime()
                         }) {
                             Label("Add High-Risk Time", systemImage: "plus.circle")
-                                .font(BFTheme.Typography.body())
+                                .font(BFTypography.body())
                                 .foregroundColor(BFColors.accent)
                         }
                     }
                     
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Get extra support during times when you're more likely to experience gambling urges")
-                            .font(BFTheme.Typography.caption())
+                            .font(BFTypography.caption())
                             .foregroundColor(BFColors.textSecondary)
                             .padding(.top, 4)
                     }
@@ -115,7 +115,7 @@ struct ReminderSettingsView: View {
                     
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Celebrate your achievements with notifications when you reach important milestones")
-                            .font(BFTheme.Typography.caption())
+                            .font(BFTypography.caption())
                             .foregroundColor(BFColors.textSecondary)
                             .padding(.top, 4)
                     }
@@ -146,11 +146,11 @@ struct ReminderSettingsView: View {
                 Section {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Notification Permission")
-                            .font(BFTheme.Typography.headline())
+                            .font(BFTypography.headline())
                             .foregroundColor(BFColors.textPrimary)
                         
                         Text("BetFree needs permission to send you notifications. If you haven't enabled notifications yet, you'll be prompted to do so when you save these settings.")
-                            .font(BFTheme.Typography.caption())
+                            .font(BFTypography.caption())
                             .foregroundColor(BFColors.textSecondary)
                         
                         if !viewModel.hasNotificationPermission {
@@ -158,7 +158,7 @@ struct ReminderSettingsView: View {
                                 viewModel.requestNotificationPermission()
                             }) {
                                 Text("Request Permission")
-                                    .font(BFTheme.Typography.button())
+                                    .font(BFTypography.button())
                                     .foregroundColor(.white)
                                     .padding(.vertical, 10)
                                     .frame(maxWidth: .infinity)
@@ -228,7 +228,7 @@ struct PaydayPickerView: View {
                 .padding()
                 
                 Text("If a month doesn't have this day, the last day of the month will be used instead")
-                    .font(BFTheme.Typography.caption())
+                    .font(BFTypography.caption())
                     .foregroundColor(BFColors.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding()
