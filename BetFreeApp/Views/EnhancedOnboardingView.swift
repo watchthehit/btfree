@@ -29,14 +29,7 @@ struct BetFreeLogo: View {
             // Background circle
             Circle()
                 .fill(
-                    .linearGradient(
-                        colors: [
-                            Color(hex: "#1B263B"),
-                            Color(hex: "#0D1B2A")
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
+                    BFColors.primaryGradient()
                 )
                 .frame(width: style == .compact ? size * 0.9 : size,
                        height: style == .compact ? size * 0.9 : size)
@@ -53,7 +46,7 @@ struct BetFreeLogo: View {
                     
                     // Strikethrough line
                     Rectangle()
-                        .fill(Color(hex: "#64FFDA"))
+                        .fill(BFColors.healing)
                         .frame(width: style == .compact ? size * 0.48 : size * 0.55, height: style == .compact ? size * 0.05 : size * 0.06)
                         .rotationEffect(.degrees(-10))
                         .offset(y: style == .compact ? size * 0.03 : size * 0.04)
@@ -63,11 +56,7 @@ struct BetFreeLogo: View {
                 Text("Free")
                     .font(.system(size: style == .compact ? size * 0.32 : size * 0.38, weight: .heavy))
                     .foregroundStyle(
-                        .linearGradient(
-                            colors: [Color(hex: "#64FFDA"), Color(hex: "#00B4D8")],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
+                        BFColors.brandGradient()
                     )
                     .dynamicTypeSize(.large ... .accessibility2)
             }
@@ -77,7 +66,7 @@ struct BetFreeLogo: View {
             Circle()
                 .trim(from: 0.7, to: 0.9)
                 .stroke(
-                    Color(hex: "#64FFDA"),
+                    BFColors.healing,
                     style: StrokeStyle(
                         lineWidth: style == .compact ? size * 0.06 : size * 0.08,
                         lineCap: .round
@@ -85,7 +74,7 @@ struct BetFreeLogo: View {
                 )
                 .frame(width: style == .compact ? size * 0.95 : size * 1.05)
                 .rotationEffect(.degrees(45))
-                .shadow(color: Color(hex: "#64FFDA").opacity(0.6), radius: 8, x: 0, y: 0)
+                .shadow(color: BFColors.healing.opacity(0.6), radius: 8, x: 0, y: 0)
         }
         .accessibilityLabel("BetFree logo")
     }
@@ -157,15 +146,8 @@ struct EnhancedOnboardingView: View {
     var body: some View {
         ZStack {
             // Gradient background
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color(hex: "#0D1B2A"),
-                    Color(hex: "#1B263B")
-                ]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            BFColors.primaryGradient()
+                .ignoresSafeArea()
             
             // Main content
             VStack(spacing: 0) {
@@ -216,86 +198,91 @@ struct EnhancedOnboardingView: View {
             }
             .safeAreaInset(edge: .bottom) {
                 // Bottom controls
-                VStack(spacing: 25) { // Increased spacing from 20 to 25
-                    // Progress bar
-                    ProgressBar(currentStep: currentPage, totalSteps: totalPages)
-                        .padding(.horizontal)
-                        .padding(.bottom, 10) // Increased from 5 to 10
-                    
-                    // Navigation buttons
-                    HStack {
-                        // Back button (except on first page)
-                        if currentPage > 0 {
-                            Button(action: {
-                                withAnimation {
-                                    currentPage -= 1
-                                }
-                                HapticManager.shared.selectionFeedback()
-                            }) {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "arrow.left")
-                                        .font(.system(size: 16, weight: .medium))
-                                    Text("Back")
-                                        .font(.system(size: 16, weight: .medium))
-                                }
-                                .foregroundStyle(.secondary)
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 14)
+                VStack(spacing: 30) {
+                    // Progress indicators
+                    VStack(spacing: 15) {
+                        // Step indicators dots - centered horizontally
+                        HStack(spacing: 12) {
+                            ForEach(0..<totalPages, id: \.self) { step in
+                                Circle()
+                                    .fill(step == currentPage ? BFColors.healing : Color.white.opacity(0.5))
+                                    .frame(width: 8, height: 8)
                             }
-                        } else {
-                            Spacer()
                         }
+                        .frame(maxWidth: .infinity, alignment: .center)
                         
+                        // Progress bar
+                        GeometryReader { geometry in
+                            ZStack(alignment: .leading) {
+                                // Background
+                                Rectangle()
+                                    .fill(Color.white.opacity(0.35))
+                                    .frame(height: 3)
+                                    .cornerRadius(1.5)
+                                
+                                // Progress
+                                Rectangle()
+                                    .fill(BFColors.brandGradient())
+                                    .frame(width: min(geometry.size.width * CGFloat(currentPage + 1) / CGFloat(totalPages), geometry.size.width), height: 3)
+                                    .cornerRadius(1.5)
+                            }
+                        }
+                        .frame(height: 3)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
+                    
+                    HStack {
                         Spacer()
                         
-                        // Next/Continue/Get Started button
-                        Button(action: {
-                            if currentPage < totalPages - 1 {
-                                withAnimation {
-                                    currentPage += 1
-                                }
-                                HapticManager.shared.selectionFeedback()
-                            } else {
-                                // Complete onboarding and save user preferences
-                                HapticManager.shared.notificationFeedback(type: .success)
-                                completeOnboarding()
-                            }
-                        }) {
-                            HStack(spacing: 8) {
-                                Text(currentPage < totalPages - 1 ? "Continue" : "Get Started")
-                                    .font(.system(size: 16, weight: .semibold))
-                                
-                                if currentPage < totalPages - 1 {
-                                    Image(systemName: "arrow.right")
-                                        .font(.system(size: 16, weight: .medium))
-                                } else {
-                                    Image(systemName: "checkmark")
-                                        .font(.system(size: 16, weight: .medium))
-                                }
-                            }
-                            .frame(minWidth: 0, maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(
-                                .linearGradient(
-                                    colors: [
-                                        Color(hex: "#64FFDA"),
-                                        Color(hex: "#00B4D8")
-                                    ],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .cornerRadius(12)
-                            .shadow(color: Color.black.opacity(0.2), radius: 3, x: 0, y: 2)
-                        }
-                        .disabled(currentPage == Self.valuePropositionPages.count && userName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                        .opacity(currentPage == Self.valuePropositionPages.count && userName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.6 : 1.0)
+                        // Step counter
+                        Text("Step \(currentPage + 1) of \(totalPages)")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(.white.opacity(0.9))
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 25)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 5)
+                    
+                    // Continue button
+                    Button(action: {
+                        if currentPage < totalPages - 1 {
+                            withAnimation {
+                                currentPage += 1
+                            }
+                            HapticManager.shared.selectionFeedback()
+                        } else {
+                            // Complete onboarding and save user preferences
+                            HapticManager.shared.notificationFeedback(type: .success)
+                            completeOnboarding()
+                        }
+                    }) {
+                        HStack(spacing: 10) {
+                            Text(currentPage < totalPages - 1 ? "Continue" : "Get Started")
+                                .font(.system(size: 18, weight: .bold))
+                                .foregroundColor(.black)
+                            
+                            if currentPage < totalPages - 1 {
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundColor(.black)
+                            } else {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundColor(.black)
+                            }
+                        }
+                        .frame(minWidth: 0, maxWidth: .infinity)
+                        .padding(.vertical, 20)
+                        .background(BFColors.brandGradient())
+                        .cornerRadius(30)
+                        .shadow(color: BFColors.healing.opacity(0.4), radius: 8, x: 0, y: 4)
+                    }
+                    .disabled(currentPage == Self.valuePropositionPages.count && userName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .opacity(currentPage == Self.valuePropositionPages.count && userName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.6 : 1.0)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 30)
                 }
-                .padding(.horizontal)
-                .background(.ultraThinMaterial)
+                .background(BFColors.primary.opacity(0.95))
                 .opacity(isAnimating ? 1 : 0)
                 .animation(.easeIn(duration: 0.5).delay(0.4), value: isAnimating)
             }
@@ -319,20 +306,13 @@ struct EnhancedOnboardingView: View {
                                 .frame(width: 150, height: 150)
                                 .overlay(
                                     Circle()
-                                        .stroke(Color(hex: "#64FFDA").opacity(0.4), lineWidth: 8)
+                                        .stroke(BFColors.healing.opacity(0.4), lineWidth: 8)
                                 )
                             
                             Circle()
                                 .trim(from: 0, to: breatheProgress)
                                 .stroke(
-                                    .linearGradient(
-                                        colors: [
-                                            Color(hex: "#64FFDA"),
-                                            Color(hex: "#00B4D8")
-                                        ],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ),
+                                    BFColors.brandGradient(),
                                     style: StrokeStyle(lineWidth: 8, lineCap: .round)
                                 )
                                 .frame(width: 150, height: 150)
@@ -340,14 +320,8 @@ struct EnhancedOnboardingView: View {
                             
                             Circle()
                                 .fill(
-                                    .linearGradient(
-                                        colors: [
-                                            Color(hex: "#64FFDA").opacity(0.6),
-                                            Color(hex: "#00B4D8").opacity(0.6)
-                                        ],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
+                                    BFColors.brandGradient()
+                                        .opacity(0.6)
                                 )
                                 .frame(width: breatheIn ? 100 : 50, height: breatheIn ? 100 : 50)
                                 .animation(.easeInOut(duration: 4), value: breatheIn)
@@ -446,15 +420,15 @@ struct EnhancedOnboardingView: View {
     }
 }
 
-// LazyView wrapper to improve performance
+// LazyView implementation to defer loading of views
 struct LazyView<Content: View>: View {
     let build: () -> Content
     
-    init(_ build: @autoclosure @escaping () -> Content) {
+    init(@ViewBuilder _ build: @escaping () -> Content) {
         self.build = build
     }
     
-    var body: Content {
+    var body: some View {
         build()
     }
 }
@@ -508,9 +482,8 @@ struct PersonalizationView: View {
                 .dynamicTypeSize(.large ... .accessibility3)
             
             Text("Let's personalize your experience to help you reach your goals.")
-                .font(.callout)
-                .fontWeight(.medium)
-                .foregroundStyle(.secondary)
+                .font(.callout.weight(.medium))
+                .foregroundStyle(.white.opacity(0.95))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 30)
                 .opacity(hasAppeared ? 1 : 0)
@@ -600,9 +573,8 @@ struct GoalSettingView: View {
                 .dynamicTypeSize(.large ... .accessibility3)
             
             Text("Choose your primary goal and set a daily mindfulness target.")
-                .font(.callout)
-                .fontWeight(.medium)
-                .foregroundStyle(.secondary)
+                .font(.callout.weight(.medium))
+                .foregroundStyle(.white.opacity(0.95))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 30)
                 .opacity(hasAppeared ? 1 : 0)
@@ -619,7 +591,7 @@ struct GoalSettingView: View {
                 } icon: {
                     Image(systemName: "target")
                         .symbolRenderingMode(.palette)
-                        .foregroundStyle(Color(hex: "#64FFDA"), .white.opacity(0.3))
+                        .foregroundStyle(BFColors.healing, .white.opacity(0.3))
                 }
                 
                 VStack(spacing: 12) {
@@ -652,14 +624,14 @@ struct GoalSettingView: View {
                     } icon: {
                         Image(systemName: "timer")
                             .symbolRenderingMode(.palette)
-                            .foregroundStyle(Color(hex: "#64FFDA"), .white.opacity(0.3))
+                            .foregroundStyle(BFColors.healing, .white.opacity(0.3))
                     }
                     
                     Spacer()
                     
                     Text("\(dailyMindfulnessGoal) min")
                         .font(.title3.weight(.bold))
-                        .foregroundStyle(Color(hex: "#64FFDA"))
+                        .foregroundStyle(BFColors.healing)
                 }
                 
                 Slider(value: Binding(
@@ -671,7 +643,7 @@ struct GoalSettingView: View {
                         dailyMindfulnessGoal = Int($0) 
                     }
                 ), in: 5...30, step: 5)
-                .tint(Color(hex: "#64FFDA"))
+                .tint(BFColors.healing)
                 
                 HStack {
                     Text("5 min")
@@ -737,9 +709,8 @@ struct TriggerIdentificationView: View {
                 .dynamicTypeSize(.large ... .accessibility3)
             
             Text("Select situations that typically trigger gambling urges for you.")
-                .font(.callout)
-                .fontWeight(.medium)
-                .foregroundStyle(.secondary)
+                .font(.callout.weight(.medium))
+                .foregroundStyle(.white.opacity(0.95))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 30)
                 .opacity(hasAppeared ? 1 : 0)
@@ -756,7 +727,7 @@ struct TriggerIdentificationView: View {
                 } icon: {
                     Image(systemName: "bolt.fill")
                         .symbolRenderingMode(.palette)
-                        .foregroundStyle(Color(hex: "#F6AE2D"), .white.opacity(0.3))
+                        .foregroundStyle(BFColors.warning, .white.opacity(0.3))
                 }
                 
                 ScrollView(.vertical, showsIndicators: false) {
@@ -803,7 +774,7 @@ struct TriggerIdentificationView: View {
                     } label: {
                         Text("Clear All")
                             .font(.footnote.weight(.medium))
-                            .foregroundStyle(Color(hex: "#64FFDA"))
+                            .foregroundStyle(BFColors.healing)
                     }
                     .buttonStyle(.plain)
                 }
@@ -856,9 +827,8 @@ struct NotificationsSetupView: View {
                 .dynamicTypeSize(.large ... .accessibility3)
             
             Text("Set up reminders to help you maintain your mindfulness practice.")
-                .font(.callout)
-                .fontWeight(.medium)
-                .foregroundStyle(.secondary)
+                .font(.callout.weight(.medium))
+                .foregroundStyle(.white.opacity(0.95))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 30)
                 .opacity(hasAppeared ? 1 : 0)
@@ -876,10 +846,10 @@ struct NotificationsSetupView: View {
                     } icon: {
                         Image(systemName: "bell.badge.fill")
                             .symbolRenderingMode(.palette)
-                            .foregroundStyle(Color(hex: "#64FFDA"), .white)
+                            .foregroundStyle(BFColors.healing, .white)
                     }
                 }
-                .toggleStyle(SwitchToggleStyle(tint: Color(hex: "#64FFDA")))
+                .toggleStyle(SwitchToggleStyle(tint: BFColors.healing))
                 .onChange(of: notificationsEnabled) { _, _ in
                     HapticManager.shared.selectionFeedback()
                 }
@@ -894,7 +864,7 @@ struct NotificationsSetupView: View {
                             .datePickerStyle(WheelDatePickerStyle())
                             .labelsHidden()
                             .frame(maxWidth: .infinity)
-                            .tint(Color(hex: "#64FFDA"))
+                            .tint(BFColors.healing)
                             .colorScheme(.dark)
                             .onChange(of: reminderTime) { _, _ in
                                 HapticManager.shared.selectionFeedback()
@@ -920,11 +890,11 @@ struct NotificationsSetupView: View {
                 Label {
                     Text("Your privacy is important")
                         .font(.headline)
-                        .foregroundStyle(Color(hex: "#64FFDA"))
+                        .foregroundStyle(BFColors.healing)
                 } icon: {
                     Image(systemName: "lock.shield.fill")
                         .symbolRenderingMode(.palette)
-                        .foregroundStyle(Color(hex: "#64FFDA"), .white.opacity(0.3))
+                        .foregroundStyle(BFColors.healing, .white.opacity(0.3))
                 }
                 
                 Text("Notifications are optional and will only be used to remind you of your mindfulness practice. You can change notification settings anytime.")
@@ -966,50 +936,32 @@ struct ProgressBar: View {
     let currentStep: Int
     let totalSteps: Int
     
+    // Create computed properties to reduce complexity
+    private var progressGradient: LinearGradient {
+        BFColors.brandGradient()
+    }
+    
+    private var inactiveColor: Color {
+        Color.secondary.opacity(0.4)
+    }
+    
+    private var progressPercentage: Int {
+        Int((Float(currentStep + 1) / Float(totalSteps)) * 100)
+    }
+    
     var body: some View {
         VStack(spacing: 12) {
             // Step indicators
             HStack(spacing: 4) {
                 ForEach(0..<totalSteps, id: \.self) { step in
-                    Circle()
-                        .fill(step <= currentStep ? 
-                            .linearGradient(
-                                colors: [Color(hex: "#64FFDA"), Color(hex: "#00B4D8")],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            ) : 
-                            .secondary.opacity(0.2)
-                        )
-                        .frame(width: 8, height: 8)
-                        .shadow(color: step <= currentStep ? Color(hex: "#64FFDA").opacity(0.4) : .clear, radius: 2, x: 0, y: 0)
-                        .scaleEffect(step == currentStep ? 1.2 : 1.0)
-                        .animation(.spring(response: 0.3), value: currentStep)
+                    stepIndicator(for: step)
                 }
             }
             .padding(.horizontal, 2)
             
             // Progress bar
             GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    // Background
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(.secondary.opacity(0.2))
-                        .frame(height: 8)
-                    
-                    // Progress
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(
-                            .linearGradient(
-                                colors: [
-                                    Color(hex: "#64FFDA"),
-                                    Color(hex: "#00B4D8")
-                                ],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .frame(width: geometry.size.width * CGFloat(currentStep + 1) / CGFloat(totalSteps), height: 8)
-                }
+                progressBar(in: geometry)
             }
             .frame(height: 8)
             
@@ -1018,13 +970,49 @@ struct ProgressBar: View {
                 Spacer()
                 Text("Step \(currentStep + 1) of \(totalSteps)")
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.white.opacity(0.7))
                     .dynamicTypeSize(.large ... .accessibility1)
             }
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Progress: step \(currentStep + 1) of \(totalSteps)")
-        .accessibilityValue("\(Int((Float(currentStep + 1) / Float(totalSteps)) * 100))% complete")
+        .accessibilityValue("\(progressPercentage)% complete")
+    }
+    
+    // Helper functions to break up complex expressions
+    private func stepIndicator(for step: Int) -> some View {
+        let isActiveStep = step <= currentStep
+        let isCurrentStep = step == currentStep
+        
+        // Convert inactiveColor to a LinearGradient for type consistency
+        let inactiveGradient = LinearGradient(
+            colors: [inactiveColor],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+        
+        return Circle()
+            .fill(isActiveStep ? progressGradient : inactiveGradient)
+            .frame(width: 8, height: 8)
+            .shadow(color: isActiveStep ? BFColors.healing.opacity(0.4) : .clear, 
+                   radius: 2, x: 0, y: 0)
+            .scaleEffect(isCurrentStep ? 1.2 : 1.0)
+            .animation(.spring(response: 0.3), value: currentStep)
+    }
+    
+    private func progressBar(in geometry: GeometryProxy) -> some View {
+        ZStack(alignment: .leading) {
+            // Background
+            RoundedRectangle(cornerRadius: 4)
+                .fill(inactiveColor)
+                .frame(height: 8)
+            
+            // Progress
+            RoundedRectangle(cornerRadius: 4)
+                .fill(progressGradient)
+                .frame(width: geometry.size.width * CGFloat(currentStep + 1) / CGFloat(totalSteps), 
+                      height: 8)
+        }
     }
 }
 
@@ -1043,8 +1031,8 @@ struct GoalButton: View {
         }) {
             HStack {
                 Text(title)
-                    .font(.headline)
-                    .foregroundStyle(isSelected ? .primary : .secondary)
+                    .font(.headline.weight(.semibold))
+                    .foregroundColor(isSelected ? Color.primary : Color.white.opacity(0.9))
                     .dynamicTypeSize(.large ... .accessibility2)
                 
                 Spacer()
@@ -1052,7 +1040,7 @@ struct GoalButton: View {
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
                         .symbolRenderingMode(.palette)
-                        .foregroundStyle(.white, Color(hex: "#64FFDA"))
+                        .foregroundStyle(.white, BFColors.healing)
                         .font(.system(size: 18, weight: .semibold))
                 }
             }
@@ -1061,23 +1049,25 @@ struct GoalButton: View {
             .background(
                 Group {
                     if isSelected {
-                        .linearGradient(
-                            colors: [
-                                Color(hex: "#64FFDA"),
-                                Color(hex: "#00B4D8")
-                            ],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
+                        BFColors.brandGradient()
                     } else {
-                        .ultraThinMaterial
+                        // Break up the complex expression into parts
+                        ZStack {
+                            Color.white.opacity(0.1)
+                            Rectangle()
+                                .fill(.ultraThinMaterial)
+                        }
                     }
                 }
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(Color.white.opacity(0.2), lineWidth: isSelected ? 0 : 1)
             )
             .cornerRadius(10)
         }
         .buttonStyle(.plain)
-        .shadow(color: isSelected ? Color(hex: "#64FFDA").opacity(0.3) : Color.clear, radius: 4, x: 0, y: 2)
+        .shadow(color: isSelected ? BFColors.healing.opacity(0.3) : Color.clear, radius: 4, x: 0, y: 2)
         .contentShape(Rectangle())
         .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
@@ -1098,8 +1088,8 @@ struct TriggerButton: View {
         }) {
             HStack {
                 Text(title)
-                    .font(.subheadline.weight(isSelected ? .semibold : .medium))
-                    .foregroundStyle(isSelected ? .primary : .secondary)
+                    .font(.subheadline.weight(isSelected ? .bold : .semibold))
+                    .foregroundColor(isSelected ? Color.primary : Color.white.opacity(0.9))
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
                     .dynamicTypeSize(.large ... .accessibility1)
@@ -1107,7 +1097,7 @@ struct TriggerButton: View {
                 if isSelected {
                     Image(systemName: "checkmark")
                         .symbolRenderingMode(.palette)
-                        .foregroundStyle(Color(hex: "#0D1B2A"))
+                        .foregroundStyle(BFColors.primary)
                         .font(.system(size: 12, weight: .bold))
                 }
             }
@@ -1117,23 +1107,26 @@ struct TriggerButton: View {
             .background(
                 Group {
                     if isSelected {
-                        .linearGradient(
-                            colors: [
-                                Color(hex: "#64FFDA"),
-                                Color(hex: "#00B4D8")
-                            ],
-                            startPoint: .leading, 
-                            endPoint: .trailing
-                        )
+                        BFColors.brandGradient()
                     } else {
-                        .ultraThinMaterial.opacity(0.5)
+                        // Break up the complex expression into parts
+                        ZStack {
+                            Color.white.opacity(0.1)
+                            Rectangle()
+                                .fill(.ultraThinMaterial)
+                                .opacity(0.5)
+                        }
                     }
                 }
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.white.opacity(0.2), lineWidth: isSelected ? 0 : 1)
             )
             .cornerRadius(8)
         }
         .buttonStyle(.plain)
-        .shadow(color: isSelected ? Color(hex: "#64FFDA").opacity(0.3) : Color.clear, radius: 3, x: 0, y: 1)
+        .shadow(color: isSelected ? BFColors.healing.opacity(0.3) : Color.clear, radius: 3, x: 0, y: 1)
         .contentShape(Rectangle())
         .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
@@ -1152,7 +1145,7 @@ struct OnboardingPageView: View {
                 .scaleEffect(hasAppeared ? 1.0 : 0.8)
                 .opacity(hasAppeared ? 1.0 : 0.0)
                 .brightness(0.1) // Add slight brightness
-                .shadow(color: Color(hex: "#64FFDA").opacity(0.5), radius: 15, x: 0, y: 0) // Add glow effect
+                .shadow(color: BFColors.healing.opacity(0.5), radius: 15, x: 0, y: 0) // Add glow effect
                 .drawingGroup() // Use Metal rendering for better performance
                 .animation(.spring(response: 0.5, dampingFraction: 0.7), value: hasAppeared)
             
@@ -1161,11 +1154,7 @@ struct OnboardingPageView: View {
                 Text(page.title)
                     .font(.title2.weight(.bold))
                     .foregroundStyle(
-                        .linearGradient(
-                            colors: [.white, .white.opacity(0.8)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
+                        .white
                     )
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
@@ -1175,8 +1164,8 @@ struct OnboardingPageView: View {
                     .dynamicTypeSize(.large ... .accessibility3)
                 
                 Text(page.description)
-                    .font(.body)
-                    .foregroundStyle(.secondary)
+                    .font(.body.weight(.medium))
+                    .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 24)
@@ -1186,7 +1175,7 @@ struct OnboardingPageView: View {
                     .dynamicTypeSize(.large ... .accessibility2)
             }
             .padding(24)
-            .background(.ultraThinMaterial.opacity(0.5))
+            .background(.ultraThinMaterial.opacity(0.7))
             .cornerRadius(20)
             .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
             .padding(.horizontal)
