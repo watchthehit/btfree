@@ -25,7 +25,7 @@ struct ProgressTrackingView: View {
                     HStack {
                         Text("Your Progress")
                             .font(BFTheme.Typography.title())
-                            .foregroundColor(BFTheme.neutralLight)
+                            .foregroundColor(BFColors.textPrimary)
                         
                         Spacer()
                         
@@ -46,7 +46,7 @@ struct ProgressTrackingView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Betting Urges Over Time")
                         .font(BFTheme.Typography.headline())
-                        .foregroundColor(BFTheme.neutralLight)
+                        .foregroundColor(BFColors.textPrimary)
                         .padding(.horizontal)
                     
                     // Urges chart
@@ -57,7 +57,7 @@ struct ProgressTrackingView: View {
                     )
                     .frame(height: 200)
                     .padding()
-                    .background(BFTheme.cardBackground)
+                    .background(BFColors.cardBackground)
                     .cornerRadius(12)
                     .padding(.horizontal)
                 }
@@ -66,14 +66,14 @@ struct ProgressTrackingView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Week by Week Comparison")
                         .font(BFTheme.Typography.headline())
-                        .foregroundColor(BFTheme.neutralLight)
+                        .foregroundColor(BFColors.textPrimary)
                         .padding(.horizontal)
                     
                     // Week comparison chart
                     WeeklyComparisonChart(weeklyData: viewModel.weeklyData)
                     .frame(height: 200)
                     .padding()
-                    .background(BFTheme.cardBackground)
+                    .background(BFColors.cardBackground)
                     .cornerRadius(12)
                     .padding(.horizontal)
                 }
@@ -110,7 +110,7 @@ struct ProgressTrackingView: View {
             .padding(.top)
         }
         .navigationTitle("Progress")
-        .background(BFTheme.background.ignoresSafeArea())
+        .background(BFColors.background.ignoresSafeArea())
         .onAppear {
             viewModel.loadData(for: selectedTimeRange)
         }
@@ -150,19 +150,19 @@ struct StatCard: View {
                 
                 Text(title)
                     .font(BFTheme.Typography.caption())
-                    .foregroundColor(BFTheme.neutralLight.opacity(0.8))
+                    .foregroundColor(BFColors.textSecondary)
                 
                 Spacer()
             }
             
             Text(value)
                 .font(BFTheme.Typography.title())
-                .foregroundColor(BFTheme.neutralLight)
+                .foregroundColor(BFColors.textPrimary)
             
             HStack {
                 Text(unit)
                     .font(BFTheme.Typography.caption())
-                    .foregroundColor(BFTheme.neutralLight.opacity(0.6))
+                    .foregroundColor(BFColors.textSecondary)
                 
                 Spacer()
                 
@@ -179,7 +179,7 @@ struct StatCard: View {
             }
         }
         .padding(12)
-        .background(BFTheme.cardBackground)
+        .background(BFColors.cardBackground)
         .cornerRadius(12)
         .frame(maxWidth: .infinity)
     }
@@ -202,7 +202,7 @@ struct StatCard: View {
         case .negative:
             return .red
         case .neutral:
-            return BFTheme.neutralLight.opacity(0.6)
+            return BFColors.textSecondary
         }
     }
 }
@@ -235,12 +235,12 @@ struct AchievementCard: View {
             VStack(spacing: 4) {
                 Text(achievement.title)
                     .font(BFTheme.Typography.headline(16))
-                    .foregroundColor(BFTheme.neutralLight)
+                    .foregroundColor(BFColors.textPrimary)
                     .multilineTextAlignment(.center)
                 
                 Text(achievement.description)
                     .font(BFTheme.Typography.caption())
-                    .foregroundColor(BFTheme.neutralLight.opacity(0.7))
+                    .foregroundColor(BFColors.textSecondary)
                     .multilineTextAlignment(.center)
             }
             .padding(.horizontal, 8)
@@ -249,7 +249,7 @@ struct AchievementCard: View {
             if let date = achievement.unlockedDate {
                 Text("Unlocked \(date.formatted(.dateTime.month().day()))")
                     .font(BFTheme.Typography.caption(12))
-                    .foregroundColor(BFTheme.neutralLight.opacity(0.5))
+                    .foregroundColor(BFColors.textSecondary)
             } else {
                 // Progress indicator if not unlocked
                 VStack(spacing: 4) {
@@ -258,14 +258,14 @@ struct AchievementCard: View {
                     
                     Text("\(Int(achievement.progress * 100))% Complete")
                         .font(BFTheme.Typography.caption(12))
-                        .foregroundColor(BFTheme.neutralLight.opacity(0.5))
+                        .foregroundColor(BFColors.textSecondary)
                 }
                 .padding(.horizontal, 20)
             }
         }
         .padding(.bottom, 12)
         .frame(width: 140)
-        .background(BFTheme.cardBackground)
+        .background(BFColors.cardBackground)
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
@@ -301,11 +301,11 @@ struct GoalSettingsSheet: View {
             VStack(spacing: 8) {
                 Text("Set Your Daily Urge Goal")
                     .font(BFTheme.Typography.title())
-                    .foregroundColor(BFTheme.neutralLight)
+                    .foregroundColor(BFColors.textPrimary)
                 
                 Text("How many urges do you want to limit yourself to each day?")
                     .font(BFTheme.Typography.body())
-                    .foregroundColor(BFTheme.neutralLight.opacity(0.8))
+                    .foregroundColor(BFColors.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
             }
@@ -326,18 +326,18 @@ struct GoalSettingsSheet: View {
                 HStack {
                     Text("No urges")
                         .font(BFTheme.Typography.caption())
-                        .foregroundColor(BFTheme.neutralLight.opacity(0.6))
+                        .foregroundColor(BFColors.textSecondary)
                     
                     Spacer()
                     
                     Text("20 urges")
                         .font(BFTheme.Typography.caption())
-                        .foregroundColor(BFTheme.neutralLight.opacity(0.6))
+                        .foregroundColor(BFColors.textSecondary)
                 }
                 .padding(.horizontal)
             }
             .padding()
-            .background(BFTheme.cardBackground)
+            .background(BFColors.cardBackground)
             .cornerRadius(16)
             .padding(.horizontal)
             
@@ -345,22 +345,22 @@ struct GoalSettingsSheet: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Recommendations:")
                     .font(BFTheme.Typography.headline())
-                    .foregroundColor(BFTheme.neutralLight)
+                    .foregroundColor(BFColors.textPrimary)
                 
                 Text("• Start with a realistic goal based on your current average")
                     .font(BFTheme.Typography.body())
-                    .foregroundColor(BFTheme.neutralLight.opacity(0.8))
+                    .foregroundColor(BFColors.textSecondary)
                 
                 Text("• Gradually decrease your limit as you build resistance")
                     .font(BFTheme.Typography.body())
-                    .foregroundColor(BFTheme.neutralLight.opacity(0.8))
+                    .foregroundColor(BFColors.textSecondary)
                 
                 Text("• Consider your triggers and time of day when setting goals")
                     .font(BFTheme.Typography.body())
-                    .foregroundColor(BFTheme.neutralLight.opacity(0.8))
+                    .foregroundColor(BFColors.textSecondary)
             }
             .padding()
-            .background(BFTheme.cardBackground)
+            .background(BFColors.cardBackground)
             .cornerRadius(16)
             .padding(.horizontal)
             
@@ -385,7 +385,7 @@ struct GoalSettingsSheet: View {
         }
         .padding(.top, 40)
         .padding(.bottom, 30)
-        .background(BFTheme.background.ignoresSafeArea())
+        .background(BFColors.background.ignoresSafeArea())
     }
 }
 
@@ -435,7 +435,7 @@ struct StatCardsSection: View {
                     value: viewModel.currentStreak.formatted(),
                     unit: "days",
                     icon: "flame.fill",
-                    color: BFTheme.accentColor,
+                    color: BFColors.accent,
                     trend: .positive,
                     trendValue: "+\(viewModel.streakChange)%"
                 )
@@ -445,7 +445,7 @@ struct StatCardsSection: View {
                     value: "$\(viewModel.moneySaved)",
                     unit: "estimated",
                     icon: "dollarsign.circle.fill",
-                    color: Color.green,
+                    color: .green,
                     trend: .positive,
                     trendValue: "+\(viewModel.moneySavedChange)%"
                 )
@@ -458,7 +458,7 @@ struct StatCardsSection: View {
                     value: viewModel.urgesResisted.formatted(),
                     unit: "total",
                     icon: "hand.raised.fill",
-                    color: Color.blue,
+                    color: .blue,
                     trend: viewModel.urgesChange > 0 ? .negative : .positive,
                     trendValue: viewModel.urgesChange > 0 ? "+\(viewModel.urgesChange)%" : "-\(abs(viewModel.urgesChange))%"
                 )
@@ -468,7 +468,7 @@ struct StatCardsSection: View {
                     value: "\(viewModel.goalProgress)%",
                     unit: "complete",
                     icon: "target",
-                    color: Color.purple,
+                    color: .purple,
                     trend: .neutral,
                     trendValue: nil
                 )
@@ -511,7 +511,7 @@ struct UrgesChartView: View {
                     x: .value("Date", dataPoint.date),
                     y: .value("Urges", dataPoint.urges)
                 )
-                .foregroundStyle(BFTheme.neutralDark)
+                .foregroundStyle(BFColors.textPrimary)
                 .symbolSize(30)
             }
             
@@ -552,7 +552,7 @@ struct WeeklyComparisonChart: View {
                     if dataPoint.thisWeek > 0 {
                         Text("\(dataPoint.thisWeek)")
                             .font(BFTheme.Typography.caption(10))
-                            .foregroundColor(BFTheme.neutralLight.opacity(0.7))
+                            .foregroundColor(BFColors.textSecondary)
                     }
                 }
                 
@@ -566,7 +566,7 @@ struct WeeklyComparisonChart: View {
                     if dataPoint.lastWeek > 0 {
                         Text("\(dataPoint.lastWeek)")
                             .font(BFTheme.Typography.caption(10))
-                            .foregroundColor(BFTheme.neutralLight.opacity(0.7))
+                            .foregroundColor(BFColors.textSecondary)
                     }
                 }
             }
@@ -582,7 +582,7 @@ struct AchievementsSection: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Your Achievements")
                 .font(BFTheme.Typography.headline())
-                .foregroundColor(BFTheme.neutralLight)
+                .foregroundColor(BFColors.textPrimary)
                 .padding(.horizontal)
             
             ScrollView(.horizontal, showsIndicators: false) {

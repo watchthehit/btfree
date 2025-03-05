@@ -40,10 +40,11 @@ We've implemented a phased migration approach:
    - ⬜ Update all `.foregroundColor()` modifiers to use `BFColors` equivalents
    - ⬜ Update all text styling to use the typography system consistently
 
-2. **ProgressView**
+2. **ProgressView** (Completed)
    - ✅ Updated chart tint and color styling to use `BFColors`
-   - ⬜ Migrate all `.foregroundColor()` usages to `BFColors`
-   - ⬜ Update all `.background()` modifiers to use `BFColors.background` and `BFColors.cardBackground`
+   - ✅ Migrated all `.foregroundColor()` usages to `BFColors.textPrimary` and `BFColors.textSecondary` 
+   - ✅ Updated all `.background()` modifiers to use `BFColors.background` and `BFColors.cardBackground`
+   - ✅ Verified that all chart elements use consistent colors from the `BFColors` system
 
 3. **CommunityView**
    - ✅ Fixed `ProgressView` tint issue
