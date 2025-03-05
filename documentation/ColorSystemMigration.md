@@ -27,20 +27,70 @@ We've implemented a phased migration approach:
   - Updated `ReminderSettingsView.swift` to use `BFColors.accent` for all toggles
   - Updated `ProgressView.swift` charts and UI elements to use `BFColors.accent` and `BFColors.primary`
   - Ensured consistent tint application across all interactive elements
-- ⬜ Fix any SwiftUI modifiers that have similar issues.
+- ⬜ Fix any SwiftUI modifiers that have similar issues:
+  - Identified numerous `.foregroundColor()` and `.background()` modifiers using `BFTheme`
+  - These will be addressed in Phase 3 on a component-by-component basis
 
 ### Phase 3: Component-by-Component Migration (Planned)
 
-As components are updated or refactored, they should be migrated from `BFTheme` to `BFColors`:
+#### Priority 1 Components (Week 1-2)
 
-1. **Medium Priority Components:**
-   - ⬜ MainTabView.swift
-   - ⬜ BetTrackingView.swift
-   - ⬜ ReminderSettingsView.swift
+1. **ReminderSettingsView** (Started)
+   - ✅ Updated all `.tint()` modifiers to use `BFColors.accent`
+   - ⬜ Update all `.foregroundColor()` modifiers to use `BFColors` equivalents
+   - ⬜ Update all text styling to use the typography system consistently
 
-2. **Low Priority Components:**
-   - ⬜ BFPaywallScreens.swift
-   - ⬜ EnhancedOnboardingView.swift (complex component, leave for later)
+2. **ProgressView**
+   - ✅ Updated chart tint and color styling to use `BFColors`
+   - ⬜ Migrate all `.foregroundColor()` usages to `BFColors`
+   - ⬜ Update all `.background()` modifiers to use `BFColors.background` and `BFColors.cardBackground`
+
+3. **CommunityView**
+   - ✅ Fixed `ProgressView` tint issue
+   - ⬜ Update all `.foregroundColor(BFTheme.accentColor)` to use `BFColors.accent`
+   - ⬜ Update all `.background()` modifiers to use `BFColors` equivalents
+
+#### Priority 2 Components (Week 3-4)
+
+4. **MainTabView**
+   - ⬜ Update all color references to use `BFColors` directly
+   - ⬜ Ensure tab bar styling uses consistent color system
+
+5. **BetTrackingView**
+   - ⬜ Migrate all color references to `BFColors`
+   - ⬜ Update chart and visualization components
+
+6. **EnhancedOnboardingView**
+   - ✅ Removed internal `BFTheme` definition
+   - ⬜ Update remaining color references to use `BFColors`
+   - ⬜ Replace hardcoded hex colors with `BFColors` system
+
+#### Priority 3 Components (Week 5-6)
+
+7. **Shared Components**
+   - ⬜ Update `BFButton`, `BFCard`, and other reusable components
+   - ⬜ Ensure consistent styling across all shared UI elements
+
+8. **Documentation**
+   - ⬜ Update all code examples in documentation to use `BFColors`
+   - ⬜ Create component styling guide with examples
+
+### Migration Approach
+
+For each component:
+
+1. **Audit**: Identify all color usages in the component
+2. **Map**: Create a mapping from `BFTheme` properties to `BFColors` equivalents
+3. **Update**: Systematically replace all color references
+4. **Test**: Verify appearance in both light and dark mode
+5. **Document**: Note any special considerations in the component documentation
+
+### Testing Strategy
+
+- Test each component in both light and dark mode after migration
+- Verify that all interactive elements maintain proper contrast
+- Ensure accessibility standards are maintained
+- Compare before/after screenshots to verify visual consistency
 
 ### Phase 4: Complete Migration (Future)
 
