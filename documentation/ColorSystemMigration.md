@@ -53,24 +53,25 @@ We've implemented a phased migration approach:
    - ✅ Updated all `.background()` modifiers to use `BFColors` equivalents
    - ✅ Verified all dividers and UI elements use consistent colors from the `BFColors` system
 
-#### Priority 2 Components (Week 3-4)
-
 4. **MainTabView** (Completed)
    - ✅ Updated all color references to use `BFColors` directly
    - ✅ Updated tab bar styling to use consistent color system
    - ✅ Migrated all placeholder views and settings components to use `BFColors`
    - ✅ Verified proper appearance in both light and dark mode
 
-5. **BetTrackingView**
-   - ⬜ Migrate all color references to `BFColors`
-   - ⬜ Update chart and visualization components
+5. **BetTrackingView** (Completed)
+   - ✅ Migrated all color references to `BFColors`
+   - ✅ Updated all `.foregroundColor(BFTheme.neutralLight)` to use `BFColors.textPrimary` and `BFColors.textSecondary`
+   - ✅ Updated all `.background()` modifiers to use `BFColors` equivalents
+   - ✅ Updated chart and visualization components to use consistent colors
+   - ✅ Verified proper appearance in both light and dark mode
 
 6. **EnhancedOnboardingView**
    - ✅ Removed internal `BFTheme` definition
    - ⬜ Update remaining color references to use `BFColors`
    - ⬜ Replace hardcoded hex colors with `BFColors` system
 
-#### Priority 3 Components (Week 5-6)
+#### Priority 2 Components (Week 3-4)
 
 7. **Shared Components**
    - ⬜ Update `BFButton`, `BFCard`, and other reusable components
