@@ -140,7 +140,7 @@ For each component:
   - ✅ `ProgressView`
   - ✅ `CommunityView`
   - ✅ `MainTabView`
-- ⬜ Remove `BFTheme.swift` compatibility layer
+- ✅ Remove `BFTheme.swift` compatibility layer
 - ⬜ Final testing and validation
 
 ## Color Mapping Reference

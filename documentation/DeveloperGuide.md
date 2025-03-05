@@ -56,27 +56,36 @@ xcodebuild -scheme BetFreeApp -destination "platform=iOS Simulator,name=iPhone 1
 
 The app uses the "Serene Recovery" color scheme as defined in `documentation/ColorScheme.md`. 
 
-### Color System
+## Color Systems
 
-The application uses the BFColors system for all color management:
+The BetFree app uses a modern, semantic color system called `BFColors` that provides:
 
-**BFColors** (`BetFreeApp/Assets/BFColors.swift`): The primary color system with full light/dark mode support, featuring:
-- Semantic color naming (e.g., `primary`, `secondary`, `accent`)
-- Functional color naming (e.g., `success`, `warning`, `error`)
-- Automatic light/dark mode adaptation
-- Gradient generators (e.g., `brandGradient()`, `primaryGradient()`)
+- ✅ Semantic and functional color naming (e.g., `textPrimary`, `background`, `success`)
+- ✅ Automatic light/dark mode adaptation
+- ✅ Consistent color palette across the entire app
+- ✅ Gradient generators for common UI patterns
+- ✅ Opacity and tint variations
 
-#### Migration Status
+### Migration Status
 
-We have completed the migration of most components to the BFColors system:
-- ✅ All Priority 1 Components (ReminderSettingsView, ProgressView, etc.)
-- ✅ All Priority 2 Components (EnhancedOnboardingView, BFButton, BFCard)
-- ✅ All Priority 3 Components (BFOnboardingIllustrations, Shared Components)
-- 🔄 Currently implementing the `BFTypography` system to replace `BFTheme.Typography`
+The migration from the legacy `BFTheme` system to `BFColors` is now complete:
 
-**All new development should use BFColors and BFTypography exclusively.**
+- ✅ All Priority 1, 2, and 3 components have been migrated
+- ✅ All typography has been migrated to the new `BFTypography` system
+- ✅ The legacy `BFTheme` system has been removed
 
-> Note: The legacy BFTheme system has been deprecated and will be removed once the typography migration is complete.
+### Typography System
+
+The app uses a dedicated typography system called `BFTypography` that provides:
+
+- Consistent text styles across the app
+- Size variations for different contexts
+- Semantic naming (title, headline, body, caption, button)
+- Convenience modifiers for SwiftUI Text components
+
+### Updating Colors
+
+If you need to edit color definitions, see `documentation/ColorScheme.md` for details.
 
 ## Typography System
 
@@ -107,21 +116,6 @@ Text("Button Text").buttonStyle()
 // Custom size with convenience modifier
 Text("Custom Headline").headlineStyle(22)
 ```
-
-### Updating Colors
-
-1. Edit color definitions in `documentation/ColorScheme.md`
-2. Run the color asset generation script:
-   ```bash
-   cd /Users/bh/Desktop/project
-   ./documentation/scripts/generate-color-assets.sh
-   ```
-3. Edit the color definitions in `BetFreeApp/Assets/BFColors.swift` to match
-4. Clear Xcode's DerivedData:
-   ```bash
-   rm -rf ~/Library/Developer/Xcode/DerivedData
-   ```
-5. Rebuild and test the app
 
 ### Using Colors in Swift
 
