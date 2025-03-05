@@ -16,7 +16,7 @@ struct BFOnboardingIllustrations {
             ZStack {
                 // Background circles
                 Circle()
-                    .stroke(BFColors.deepSpaceBlue.opacity(0.2), lineWidth: size * 0.01)
+                    .stroke(BFColors.primary.opacity(0.2), lineWidth: size * 0.01)
                     .frame(width: size * 0.9, height: size * 0.9)
                 
                 // Broken chain link concept
@@ -35,8 +35,8 @@ struct BFOnboardingIllustrations {
                     .stroke(
                         LinearGradient(
                             gradient: Gradient(colors: [
-                                BFColors.oxfordBlue,
-                                BFColors.deepSpaceBlue
+                                BFColors.primary,
+                                BFColors.primary.opacity(0.7)
                             ]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -58,8 +58,8 @@ struct BFOnboardingIllustrations {
                     .stroke(
                         LinearGradient(
                             gradient: Gradient(colors: [
-                                BFColors.oxfordBlue,
-                                BFColors.deepSpaceBlue
+                                BFColors.primary,
+                                BFColors.primary.opacity(0.7)
                             ]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -81,8 +81,8 @@ struct BFOnboardingIllustrations {
                     .stroke(
                         LinearGradient(
                             gradient: Gradient(colors: [
-                                BFColors.vibrantTeal,
-                                BFColors.oceanBlue
+                                BFColors.secondary,
+                                BFColors.calm
                             ]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -90,7 +90,7 @@ struct BFOnboardingIllustrations {
                         style: StrokeStyle(lineWidth: size * 0.04, lineCap: .round)
                     )
                     .frame(width: size * 0.45, height: size * 0.45)
-                    .shadow(color: BFColors.vibrantTeal.opacity(0.4), radius: size * 0.04)
+                    .shadow(color: BFColors.secondary.opacity(0.4), radius: size * 0.04)
                     .offset(y: isAnimating ? size * 0.02 : -size * 0.02)
                     .animation(
                         Animation.easeInOut(duration: 2.5)
@@ -118,8 +118,8 @@ struct BFOnboardingIllustrations {
                     .fill(
                         RadialGradient(
                             gradient: Gradient(colors: [
-                                BFColors.deepSpaceBlue.opacity(0.1),
-                                BFColors.deepSpaceBlue.opacity(0.0)
+                                BFColors.primary.opacity(0.1),
+                                BFColors.primary.opacity(0.0)
                             ]),
                             center: .center,
                             startRadius: 0,
@@ -140,7 +140,7 @@ struct BFOnboardingIllustrations {
                         )
                     }
                     .stroke(
-                        BFColors.oceanBlue.opacity(0.3),
+                        BFColors.calm.opacity(0.3),
                         style: StrokeStyle(lineWidth: size * 0.03, lineCap: .round)
                     )
                     
@@ -157,8 +157,8 @@ struct BFOnboardingIllustrations {
                     .stroke(
                         LinearGradient(
                             gradient: Gradient(colors: [
-                                BFColors.vibrantTeal,
-                                BFColors.oceanBlue
+                                BFColors.secondary,
+                                BFColors.calm
                             ]),
                             startPoint: .leading,
                             endPoint: .trailing
@@ -168,9 +168,9 @@ struct BFOnboardingIllustrations {
                     
                     // Progress indicator dot
                     Circle()
-                        .fill(BFColors.vibrantTeal)
+                        .fill(BFColors.secondary)
                         .frame(width: size * 0.08, height: size * 0.08)
-                        .shadow(color: BFColors.vibrantTeal.opacity(0.5), radius: size * 0.02)
+                        .shadow(color: BFColors.secondary.opacity(0.5), radius: size * 0.02)
                         .offset(
                             x: getPositionAlongPath(progress: growthProgress).x - size * 0.5,
                             y: getPositionAlongPath(progress: growthProgress).y - size * 0.5
@@ -183,7 +183,7 @@ struct BFOnboardingIllustrations {
                     Circle()
                         .trim(from: 0.1, to: 0.9)
                         .rotation(.degrees(90))
-                        .fill(BFColors.vibrantTeal.opacity(0.8))
+                        .fill(BFColors.secondary)
                         .frame(width: size * 0.1, height: size * 0.1)
                         .offset(x: size * 0.3)
                         .scaleEffect(isAnimating ? 1 : 0.7)
@@ -270,7 +270,7 @@ struct BFOnboardingIllustrations {
                 ForEach(0..<3) { i in
                     Circle()
                         .stroke(
-                            BFColors.oceanBlue.opacity(0.1),
+                            BFColors.primary.opacity(0.1),
                             lineWidth: size * 0.01
                         )
                         .frame(width: size * (0.6 + CGFloat(i) * 0.2))
@@ -290,22 +290,22 @@ struct BFOnboardingIllustrations {
                         .fill(
                             LinearGradient(
                                 gradient: Gradient(colors: [
-                                    BFColors.vibrantTeal.opacity(0.8),
-                                    BFColors.oceanBlue.opacity(0.5)
+                                    BFColors.secondary,
+                                    BFColors.calm
                                 ]),
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
                         )
                         .frame(width: size * 0.3, height: size * 0.3)
-                        .shadow(color: BFColors.vibrantTeal.opacity(0.3), radius: size * 0.05)
+                        .shadow(color: BFColors.secondary.opacity(0.3), radius: size * 0.05)
                     
                     // Wave patterns representing calm
                     ForEach(0..<3) { i in
                         Capsule()
                             .trim(from: 0.2, to: 0.8)
                             .stroke(
-                                BFColors.vibrantTeal.opacity(0.8 - Double(i) * 0.2),
+                                BFColors.secondary.opacity(0.8 - Double(i) * 0.2),
                                 lineWidth: size * 0.01
                             )
                             .frame(width: size * 0.15, height: size * (0.08 + 0.05 * CGFloat(i)))
@@ -340,7 +340,7 @@ struct BFOnboardingIllustrations {
                         if !(row == 1 && col == 1) { // Skip center
                             RoundedRectangle(cornerRadius: size * 0.02)
                                 .stroke(
-                                    BFColors.deepSpaceBlue.opacity(0.2),
+                                    BFColors.primary.opacity(0.2),
                                     lineWidth: 1
                                 )
                                 .frame(width: size * 0.15, height: size * 0.15)
@@ -365,7 +365,7 @@ struct BFOnboardingIllustrations {
                         ))
                     }
                     .stroke(
-                        BFColors.oceanBlue.opacity(isAnimating ? 0.8 : 0.3),
+                        BFColors.calm.opacity(isAnimating ? 0.8 : 0.3),
                         lineWidth: size * 0.01
                     )
                     .animation(
@@ -383,15 +383,15 @@ struct BFOnboardingIllustrations {
                     .fill(
                         LinearGradient(
                             gradient: Gradient(colors: [
-                                BFColors.vibrantTeal,
-                                BFColors.oceanBlue
+                                BFColors.secondary,
+                                BFColors.calm
                             ]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
                     .frame(width: size * 0.2, height: size * 0.2)
-                    .shadow(color: BFColors.vibrantTeal.opacity(0.4), radius: size * 0.03)
+                    .shadow(color: BFColors.secondary.opacity(0.4), radius: size * 0.03)
                     .scaleEffect(isAnimating ? 1.1 : 1)
                     .animation(
                         Animation.easeInOut(duration: 2)
@@ -405,7 +405,7 @@ struct BFOnboardingIllustrations {
                     let distance = size * 0.3
                     
                     Circle()
-                        .fill(BFColors.vibrantTeal.opacity(0.8))
+                        .fill(BFColors.secondary)
                         .frame(width: size * 0.08, height: size * 0.08)
                         .offset(
                             x: cos(angle) * distance,
@@ -481,5 +481,10 @@ struct BFOnboardingIllustrations_Previews: PreviewProvider {
         .background(BFColors.deepSpaceBlue)
         .preferredColorScheme(.dark)
         .previewDisplayName("Dark Mode")
+        
+        BFOnboardingIllustrations.BreakingFree(size: 180)
+            .previewLayout(.fixed(width: 320, height: 320))
+            .padding()
+            .background(BFColors.primary)
     }
 } 
