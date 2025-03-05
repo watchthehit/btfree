@@ -170,7 +170,7 @@ When migrating a component:
 - Phase 3: In Progress (April 2024)
   - Priority 1 Components: Completed
   - Priority 2 Components: Completed
-  - Priority 3 Components: Planned for May 2024
+  - Priority 3 Components: In Progress (Started May 2024)
 - Phase 4: Target Completion: May 2024 
 
 ### Priority 2 Components
