@@ -46,10 +46,12 @@ We've implemented a phased migration approach:
    - ✅ Updated all `.background()` modifiers to use `BFColors.background` and `BFColors.cardBackground`
    - ✅ Verified that all chart elements use consistent colors from the `BFColors` system
 
-3. **CommunityView**
+3. **CommunityView** (Completed)
    - ✅ Fixed `ProgressView` tint issue
-   - ⬜ Update all `.foregroundColor(BFTheme.accentColor)` to use `BFColors.accent`
-   - ⬜ Update all `.background()` modifiers to use `BFColors` equivalents
+   - ✅ Updated all `.foregroundColor(BFTheme.accentColor)` to use `BFColors.accent`
+   - ✅ Updated all `.foregroundColor(BFTheme.neutralLight)` to use `BFColors.textPrimary` and `BFColors.textSecondary`
+   - ✅ Updated all `.background()` modifiers to use `BFColors` equivalents
+   - ✅ Verified all dividers and UI elements use consistent colors from the `BFColors` system
 
 #### Priority 2 Components (Week 3-4)
 

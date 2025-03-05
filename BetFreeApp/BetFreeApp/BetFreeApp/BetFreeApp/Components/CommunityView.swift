@@ -15,27 +15,27 @@ struct CommunityView: View {
                         // Profile image
                         ZStack {
                             Circle()
-                                .fill(BFTheme.cardBackground)
+                                .fill(BFColors.cardBackground)
                                 .frame(width: 70, height: 70)
                             
                             Text(viewModel.userInitials)
                                 .font(.system(size: 28, weight: .bold))
-                                .foregroundColor(BFTheme.accentColor)
+                                .foregroundColor(BFColors.accent)
                         }
                         
                         // Stats
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Your Profile")
                                 .font(BFTheme.Typography.caption())
-                                .foregroundColor(BFTheme.neutralLight.opacity(0.7))
+                                .foregroundColor(BFColors.textSecondary)
                             
                             Text(viewModel.username)
                                 .font(BFTheme.Typography.headline())
-                                .foregroundColor(BFTheme.neutralLight)
+                                .foregroundColor(BFColors.textPrimary)
                             
                             Text("\(viewModel.streakDays) day streak · \(viewModel.buddiesCount) buddies")
                                 .font(BFTheme.Typography.body(14))
-                                .foregroundColor(BFTheme.neutralLight.opacity(0.8))
+                                .foregroundColor(BFColors.textSecondary)
                         }
                         
                         Spacer()
@@ -60,7 +60,7 @@ struct CommunityView: View {
                             .padding(.horizontal, 16)
                             .background(
                                 Capsule()
-                                    .fill(BFTheme.primaryColor)
+                                    .fill(BFColors.primary)
                             )
                         }
                         
@@ -74,12 +74,12 @@ struct CommunityView: View {
                                 Text("My Code")
                                     .font(BFTheme.Typography.button(14))
                             }
-                            .foregroundColor(BFTheme.neutralDark)
+                            .foregroundColor(BFColors.textDark)
                             .padding(.vertical, 10)
                             .padding(.horizontal, 16)
                             .background(
                                 Capsule()
-                                    .fill(BFTheme.neutralLight.opacity(0.9))
+                                    .fill(BFColors.textSecondary)
                             )
                         }
                         
@@ -91,7 +91,7 @@ struct CommunityView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("LEADERBOARD")
                             .font(BFTheme.Typography.caption(12))
-                            .foregroundColor(BFTheme.neutralLight.opacity(0.7))
+                            .foregroundColor(BFColors.textSecondary)
                             .tracking(1)
                             .padding(.leading)
                         
@@ -100,18 +100,18 @@ struct CommunityView: View {
                             VStack(spacing: 16) {
                                 Image(systemName: "person.2")
                                     .font(.system(size: 40))
-                                    .foregroundColor(BFTheme.neutralLight.opacity(0.4))
+                                    .foregroundColor(BFColors.textTertiary)
                                     .padding(.top, 20)
                                 
                                 Text("Connect with friends to see who can maintain the longest streak!")
                                     .font(BFTheme.Typography.body())
-                                    .foregroundColor(BFTheme.neutralLight.opacity(0.7))
+                                    .foregroundColor(BFColors.textSecondary)
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 40)
                                     .padding(.bottom, 20)
                             }
                             .frame(maxWidth: .infinity)
-                            .background(BFTheme.cardBackground)
+                            .background(BFColors.cardBackground)
                             .cornerRadius(16)
                             .padding(.horizontal)
                         } else {
@@ -122,12 +122,12 @@ struct CommunityView: View {
                                     
                                     if entry.id != viewModel.leaderboardEntries.last?.id {
                                         Divider()
-                                            .background(BFTheme.neutralLight.opacity(0.1))
+                                            .background(BFColors.divider)
                                             .padding(.leading, 70)
                                     }
                                 }
                             }
-                            .background(BFTheme.cardBackground)
+                            .background(BFColors.cardBackground)
                             .cornerRadius(16)
                             .padding(.horizontal)
                         }
@@ -137,7 +137,7 @@ struct CommunityView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("RECENT ACTIVITY")
                             .font(BFTheme.Typography.caption(12))
-                            .foregroundColor(BFTheme.neutralLight.opacity(0.7))
+                            .foregroundColor(BFColors.textSecondary)
                             .tracking(1)
                             .padding(.leading)
                         
@@ -147,12 +147,12 @@ struct CommunityView: View {
                                 
                                 if activity.id != viewModel.activityFeed.last?.id {
                                     Divider()
-                                        .background(BFTheme.neutralLight.opacity(0.1))
+                                        .background(BFColors.divider)
                                         .padding(.leading, 56)
                                 }
                             }
                         }
-                        .background(BFTheme.cardBackground)
+                        .background(BFColors.cardBackground)
                         .cornerRadius(16)
                         .padding(.horizontal)
                     }
@@ -161,7 +161,7 @@ struct CommunityView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("CHALLENGES")
                             .font(BFTheme.Typography.caption(12))
-                            .foregroundColor(BFTheme.neutralLight.opacity(0.7))
+                            .foregroundColor(BFColors.textSecondary)
                             .tracking(1)
                             .padding(.leading)
                         
@@ -186,21 +186,21 @@ struct CommunityView: View {
                                     Text("Create New Challenge")
                                         .font(BFTheme.Typography.button(14))
                                 }
-                                .foregroundColor(BFTheme.accentColor)
+                                .foregroundColor(BFColors.accent)
                                 .padding(.vertical, 12)
                                 .frame(maxWidth: .infinity)
                                 .background(
                                     RoundedRectangle(cornerRadius: 12)
-                                        .stroke(BFTheme.accentColor.opacity(0.5), lineWidth: 1)
+                                        .stroke(BFColors.accent.opacity(0.5), lineWidth: 1)
                                         .background(
                                             RoundedRectangle(cornerRadius: 12)
-                                                .fill(BFTheme.accentColor.opacity(0.05))
+                                                .fill(BFColors.accent.opacity(0.05))
                                         )
                                 )
                             }
                         }
                         .padding()
-                        .background(BFTheme.cardBackground)
+                        .background(BFColors.cardBackground)
                         .cornerRadius(16)
                         .padding(.horizontal)
                     }
@@ -208,7 +208,7 @@ struct CommunityView: View {
                     Spacer(minLength: 20)
                 }
             }
-            .background(BFTheme.background.ignoresSafeArea())
+            .background(BFColors.background.ignoresSafeArea())
             .navigationTitle("Community")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -234,7 +234,7 @@ struct CommunityView: View {
                     } label: {
                         Image(systemName: "ellipsis.circle")
                             .font(.system(size: 18))
-                            .foregroundColor(BFTheme.neutralLight)
+                            .foregroundColor(BFColors.textPrimary)
                     }
                 }
             }
@@ -278,7 +278,7 @@ struct LeaderboardRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(entry.name)
                     .font(BFTheme.Typography.body())
-                    .foregroundColor(isCurrentUser ? BFTheme.accentColor : BFTheme.neutralLight)
+                    .foregroundColor(isCurrentUser ? BFColors.accent : BFColors.textPrimary)
                 
                 HStack(spacing: 6) {
                     Image(systemName: "flame.fill")
@@ -287,7 +287,7 @@ struct LeaderboardRow: View {
                     
                     Text("\(entry.streakDays) day streak")
                         .font(BFTheme.Typography.caption())
-                        .foregroundColor(BFTheme.neutralLight.opacity(0.7))
+                        .foregroundColor(BFColors.textSecondary)
                 }
             }
             
@@ -310,7 +310,7 @@ struct LeaderboardRow: View {
         }
         .padding(.vertical, 12)
         .padding(.horizontal, 16)
-        .background(isCurrentUser ? BFTheme.accentColor.opacity(0.05) : Color.clear)
+        .background(isCurrentUser ? BFColors.accent.opacity(0.05) : Color.clear)
     }
     
     var rankColor: Color {
@@ -322,7 +322,7 @@ struct LeaderboardRow: View {
         case 3:
             return Color(hex: "#CD7F32") // Bronze
         default:
-            return BFTheme.neutralLight.opacity(0.6)
+            return BFColors.textTertiary
         }
     }
 }
@@ -348,11 +348,11 @@ struct ActivityRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(activity.description)
                     .font(BFTheme.Typography.body(14))
-                    .foregroundColor(BFTheme.neutralLight)
+                    .foregroundColor(BFColors.textSecondary)
                 
                 Text(activity.timeAgo)
                     .font(BFTheme.Typography.caption(12))
-                    .foregroundColor(BFTheme.neutralLight.opacity(0.6))
+                    .foregroundColor(BFColors.textSecondary.opacity(0.6))
             }
             
             Spacer()
@@ -386,7 +386,7 @@ struct ChallengeCard: View {
                 
                 Text(title)
                     .font(BFTheme.Typography.headline())
-                    .foregroundColor(BFTheme.neutralLight)
+                    .foregroundColor(BFColors.textSecondary)
                 
                 Spacer()
                 
@@ -403,23 +403,23 @@ struct ChallengeCard: View {
             
             Text(description)
                 .font(BFTheme.Typography.body(14))
-                .foregroundColor(BFTheme.neutralLight.opacity(0.8))
+                .foregroundColor(BFColors.textSecondary.opacity(0.8))
             
             // Progress bar with proper tint styling
             VStack(spacing: 6) {
                 ProgressView(value: progress)
-                    .tint(BFTheme.accentColor)
+                    .tint(BFColors.accent)
                 
                 HStack {
                     Text("\(Int(progress * 100))% Complete")
                         .font(BFTheme.Typography.caption())
-                        .foregroundColor(BFTheme.neutralLight.opacity(0.7))
+                        .foregroundColor(BFColors.textSecondary.opacity(0.7))
                     
                     Spacer()
                     
                     Text("\(participantCount) participants")
                         .font(BFTheme.Typography.caption())
-                        .foregroundColor(BFTheme.neutralLight.opacity(0.7))
+                        .foregroundColor(BFColors.textSecondary.opacity(0.7))
                 }
             }
             .padding(.top, 4)
@@ -441,16 +441,16 @@ struct InviteBuddySheet: View {
                 // Header image
                 Image(systemName: "person.2.circle.fill")
                     .font(.system(size: 60))
-                    .foregroundColor(BFTheme.accentColor)
+                    .foregroundColor(BFColors.accent)
                     .padding(.top, 20)
                 
                 Text("Invite a Buddy")
                     .font(BFTheme.Typography.title())
-                    .foregroundColor(BFTheme.neutralLight)
+                    .foregroundColor(BFColors.textPrimary)
                 
                 Text("Support each other on your journey to bet-free living")
                     .font(BFTheme.Typography.body())
-                    .foregroundColor(BFTheme.neutralLight.opacity(0.8))
+                    .foregroundColor(BFColors.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 20)
                 
@@ -459,12 +459,12 @@ struct InviteBuddySheet: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Friend's Email")
                             .font(BFTheme.Typography.caption())
-                            .foregroundColor(BFTheme.neutralLight.opacity(0.8))
+                            .foregroundColor(BFColors.textSecondary)
                         
                         TextField("Enter email address", text: $email)
                             .font(BFTheme.Typography.body())
                             .padding()
-                            .background(BFTheme.cardBackground)
+                            .background(BFColors.cardBackground)
                             .cornerRadius(12)
                             .autocapitalization(.none)
                             .keyboardType(.emailAddress)
@@ -474,13 +474,13 @@ struct InviteBuddySheet: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Personal Message")
                             .font(BFTheme.Typography.caption())
-                            .foregroundColor(BFTheme.neutralLight.opacity(0.8))
+                            .foregroundColor(BFColors.textSecondary)
                         
                         TextEditor(text: $message)
                             .font(BFTheme.Typography.body())
                             .padding()
                             .frame(height: 100)
-                            .background(BFTheme.cardBackground)
+                            .background(BFColors.cardBackground)
                             .cornerRadius(12)
                     }
                 }
@@ -501,7 +501,7 @@ struct InviteBuddySheet: View {
                         .frame(maxWidth: .infinity)
                         .background(
                             LinearGradient(
-                                colors: [BFTheme.accentColor, BFTheme.accentColor.opacity(0.8)],
+                                colors: [BFColors.accent, BFColors.accent.opacity(0.8)],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
@@ -534,12 +534,12 @@ struct QRCodeSheet: View {
         VStack(spacing: 30) {
             Text("Your QR Code")
                 .font(BFTheme.Typography.title())
-                .foregroundColor(BFTheme.neutralLight)
+                .foregroundColor(BFColors.textPrimary)
                 .padding(.top, 40)
             
             Text("Friends can scan this to add you as a buddy")
                 .font(BFTheme.Typography.body())
-                .foregroundColor(BFTheme.neutralLight.opacity(0.8))
+                .foregroundColor(BFColors.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
             
@@ -562,7 +562,7 @@ struct QRCodeSheet: View {
             
             Text(username)
                 .font(BFTheme.Typography.headline())
-                .foregroundColor(BFTheme.neutralLight)
+                .foregroundColor(BFColors.textPrimary)
                 .padding(.top, 16)
             
             Spacer()
@@ -571,7 +571,7 @@ struct QRCodeSheet: View {
                 dismiss()
             }
             .font(BFTheme.Typography.button())
-            .foregroundColor(BFTheme.neutralLight)
+            .foregroundColor(BFColors.textPrimary)
             .padding(.bottom, 40)
         }
     }
@@ -608,7 +608,7 @@ class CommunityViewModel: ObservableObject {
         leaderboardEntries = [
             LeaderboardEntry(id: "user-456", rank: 1, name: "Sarah P.", initials: "SP", streakDays: 14, color: .orange, streakColor: .orange, badges: ["fast"]),
             LeaderboardEntry(id: "user-789", rank: 2, name: "Mike R.", initials: "MR", streakDays: 9, color: .blue, streakColor: .blue, badges: []),
-            LeaderboardEntry(id: "user-123", rank: 3, name: "John D.", initials: "JD", streakDays: 5, color: BFTheme.accentColor, streakColor: BFTheme.accentColor, badges: ["new"]),
+            LeaderboardEntry(id: "user-123", rank: 3, name: "John D.", initials: "JD", streakDays: 5, color: BFColors.accent, streakColor: BFColors.accent, badges: ["new"]),
             LeaderboardEntry(id: "user-234", rank: 4, name: "Emma L.", initials: "EL", streakDays: 3, color: .purple, streakColor: .purple, badges: [])
         ]
         
@@ -616,7 +616,7 @@ class CommunityViewModel: ObservableObject {
         activityFeed = [
             ActivityItem(id: UUID().uuidString, userInitials: "SP", description: "Sarah reached a 14-day streak", timeAgo: "2 hours ago", icon: "flame.fill", iconColor: .orange, color: .orange),
             ActivityItem(id: UUID().uuidString, userInitials: "MR", description: "Mike saved $50 by not gambling", timeAgo: "Yesterday", icon: "dollarsign.circle.fill", iconColor: .green, color: .blue),
-            ActivityItem(id: UUID().uuidString, userInitials: "JD", description: "You joined the 7-Day Challenge", timeAgo: "2 days ago", icon: "flag.fill", iconColor: .green, color: BFTheme.accentColor),
+            ActivityItem(id: UUID().uuidString, userInitials: "JD", description: "You joined the 7-Day Challenge", timeAgo: "2 days ago", icon: "flag.fill", iconColor: .green, color: BFColors.accent),
             ActivityItem(id: UUID().uuidString, userInitials: "EL", description: "Emma resisted 5 urges today", timeAgo: "3 days ago", icon: "hand.raised.fill", iconColor: .blue, color: .purple)
         ]
     }
