@@ -105,9 +105,12 @@ We've implemented a phased migration approach:
    - ✅ Confirmed all components use standard color properties
    - ⬜ Review remaining specialized components in other files
 
-3. **Documentation**
-   - ⬜ Update all code examples in documentation to use `BFColors`
-   - ⬜ Create component styling guide with examples
+3. ✅ **Documentation**
+   - ✅ Updated DeveloperGuide.md with modern `BFColors` code examples
+   - ✅ Removed references to deprecated `BFTheme` system in documentation
+   - ✅ Added examples of gradient and opacity usage with `BFColors`
+   - ✅ Updated migration status in developer documentation
+   - ⬜ Create comprehensive styling guide with color usage examples
 
 ### Migration Approach
 

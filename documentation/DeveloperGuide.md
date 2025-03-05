@@ -58,17 +58,24 @@ The app uses the "Serene Recovery" color scheme as defined in `documentation/Col
 
 ### Color System
 
-The application currently uses two color systems:
+The application uses the BFColors system for all color management:
 
-1. **BFColors** (`BetFreeApp/Assets/BFColors.swift`): The primary color system with full light/dark mode support.
-2. **BFTheme** (`BetFreeApp/BetFreeApp/BetFreeApp/BetFreeApp/BFTheme.swift`): A compatibility layer that provides a bridge to the BFColors system.
+**BFColors** (`BetFreeApp/Assets/BFColors.swift`): The primary color system with full light/dark mode support, featuring:
+- Semantic color naming (e.g., `primary`, `secondary`, `accent`)
+- Functional color naming (e.g., `success`, `warning`, `error`)
+- Automatic light/dark mode adaptation
+- Gradient generators (e.g., `brandGradient()`, `primaryGradient()`)
 
-#### Migration Strategy
+#### Migration Status
 
-We are gradually migrating all code to use the BFColors system directly. The BFTheme system provides a compatibility layer during this transition.
+We have completed the migration of most components to the BFColors system:
+- ✅ All Priority 1 Components (ReminderSettingsView, ProgressView, etc.)
+- ✅ All Priority 2 Components (EnhancedOnboardingView, BFButton, BFCard)
+- 🔄 Currently working on Priority 3 Components
 
-- **New components** should use `BFColors` directly.
-- **Existing components** can continue to use `BFTheme` until they are refactored.
+**All new development should use BFColors exclusively.**
+
+> Note: The legacy BFTheme system has been deprecated and will be removed in a future update.
 
 ### Updating Colors
 
@@ -89,17 +96,26 @@ We are gradually migrating all code to use the BFColors system directly. The BFT
 
 ```swift
 // UIKit
-view.backgroundColor = BFTheme.background
+view.backgroundColor = BFColors.background
 
-// SwiftUI with BFTheme (legacy components)
-Text("Hello")
-    .foregroundColor(BFTheme.neutralLight)
-    .background(BFTheme.cardBackground)
-
-// SwiftUI with BFColors (preferred for new components)
+// SwiftUI with BFColors
 Text("Hello")
     .foregroundColor(BFColors.textPrimary)
     .background(BFColors.cardBackground)
+
+// Using gradients
+Rectangle()
+    .fill(BFColors.brandGradient())
+    
+// Using color with opacity
+Circle()
+    .stroke(BFColors.primary.opacity(0.2))
+    
+// Using semantic colors for states
+Button("Save") {
+    // action
+}
+.foregroundColor(isEnabled ? BFColors.primary : BFColors.textTertiary)
 ```
 
 ## Troubleshooting
