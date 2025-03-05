@@ -75,7 +75,7 @@ The app uses the "Serene Recovery" color scheme as defined in `documentation/Col
 
 ```swift
 // UIKit
-view.backgroundColor = BFColors.background
+view.backgroundColor = BFTheme.background
 
 // SwiftUI
 Text("Hello")
