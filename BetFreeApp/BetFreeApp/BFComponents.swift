@@ -107,7 +107,7 @@ struct BFCard<Content: View>: View {
             .padding(padding)
             .background(BFColors.cardBackground)
             .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
+            .shadow(color: BFColors.primary.opacity(0.05), radius: 8, x: 0, y: 2)
     }
 }
 
