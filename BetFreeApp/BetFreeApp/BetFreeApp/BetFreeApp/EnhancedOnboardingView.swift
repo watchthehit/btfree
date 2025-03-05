@@ -274,8 +274,8 @@ struct EnhancedOnboardingView: View {
             // Background gradient
             LinearGradient(
                 gradient: Gradient(colors: [
-                    BFTheme.background,
-                    BFTheme.cardBackground
+                    BFColors.background,
+                    BFColors.cardBackground
                 ]),
                 startPoint: .top,
                 endPoint: .bottom
@@ -296,12 +296,12 @@ struct EnhancedOnboardingView: View {
                             }) {
                                 Text("Quick Start")
                                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                                    .foregroundStyle(BFTheme.accentColor)
+                                    .foregroundStyle(BFColors.accent)
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 8)
                                     .background(
                                         Capsule()
-                                            .stroke(BFTheme.accentColor.opacity(0.5), lineWidth: 1.5)
+                                            .stroke(BFColors.accent.opacity(0.5), lineWidth: 1.5)
                                     )
                             }
                             .padding(.leading, 20)
@@ -318,12 +318,12 @@ struct EnhancedOnboardingView: View {
                         }) {
                             Text("Skip")
                                 .font(.system(size: 16, weight: .medium, design: .rounded))
-                                .foregroundStyle(BFTheme.neutralLight.opacity(0.8))
+                                .foregroundStyle(BFColors.textPrimary.opacity(0.8))
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 8)
                                 .background(
                                     Capsule()
-                                        .fill(BFTheme.neutralDark.opacity(0.15))
+                                        .fill(BFColors.primary.opacity(0.15))
                                 )
                         }
                         .padding(.trailing, 20)
@@ -380,13 +380,13 @@ struct EnhancedOnboardingView: View {
                             .background(
                                 LinearGradient(
                                     gradient: Gradient(colors: viewModel.currentPage < pages.count ? 
-                                        [BFTheme.primaryColor, BFTheme.primaryColor.opacity(0.8)] : 
-                                        [BFTheme.accentColor, BFTheme.accentColor.opacity(0.8)]),
+                                        [BFColors.primary, BFColors.primary.opacity(0.8)] : 
+                                        [BFColors.accent, BFColors.accent.opacity(0.8)]),
                                     startPoint: .leading,
                                     endPoint: .trailing
                                 )
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .shadow(color: (viewModel.currentPage < pages.count ? BFTheme.primaryColor : BFTheme.accentColor).opacity(0.3), 
+                                .shadow(color: (viewModel.currentPage < pages.count ? BFColors.primary : BFColors.accent).opacity(0.3), 
                                         radius: 10, x: 0, y: 5)
                             )
                         }
@@ -419,14 +419,14 @@ struct ProgressIndicators: View {
                 ZStack(alignment: .leading) {
                     // Background bar
                     Capsule()
-                        .fill(BFTheme.neutralLight.opacity(0.2))
+                        .fill(BFColors.textPrimary.opacity(0.2))
                         .frame(height: 6)
                     
                     // Progress bar
                     Capsule()
                         .fill(
                             LinearGradient(
-                                gradient: Gradient(colors: [BFTheme.primaryColor, BFTheme.primaryColor.opacity(0.8)]),
+                                gradient: Gradient(colors: [BFColors.primary, BFColors.primary.opacity(0.8)]),
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
@@ -441,7 +441,7 @@ struct ProgressIndicators: View {
             // Step text
             Text("\(currentPage + 1)/\(totalPages)")
                 .font(BFTypography.caption())
-                .foregroundStyle(BFTheme.neutralLight.opacity(0.8))
+                .foregroundStyle(BFColors.textPrimary.opacity(0.8))
                 .padding(.top, 4)
         }
     }
@@ -457,7 +457,7 @@ struct OnboardingPageView: View {
             ZStack {
                 // Background effect
                 Circle()
-                    .fill(BFTheme.primaryColor.opacity(0.1))
+                    .fill(BFColors.primary.opacity(0.1))
                     .frame(width: 200, height: 200)
                 
                 // Illustration view
@@ -465,7 +465,7 @@ struct OnboardingPageView: View {
                     .scaleEffect(1.0)
                     .opacity(1)
                     .brightness(0.05)
-                    .shadow(color: BFTheme.primaryColor.opacity(0.3), radius: 10, x: 0, y: 5)
+                    .shadow(color: BFColors.primary.opacity(0.3), radius: 10, x: 0, y: 5)
             }
             .padding(.bottom, 20)
             
@@ -473,14 +473,14 @@ struct OnboardingPageView: View {
             VStack(alignment: .center, spacing: 16) {
                 Text(page.title)
                     .font(BFTypography.title())
-                    .foregroundColor(BFTheme.neutralLight)
+                    .foregroundColor(BFColors.textPrimary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 10)
                 
                 Text(page.description)
                     .font(BFTypography.body())
-                    .foregroundColor(BFTheme.neutralLight)
+                    .foregroundColor(BFColors.textPrimary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 24)
@@ -491,7 +491,7 @@ struct OnboardingPageView: View {
             .padding(.vertical, 20)
             .background(
                 RoundedRectangle(cornerRadius: 20)
-                    .fill(Color(BFTheme.cardBackground.description).opacity(0.9))
+                    .fill(Color(BFColors.cardBackground.description).opacity(0.9))
                     .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
             )
             .padding(.horizontal, 20)
@@ -608,7 +608,7 @@ struct OnboardingPaywallView: View {
                     .padding(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                     .background(
                         Capsule()
-                            .fill(BFTheme.accentColor)
+                            .fill(BFColors.accent)
                     )
                     .opacity(hasAppeared ? 1 : 0)
                     .animation(Animation.easeOut(duration: 0.5).delay(0.15), value: hasAppeared)
@@ -649,13 +649,13 @@ struct OnboardingPaywallView: View {
                         )
                         
                         // Very subtle accent color influence
-                        BFTheme.accentColor.opacity(0.03)
+                        BFColors.accent.opacity(0.03)
                     }
                 )
                 .overlay(
                     // Add subtle border for definition
                     RoundedRectangle(cornerRadius: 16)
-                        .stroke(BFTheme.accentColor.opacity(0.2), lineWidth: 1)
+                        .stroke(BFColors.accent.opacity(0.2), lineWidth: 1)
                 )
                 .cornerRadius(16)
                 .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
@@ -666,7 +666,7 @@ struct OnboardingPaywallView: View {
                     Text("30% OFF - LIMITED TIME OFFER")
                         .font(BFTypography.caption(12))
                         .fontWeight(.bold)
-                        .foregroundColor(BFTheme.accentColor)
+                        .foregroundColor(BFColors.accent)
                         .padding(.vertical, 8)
                         .padding(.top, 4)
                         .transition(.opacity)
@@ -703,7 +703,7 @@ struct OnboardingPaywallView: View {
                         } label: {
                             Text(showAllPlans ? "Show Fewer Options" : "See All Plans")
                                 .font(BFTypography.caption())
-                                .foregroundColor(BFTheme.primaryColor)
+                                .foregroundStyle(BFColors.primary)
                         }
                         .padding(.top, 4)
                         .opacity(hasAppeared ? 1 : 0)
@@ -739,12 +739,12 @@ struct OnboardingPaywallView: View {
                         .padding(.vertical, 16)
                         .background(
                             LinearGradient(
-                                gradient: Gradient(colors: [BFTheme.accentColor, BFTheme.accentColor.opacity(0.8)]),
+                                gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.8)]),
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
                             .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .shadow(color: BFTheme.accentColor.opacity(0.3), radius: 10, x: 0, y: 5)
+                            .shadow(color: BFColors.accent.opacity(0.3), radius: 10, x: 0, y: 5)
                         )
                     }
                     .padding(.horizontal, 20)
@@ -762,7 +762,7 @@ struct OnboardingPaywallView: View {
                     } label: {
                         Text("Continue with limited access")
                             .font(BFTypography.body(16))
-                            .foregroundStyle(BFTheme.neutralLight.opacity(0.8))
+                            .foregroundStyle(BFColors.textPrimary.opacity(0.8))
                             .padding(.vertical, 8)
                     }
                     .opacity(hasAppeared ? 1 : 0)
@@ -771,7 +771,7 @@ struct OnboardingPaywallView: View {
                     // Privacy and terms
                     Text("Trial auto-converts to subscription. Cancel anytime.")
                         .font(BFTypography.caption(12))
-                        .foregroundStyle(BFTheme.neutralLight.opacity(0.6))
+                        .foregroundStyle(BFColors.textPrimary.opacity(0.6))
                         .multilineTextAlignment(.center)
                         .padding(.top, 4)
                         .padding(.horizontal, 20)
@@ -804,11 +804,11 @@ struct FeatureRow: View {
             Image(systemName: icon)
                 .font(.system(size: 24))
                 .symbolRenderingMode(.palette)
-                .foregroundStyle(BFTheme.accentColor, BFTheme.neutralLight.opacity(0.3))
+                .foregroundStyle(BFColors.accent, BFColors.textPrimary.opacity(0.3))
                 .frame(width: 36, height: 36)
                 .background(
                     Circle()
-                        .fill(BFTheme.accentColor.opacity(0.15))
+                        .fill(BFColors.accent.opacity(0.15))
                 )
             
             VStack(alignment: .leading, spacing: 2) {
@@ -844,24 +844,24 @@ struct PricingOption: View {
                 Text("Best Value")
                     .font(BFTypography.caption(11))
                     .fontWeight(.bold)
-                    .foregroundStyle(BFTheme.accentColor)
+                    .foregroundStyle(BFColors.accent)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
                     .background(
                         RoundedRectangle(cornerRadius: 8)
-                            .fill(BFTheme.accentColor.opacity(0.15))
+                            .fill(BFColors.accent.opacity(0.15))
                     )
                     .padding(.bottom, 2)
             } else if isPromoted {
                 Text("Popular")
                     .font(BFTypography.caption(11))
                     .fontWeight(.bold)
-                    .foregroundStyle(BFTheme.primaryColor)
+                    .foregroundStyle(BFColors.primary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
                     .background(
                         RoundedRectangle(cornerRadius: 8)
-                            .fill(BFTheme.primaryColor.opacity(0.15))
+                            .fill(BFColors.primary.opacity(0.15))
                     )
                     .padding(.bottom, 2)
             } else {
@@ -871,33 +871,33 @@ struct PricingOption: View {
             
                 Text(title)
                 .font(BFTypography.headline(16))
-                .foregroundStyle(BFTheme.neutralLight)
+                .foregroundStyle(BFColors.textPrimary)
             
             Text(price)
                 .font(BFTypography.title(22))
-                .foregroundStyle(BFTheme.neutralLight)
+                .foregroundStyle(BFColors.textPrimary)
             
             if let original = originalPrice {
                 Text(original)
                     .font(BFTypography.caption(12))
-                    .foregroundStyle(BFTheme.neutralLight.opacity(0.6))
-                    .strikethrough(true, color: BFTheme.neutralLight.opacity(0.6))
+                    .foregroundStyle(BFColors.textPrimary.opacity(0.6))
+                    .strikethrough(true, color: BFColors.textPrimary.opacity(0.6))
                     .padding(.top, -6)
             }
             
             Text(subtitle)
                 .font(BFTypography.body(14))
-                .foregroundStyle(BFTheme.neutralLight)
+                .foregroundStyle(BFColors.textPrimary)
         }
         .padding(.vertical, 12)
         .padding(.horizontal, 8)
             .frame(maxWidth: .infinity)
             .background(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(isSelected ? BFTheme.accentColor : BFTheme.neutralLight.opacity(0.3), lineWidth: 2)
+                .stroke(isSelected ? BFColors.accent : BFColors.textPrimary.opacity(0.3), lineWidth: 2)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(isSelected ? BFTheme.cardBackground.opacity(0.8) : BFTheme.cardBackground.opacity(0.5))
+                        .fill(isSelected ? BFColors.cardBackground.opacity(0.8) : BFColors.cardBackground.opacity(0.5))
                 )
         )
         .onTapGesture {
@@ -915,7 +915,7 @@ struct BasicSetupView: View {
             // Title
             Text("Ready to start tracking?")
                 .font(BFTypography.title(28))
-                .foregroundColor(BFTheme.neutralLight)
+                .foregroundColor(BFColors.textPrimary)
                     .multilineTextAlignment(.center)
                 .padding(.top, 40)
             
@@ -925,7 +925,7 @@ struct BasicSetupView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("What's your goal?")
                         .font(BFTypography.headline())
-                        .foregroundColor(BFTheme.neutralLight)
+                        .foregroundColor(BFColors.textPrimary)
                     
                     HStack(spacing: 12) {
                         ForEach(viewModel.goals, id: \.self) { goal in
@@ -943,19 +943,19 @@ struct BasicSetupView: View {
                 .padding(.horizontal, 20)
                 
                 Divider()
-                    .background(BFTheme.neutralLight.opacity(0.2))
+                    .background(BFColors.textPrimary.opacity(0.2))
                     .padding(.horizontal, 40)
                 
                 // Daily urge goal
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Set a daily urge limit")
                         .font(BFTypography.headline())
-                        .foregroundColor(BFTheme.neutralLight)
+                        .foregroundColor(BFColors.textPrimary)
                     
                     HStack {
                         Text("\(viewModel.dailyMindfulnessGoal) urges per day")
                             .font(BFTypography.body(18))
-                            .foregroundColor(BFTheme.neutralLight)
+                            .foregroundColor(BFColors.textPrimary)
                             .frame(width: 180)
             
             Spacer()
@@ -970,7 +970,7 @@ struct BasicSetupView: View {
                             }) {
                                 Image(systemName: "minus.circle.fill")
                                     .font(.system(size: 30))
-                                    .foregroundColor(BFTheme.primaryColor)
+                                    .foregroundColor(BFColors.primary)
                             }
                             
                             Button(action: {
@@ -981,7 +981,7 @@ struct BasicSetupView: View {
                             }) {
                                 Image(systemName: "plus.circle.fill")
                                     .font(.system(size: 30))
-                                    .foregroundColor(BFTheme.primaryColor)
+                                    .foregroundColor(BFColors.primary)
                             }
                         }
                     }
@@ -989,7 +989,7 @@ struct BasicSetupView: View {
                     .padding(.vertical, 14)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(BFTheme.cardBackground)
+                            .fill(BFColors.cardBackground)
                     )
                 }
                 .padding(.horizontal, 20)
@@ -1012,17 +1012,17 @@ struct GoalButton: View {
         Button(action: action) {
             Text(title)
                 .font(BFTypography.body())
-                .foregroundColor(isSelected ? .white : BFTheme.neutralLight)
+                .foregroundColor(isSelected ? .white : BFColors.textPrimary)
                 .padding(.vertical, 12)
                 .padding(.horizontal, 16)
                 .frame(maxWidth: .infinity)
                 .background(
                     RoundedRectangle(cornerRadius: 10)
-                        .fill(isSelected ? BFTheme.accentColor : BFTheme.cardBackground)
+                        .fill(isSelected ? BFColors.accent : BFColors.cardBackground)
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 10)
-                        .stroke(BFTheme.accentColor.opacity(isSelected ? 0 : 0.5), lineWidth: 1.5)
+                        .stroke(BFColors.accent.opacity(isSelected ? 0 : 0.5), lineWidth: 1.5)
                 )
         }
         .buttonStyle(PlainButtonStyle())

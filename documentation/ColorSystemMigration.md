@@ -134,7 +134,7 @@ For each component:
 - ✅ Create `BFTypography.swift` with all typography functions
 - ✅ Update `ReminderSettingsView` to use `BFTypography`
 - ✅ Update `BFPaywallScreens` to use `BFColors` 
-- ✅ Update `EnhancedOnboardingView` to use `BFTypography`
+- ✅ Update `EnhancedOnboardingView` to use `BFTypography` and `BFColors`
 - ✅ Update `BetTrackingView` to use `BFTypography`
 - ✅ Update remaining components to use `BFTypography`:
   - ✅ `ProgressView`
