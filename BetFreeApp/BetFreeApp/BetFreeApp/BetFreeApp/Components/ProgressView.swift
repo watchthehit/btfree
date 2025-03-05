@@ -96,7 +96,7 @@ struct ProgressTrackingView: View {
                     .frame(maxWidth: .infinity)
                     .background(
                         LinearGradient(
-                            colors: [BFTheme.primaryColor, BFTheme.primaryColor.opacity(0.8)],
+                            colors: [BFColors.primary, BFColors.primary.opacity(0.8)],
                             startPoint: .leading,
                             endPoint: .trailing
                         )
@@ -314,13 +314,13 @@ struct GoalSettingsSheet: View {
             VStack(spacing: 16) {
                 Text("\(selectedGoal)")
                     .font(.system(size: 60, weight: .bold, design: .rounded))
-                    .foregroundColor(BFTheme.accentColor)
+                    .foregroundColor(BFColors.accent)
                 
                 Slider(value: Binding(
                     get: { Double(selectedGoal) },
                     set: { selectedGoal = Int($0) }
                 ), in: 0...20, step: 1)
-                .tint(BFTheme.accentColor)
+                .tint(BFColors.accent)
                 .padding(.horizontal)
                 
                 HStack {
@@ -377,7 +377,7 @@ struct GoalSettingsSheet: View {
                     .padding(.vertical, 16)
                     .frame(maxWidth: .infinity)
                     .background(
-                        BFTheme.accentColor
+                        BFColors.accent
                             .cornerRadius(12)
                     )
             }
@@ -406,17 +406,17 @@ struct TimeRangeMenu: View {
             HStack {
                 Text(selectedTimeRange.rawValue)
                     .font(BFTheme.Typography.caption())
-                    .foregroundColor(BFTheme.primaryColor)
+                    .foregroundColor(BFColors.primary)
                 
                 Image(systemName: "chevron.down")
                     .font(.system(size: 12))
-                    .foregroundColor(BFTheme.primaryColor)
+                    .foregroundColor(BFColors.primary)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
             .background(
                 Capsule()
-                    .fill(BFTheme.primaryColor.opacity(0.15))
+                    .fill(BFColors.primary.opacity(0.15))
             )
         }
     }
@@ -493,7 +493,7 @@ struct UrgesChartView: View {
                 )
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [BFTheme.accentColor, BFTheme.accentColor.opacity(0.3)],
+                        colors: [BFColors.accent, BFColors.accent.opacity(0.3)],
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -504,7 +504,7 @@ struct UrgesChartView: View {
                     x: .value("Date", dataPoint.date),
                     y: .value("Urges", dataPoint.urges)
                 )
-                .foregroundStyle(BFTheme.accentColor)
+                .foregroundStyle(BFColors.accent)
                 .interpolationMethod(.catmullRom)
                 
                 PointMark(
@@ -528,6 +528,10 @@ struct UrgesChartView: View {
                 }
             }
         }
+        .chartXAxis {
+            // ... existing code ...
+        }
+        .tint(BFColors.accent)
     }
 }
 
@@ -542,7 +546,7 @@ struct WeeklyComparisonChart: View {
                     x: .value("Day", dataPoint.day),
                     y: .value("Value", dataPoint.thisWeek)
                 )
-                .foregroundStyle(BFTheme.accentColor)
+                .foregroundStyle(BFColors.accent)
                 .position(by: .value("Week", "This Week"))
                 .annotation(position: .top) {
                     if dataPoint.thisWeek > 0 {
@@ -556,7 +560,7 @@ struct WeeklyComparisonChart: View {
                     x: .value("Day", dataPoint.day),
                     y: .value("Value", dataPoint.lastWeek)
                 )
-                .foregroundStyle(BFTheme.primaryColor.opacity(0.5))
+                .foregroundStyle(BFColors.primary.opacity(0.5))
                 .position(by: .value("Week", "Last Week"))
                 .annotation(position: .top) {
                     if dataPoint.lastWeek > 0 {

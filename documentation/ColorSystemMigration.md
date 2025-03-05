@@ -23,7 +23,10 @@ We've implemented a phased migration approach:
 
 - ✅ Fixed property name mismatch from `BFTheme.backgroundColor` to `BFTheme.background`.
 - ✅ Corrected the `ProgressView` tint implementation in `CommunityView.swift`.
-- ⬜ Review and update all `.tint()` usages throughout the codebase.
+- ✅ Reviewed and updated all `.tint()` usages throughout the codebase:
+  - Updated `ReminderSettingsView.swift` to use `BFColors.accent` for all toggles
+  - Updated `ProgressView.swift` charts and UI elements to use `BFColors.accent` and `BFColors.primary`
+  - Ensured consistent tint application across all interactive elements
 - ⬜ Fix any SwiftUI modifiers that have similar issues.
 
 ### Phase 3: Component-by-Component Migration (Planned)
