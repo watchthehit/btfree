@@ -366,7 +366,7 @@ struct EnhancedOnboardingView: View {
                         }) {
                             HStack(spacing: 12) {
                                 Text(viewModel.currentPage < pages.count ? "Continue" : "Get Started")
-                                    .font(BFTheme.Typography.button())
+                                    .font(BFTypography.button())
                                     .foregroundStyle(.white)
                                 
                                 if viewModel.currentPage < pages.count {
@@ -440,7 +440,7 @@ struct ProgressIndicators: View {
             
             // Step text
             Text("\(currentPage + 1)/\(totalPages)")
-                .font(BFTheme.Typography.caption())
+                .font(BFTypography.caption())
                 .foregroundStyle(BFTheme.neutralLight.opacity(0.8))
                 .padding(.top, 4)
         }
@@ -472,14 +472,14 @@ struct OnboardingPageView: View {
             // Text content
             VStack(alignment: .center, spacing: 16) {
                 Text(page.title)
-                    .font(BFTheme.Typography.title())
+                    .font(BFTypography.title())
                     .foregroundColor(BFTheme.neutralLight)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 10)
                 
                 Text(page.description)
-                    .font(BFTheme.Typography.body())
+                    .font(BFTypography.body())
                     .foregroundColor(BFTheme.neutralLight)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
@@ -576,7 +576,7 @@ struct OnboardingPaywallView: View {
                 // Header
                 VStack(spacing: 8) {
                     Text("Unlock Full Access")
-                        .font(BFTheme.Typography.title())
+                        .font(BFTypography.title())
                         .foregroundStyle(
                             .linearGradient(
                                 colors: [.white, .white.opacity(0.8)],
@@ -591,7 +591,7 @@ struct OnboardingPaywallView: View {
                         .animation(.easeOut(duration: 0.5), value: hasAppeared)
             
                     Text("Get the most out of your journey to bet-free living with premium features")
-                        .font(BFTheme.Typography.body())
+                        .font(BFTypography.body())
                         .foregroundStyle(.white.opacity(0.95))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 30)
@@ -602,7 +602,7 @@ struct OnboardingPaywallView: View {
                 
                 // Free Trial Banner
                 Text("7-DAY FREE TRIAL")
-                    .font(BFTheme.Typography.caption(14))
+                    .font(BFTypography.caption(14))
                     .fontWeight(.bold)
                     .foregroundColor(Color.white)
                     .padding(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
@@ -664,7 +664,7 @@ struct OnboardingPaywallView: View {
                 // Limited Time Offer
                 if hasAppeared {
                     Text("30% OFF - LIMITED TIME OFFER")
-                        .font(BFTheme.Typography.caption(12))
+                        .font(BFTypography.caption(12))
                         .fontWeight(.bold)
                         .foregroundColor(BFTheme.accentColor)
                         .padding(.vertical, 8)
@@ -702,7 +702,7 @@ struct OnboardingPaywallView: View {
                             }
                         } label: {
                             Text(showAllPlans ? "Show Fewer Options" : "See All Plans")
-                                .font(BFTheme.Typography.caption())
+                                .font(BFTypography.caption())
                                 .foregroundColor(BFTheme.primaryColor)
                         }
                         .padding(.top, 4)
@@ -728,7 +728,7 @@ struct OnboardingPaywallView: View {
                     } label: {
                         HStack(spacing: 12) {
                             Text("Start 7-Day Free Trial")
-                                .font(BFTheme.Typography.button())
+                                .font(BFTypography.button())
                                 .foregroundStyle(.white)
                             
                             Image(systemName: "arrow.right")
@@ -761,7 +761,7 @@ struct OnboardingPaywallView: View {
                         }
                     } label: {
                         Text("Continue with limited access")
-                            .font(BFTheme.Typography.body(16))
+                            .font(BFTypography.body(16))
                             .foregroundStyle(BFTheme.neutralLight.opacity(0.8))
                             .padding(.vertical, 8)
                     }
@@ -770,7 +770,7 @@ struct OnboardingPaywallView: View {
                     
                     // Privacy and terms
                     Text("Trial auto-converts to subscription. Cancel anytime.")
-                        .font(BFTheme.Typography.caption(12))
+                        .font(BFTypography.caption(12))
                         .foregroundStyle(BFTheme.neutralLight.opacity(0.6))
                         .multilineTextAlignment(.center)
                         .padding(.top, 4)
@@ -813,11 +813,11 @@ struct FeatureRow: View {
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(BFTheme.Typography.headline(17))
+                    .font(BFTypography.headline(17))
                     .foregroundStyle(.white)
                 
                 Text(description)
-                    .font(BFTheme.Typography.body(14))
+                    .font(BFTypography.body(14))
                     .foregroundStyle(.white.opacity(0.9))
                     .lineSpacing(2)
                     .fixedSize(horizontal: false, vertical: true)
@@ -842,7 +842,7 @@ struct PricingOption: View {
         VStack(spacing: 6) {
             if isBestValue {
                 Text("Best Value")
-                    .font(BFTheme.Typography.caption(11))
+                    .font(BFTypography.caption(11))
                     .fontWeight(.bold)
                     .foregroundStyle(BFTheme.accentColor)
                     .padding(.horizontal, 8)
@@ -854,7 +854,7 @@ struct PricingOption: View {
                     .padding(.bottom, 2)
             } else if isPromoted {
                 Text("Popular")
-                    .font(BFTheme.Typography.caption(11))
+                    .font(BFTypography.caption(11))
                     .fontWeight(.bold)
                     .foregroundStyle(BFTheme.primaryColor)
                     .padding(.horizontal, 8)
@@ -870,23 +870,23 @@ struct PricingOption: View {
             }
             
                 Text(title)
-                .font(BFTheme.Typography.headline(16))
+                .font(BFTypography.headline(16))
                 .foregroundStyle(BFTheme.neutralLight)
             
             Text(price)
-                .font(BFTheme.Typography.title(22))
+                .font(BFTypography.title(22))
                 .foregroundStyle(BFTheme.neutralLight)
             
             if let original = originalPrice {
                 Text(original)
-                    .font(BFTheme.Typography.caption(12))
+                    .font(BFTypography.caption(12))
                     .foregroundStyle(BFTheme.neutralLight.opacity(0.6))
                     .strikethrough(true, color: BFTheme.neutralLight.opacity(0.6))
                     .padding(.top, -6)
             }
             
             Text(subtitle)
-                .font(BFTheme.Typography.body(14))
+                .font(BFTypography.body(14))
                 .foregroundStyle(BFTheme.neutralLight)
         }
         .padding(.vertical, 12)
@@ -914,7 +914,7 @@ struct BasicSetupView: View {
         VStack(spacing: 25) {
             // Title
             Text("Ready to start tracking?")
-                .font(BFTheme.Typography.title(28))
+                .font(BFTypography.title(28))
                 .foregroundColor(BFTheme.neutralLight)
                     .multilineTextAlignment(.center)
                 .padding(.top, 40)
@@ -924,7 +924,7 @@ struct BasicSetupView: View {
                 // Goal selection
                 VStack(alignment: .leading, spacing: 12) {
                     Text("What's your goal?")
-                        .font(BFTheme.Typography.headline())
+                        .font(BFTypography.headline())
                         .foregroundColor(BFTheme.neutralLight)
                     
                     HStack(spacing: 12) {
@@ -949,12 +949,12 @@ struct BasicSetupView: View {
                 // Daily urge goal
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Set a daily urge limit")
-                        .font(BFTheme.Typography.headline())
+                        .font(BFTypography.headline())
                         .foregroundColor(BFTheme.neutralLight)
                     
                     HStack {
                         Text("\(viewModel.dailyMindfulnessGoal) urges per day")
-                            .font(BFTheme.Typography.body(18))
+                            .font(BFTypography.body(18))
                             .foregroundColor(BFTheme.neutralLight)
                             .frame(width: 180)
             
@@ -1011,7 +1011,7 @@ struct GoalButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(BFTheme.Typography.body())
+                .font(BFTypography.body())
                 .foregroundColor(isSelected ? .white : BFTheme.neutralLight)
                 .padding(.vertical, 12)
                 .padding(.horizontal, 16)
