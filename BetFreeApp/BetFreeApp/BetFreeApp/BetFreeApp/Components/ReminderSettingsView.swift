@@ -20,7 +20,7 @@ struct ReminderSettingsView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Receive a daily reminder to track your urges and progress")
                             .font(BFTheme.Typography.caption())
-                            .foregroundColor(BFTheme.neutralLight.opacity(0.7))
+                            .foregroundColor(BFColors.textSecondary)
                             .padding(.top, 4)
                     }
                 }
@@ -42,7 +42,7 @@ struct ReminderSettingsView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Get a reminder if you haven't tracked any urges after the specified time period")
                             .font(BFTheme.Typography.caption())
-                            .foregroundColor(BFTheme.neutralLight.opacity(0.7))
+                            .foregroundColor(BFColors.textSecondary)
                             .padding(.top, 4)
                     }
                 }
@@ -60,7 +60,7 @@ struct ReminderSettingsView: View {
                             Text("Payday Date")
                             Spacer()
                             Text(viewModel.paydayDateFormatted)
-                                .foregroundColor(BFTheme.neutralLight.opacity(0.6))
+                                .foregroundColor(BFColors.textSecondary)
                         }
                         .onTapGesture {
                             viewModel.isShowingPaydayPicker = true
@@ -76,7 +76,7 @@ struct ReminderSettingsView: View {
                                 Text(viewModel.customRiskTimes[index].name)
                                 Spacer()
                                 Text(viewModel.formatTimeRange(viewModel.customRiskTimes[index]))
-                                    .foregroundColor(BFTheme.neutralLight.opacity(0.6))
+                                    .foregroundColor(BFColors.textSecondary)
                             }
                             .contentShape(Rectangle())
                             .onTapGesture {
@@ -97,7 +97,7 @@ struct ReminderSettingsView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Get extra support during times when you're more likely to experience gambling urges")
                             .font(BFTheme.Typography.caption())
-                            .foregroundColor(BFTheme.neutralLight.opacity(0.7))
+                            .foregroundColor(BFColors.textSecondary)
                             .padding(.top, 4)
                     }
                 }
@@ -116,7 +116,7 @@ struct ReminderSettingsView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Celebrate your achievements with notifications when you reach important milestones")
                             .font(BFTheme.Typography.caption())
-                            .foregroundColor(BFTheme.neutralLight.opacity(0.7))
+                            .foregroundColor(BFColors.textSecondary)
                             .padding(.top, 4)
                     }
                 }
@@ -147,11 +147,11 @@ struct ReminderSettingsView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Notification Permission")
                             .font(BFTheme.Typography.headline())
-                            .foregroundColor(BFTheme.neutralLight)
+                            .foregroundColor(BFColors.textPrimary)
                         
                         Text("BetFree needs permission to send you notifications. If you haven't enabled notifications yet, you'll be prompted to do so when you save these settings.")
                             .font(BFTheme.Typography.caption())
-                            .foregroundColor(BFTheme.neutralLight.opacity(0.7))
+                            .foregroundColor(BFColors.textSecondary)
                         
                         if !viewModel.hasNotificationPermission {
                             Button(action: {
@@ -229,7 +229,7 @@ struct PaydayPickerView: View {
                 
                 Text("If a month doesn't have this day, the last day of the month will be used instead")
                     .font(BFTheme.Typography.caption())
-                    .foregroundColor(BFTheme.neutralLight.opacity(0.7))
+                    .foregroundColor(BFColors.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding()
             }
@@ -292,7 +292,7 @@ struct CustomRiskTimeEditor: View {
                         } label: {
                             HStack {
                                 Text(day.displayName)
-                                    .foregroundColor(BFTheme.neutralLight)
+                                    .foregroundColor(BFColors.textPrimary)
                                 
                                 Spacer()
                                 

@@ -35,9 +35,9 @@ We've implemented a phased migration approach:
 
 #### Priority 1 Components (Week 1-2)
 
-1. **ReminderSettingsView** (Started)
+1. **ReminderSettingsView** (In Progress)
    - ✅ Updated all `.tint()` modifiers to use `BFColors.accent`
-   - ⬜ Update all `.foregroundColor()` modifiers to use `BFColors` equivalents
+   - ✅ Updated all `.foregroundColor()` modifiers to use `BFColors.textPrimary` and `BFColors.textSecondary`
    - ⬜ Update all text styling to use the typography system consistently
 
 2. **ProgressView** (Completed)
