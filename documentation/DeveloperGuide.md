@@ -168,3 +168,67 @@ The duplicate files issue has been resolved. The project now has only one copy o
 5. **Clear DerivedData** when facing caching issues
 6. **Commit both code and documentation** changes together
 7. **Avoid creating duplicate files** in the project 
+
+## SwiftUI View Structuring
+
+When building complex views in SwiftUI, follow these best practices to prevent compiler issues and improve maintainability:
+
+### Breaking Down Complex Views
+
+For complex views like `CommunityView.swift`, use a component-based approach:
+
+1. **Create Smaller View Components**: Extract sections of complex views into their own view structures
+   ```swift
+   // Instead of one large view:
+   struct ComplexView: View {
+     // Lots of nested content
+   }
+   
+   // Break it down:
+   struct ComplexView: View {
+     var body: some View {
+       VStack {
+         HeaderComponent()
+         ContentComponent()
+         FooterComponent()
+       }
+     }
+   }
+   ```
+
+2. **Use Clear MARK Comments**: Organize your code with descriptive section markers
+   ```swift
+   // MARK: - Header Component
+   struct HeaderComponent: View {
+     // Implementation
+   }
+   ```
+
+3. **Pass Only Required Data**: Avoid passing entire view models to subcomponents
+   ```swift
+   // Instead of:
+   ContentComponent(viewModel: viewModel)
+   
+   // Prefer:
+   ContentComponent(items: viewModel.items, isLoading: viewModel.isLoading)
+   ```
+
+4. **Use Bindings Sparingly**: Only pass bindings when the child component needs to modify state
+   ```swift
+   struct ButtonComponent: View {
+     @Binding var isPressed: Bool
+     // Implementation
+   }
+   ```
+
+### Example: Community View Structure
+
+The `CommunityView.swift` file demonstrates these principles with components such as:
+
+- `ProfileHeaderView`: Displays user profile information
+- `ConnectButtonsView`: Handles invite and QR code buttons
+- `LeaderboardSectionView`: Manages the leaderboard display and empty states
+- `ActivitySectionView`: Shows recent activity with proper empty states
+- `ChallengesSectionView`: Displays user challenges in a horizontal scroll
+
+This approach helps prevent SwiftUI compiler issues (like "unable to type-check this expression in reasonable time") and makes the code more maintainable. 
