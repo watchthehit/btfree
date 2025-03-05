@@ -56,6 +56,20 @@ xcodebuild -scheme BetFreeApp -destination "platform=iOS Simulator,name=iPhone 1
 
 The app uses the "Serene Recovery" color scheme as defined in `documentation/ColorScheme.md`. 
 
+### Color System
+
+The application currently uses two color systems:
+
+1. **BFColors** (`BetFreeApp/Assets/BFColors.swift`): The primary color system with full light/dark mode support.
+2. **BFTheme** (`BetFreeApp/BetFreeApp/BetFreeApp/BetFreeApp/BFTheme.swift`): A compatibility layer that provides a bridge to the BFColors system.
+
+#### Migration Strategy
+
+We are gradually migrating all code to use the BFColors system directly. The BFTheme system provides a compatibility layer during this transition.
+
+- **New components** should use `BFColors` directly.
+- **Existing components** can continue to use `BFTheme` until they are refactored.
+
 ### Updating Colors
 
 1. Edit color definitions in `documentation/ColorScheme.md`
@@ -64,7 +78,7 @@ The app uses the "Serene Recovery" color scheme as defined in `documentation/Col
    cd /Users/bh/Desktop/project
    ./documentation/scripts/generate-color-assets.sh
    ```
-3. Edit the color definitions in `BetFreeApp/BetFreeApp/BetFreeApp/BetFreeApp/BFColors.swift` to match
+3. Edit the color definitions in `BetFreeApp/Assets/BFColors.swift` to match
 4. Clear Xcode's DerivedData:
    ```bash
    rm -rf ~/Library/Developer/Xcode/DerivedData
@@ -77,7 +91,12 @@ The app uses the "Serene Recovery" color scheme as defined in `documentation/Col
 // UIKit
 view.backgroundColor = BFTheme.background
 
-// SwiftUI
+// SwiftUI with BFTheme (legacy components)
+Text("Hello")
+    .foregroundColor(BFTheme.neutralLight)
+    .background(BFTheme.cardBackground)
+
+// SwiftUI with BFColors (preferred for new components)
 Text("Hello")
     .foregroundColor(BFColors.textPrimary)
     .background(BFColors.cardBackground)

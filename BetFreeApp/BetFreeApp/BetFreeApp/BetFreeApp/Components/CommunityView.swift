@@ -405,9 +405,10 @@ struct ChallengeCard: View {
                 .font(BFTheme.Typography.body(14))
                 .foregroundColor(BFTheme.neutralLight.opacity(0.8))
             
-            // Progress bar (color styling omitted to prevent compiler errors)
+            // Progress bar with proper tint styling
             VStack(spacing: 6) {
                 ProgressView(value: progress)
+                    .tint(BFTheme.accentColor)
                 
                 HStack {
                     Text("\(Int(progress * 100))% Complete")
