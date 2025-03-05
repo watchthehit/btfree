@@ -26,15 +26,15 @@ struct CommunityView: View {
                         // Stats
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Your Profile")
-                                .font(BFTheme.Typography.caption())
+                                .font(BFTypography.caption())
                                 .foregroundColor(BFColors.textSecondary)
                             
                             Text(viewModel.username)
-                                .font(BFTheme.Typography.headline())
+                                .font(BFTypography.headline())
                                 .foregroundColor(BFColors.textPrimary)
                             
                             Text("\(viewModel.streakDays) day streak · \(viewModel.buddiesCount) buddies")
-                                .font(BFTheme.Typography.body(14))
+                                .font(BFTypography.body(14))
                                 .foregroundColor(BFColors.textSecondary)
                         }
                         
@@ -53,7 +53,7 @@ struct CommunityView: View {
                                 Image(systemName: "person.badge.plus")
                                     .font(.system(size: 16))
                                 Text("Invite")
-                                    .font(BFTheme.Typography.button(14))
+                                    .font(BFTypography.button(14))
                             }
                             .foregroundColor(.white)
                             .padding(.vertical, 10)
@@ -72,7 +72,7 @@ struct CommunityView: View {
                                 Image(systemName: "qrcode")
                                     .font(.system(size: 16))
                                 Text("My Code")
-                                    .font(BFTheme.Typography.button(14))
+                                    .font(BFTypography.button(14))
                             }
                             .foregroundColor(BFColors.textDark)
                             .padding(.vertical, 10)
@@ -90,7 +90,7 @@ struct CommunityView: View {
                     // Leaderboard section
                     VStack(alignment: .leading, spacing: 12) {
                         Text("LEADERBOARD")
-                            .font(BFTheme.Typography.caption(12))
+                            .font(BFTypography.caption(12))
                             .foregroundColor(BFColors.textSecondary)
                             .tracking(1)
                             .padding(.leading)
@@ -104,7 +104,7 @@ struct CommunityView: View {
                                     .padding(.top, 20)
                                 
                                 Text("Connect with friends to see who can maintain the longest streak!")
-                                    .font(BFTheme.Typography.body())
+                                    .font(BFTypography.body())
                                     .foregroundColor(BFColors.textSecondary)
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 40)
@@ -136,7 +136,7 @@ struct CommunityView: View {
                     // Recent activity
                     VStack(alignment: .leading, spacing: 12) {
                         Text("RECENT ACTIVITY")
-                            .font(BFTheme.Typography.caption(12))
+                            .font(BFTypography.caption(12))
                             .foregroundColor(BFColors.textSecondary)
                             .tracking(1)
                             .padding(.leading)
@@ -160,7 +160,7 @@ struct CommunityView: View {
                     // Challenge section
                     VStack(alignment: .leading, spacing: 12) {
                         Text("CHALLENGES")
-                            .font(BFTheme.Typography.caption(12))
+                            .font(BFTypography.caption(12))
                             .foregroundColor(BFColors.textSecondary)
                             .tracking(1)
                             .padding(.leading)
@@ -184,7 +184,7 @@ struct CommunityView: View {
                                     Image(systemName: "plus.circle")
                                         .font(.system(size: 16))
                                     Text("Create New Challenge")
-                                        .font(BFTheme.Typography.button(14))
+                                        .font(BFTypography.button(14))
                                 }
                                 .foregroundColor(BFColors.accent)
                                 .padding(.vertical, 12)
@@ -277,7 +277,7 @@ struct LeaderboardRow: View {
             // Name and streak
             VStack(alignment: .leading, spacing: 4) {
                 Text(entry.name)
-                    .font(BFTheme.Typography.body())
+                    .font(BFTypography.body())
                     .foregroundColor(isCurrentUser ? BFColors.accent : BFColors.textPrimary)
                 
                 HStack(spacing: 6) {
@@ -286,7 +286,7 @@ struct LeaderboardRow: View {
                         .foregroundColor(entry.streakColor)
                     
                     Text("\(entry.streakDays) day streak")
-                        .font(BFTheme.Typography.caption())
+                        .font(BFTypography.caption())
                         .foregroundColor(BFColors.textSecondary)
                 }
             }
@@ -347,11 +347,11 @@ struct ActivityRow: View {
             // Activity description
             VStack(alignment: .leading, spacing: 4) {
                 Text(activity.description)
-                    .font(BFTheme.Typography.body(14))
+                    .font(BFTypography.body(14))
                     .foregroundColor(BFColors.textSecondary)
                 
                 Text(activity.timeAgo)
-                    .font(BFTheme.Typography.caption(12))
+                    .font(BFTypography.caption(12))
                     .foregroundColor(BFColors.textSecondary.opacity(0.6))
             }
             
@@ -385,7 +385,7 @@ struct ChallengeCard: View {
                     .foregroundColor(color)
                 
                 Text(title)
-                    .font(BFTheme.Typography.headline())
+                    .font(BFTypography.headline())
                     .foregroundColor(BFColors.textSecondary)
                 
                 Spacer()
@@ -402,7 +402,7 @@ struct ChallengeCard: View {
             }
             
             Text(description)
-                .font(BFTheme.Typography.body(14))
+                .font(BFTypography.body(14))
                 .foregroundColor(BFColors.textSecondary.opacity(0.8))
             
             // Progress bar with proper tint styling
@@ -412,13 +412,13 @@ struct ChallengeCard: View {
                 
                 HStack {
                     Text("\(Int(progress * 100))% Complete")
-                        .font(BFTheme.Typography.caption())
+                        .font(BFTypography.caption())
                         .foregroundColor(BFColors.textSecondary.opacity(0.7))
                     
                     Spacer()
                     
                     Text("\(participantCount) participants")
-                        .font(BFTheme.Typography.caption())
+                        .font(BFTypography.caption())
                         .foregroundColor(BFColors.textSecondary.opacity(0.7))
                 }
             }
@@ -445,11 +445,11 @@ struct InviteBuddySheet: View {
                     .padding(.top, 20)
                 
                 Text("Invite a Buddy")
-                    .font(BFTheme.Typography.title())
+                    .font(BFTypography.title())
                     .foregroundColor(BFColors.textPrimary)
                 
                 Text("Support each other on your journey to bet-free living")
-                    .font(BFTheme.Typography.body())
+                    .font(BFTypography.body())
                     .foregroundColor(BFColors.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 20)
@@ -458,11 +458,11 @@ struct InviteBuddySheet: View {
                     // Email input
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Friend's Email")
-                            .font(BFTheme.Typography.caption())
+                            .font(BFTypography.caption())
                             .foregroundColor(BFColors.textSecondary)
                         
                         TextField("Enter email address", text: $email)
-                            .font(BFTheme.Typography.body())
+                            .font(BFTypography.body())
                             .padding()
                             .background(BFColors.cardBackground)
                             .cornerRadius(12)
@@ -473,11 +473,11 @@ struct InviteBuddySheet: View {
                     // Message input
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Personal Message")
-                            .font(BFTheme.Typography.caption())
+                            .font(BFTypography.caption())
                             .foregroundColor(BFColors.textSecondary)
                         
                         TextEditor(text: $message)
-                            .font(BFTheme.Typography.body())
+                            .font(BFTypography.body())
                             .padding()
                             .frame(height: 100)
                             .background(BFColors.cardBackground)
@@ -495,7 +495,7 @@ struct InviteBuddySheet: View {
                     dismiss()
                 } label: {
                     Text("Send Invite")
-                        .font(BFTheme.Typography.button())
+                        .font(BFTypography.button())
                         .foregroundColor(.white)
                         .padding(.vertical, 16)
                         .frame(maxWidth: .infinity)
@@ -533,12 +533,12 @@ struct QRCodeSheet: View {
     var body: some View {
         VStack(spacing: 30) {
             Text("Your QR Code")
-                .font(BFTheme.Typography.title())
+                .font(BFTypography.title())
                 .foregroundColor(BFColors.textPrimary)
                 .padding(.top, 40)
             
             Text("Friends can scan this to add you as a buddy")
-                .font(BFTheme.Typography.body())
+                .font(BFTypography.body())
                 .foregroundColor(BFColors.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
@@ -561,7 +561,7 @@ struct QRCodeSheet: View {
             .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
             
             Text(username)
-                .font(BFTheme.Typography.headline())
+                .font(BFTypography.headline())
                 .foregroundColor(BFColors.textPrimary)
                 .padding(.top, 16)
             
@@ -570,7 +570,7 @@ struct QRCodeSheet: View {
             Button("Close") {
                 dismiss()
             }
-            .font(BFTheme.Typography.button())
+            .font(BFTypography.button())
             .foregroundColor(BFColors.textPrimary)
             .padding(.bottom, 40)
         }

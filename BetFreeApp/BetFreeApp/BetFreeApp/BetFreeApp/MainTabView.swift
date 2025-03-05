@@ -67,7 +67,7 @@ struct MainTabView: View {
                             .font(.system(size: 16, weight: .bold))
                         
                         Text("Track Urge")
-                            .font(BFTheme.Typography.button(16))
+                            .font(BFTypography.button(16))
                     }
                     .foregroundColor(.white)
                     .padding(.vertical, 12)
@@ -98,11 +98,11 @@ struct ProgressPlaceholderView: View {
             
             VStack(spacing: 20) {
                 Text("Progress & Insights")
-                    .font(BFTheme.Typography.title())
+                    .font(BFTypography.title())
                     .foregroundColor(BFColors.textPrimary)
                 
                 Text("Track your journey to bet-free living with detailed stats and insights")
-                    .font(BFTheme.Typography.body())
+                    .font(BFTypography.body())
                     .foregroundColor(BFColors.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
@@ -138,7 +138,7 @@ struct StatisticCard: View {
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(BFTheme.Typography.caption())
+                    .font(BFTypography.caption())
                     .foregroundColor(BFColors.textSecondary)
                     .tracking(0.5)
                 
@@ -148,7 +148,7 @@ struct StatisticCard: View {
                         .foregroundColor(BFColors.textPrimary)
                     
                     Text(subtitle)
-                        .font(BFTheme.Typography.caption(12))
+                        .font(BFTypography.caption(12))
                         .foregroundColor(BFColors.textTertiary)
                         .padding(.bottom, 4)
                 }
@@ -174,11 +174,11 @@ struct JournalView: View {
             
             VStack {
                 Text("Journal")
-                    .font(BFTheme.Typography.title())
+                    .font(BFTypography.title())
                     .foregroundColor(BFColors.textPrimary)
                 
                 Text("Track your thoughts and triggers to understand your gambling patterns")
-                    .font(BFTheme.Typography.body())
+                    .font(BFTypography.body())
                     .foregroundColor(BFColors.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
@@ -193,7 +193,7 @@ struct JournalView: View {
                             .font(.system(size: 20))
                         
                         Text("New Entry")
-                            .font(BFTheme.Typography.button(16))
+                            .font(BFTypography.button(16))
                     }
                     .foregroundColor(.white)
                     .padding(.vertical, 12)
@@ -207,7 +207,7 @@ struct JournalView: View {
                 
                 // Placeholder for empty state
                 Text("No journal entries yet")
-                    .font(BFTheme.Typography.body())
+                    .font(BFTypography.body())
                     .foregroundColor(BFColors.textTertiary)
                     .padding(.top, 60)
             }
@@ -223,11 +223,11 @@ struct CommunityPlaceholderView: View {
             
             VStack {
                 Text("Quit Buddies")
-                    .font(BFTheme.Typography.title())
+                    .font(BFTypography.title())
                     .foregroundColor(BFColors.textPrimary)
                 
                 Text("Connect with friends to stay accountable and motivated")
-                    .font(BFTheme.Typography.body())
+                    .font(BFTypography.body())
                     .foregroundColor(BFColors.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
@@ -242,7 +242,7 @@ struct CommunityPlaceholderView: View {
                             .font(.system(size: 18))
                         
                         Text("Invite Buddy")
-                            .font(BFTheme.Typography.button(16))
+                            .font(BFTypography.button(16))
                     }
                     .foregroundColor(.white)
                     .padding(.vertical, 12)
@@ -257,7 +257,7 @@ struct CommunityPlaceholderView: View {
                 // Leaderboard preview
                 VStack(alignment: .leading, spacing: 0) {
                     Text("LEADERBOARD")
-                        .font(BFTheme.Typography.caption())
+                        .font(BFTypography.caption())
                         .foregroundColor(BFColors.textSecondary)
                         .tracking(1)
                         .padding(.horizontal, 20)
@@ -267,7 +267,7 @@ struct CommunityPlaceholderView: View {
                         .background(BFColors.divider)
                     
                     Text("Invite friends to see who can maintain the longest streak")
-                        .font(BFTheme.Typography.body(15))
+                        .font(BFTypography.body(15))
                         .foregroundColor(BFColors.textSecondary)
                         .multilineTextAlignment(.center)
                         .padding(40)
@@ -290,7 +290,7 @@ struct SettingsView: View {
             
             VStack {
                 Text("Settings")
-                    .font(BFTheme.Typography.title())
+                    .font(BFTypography.title())
                     .foregroundColor(BFColors.textPrimary)
                     .padding(.top, 40)
                     .padding(.bottom, 20)
@@ -333,7 +333,7 @@ struct SettingsRow: View {
                     .frame(width: 32, height: 32)
                 
                 Text(title)
-                    .font(BFTheme.Typography.body())
+                    .font(BFTypography.body())
                     .foregroundColor(BFColors.textPrimary)
                 
                 Spacer()

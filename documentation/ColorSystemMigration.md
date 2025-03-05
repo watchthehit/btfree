@@ -136,10 +136,10 @@ For each component:
 - ✅ Update `BFPaywallScreens` to use `BFColors` 
 - ✅ Update `EnhancedOnboardingView` to use `BFTypography`
 - ✅ Update `BetTrackingView` to use `BFTypography`
-- ⬜ Update remaining components to use `BFTypography`:
-  - ⬜ `ProgressView`
-  - ⬜ `CommunityView`
-  - ⬜ `MainTabView`
+- ✅ Update remaining components to use `BFTypography`:
+  - ✅ `ProgressView`
+  - ✅ `CommunityView`
+  - ✅ `MainTabView`
 - ⬜ Remove `BFTheme.swift` compatibility layer
 - ⬜ Final testing and validation
 

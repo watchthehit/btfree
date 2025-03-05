@@ -24,7 +24,7 @@ struct ProgressTrackingView: View {
                 VStack(spacing: 16) {
                     HStack {
                         Text("Your Progress")
-                            .font(BFTheme.Typography.title())
+                            .font(BFTypography.title())
                             .foregroundColor(BFColors.textPrimary)
                         
                         Spacer()
@@ -45,7 +45,7 @@ struct ProgressTrackingView: View {
                 // Charts section
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Betting Urges Over Time")
-                        .font(BFTheme.Typography.headline())
+                        .font(BFTypography.headline())
                         .foregroundColor(BFColors.textPrimary)
                         .padding(.horizontal)
                     
@@ -65,7 +65,7 @@ struct ProgressTrackingView: View {
                 // Weekly comparison
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Week by Week Comparison")
-                        .font(BFTheme.Typography.headline())
+                        .font(BFTypography.headline())
                         .foregroundColor(BFColors.textPrimary)
                         .padding(.horizontal)
                     
@@ -89,7 +89,7 @@ struct ProgressTrackingView: View {
                         Image(systemName: "target")
                             .font(.system(size: 18))
                         Text("Update Your Goals")
-                            .font(BFTheme.Typography.button())
+                            .font(BFTypography.button())
                     }
                     .foregroundColor(.white)
                     .padding(.vertical, 14)
@@ -149,19 +149,19 @@ struct StatCard: View {
                     .foregroundColor(color)
                 
                 Text(title)
-                    .font(BFTheme.Typography.caption())
+                    .font(BFTypography.caption())
                     .foregroundColor(BFColors.textSecondary)
                 
                 Spacer()
             }
             
             Text(value)
-                .font(BFTheme.Typography.title())
+                .font(BFTypography.title())
                 .foregroundColor(BFColors.textPrimary)
             
             HStack {
                 Text(unit)
-                    .font(BFTheme.Typography.caption())
+                    .font(BFTypography.caption())
                     .foregroundColor(BFColors.textSecondary)
                 
                 Spacer()
@@ -172,7 +172,7 @@ struct StatCard: View {
                             .font(.system(size: 10))
                         
                         Text(trendValue)
-                            .font(BFTheme.Typography.caption(12))
+                            .font(BFTypography.caption(12))
                     }
                     .foregroundColor(trendColor)
                 }
@@ -234,12 +234,12 @@ struct AchievementCard: View {
             // Title and description
             VStack(spacing: 4) {
                 Text(achievement.title)
-                    .font(BFTheme.Typography.headline(16))
+                    .font(BFTypography.headline(16))
                     .foregroundColor(BFColors.textPrimary)
                     .multilineTextAlignment(.center)
                 
                 Text(achievement.description)
-                    .font(BFTheme.Typography.caption())
+                    .font(BFTypography.caption())
                     .foregroundColor(BFColors.textSecondary)
                     .multilineTextAlignment(.center)
             }
@@ -248,7 +248,7 @@ struct AchievementCard: View {
             // Unlocked date if available
             if let date = achievement.unlockedDate {
                 Text("Unlocked \(date.formatted(.dateTime.month().day()))")
-                    .font(BFTheme.Typography.caption(12))
+                    .font(BFTypography.caption(12))
                     .foregroundColor(BFColors.textSecondary)
             } else {
                 // Progress indicator if not unlocked
@@ -257,7 +257,7 @@ struct AchievementCard: View {
                         .progressViewStyle(LinearProgressViewStyle(tint: achievement.color))
                     
                     Text("\(Int(achievement.progress * 100))% Complete")
-                        .font(BFTheme.Typography.caption(12))
+                        .font(BFTypography.caption(12))
                         .foregroundColor(BFColors.textSecondary)
                 }
                 .padding(.horizontal, 20)
@@ -300,11 +300,11 @@ struct GoalSettingsSheet: View {
             // Header
             VStack(spacing: 8) {
                 Text("Set Your Daily Urge Goal")
-                    .font(BFTheme.Typography.title())
+                    .font(BFTypography.title())
                     .foregroundColor(BFColors.textPrimary)
                 
                 Text("How many urges do you want to limit yourself to each day?")
-                    .font(BFTheme.Typography.body())
+                    .font(BFTypography.body())
                     .foregroundColor(BFColors.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
@@ -325,13 +325,13 @@ struct GoalSettingsSheet: View {
                 
                 HStack {
                     Text("No urges")
-                        .font(BFTheme.Typography.caption())
+                        .font(BFTypography.caption())
                         .foregroundColor(BFColors.textSecondary)
                     
                     Spacer()
                     
                     Text("20 urges")
-                        .font(BFTheme.Typography.caption())
+                        .font(BFTypography.caption())
                         .foregroundColor(BFColors.textSecondary)
                 }
                 .padding(.horizontal)
@@ -344,19 +344,19 @@ struct GoalSettingsSheet: View {
             // Recommendations
             VStack(alignment: .leading, spacing: 8) {
                 Text("Recommendations:")
-                    .font(BFTheme.Typography.headline())
+                    .font(BFTypography.headline())
                     .foregroundColor(BFColors.textPrimary)
                 
                 Text("• Start with a realistic goal based on your current average")
-                    .font(BFTheme.Typography.body())
+                    .font(BFTypography.body())
                     .foregroundColor(BFColors.textSecondary)
                 
                 Text("• Gradually decrease your limit as you build resistance")
-                    .font(BFTheme.Typography.body())
+                    .font(BFTypography.body())
                     .foregroundColor(BFColors.textSecondary)
                 
                 Text("• Consider your triggers and time of day when setting goals")
-                    .font(BFTheme.Typography.body())
+                    .font(BFTypography.body())
                     .foregroundColor(BFColors.textSecondary)
             }
             .padding()
@@ -372,7 +372,7 @@ struct GoalSettingsSheet: View {
                 dismiss()
             } label: {
                 Text("Save Goal")
-                    .font(BFTheme.Typography.button())
+                    .font(BFTypography.button())
                     .foregroundColor(.white)
                     .padding(.vertical, 16)
                     .frame(maxWidth: .infinity)
@@ -405,7 +405,7 @@ struct TimeRangeMenu: View {
         } label: {
             HStack {
                 Text(selectedTimeRange.rawValue)
-                    .font(BFTheme.Typography.caption())
+                    .font(BFTypography.caption())
                     .foregroundColor(BFColors.primary)
                 
                 Image(systemName: "chevron.down")
@@ -523,7 +523,7 @@ struct UrgesChartView: View {
                 .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 5]))
                 .annotation(position: .trailing) {
                     Text("Goal")
-                        .font(BFTheme.Typography.caption(12))
+                        .font(BFTypography.caption(12))
                         .foregroundColor(Color.red.opacity(0.7))
                 }
             }
@@ -551,7 +551,7 @@ struct WeeklyComparisonChart: View {
                 .annotation(position: .top) {
                     if dataPoint.thisWeek > 0 {
                         Text("\(dataPoint.thisWeek)")
-                            .font(BFTheme.Typography.caption(10))
+                            .font(BFTypography.caption(10))
                             .foregroundColor(BFColors.textSecondary)
                     }
                 }
@@ -565,7 +565,7 @@ struct WeeklyComparisonChart: View {
                 .annotation(position: .top) {
                     if dataPoint.lastWeek > 0 {
                         Text("\(dataPoint.lastWeek)")
-                            .font(BFTheme.Typography.caption(10))
+                            .font(BFTypography.caption(10))
                             .foregroundColor(BFColors.textSecondary)
                     }
                 }
@@ -581,7 +581,7 @@ struct AchievementsSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Your Achievements")
-                .font(BFTheme.Typography.headline())
+                .font(BFTypography.headline())
                 .foregroundColor(BFColors.textPrimary)
                 .padding(.horizontal)
             
