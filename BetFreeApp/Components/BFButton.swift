@@ -54,13 +54,19 @@ struct BFButton: View {
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
                     .strokeBorder(
-                        style == .secondary ? BFColors.vibrantTeal : Color.clear,
+                        style == .secondary ? BFColors.secondary : Color.clear,
                         lineWidth: 1.5
                     )
             )
             .foregroundColor(buttonTextColor)
             .cornerRadius(8)
             .opacity(isDisabled ? 0.6 : 1.0)
+            .shadow(
+                color: style == .primary ? BFColors.healing.opacity(0.3) : Color.clear,
+                radius: 4,
+                x: 0,
+                y: 2
+            )
         }
         .disabled(isDisabled)
     }
@@ -69,11 +75,14 @@ struct BFButton: View {
     private var buttonTextColor: Color {
         switch style {
         case .primary:
-            return .white
+            // For primary style, use white text for high contrast against gradient
+            return Color.white
         case .secondary:
-            return BFColors.vibrantTeal
+            // For secondary style, use secondary color for the border and text
+            return BFColors.secondary
         case .text:
-            return BFColors.oceanBlue
+            // For text style, use calm for a more subtle appearance
+            return BFColors.calm
         }
     }
 }
@@ -81,83 +90,87 @@ struct BFButton: View {
 // MARK: - Preview
 struct BFButton_Previews: PreviewProvider {
     static var previews: some View {
-        VStack(spacing: 20) {
-            BFButton(
-                title: "Continue",
-                style: .primary,
-                action: {}
-            )
+        Group {
+            // Light mode preview
+            VStack(spacing: 20) {
+                BFButton(
+                    title: "Continue",
+                    style: .primary,
+                    action: {}
+                )
+                
+                BFButton(
+                    title: "Learn More",
+                    style: .secondary,
+                    action: {}
+                )
+                
+                BFButton(
+                    title: "Skip",
+                    style: .text,
+                    action: {}
+                )
+                
+                BFButton(
+                    title: "Save Progress",
+                    style: .primary,
+                    icon: "arrow.down.doc.fill",
+                    action: {},
+                    isFullWidth: true
+                )
+                
+                BFButton(
+                    title: "Not Available",
+                    style: .primary,
+                    action: {},
+                    isDisabled: true
+                )
+            }
+            .padding()
+            .background(BFColors.background)
+            .previewLayout(.sizeThatFits)
+            .previewDisplayName("Light Mode")
             
-            BFButton(
-                title: "Learn More",
-                style: .secondary,
-                action: {}
-            )
-            
-            BFButton(
-                title: "Skip",
-                style: .text,
-                action: {}
-            )
-            
-            BFButton(
-                title: "Save Progress",
-                style: .primary,
-                icon: "arrow.down.doc.fill",
-                action: {},
-                isFullWidth: true
-            )
-            
-            BFButton(
-                title: "Not Available",
-                style: .primary,
-                action: {},
-                isDisabled: true
-            )
+            // Dark mode preview
+            VStack(spacing: 20) {
+                BFButton(
+                    title: "Continue",
+                    style: .primary,
+                    action: {}
+                )
+                
+                BFButton(
+                    title: "Learn More",
+                    style: .secondary,
+                    action: {}
+                )
+                
+                BFButton(
+                    title: "Skip",
+                    style: .text,
+                    action: {}
+                )
+                
+                BFButton(
+                    title: "Save Progress",
+                    style: .primary,
+                    icon: "arrow.down.doc.fill",
+                    action: {},
+                    isFullWidth: true
+                )
+                
+                BFButton(
+                    title: "Not Available",
+                    style: .primary,
+                    action: {},
+                    isDisabled: true
+                )
+            }
+            .padding()
+            .background(BFColors.background)
+            .previewLayout(.sizeThatFits)
+            .previewDisplayName("Dark Mode")
+            .preferredColorScheme(.dark)
         }
-        .padding()
-        .background(Color(hex: "#F5F8FA"))
-        .previewLayout(.sizeThatFits)
-        .previewDisplayName("Light Mode")
-        
-        VStack(spacing: 20) {
-            BFButton(
-                title: "Continue",
-                style: .primary,
-                action: {}
-            )
-            
-            BFButton(
-                title: "Learn More",
-                style: .secondary,
-                action: {}
-            )
-            
-            BFButton(
-                title: "Skip",
-                style: .text,
-                action: {}
-            )
-            
-            BFButton(
-                title: "Save Progress",
-                style: .primary,
-                icon: "arrow.down.doc.fill",
-                action: {},
-                isFullWidth: true
-            )
-            
-            BFButton(
-                title: "Not Available",
-                style: .primary,
-                action: {},
-                isDisabled: true
-            )
-        }
-        .padding()
-        .background(BFColors.deepSpaceBlue)
-        .previewLayout(.sizeThatFits)
-        .previewDisplayName("Dark Mode")
-        .preferredColorScheme(.dark)
     }
 } 
