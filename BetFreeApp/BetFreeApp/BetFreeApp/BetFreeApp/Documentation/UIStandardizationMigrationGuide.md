@@ -2,213 +2,346 @@
 
 ## Overview
 
-This document provides a systematic approach for migrating existing UI elements in the BetFree app to the new standardized UI system. Following this guide will help ensure consistent appearance and behavior across all screens, improve accessibility, and simplify future maintenance.
+This guide provides step-by-step instructions for migrating existing screens and components in the BetFree app to the new unified design system. The goal is to ensure visual consistency across the entire app while making the codebase more maintainable.
 
-## Why Standardize?
+## Migration Approach
 
-- **Consistency**: Creates a cohesive user experience across all app screens
-- **Efficiency**: Reduces development time through reusable components
-- **Maintenance**: Makes app-wide styling changes easier to implement
-- **Accessibility**: Ensures proper contrast and readability for all users
-- **Quality**: Reduces UI bugs and inconsistencies
+Migration will follow a feature-by-feature approach, starting with the most visible screens. The recommended order is:
 
-## Migration Process
+1. Main counter screen
+2. Profile view
+3. Dashboard
+4. Statistics screens
+5. Settings
+6. Goals section
+7. Auxiliary screens
 
-### Phase 1: Audit (Week 1)
+## Migration Steps
 
-1. **Run the UI Audit Script**
-   ```bash
-   cd BetFreeApp/BetFreeApp/BetFreeApp/BetFreeApp/Scripts
-   chmod +x ui_audit.sh
-   ./ui_audit.sh
-   ```
+### Step 1: Update Imports
 
-2. **Review Audit Results**
-   - Identify files with the most standardization issues
-   - Focus initial efforts on high-impact files (e.g., frequently viewed screens)
-   - Create a prioritized list of files to update
+Ensure each file has the necessary imports to access the design system:
 
-3. **Document Visual Test Cases**
-   - Take screenshots of key screens before standardization
-   - Create a visual reference document for before/after comparisons
+```swift
+import SwiftUI
 
-### Phase 2: Color Standardization (Week 2)
+// If needed for specific components or utilities
+import Foundation
+#if canImport(UIKit)
+import UIKit
+#endif
+```
 
-1. **Replace Direct Colors**
-   - Replace `Color.white` with `Color.bfWhite`
-   - Replace `Color.black` with `Color.bfBlack`
-   - Replace `Color.gray` with `Color.bfGray()`
-   - Replace other direct SwiftUI colors with BF equivalents
+### Step 2: Migrate Colors
 
-2. **Replace Hex Colors**
-   - Replace `Color(hex: "#...")` with appropriate `BFColors` properties
-   - Identify semantically appropriate colors from the design system
+Replace all hardcoded colors and old color references with the new design system:
 
-3. **Standardize Opacity**
-   - Replace opacity modifiers on colors with standardized values
-   - Example: `.opacity(0.7)` → proper semantic color with appropriate opacity
+#### Before:
+```swift
+Text("Hello")
+    .foregroundColor(Color.white)
+    .background(Color.black.opacity(0.7))
+```
 
-### Phase 3: Typography Standardization (Week 3)
+or 
 
-1. **Replace Direct Font Declarations**
-   - Replace `.font(.system(size: X, weight: Y))` with `BFTypography` equivalents
-   - Example: `.font(.system(size: 16, weight: .medium))` → `.font(BFTypography.bodyMedium)`
+```swift
+Text("Hello")
+    .foregroundColor(BFColors.textPrimary)
+    .background(BFColors.cardBackground)
+```
 
-2. **Implement Semantic Text Styling**
-   - Apply appropriate text styles based on content meaning
-   - Heading text: `.font(BFTypography.heading1)`, `.heading2`, or `.heading3`
-   - Body text: `.font(BFTypography.bodyLarge)`, `.bodyMedium`, or `.bodySmall`
-   - UI elements: `.font(BFTypography.button)` or `.caption`
+#### After:
+```swift
+Text("Hello")
+    .foregroundColor(BFDesignSystem.Colors.textPrimary)
+    .background(BFDesignSystem.Colors.cardBackground)
+```
 
-### Phase 4: Spacing Standardization (Week 4)
+or using extensions:
 
-1. **Replace Direct Padding Values**
-   - Replace `.padding(20)` with `.padding(BFSpacing.medium)`
-   - Replace custom horizontal/vertical padding with standardized values
+```swift
+Text("Hello")
+    .foregroundColor(.bfTextPrimary)
+    .background(.bfCardBackground)
+```
 
-2. **Replace Direct Spacing Values**
-   - Replace `spacing: 16` with `spacing: BFSpacing.medium`
-   - Replace hard-coded spacing with semantic constants
+### Step 3: Migrate Typography
 
-3. **Implement Standard Layout Modifiers**
-   - Use `.standardContentSpacing()` for consistent content padding
-   - Use `.standardSectionSpacing()` for consistent section separation
+Replace all font definitions with the design system typography:
 
-### Phase 5: Component Migration (Weeks 5-6)
+#### Before:
+```swift
+Text("Title")
+    .font(.system(size: 24, weight: .bold))
+```
 
-1. **Replace Simple Components**
-   - Replace basic buttons with `BFPrimaryButton` or `BFSecondaryButton`
-   - Replace text fields with `BFTextField`
-   - Replace custom progress indicators with `BFProgressBar`
+or
 
-2. **Replace Complex Components**
-   - Replace card-like views with `BFInfoCard` or other card components
-   - Replace list items with `BFListItem`
-   - Replace status indicators with `BFBadge`
+```swift
+Text("Title")
+    .font(BFTypography.heading2)
+```
 
-3. **Implement Specialized Components**
-   - Use `BFEmptyState` for empty list views
-   - Use `BFStatsCard` for statistics displays
+#### After:
+```swift
+Text("Title")
+    .font(BFDesignSystem.Typography.title2())
+```
 
-### Phase 6: Animation Standardization (Week 7)
+or using extensions:
 
-1. **Replace Direct Animations**
-   - Replace custom animations with standard animations
-   - Example: `.animation(.easeOut)` → `.animation(.bfAppear)`
+```swift
+Text("Title")
+    .font(.heading2)
+```
 
-2. **Implement Accessibility-Aware Animations**
-   - Use `.accessibleAnimation()` to respect reduced motion settings
-   - Use standard animation modifiers like `.fadeInAnimation()` and `.slideInAnimation()`
+### Step 4: Migrate Spacing and Layout
 
-### Phase 7: Testing & Refinement (Week 8)
+Replace all hardcoded spacing values:
 
-1. **Visual Regression Testing**
-   - Compare before/after screenshots
-   - Verify consistent appearance across all screens
+#### Before:
+```swift
+VStack(spacing: 16) {
+    // Content
+}
+.padding(.horizontal, 20)
+```
 
-2. **Accessibility Testing**
-   - Test with VoiceOver and other assistive technologies
-   - Verify sufficient contrast and readability
+or
 
-3. **Performance Testing**
-   - Measure render time for standardized views
-   - Optimize if needed
+```swift
+VStack(spacing: BFSpacing.medium) {
+    // Content
+}
+.padding(.horizontal, BFSpacing.screenHorizontal)
+```
 
-## File Update Process
+#### After:
+```swift
+VStack(spacing: BFDesignSystem.Spacing.medium) {
+    // Content
+}
+.bfScreenPadding()
+```
 
-For each file that needs to be standardized, follow this workflow:
+### Step 5: Migrate View Modifiers
 
-1. **Create a Working Branch**
-   ```bash
-   git checkout -b standardize/[filename]
-   ```
+Replace custom view modifiers with standardized ones:
 
-2. **Document Current State**
-   - Take screenshots of current UI
-   - Note any special UI behaviors or requirements
+#### Before:
+```swift
+VStack {
+    // Content
+}
+.padding(16)
+.background(
+    RoundedRectangle(cornerRadius: 12)
+        .fill(BFColors.cardBackground)
+        .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+)
+```
 
-3. **Apply Standardization**
-   - Use the VSCode "Find & Replace" feature to help with bulk updates
-   - Apply changes in this order:
-     1. Colors
-     2. Typography
-     3. Spacing
-     4. Components
-     5. Animations
+#### After:
+```swift
+VStack {
+    // Content
+}
+.bfCardStyle()
+```
 
-4. **Test Changes**
-   - Run the app and verify UI appearance
-   - Ensure all functionality works as expected
-   - Compare against original screenshots
+### Step 6: Add Animation
 
-5. **Submit for Review**
-   - Create a pull request
-   - Include before/after screenshots
-   - Document any potential issues or edge cases
+Add entrance and interaction animations:
 
-## Common Patterns & Their Standardized Alternatives
+```swift
+VStack {
+    // Content
+}
+.bfCardStyle()
+.withBFEntranceAnimation(delay: 0.2)
+```
 
-### Color Usage
+For interactive elements:
 
-| Before | After |
-|--------|-------|
-| `Color.white` | `Color.bfWhite` |
-| `Color.black` | `Color.bfBlack` |
-| `Color.gray` | `Color.bfGray()` |
-| `Color.black.opacity(0.1)` | `Color.bfShadow(opacity: 0.1)` |
-| `Color.white.opacity(0.8)` | `Color.bfOverlay(opacity: 0.8)` |
-| `Color(hex: "#FF0000")` | `BFColors.error` |
+```swift
+Button {
+    // Action
+} label: {
+    Text("Tap Me")
+}
+.scaleEffect(isPressed ? 0.95 : 1.0)
+.animation(BFDesignSystem.Animation.buttonPress, value: isPressed)
+```
 
-### Typography
+### Step 7: Replace Components
 
-| Before | After |
-|--------|-------|
-| `.font(.system(size: 32, weight: .bold))` | `.font(BFTypography.heading1)` |
-| `.font(.system(size: 24, weight: .semibold))` | `.font(BFTypography.heading2)` |
-| `.font(.system(size: 16, weight: .regular))` | `.font(BFTypography.bodyMedium)` |
-| `.font(.system(size: 14, weight: .regular))` | `.font(BFTypography.bodySmall)` |
+Replace custom component implementations with standardized components:
 
-### Spacing
+#### Before:
+```swift
+// Custom card implementation
+VStack(alignment: .leading, spacing: 12) {
+    Text("Card Title")
+        .font(.system(size: 18, weight: .semibold))
+    
+    Divider()
+    
+    Text("Card content")
+        .font(.system(size: 16))
+}
+.padding(16)
+.background(
+    RoundedRectangle(cornerRadius: 12)
+        .fill(Color(.systemBackground))
+        .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+)
+```
 
-| Before | After |
-|--------|-------|
-| `padding(20)` | `padding(BFSpacing.medium)` |
-| `padding(.horizontal, 20)` | `padding(.horizontal, BFSpacing.screenHorizontal)` |
-| `VStack(spacing: 16)` | `VStack(spacing: BFSpacing.medium)` |
-| `padding([.horizontal, .bottom], 20)` | `standardContentSpacing()` |
+#### After:
+```swift
+BFComponents.Card(title: "Card Title") {
+    Text("Card content")
+        .font(BFDesignSystem.Typography.body())
+}
+```
 
-### Components
+### Step 8: Migrate Buttons
 
-| Before | After |
-|--------|-------|
-| Custom button implementation | `BFPrimaryButton(title: "Label", action: { ... })` |
-| Custom card implementation | `BFInfoCard(title: "Title") { ... }` |
-| Custom list item | `BFListItem(title: "Title", subtitle: "Subtitle", icon: "icon", action: { ... })` |
+Replace custom buttons with standardized button components:
 
-### Animation
+#### Before:
+```swift
+Button(action: {
+    // Action here
+}) {
+    Text("Primary Action")
+        .font(.system(size: 16, weight: .semibold))
+        .foregroundColor(.white)
+        .padding()
+        .frame(maxWidth: .infinity)
+        .background(Color.blue)
+        .cornerRadius(10)
+}
+```
 
-| Before | After |
-|--------|-------|
-| `.animation(.easeOut(duration: 0.3))` | `.animation(.bfAppear)` |
-| Custom fade animation | `.fadeInAnimation(isActive: isVisible)` |
-| Multi-property animation | `.scaleAnimation(isActive: isVisible)` |
+#### After:
+```swift
+BFComponents.PrimaryButton(title: "Primary Action") {
+    // Action here
+}
+```
 
-## Success Metrics
+## ProfileView Migration Example
 
-- **Consistency Score**: Percentage of UI elements using standardized components
-- **Audit Results**: Reduction in issues reported by the ui_audit.sh script
-- **Developer Feedback**: Ease of implementation and maintenance
-- **User Feedback**: Improved perception of app quality and usability
+Here's a comprehensive example of migrating the ProfileView:
 
-## Support Resources
+### Before:
+```swift
+// Header section
+VStack {
+    Image(systemName: "person.circle.fill")
+        .font(.system(size: 60))
+        .foregroundColor(BFColors.accent)
+    
+    Text(username)
+        .font(.system(size: 24, weight: .bold))
+        .foregroundColor(BFColors.textPrimary)
+}
+.padding()
+.background(
+    RoundedRectangle(cornerRadius: 12)
+    .fill(BFColors.cardBackground)
+    .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+)
+.padding(.horizontal, 20)
+```
 
-- **UI Standardization Documentation**: `/Documentation/UIStandardization.md`
-- **Standardized Components**: `BFStandardizedComponents.swift`
-- **UI Standardization Extensions**: `BFUIStandardization.swift`
-- **Design System File**: `BFDesignSystem.swift`
-- **Typography System**: `BFTypography.swift`
-- **Color System**: `BFColors.swift`
+### After:
+```swift
+// Header section
+VStack {
+    Image(systemName: "person.circle.fill")
+        .font(BFDesignSystem.Typography.largeTitle())
+        .foregroundColor(BFDesignSystem.Colors.accent)
+    
+    Text(username)
+        .font(BFDesignSystem.Typography.title2())
+        .foregroundColor(BFDesignSystem.Colors.textPrimary)
+}
+.bfCardStyle()
+.bfScreenPadding()
+.withBFEntranceAnimation(delay: 0.2)
+```
 
-## Questions & Feedback
+## Testing Your Migration
 
-Please direct any questions about the standardization process to the UI/UX team lead. 
+After migrating each screen, perform the following tests:
+
+1. **Visual Inspection**: Compare the migrated screen to the design references.
+2. **Dark Mode Testing**: Verify the screen looks correct in dark mode.
+3. **Animation Testing**: Check that all animations work smoothly.
+4. **Performance Testing**: Ensure the screen performs well with no lag.
+5. **Accessibility Testing**: Verify screen works with accessibility features.
+
+## Common Migration Issues
+
+### 1. Color Conflicts
+
+**Problem**: Colors don't match design expectations.
+
+**Solution**: Double check color definitions and ensure you're using the correct color from `BFDesignSystem.Colors`.
+
+### 2. Layout Shifts
+
+**Problem**: Layout changes after migration.
+
+**Solution**: Check padding and spacing values, and ensure you're using the correct `Spacing` constants.
+
+### 3. Animation Issues
+
+**Problem**: Animations don't play properly or cause layout issues.
+
+**Solution**: Ensure animations are tied to state changes with the `value:` parameter, and check for conflicting animations.
+
+### 4. Component Adaptability 
+
+**Problem**: Components don't adapt to different screen sizes.
+
+**Solution**: Make sure components use flexible sizing (e.g., `.frame(maxWidth: .infinity)` where appropriate).
+
+## Progressive Enhancement
+
+After the basic migration is complete, consider these enhancements:
+
+1. **Add Entrance Animations**: Apply `.withBFEntranceAnimation()` with staggered delays for a polished feel.
+2. **Improve Button Feedback**: Add haptic feedback with `HapticManager.shared.playLightFeedback()`.
+3. **Enhance Visual Hierarchy**: Use accentShadow() for important actions.
+4. **Add Response Animations**: Use `.scaleAnimation(isActive:)` for state changes.
+
+## Example Migration Workflow
+
+Here's a practical example workflow for migrating a screen:
+
+1. Create a new branch: `git checkout -b migrate-profile-screen`
+2. Open the target file (e.g., `ProfileView.swift`)
+3. Start with imports and then follow the migration steps
+4. Test the migrated screen
+5. Commit changes: `git commit -m "Migrate ProfileView to unified design system"`
+6. Create a PR for review
+
+## Timeline Expectations
+
+Each screen should take approximately:
+
+- Simple screens: 1-2 hours
+- Complex screens: 3-4 hours
+- Highly interactive screens: 4-8 hours
+
+The entire app migration is expected to take approximately 1-2 weeks.
+
+## Additional Resources
+
+- `DesignSystem.md`: Comprehensive documentation of the design system
+- `UIStandardization.md`: Overall standardization guidelines
+- `AccessibilityGuidelines.md`: Ensuring your migrated UI is accessible 

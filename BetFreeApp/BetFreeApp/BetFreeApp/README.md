@@ -12,7 +12,9 @@ The app is built with an Xcode project using Swift and SwiftUI, with the followi
 - **EnhancedOnboardingView.swift**: 8-screen onboarding flow
 - **AppState.swift**: Central state management with @MainActor
 - **Models.swift**: Data structures for app functionality
-- **BFColors.swift**: Color utilities and design system
+- **BFDesignSystem.swift**: Unified design system with colors, typography, and spacing
+- **BFComponents.swift**: Reusable UI components based on the design system
+- **BFViewModifiers.swift**: Custom view modifiers for consistent styling
 - **CravingReportView.swift**: Interface for logging cravings
 
 ## Features
@@ -22,10 +24,12 @@ The app is built with an Xcode project using Swift and SwiftUI, with the followi
 - Craving reporting and analysis
 - Customizable notification preferences
 - Privacy-focused design with local data storage
+- Unified UI/UX system with consistent components and animations
 
 ## Technical Details
 - Built with SwiftUI
 - MVVM architecture
+- Unified design system for consistent UX
 - Supports iOS 15.0 and above
 - Uses @MainActor for thread safety
 
@@ -33,6 +37,22 @@ The app is built with an Xcode project using Swift and SwiftUI, with the followi
 1. Open the BetFreeApp.xcodeproj file in Xcode
 2. Select your target device or simulator
 3. Build and run the app (⌘R)
+
+## Unified Design System
+The app implements a comprehensive design system architecture:
+
+- **Design Tokens**: Centralized definitions for colors, typography, spacing, and animations
+- **Component Library**: Reusable UI components built using the design tokens
+- **View Modifiers**: Custom modifiers for consistent styling and animations
+- **Extension Methods**: Convenience extensions for SwiftUI's native types
+
+Key files:
+- `BFDesignSystem.swift`: Core design tokens and constants
+- `BFComponents.swift`: Reusable UI components
+- `BFViewModifiers.swift`: Consistent styling modifiers
+- `BFStandardComponents.swift`: Extended component variations
+
+For detailed documentation on the design system, see the Documentation folder.
 
 ## Onboarding Flow
 The app includes a comprehensive onboarding flow with the following screens:
@@ -50,7 +70,11 @@ The app uses a central AppState object as the single source of truth, which is p
 
 ## Documentation
 More detailed documentation can be found in the Documentation folder:
-- OnboardingDocumentation.md: Detailed explanation of the onboarding system
+- **DesignSystem.md**: Comprehensive guide to the unified design system
+- **UIStandardization.md**: Guidelines for maintaining UI consistency
+- **UIStandardizationMigrationGuide.md**: How to migrate to the design system
+- **OnboardingDocumentation.md**: Detailed explanation of the onboarding system
+- **AccessibilityGuidelines.md**: Ensuring the app is accessible to all users
 
 ## Troubleshooting
 
@@ -67,7 +91,8 @@ More detailed documentation can be found in the Documentation folder:
 For more detailed troubleshooting information, refer to the OnboardingDocumentation.md file in the Documentation folder.
 
 ## Future Enhancements
-- Data visualization for craving patterns
+- Enhanced data visualization for behavior patterns
 - Expanded mindfulness exercises
 - Community support features
-- Achievement badges and rewards system 
+- Achievement badges and rewards system
+- Expanded component library for easier feature development 
