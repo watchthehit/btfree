@@ -1,116 +1,177 @@
 import SwiftUI
 
+/// Typography for the BetFree app
+/// A centralized system to manage all text styles with support for
+/// Dynamic Type and device adaptability
+
 struct BFTypography {
-    // Headings
-    static let heading1 = Font.system(size: 32, weight: .bold)
-    static let heading2 = Font.system(size: 24, weight: .semibold)
-    static let heading3 = Font.system(size: 20, weight: .medium)
+    // MARK: - Heading Styles
     
-    // Body text
-    static let bodyLarge = Font.system(size: 18, weight: .regular)
-    static let bodyMedium = Font.system(size: 16, weight: .regular)
-    static let bodySmall = Font.system(size: 14, weight: .regular)
+    /// Large title - Used for main screen titles
+    static func largeTitle() -> Font {
+        return .system(size: 34, weight: .bold, design: .rounded)
+            .metrics(for: .largeTitle)
+    }
     
-    // UI elements
-    static let button = Font.system(size: 16, weight: .medium)
-    static let caption = Font.system(size: 12, weight: .regular)
-    static let overline = Font.system(size: 10, weight: .medium).uppercaseSmallCaps()
+    /// Title level 1 - Used for major section headers
+    static func title1() -> Font {
+        return .system(size: 28, weight: .bold, design: .rounded)
+            .metrics(for: .title)
+    }
     
-    // Text modifiers for views
-    struct Modifiers {
-        // Heading modifiers
-        static func heading1() -> some ViewModifier {
-            HeadingModifier(font: BFTypography.heading1, color: BFColors.textPrimary)
-        }
-        
-        static func heading2() -> some ViewModifier {
-            HeadingModifier(font: BFTypography.heading2, color: BFColors.textPrimary)
-        }
-        
-        static func heading3() -> some ViewModifier {
-            HeadingModifier(font: BFTypography.heading3, color: BFColors.textPrimary)
-        }
-        
-        // Body modifiers
-        static func bodyLarge() -> some ViewModifier {
-            BodyModifier(font: BFTypography.bodyLarge, color: BFColors.textPrimary)
-        }
-        
-        static func bodyMedium() -> some ViewModifier {
-            BodyModifier(font: BFTypography.bodyMedium, color: BFColors.textPrimary)
-        }
-        
-        static func bodySmall() -> some ViewModifier {
-            BodyModifier(font: BFTypography.bodySmall, color: BFColors.textSecondary)
-        }
-        
-        static func caption() -> some ViewModifier {
-            BodyModifier(font: BFTypography.caption, color: BFColors.textTertiary)
-        }
+    /// Title level 2 - Used for section headers
+    static func title2() -> Font {
+        return .system(size: 22, weight: .bold, design: .rounded)
+            .metrics(for: .title2)
+    }
+    
+    /// Title level 3 - Used for subsection headers
+    static func title3() -> Font {
+        return .system(size: 20, weight: .semibold, design: .rounded)
+            .metrics(for: .title3)
+    }
+    
+    // MARK: - Body Styles
+    
+    /// Body - Primary text style
+    static func body() -> Font {
+        return .system(size: 17, weight: .regular, design: .rounded)
+            .metrics(for: .body)
+    }
+    
+    /// Body bold - Emphasized body text
+    static func bodyBold() -> Font {
+        return .system(size: 17, weight: .semibold, design: .rounded)
+            .metrics(for: .body)
+    }
+    
+    /// Subheadline - Secondary text style
+    static func subheadline() -> Font {
+        return .system(size: 15, weight: .regular, design: .rounded)
+            .metrics(for: .subheadline)
+    }
+    
+    /// Subheadline bold - Emphasized secondary text
+    static func subheadlineBold() -> Font {
+        return .system(size: 15, weight: .semibold, design: .rounded)
+            .metrics(for: .subheadline)
+    }
+    
+    // MARK: - Special Styles
+    
+    /// Caption - Used for supplementary information
+    static func caption() -> Font {
+        return .system(size: 13, weight: .regular, design: .rounded)
+            .metrics(for: .caption)
+    }
+    
+    /// Caption bold - Emphasized supplementary information
+    static func captionBold() -> Font {
+        return .system(size: 13, weight: .semibold, design: .rounded)
+            .metrics(for: .caption)
+    }
+    
+    /// Footnote - Used for very small text
+    static func footnote() -> Font {
+        return .system(size: 12, weight: .regular, design: .rounded)
+            .metrics(for: .footnote)
+    }
+    
+    // MARK: - Button Styles
+    
+    /// Primary button text
+    static func buttonPrimary() -> Font {
+        return .system(size: 17, weight: .semibold, design: .rounded)
+            .metrics(for: .body)
+    }
+    
+    /// Secondary button text
+    static func buttonSecondary() -> Font {
+        return .system(size: 15, weight: .semibold, design: .rounded)
+            .metrics(for: .subheadline)
+    }
+    
+    /// Small button or tab text
+    static func buttonSmall() -> Font {
+        return .system(size: 13, weight: .medium, design: .rounded)
+            .metrics(for: .caption)
+    }
+    
+    // MARK: - Numeric Styles
+    
+    /// Large numbers (counters, stats)
+    static func statLarge() -> Font {
+        return .system(size: 40, weight: .bold, design: .rounded)
+    }
+    
+    /// Medium numbers (secondary stats)
+    static func statMedium() -> Font {
+        return .system(size: 28, weight: .bold, design: .rounded)
+    }
+    
+    /// Small numbers (tertiary stats)
+    static func statSmall() -> Font {
+        return .system(size: 20, weight: .semibold, design: .rounded)
     }
 }
 
-// Private modifiers
-private struct HeadingModifier: ViewModifier {
-    let font: Font
-    let color: Color
-    
-    func body(content: Content) -> some View {
-        content
-            .font(font)
-            .foregroundColor(color)
-            .lineSpacing(4)
-            .fixedSize(horizontal: false, vertical: true)
-            .accessibilityAddTraits(.isHeader)
+// MARK: - Helper Extensions
+
+extension Font {
+    /// Applies the system's Dynamic Type metrics to this font
+    func metrics(for textStyle: TextStyle) -> Font {
+        return self.dynamicTypeSize(.large...(.accessibility5))
     }
 }
 
-private struct BodyModifier: ViewModifier {
-    let font: Font
-    let color: Color
-    
-    func body(content: Content) -> some View {
-        content
-            .font(font)
-            .foregroundColor(color)
-            .lineSpacing(2)
-            .fixedSize(horizontal: false, vertical: true)
-    }
-}
+// MARK: - Text Style Modifiers
 
-// Text style view extensions
 extension View {
-    func textStyle<S: ViewModifier>(_ style: S) -> some View {
-        modifier(style)
-    }
-}
-
-extension Text {
-    func heading1() -> some View {
-        modifier(BFTypography.Modifiers.heading1())
+    /// Applies the large title style to text
+    func largeTitle() -> some View {
+        return self.font(BFTypography.largeTitle())
+            .foregroundColor(BFColors.textPrimary)
     }
     
-    func heading2() -> some View {
-        modifier(BFTypography.Modifiers.heading2())
+    /// Applies the title 1 style to text
+    func title1() -> some View {
+        return self.font(BFTypography.title1())
+            .foregroundColor(BFColors.textPrimary)
     }
     
-    func heading3() -> some View {
-        modifier(BFTypography.Modifiers.heading3())
+    /// Applies the title 2 style to text
+    func title2() -> some View {
+        return self.font(BFTypography.title2())
+            .foregroundColor(BFColors.textPrimary)
     }
     
-    func bodyLarge() -> some View {
-        modifier(BFTypography.Modifiers.bodyLarge())
+    /// Applies the title 3 style to text
+    func title3() -> some View {
+        return self.font(BFTypography.title3())
+            .foregroundColor(BFColors.textPrimary)
     }
     
-    func bodyMedium() -> some View {
-        modifier(BFTypography.Modifiers.bodyMedium())
+    /// Applies the body style to text
+    func bodyStyle() -> some View {
+        return self.font(BFTypography.body())
+            .foregroundColor(BFColors.textPrimary)
     }
     
-    func bodySmall() -> some View {
-        modifier(BFTypography.Modifiers.bodySmall())
+    /// Applies the body bold style to text
+    func bodyBold() -> some View {
+        return self.font(BFTypography.bodyBold())
+            .foregroundColor(BFColors.textPrimary)
     }
     
-    func caption() -> some View {
-        modifier(BFTypography.Modifiers.caption())
+    /// Applies the subheadline style to text
+    func subheadline() -> some View {
+        return self.font(BFTypography.subheadline())
+            .foregroundColor(BFColors.textSecondary)
+    }
+    
+    /// Applies the caption style to text
+    func captionStyle() -> some View {
+        return self.font(BFTypography.caption())
+            .foregroundColor(BFColors.textTertiary)
     }
 } 

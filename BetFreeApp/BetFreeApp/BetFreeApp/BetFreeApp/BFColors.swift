@@ -1,171 +1,137 @@
 import SwiftUI
 
-/**
- * BFColors - Color management for the BetFree app
- *
- * This file implements the "Serene Strength" color scheme, which uses a palette of
- * deep blues, vibrant teals, and coral accents to create a powerful,
- * motivating environment for users on their recovery journey.
- */
-public struct BFColors {
-    // MARK: - Primary Colors
+/// BetFree Design System Colors
+/// A comprehensive color system that supports both light and dark modes
+/// with clear semantic meaning and consistent application
+
+struct BFColors {
+    // MARK: - Brand Colors
     
-    /// Deep Space Blue - Primary brand color representing strength and depth
-    public static var primary: Color {
-        dynamicColor(light: Color(hex: "#0D1B2A"), dark: Color(hex: "#1B263B"))
-    }
+    /// Primary brand color - Used for main actions and key UI elements
+    static let primary = Color("BFPrimary", bundle: nil)
     
-    /// Vibrant Teal - Secondary color representing energy and clarity
-    public static var secondary: Color {
-        dynamicColor(light: Color(hex: "#00B2A9"), dark: Color(hex: "#00A896"))
-    }
+    /// Secondary brand color - Used for complementary UI elements
+    static let secondary = Color("BFSecondary", bundle: nil)
     
-    /// Coral Accent - Accent color providing warmth and encouragement
-    public static var accent: Color {
-        dynamicColor(light: Color(hex: "#E94E34"), dark: Color(hex: "#E74C3C"))
-    }
+    /// Accent color - Used for highlighting and important elements
+    static let accent = Color("BFAccent", bundle: nil)
     
-    /// Accent Red - Accent color providing warmth and encouragement
-    public static var accentRed: Color {
-        dynamicColor(light: Color(hex: "#E53935"), dark: Color(hex: "#F44336"))
-    }
+    // MARK: - Background Colors
     
-    // MARK: - Theme Colors
+    /// Main app background
+    static let background = Color("BFBackground", bundle: nil)
     
-    /// Ocean Blue - Used in relaxation-focused features
-    public static var calm: Color {
-        dynamicColor(light: Color(hex: "#0097A7"), dark: Color(hex: "#00ACC1"))
-    }
+    /// Secondary background for visual hierarchy (cards, sections)
+    static let cardBackground = Color("BFCardBackground", bundle: nil)
     
-    /// Aquamarine - Used in focus and mindfulness features
-    public static var focus: Color {
-        dynamicColor(light: Color(hex: "#00897B"), dark: Color(hex: "#00ACC1"))
-    }
+    /// Input field background
+    static let inputBackground = Color("BFInputBackground", bundle: nil)
     
-    /// Warm Sand - Used in supportive content areas
-    public static var hope: Color {
-        dynamicColor(light: Color(hex: "#E0E1DD"), dark: Color(hex: "#CCD1D9"))
-    }
+    // MARK: - Text Colors
     
-    // MARK: - Additional Theme Colors
+    /// Primary text - Highest contrast
+    static let textPrimary = Color("BFTextPrimary", bundle: nil)
     
-    /// Healing Green - A gentle teal for healing and growth content
-    public static var healing: Color {
-        dynamicColor(light: Color(hex: "#26A69A"), dark: Color(hex: "#00BFA5"))
-    }
+    /// Secondary text - Medium contrast for subtitles, descriptions
+    static let textSecondary = Color("BFTextSecondary", bundle: nil)
     
-    /// Info Blue - A soft blue for informational content
-    public static var info: Color {
-        dynamicColor(light: Color(hex: "#0077B6"), dark: Color(hex: "#0096C7"))
-    }
+    /// Tertiary text - Lowest contrast for hints, footnotes
+    static let textTertiary = Color("BFTextTertiary", bundle: nil)
     
-    // MARK: - Functional Colors
+    // MARK: - Semantic Colors
     
-    /// Success Green - Indicates successful actions and achievements
-    public static var success: Color {
-        dynamicColor(light: Color(hex: "#4CAF50"), dark: Color(hex: "#5DBF61"))
-    }
+    /// Success color - Used for positive outcomes
+    static let success = Color("BFSuccess", bundle: nil)
     
-    /// Warning Amber - Used for cautionary messages requiring attention
-    public static var warning: Color {
-        dynamicColor(light: Color(hex: "#FFB74D"), dark: Color(hex: "#FFC107"))
-    }
+    /// Warning color - Used for cautionary elements
+    static let warning = Color("BFWarning", bundle: nil)
     
-    /// Error Red - Signals error states and critical alerts
-    public static var error: Color {
-        dynamicColor(light: Color(hex: "#F95738"), dark: Color(hex: "#FF5252"))
-    }
+    /// Error color - Used for negative outcomes
+    static let error = Color("BFError", bundle: nil)
     
-    // MARK: - Neutral Colors
+    // MARK: - Feature-specific Colors
     
-    /// Background color - Light Sand in light mode, Dark Charcoal in dark mode
-    public static var background: Color {
-        dynamicColor(light: Color(hex: "#F7F3EB"), dark: Color(hex: "#1C1F2E"))
-    }
+    /// Streak-related elements
+    static let streak = Color("BFStreak", bundle: nil)
     
-    /// Secondary background color - Slightly darker than primary background
-    public static var secondaryBackground: Color {
-        dynamicColor(light: Color(hex: "#EAE6DE"), dark: Color(hex: "#252837"))
-    }
+    /// Money/savings-related elements
+    static let savings = Color("BFSavings", bundle: nil)
     
-    /// Card background - White in light mode, Charcoal in dark mode
-    public static var cardBackground: Color {
-        dynamicColor(light: Color(hex: "#FFFFFF"), dark: Color(hex: "#2D3142"))
-    }
-    
-    /// Primary text - Deep Space in light mode, White in dark mode
-    public static var textPrimary: Color {
-        dynamicColor(light: Color(hex: "#0D1B2A"), dark: Color(hex: "#FFFFFF"))
-    }
-    
-    /// Secondary text - Oxford Blue in light mode, Light Silver in dark mode
-    public static var textSecondary: Color {
-        dynamicColor(light: Color(hex: "#1B263B"), dark: Color(hex: "#E0E0E0"))
-    }
-    
-    /// Tertiary text - Light Gray in both modes
-    public static var textTertiary: Color {
-        dynamicColor(light: Color(hex: "#505F79"), dark: Color(hex: "#BDBDBD"))
-    }
-    
-    /// Divider - Light Gray in light mode, Dark Blue in dark mode
-    public static var divider: Color {
-        dynamicColor(light: Color(hex: "#E6EBF0"), dark: Color(hex: "#2C3E50"))
-    }
-    
-    // MARK: - Dynamic Colors
-    
-    /// Creates a dynamic color that adapts to light and dark mode
-    /// - Parameters:
-    ///   - light: Color to use in light mode
-    ///   - dark: Color to use in dark mode
-    /// - Returns: Color that adapts to the current color scheme
-    private static func dynamicColor(light: Color, dark: Color) -> Color {
-        #if os(iOS)
-        return Color(UIColor { $0.userInterfaceStyle == .dark ? UIColor(dark) : UIColor(light) })
-        #else
-        return light // Default to light color on non-iOS platforms for now
-        #endif
-    }
+    /// Mindfulness-related elements
+    static let mindfulness = Color("BFMindfulness", bundle: nil)
     
     // MARK: - Gradients
     
-    /// Primary gradient - From Deep Space Blue to Oxford Blue
-    public static func primaryGradient() -> LinearGradient {
-        LinearGradient(
-            gradient: Gradient(colors: [Color(hex: "#0D1B2A"), Color(hex: "#1B263B")]),
-            startPoint: .leading,
-            endPoint: .trailing
-        )
-    }
+    /// Main app gradient
+    static let primaryGradient = LinearGradient(
+        colors: [primary, primary.opacity(0.8)],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
     
-    /// Brand gradient - From Vibrant Teal to Ocean Blue
-    public static func brandGradient() -> LinearGradient {
-        LinearGradient(
-            gradient: Gradient(colors: [Color(hex: "#64FFDA"), Color(hex: "#00B4D8")]),
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
+    /// Accent gradient for buttons and important UI elements
+    static let accentGradient = LinearGradient(
+        colors: [accent, accent.opacity(0.8)],
+        startPoint: .leading,
+        endPoint: .trailing
+    )
     
-    /// Energy gradient - From Ocean Blue to Coral
-    public static func energyGradient() -> LinearGradient {
-        LinearGradient(
-            gradient: Gradient(colors: [Color(hex: "#00B4D8"), Color(hex: "#F95738")]),
-            startPoint: .leading,
-            endPoint: .trailing
-        )
-    }
+    /// Streak gradient for motivation elements
+    static let streakGradient = LinearGradient(
+        colors: [streak, streak.opacity(0.7)],
+        startPoint: .leading,
+        endPoint: .trailing
+    )
     
-    /// Progress gradient - Used for progress indicators
-    public static func progressGradient() -> LinearGradient {
-        LinearGradient(
-            gradient: Gradient(colors: [secondary, calm]),
-            startPoint: .leading,
-            endPoint: .trailing
-        )
+    // MARK: - Utility Methods
+    
+    /// Returns an appropriate color for urge trigger categories
+    static func colorForTrigger(_ category: EnhancedTriggerCategory) -> Color {
+        switch category {
+        case .stress:
+            return Color("BFTriggerStress", bundle: nil)
+        case .boredom:
+            return Color("BFTriggerBoredom", bundle: nil)
+        case .social:
+            return Color("BFTriggerSocial", bundle: nil)
+        case .celebration:
+            return Color("BFTriggerCelebration", bundle: nil)
+        case .sadness:
+            return Color("BFTriggerSadness", bundle: nil)
+        case .habit:
+            return Color("BFTriggerHabit", bundle: nil)
+        case .other:
+            return Color("BFTriggerOther", bundle: nil)
+        }
     }
 }
 
-// MARK: - Color extension has been moved to avoid duplication
-// The Color extension with hex support should be imported from ColorExtensions.swift instead of being defined here
+// MARK: - Helper Extensions
+
+extension Color {
+    /// Creates a color with the specified hex string
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3: // RGB (12-bit)
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: // RGB (24-bit)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: // ARGB (32-bit)
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (255, 0, 0, 0)
+        }
+        
+        self.init(
+            .sRGB,
+            red: Double(r) / 255,
+            green: Double(g) / 255,
+            blue: Double(b) / 255,
+            opacity: Double(a) / 255
+        )
+    }
+} 
