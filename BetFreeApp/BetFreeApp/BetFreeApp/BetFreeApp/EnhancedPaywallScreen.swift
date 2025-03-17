@@ -16,6 +16,8 @@ struct EnhancedPaywallScreen: View {
     @State private var showFeatures = false
     @State private var expandedFeature: Int? = nil
     @State private var showPersonalizedOffer = false
+    @State private var isModal = false
+    @Environment(\.presentationMode) private var presentationMode
     
     // Plan options
     private let plans = [
@@ -65,292 +67,202 @@ struct EnhancedPaywallScreen: View {
     }
     
     var body: some View {
-        // Break up the complex expression into smaller parts
-        let backgroundGradient = LinearGradient(
-            gradient: Gradient(colors: [Color(hex: "#10172A"), Color(hex: "#1c2b4b")]),
-            startPoint: .top,
-            endPoint: .bottom
-        )
-        
-        return ZStack {
-            // Background with gradient
-            backgroundGradient
-                .ignoresSafeArea()
-            
-            // Floating shapes (subtle background elements)
-            ForEach(0..<6) { index in
-                FloatingShape(index: index)
-                    .opacity(0.15) // More subtle in this view
-            }
+        ZStack {
+            // Background gradient
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(hex: "#0A1528"),
+                    Color(hex: "#152A4F")
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
             
             // Main content
-            ScrollView {
-                VStack(spacing: 25) {
-                    // Header
-                    VStack(spacing: 12) {
-                        Text("Unlock Premium")
-                            .font(.system(size: 32, weight: .bold, design: .rounded))
+            BFScrollView(
+                showsIndicators: true,
+                bottomSpacing: 50,
+                heightMultiplier: 1.1
+            ) {
+                VStack(spacing: 20) {
+                    // App logo and name
+                    VStack(spacing: 10) {
+                        Image(systemName: "checkmark.seal.fill")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 60, height: 60)
+                            .foregroundColor(BFColorSystem.accent)
+                        
+                        Text("BetFree Premium")
+                            .font(.system(size: 28, weight: .bold))
                             .foregroundColor(.white)
-                            .multilineTextAlignment(.center)
-                            .padding(.top, 50)
-                            .opacity(isAnimating ? 1 : 0)
-                            .offset(y: isAnimating ? 0 : -20)
-                            .animation(.easeOut(duration: 0.6), value: isAnimating)
-                        
-                        // Animated illustration of premium features
-                        ZStack {
-                            // Background glow
-                            Circle()
-                                .fill(BFColors.accent.opacity(0.2))
-                                .frame(width: 120, height: 120)
-                                .blur(radius: 15)
-                                .opacity(isAnimating ? 1 : 0)
-                                .scaleEffect(isAnimating ? 1 : 0.8)
-                                .animation(.easeOut(duration: 0.8).delay(0.2), value: isAnimating)
-                            
-                            // Premium badge
-                            ZStack {
-                                // Outer circle
-                                Circle()
-                                    .fill(
-                                        LinearGradient(
-                                            gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.7)]),
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        )
-                                    )
-                                    .frame(width: 100, height: 100)
-                                    .shadow(color: BFColors.accent.opacity(0.6), radius: 10, x: 0, y: 5)
-                                
-                                // Sparkle effects
-                                ForEach(0..<8) { i in
-                                    let angle = Double(i) * .pi / 4
-                                    let distance: CGFloat = 60
-                                    
-                                    Image(systemName: "sparkle")
-                                        .font(.system(size: 14))
-                                        .foregroundColor(.white)
-                                        .offset(
-                                            x: cos(angle) * distance,
-                                            y: sin(angle) * distance
-                                        )
-                                        .opacity(isAnimating ? 1 : 0)
-                                        .scaleEffect(isAnimating ? 1 : 0)
-                                        .animation(
-                                            Animation.easeOut(duration: 0.8)
-                                                .delay(0.4 + Double(i) * 0.05),
-                                            value: isAnimating
-                                        )
-                                }
-                                
-                                // Premium icon
-                                Image(systemName: "star.fill")
-                                    .font(.system(size: 40))
-                                    .foregroundColor(.white)
-                            }
-                            .opacity(isAnimating ? 1 : 0)
-                            .scaleEffect(isAnimating ? 1 : 0.5)
-                            .animation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.3), value: isAnimating)
-                        }
-                        .frame(height: 150)
-                        
-                        // Personalized message
-                        if showPersonalizedOffer {
-                            Text(personalizedMessage)
-                                .font(.system(size: 16, weight: .medium, design: .rounded))
-                                .foregroundColor(.white.opacity(0.9))
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 30)
-                                .padding(.top, 10)
-                                .transition(.opacity.combined(with: .move(edge: .bottom)))
-                        }
                     }
+                    .padding(.top, 30)
                     
-                    // Plan selection cards
-                    VStack(spacing: 16) {
-                        Text("Choose Your Plan")
-                            .font(.system(size: 18, weight: .semibold, design: .rounded))
-                            .foregroundColor(.white)
-                            .opacity(isAnimating ? 1 : 0)
-                            .animation(.easeOut(duration: 0.5).delay(0.5), value: isAnimating)
-                        
-                        // Plan options
-                        ForEach(plans) { plan in
-                            PlanCard(
-                                plan: plan,
-                                isSelected: selectedPlanIndex == plan.id,
-                                action: {
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                        selectedPlanIndex = plan.id
-                                    }
-                                    HapticManager.shared.impactFeedback(style: .light)
-                                }
-                            )
-                            .opacity(isAnimating ? 1 : 0)
-                            .offset(y: isAnimating ? 0 : 20)
-                            .animation(
-                                .easeOut(duration: 0.5)
-                                    .delay(0.6 + Double(plan.id) * 0.1),
-                                value: isAnimating
-                            )
-                        }
-                    }
-                    .padding(.horizontal, 20)
+                    // Features list
+                    featuresSection
                     
-                    // Features section
-                    if showFeatures {
-                        VStack(spacing: 16) {
-                            Text("Premium Features")
-                                .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                .foregroundColor(.white)
-                                .padding(.top, 10)
-                            
-                            // Feature list
-                            VStack(spacing: 12) {
-                                ForEach(features) { feature in
-                                    FeatureCard(
-                                        feature: feature,
-                                        isExpanded: expandedFeature == feature.id,
-                                        onTap: {
-                                            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                                                if expandedFeature == feature.id {
-                                                    expandedFeature = nil
-                                                } else {
-                                                    expandedFeature = feature.id
-                                                }
-                                            }
-                                            HapticManager.shared.impactFeedback(style: .light)
-                                        }
-                                    )
-                                    .transition(.opacity.combined(with: .move(edge: .bottom)))
-                                    .animation(
-                                        .easeOut(duration: 0.4)
-                                            .delay(Double(feature.id) * 0.1),
-                                        value: showFeatures
-                                    )
-                                }
-                            }
-                            .padding(.horizontal, 20)
-                        }
-                        .transition(.opacity.combined(with: .move(edge: .bottom)))
-                    }
+                    // Subscription options
+                    subscriptionOptionsSection
                     
-                    // Money-back guarantee
-                    VStack {
-                        HStack(spacing: 12) {
-                            Image(systemName: "checkmark.shield.fill")
-                                .foregroundColor(BFColors.accent)
-                                .font(.system(size: 18))
-                            
-                            Text("7-Day Money-Back Guarantee")
-                                .font(.system(size: 15, weight: .medium, design: .rounded))
-                                .foregroundColor(.white.opacity(0.9))
-                        }
-                        .padding(.vertical, 15)
-                        .padding(.horizontal, 20)
-                        .background(Color.white.opacity(0.07))
-                        .cornerRadius(12)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 10)
-                    .opacity(isAnimating ? 1 : 0)
-                    .animation(.easeOut(duration: 0.5).delay(1.0), value: isAnimating)
-                    
-                    // Action buttons
-                    VStack(spacing: 15) {
-                        // Subscribe button
+                    // Legal text
+                    legalSection
+                }
+                .padding(.horizontal)
+            }
+            
+            // Close button
+            if isModal {
+                VStack {
+                    HStack {
+                        Spacer()
                         Button(action: {
-                            // Process subscription with paywallManager
-                            let selectedPlan = plans[selectedPlanIndex]
-                            HapticManager.shared.notificationFeedback(type: .success)
-                            
-                            paywallManager.purchaseSubscription(planId: selectedPlan.planId) { success in
-                                if success {
-                                    viewModel.isProUser = true
-                                    viewModel.completeOnboarding {}
-                                } else {
-                                    // In a real app, you would show an error message here
-                                    print("Purchase failed")
-                                }
-                            }
+                            presentationMode.wrappedValue.dismiss()
                         }) {
-                            Text("Subscribe Now")
-                                .font(.system(size: 18, weight: .bold, design: .rounded))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 18)
-                                .background(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [BFColors.accent, BFColors.accent.opacity(0.8)]),
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                                    .shadow(color: BFColors.accent.opacity(0.3), radius: 10, x: 0, y: 5)
-                                )
-                        }
-                        .opacity(isAnimating ? 1 : 0)
-                        .animation(.easeOut(duration: 0.5).delay(1.1), value: isAnimating)
-                        
-                        // Skip for now (continue with limited version)
-                        Button(action: {
-                            // Skip subscription
-                            HapticManager.shared.impactFeedback(style: .medium)
-                            withAnimation {
-                                viewModel.skipSubscription()
-                            }
-                        }) {
-                            Text("Continue with Limited Version")
-                                .font(.system(size: 16, weight: .medium, design: .rounded))
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 28))
                                 .foregroundColor(.white.opacity(0.7))
-                                .padding(.vertical, 10)
+                                .padding(16)
                         }
-                        .opacity(isAnimating ? 1 : 0)
-                        .animation(.easeOut(duration: 0.5).delay(1.2), value: isAnimating)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                    .padding(.bottom, 40)
-                    
-                    // Terms and privacy
-                    Text("By subscribing, you agree to our Terms of Service and Privacy Policy. Subscription automatically renews unless auto-renew is turned off.")
-                        .font(.system(size: 12, weight: .regular, design: .rounded))
-                        .foregroundColor(.white.opacity(0.5))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 30)
-                        .padding(.bottom, 30)
-                        .opacity(isAnimating ? 1 : 0)
-                        .animation(.easeOut(duration: 0.5).delay(1.3), value: isAnimating)
+                    Spacer()
                 }
             }
         }
         .onAppear {
-            startAnimations()
-        }
-    }
-    
-    // Helper methods
-    private func startAnimations() {
-        // Start entrance animations
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            withAnimation {
-                isAnimating = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                withAnimation {
+                    isAnimating = true
+                }
             }
             
-            // Show features after a delay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                 withAnimation {
                     showFeatures = true
                 }
-                
-                // Show personalized offer
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    withAnimation {
-                        showPersonalizedOffer = true
-                    }
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                withAnimation {
+                    showPersonalizedOffer = true
                 }
             }
         }
+    }
+    
+    // MARK: - UI Components
+    
+    private var featuresSection: some View {
+        VStack(spacing: 16) {
+            // Feature list
+            ForEach(features) { feature in
+                featureRow(feature)
+            }
+        }
+        .padding(.top, 10)
+        .opacity(showFeatures ? 1 : 0)
+        .animation(.easeOut(duration: 0.6).delay(0.2), value: showFeatures)
+    }
+    
+    private func featureRow(_ feature: FeatureItem) -> some View {
+        let isExpanded = expandedFeature == feature.id
+        
+        return HStack(spacing: 12) {
+            Image(systemName: feature.icon)
+                .foregroundColor(BFColorSystem.accent)
+                .font(.system(size: 18))
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(feature.title)
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundColor(.white)
+                
+                if isExpanded {
+                    Text(feature.description)
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .foregroundColor(.white.opacity(0.7))
+                        .fixedSize(horizontal: false, vertical: true)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+            }
+            
+            Spacer()
+            
+            Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                .foregroundColor(.white.opacity(0.6))
+                .font(.system(size: 14, weight: .medium))
+                .padding(8)
+                .background(Color.white.opacity(0.1))
+                .clipShape(Circle())
+        }
+        .padding(.vertical, 12)
+        .padding(.horizontal, 16)
+        .background(Color.white.opacity(0.05))
+        .cornerRadius(12)
+        .onTapGesture {
+            withAnimation(.spring()) {
+                expandedFeature = isExpanded ? nil : feature.id
+            }
+        }
+    }
+    
+    private var subscriptionOptionsSection: some View {
+        VStack(spacing: 16) {
+            Text("Choose Your Plan")
+                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+                .padding(.top, 10)
+            
+            // Plan options
+            ForEach(plans) { plan in
+                planOptionView(plan)
+            }
+        }
+        .padding(.top, 10)
+    }
+    
+    @ViewBuilder
+    private func planOptionView(_ plan: PlanOption) -> some View {
+        let isSelected = selectedPlanIndex == plan.id
+        
+        PlanCard(
+            plan: plan,
+            isSelected: isSelected,
+            action: {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    selectedPlanIndex = plan.id
+                    HapticManager.shared.playLightFeedback()
+                }
+            }
+        )
+    }
+    
+    private var legalSection: some View {
+        VStack(spacing: 10) {
+            Button {
+                // Open privacy policy
+                if let url = URL(string: "https://betfreeapp.com/privacy") {
+                    UIApplication.shared.open(url)
+                }
+            } label: {
+                Text("Privacy Policy")
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundColor(.white.opacity(0.6))
+            }
+            
+            Button {
+                // Open terms of service
+                if let url = URL(string: "https://betfreeapp.com/terms") {
+                    UIApplication.shared.open(url)
+                }
+            } label: {
+                Text("Terms of Service")
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundColor(.white.opacity(0.6))
+            }
+        }
+        .padding(.top, 10)
     }
 }
 
@@ -404,9 +316,9 @@ struct PlanCard: View {
                 // Completely redesigned selection indicator
                 ZStack {
                     Circle()
-                        .fill(isSelected ? BFColors.accent : Color.white.opacity(0.05))
+                        .fill(isSelected ? BFColorSystem.accent : Color.white.opacity(0.05))
                         .frame(width: 32, height: 32)
-                        .shadow(color: isSelected ? BFColors.accent.opacity(0.6) : Color.clear, radius: 6)
+                        .shadow(color: isSelected ? BFColorSystem.accent.opacity(0.6) : Color.clear, radius: 6)
                     
                     if isSelected {
                         // Checkmark icon for selected plans
@@ -426,10 +338,10 @@ struct PlanCard: View {
                         if plan.popularTag {
                             Text("POPULAR")
                                 .font(.system(size: 10, weight: .bold, design: .rounded))
-                                .foregroundColor(BFColors.accent)
+                                .foregroundColor(BFColorSystem.accent)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 3)
-                                .background(BFColors.accent.opacity(0.2))
+                                .background(BFColorSystem.accent.opacity(0.2))
                                 .cornerRadius(4)
                         }
                     }
@@ -454,7 +366,7 @@ struct PlanCard: View {
                     if !plan.savings.isEmpty {
                         Text(plan.savings)
                             .font(.system(size: 13, weight: .medium, design: .rounded))
-                            .foregroundColor(BFColors.accent)
+                            .foregroundColor(BFColorSystem.accent)
                             .padding(.top, 2)
                     }
                 }
@@ -465,7 +377,7 @@ struct PlanCard: View {
                 RoundedRectangle(cornerRadius: 16)
                     .fill(isSelected ? 
                           LinearGradient(
-                            gradient: Gradient(colors: [BFColors.accent.opacity(0.3), Color.white.opacity(0.12)]),
+                            gradient: Gradient(colors: [BFColorSystem.accent.opacity(0.3), Color.white.opacity(0.12)]),
                             startPoint: .leading,
                             endPoint: .trailing
                           ) : 
@@ -476,9 +388,9 @@ struct PlanCard: View {
                           ))
                     .overlay(
                         RoundedRectangle(cornerRadius: 16)
-                            .stroke(isSelected ? BFColors.accent : Color.white.opacity(0.08), lineWidth: isSelected ? 2 : 1)
+                            .stroke(isSelected ? BFColorSystem.accent : Color.white.opacity(0.08), lineWidth: isSelected ? 2 : 1)
                     )
-                    .shadow(color: isSelected ? BFColors.accent.opacity(0.4) : Color.clear, radius: 8, x: 0, y: 2)
+                    .shadow(color: isSelected ? BFColorSystem.accent.opacity(0.4) : Color.clear, radius: 8, x: 0, y: 2)
             )
             .scaleEffect(isSelected ? 1.03 : (isPressed ? 0.98 : 1.0))
             .opacity(isSelected ? 1 : 0.8)

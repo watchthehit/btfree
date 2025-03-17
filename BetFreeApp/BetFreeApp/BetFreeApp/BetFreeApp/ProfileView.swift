@@ -27,62 +27,53 @@ struct ProfileView: View {
     @State private var yOffset: CGFloat = 20
     
     var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                // Main background
-                BFColorSystem.background
-                    .ignoresSafeArea()
-                
-                ScrollView(.vertical, showsIndicators: true) {
-                    VStack(spacing: BFDesignTokens.Spacing.large) {
-                        profileHeaderView
-                            .withBFEntranceAnimation(delay: 0.1)
-                        
-                        statsOverview
-                            .withBFEntranceAnimation(delay: 0.2)
-                            .background(
-                                RoundedRectangle(cornerRadius: BFDesignTokens.BorderRadius.card)
-                                    .fill(Color(hex: "#232B3D"))
-                            )
-                        
-                        settingsSection
-                            .withBFEntranceAnimation(delay: 0.3)
-                            .background(
-                                RoundedRectangle(cornerRadius: BFDesignTokens.BorderRadius.card)
-                                    .fill(Color(hex: "#232B3D"))
-                            )
-                        
-                        subscriptionSection
-                            .withBFEntranceAnimation(delay: 0.4)
-                            .background(
-                                RoundedRectangle(cornerRadius: BFDesignTokens.BorderRadius.card)
-                                    .fill(Color(hex: "#232B3D"))
-                            )
-                        
-                        dangerZone
-                            .withBFEntranceAnimation(delay: 0.5)
-                            .background(
-                                RoundedRectangle(cornerRadius: BFDesignTokens.BorderRadius.card)
-                                    .fill(Color(hex: "#232B3D"))
-                            )
-                            
-                        // Extra spacer at the bottom to force scrolling
-                        Spacer().frame(height: 200)
-                    }
-                    .padding(.horizontal)
-                    .padding(.bottom, 150) // Add extra padding at bottom for scrolling past tab bar
-                    .frame(minWidth: geometry.size.width, minHeight: geometry.size.height * 1.5)
-                }
-                .onAppear {
-                    // Force scroll view to always be scrollable
-                    UIScrollView.appearance().bounces = true
-                    UIScrollView.appearance().alwaysBounceVertical = true
+        ZStack {
+            // Main background
+            BFColorSystem.background
+                .ignoresSafeArea()
+            
+            // Use the new standardized BFScrollView
+            BFScrollView(
+                showsIndicators: true,
+                bottomSpacing: 150,
+                heightMultiplier: 1.5
+            ) {
+                VStack(spacing: BFDesignTokens.Spacing.large) {
+                    profileHeaderView
+                        .withBFEntranceAnimation(delay: 0.1)
                     
-                    // Refresh tab bar to help with scrolling issues
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        enhancedAppState.refreshTabBarVisibility()
-                    }
+                    statsOverview
+                        .withBFEntranceAnimation(delay: 0.2)
+                        .background(
+                            RoundedRectangle(cornerRadius: BFDesignTokens.BorderRadius.card)
+                                .fill(Color(hex: "#232B3D"))
+                        )
+                    
+                    settingsSection
+                        .withBFEntranceAnimation(delay: 0.3)
+                        .background(
+                            RoundedRectangle(cornerRadius: BFDesignTokens.BorderRadius.card)
+                                .fill(Color(hex: "#232B3D"))
+                        )
+                    
+                    subscriptionSection
+                        .withBFEntranceAnimation(delay: 0.4)
+                        .background(
+                            RoundedRectangle(cornerRadius: BFDesignTokens.BorderRadius.card)
+                                .fill(Color(hex: "#232B3D"))
+                        )
+                    
+                    dangerZone
+                        .withBFEntranceAnimation(delay: 0.5)
+                        .background(
+                            RoundedRectangle(cornerRadius: BFDesignTokens.BorderRadius.card)
+                                .fill(Color(hex: "#232B3D"))
+                        )
+                        
+                    // Extra spacer at the bottom to force scrolling
+                    Spacer().frame(height: 150)
                 }
+                .padding(.horizontal)
             }
         }
         .edgesIgnoringSafeArea(.bottom)
