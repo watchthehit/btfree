@@ -56,4 +56,55 @@ More detailed documentation can be found in the Documentation folder:
 - Data visualization for craving patterns
 - Expanded mindfulness exercises
 - Community support features
-- Achievement badges and rewards system 
+- Achievement badges and rewards system
+
+## Recent Updates
+
+### Bug Fixes (July 2023)
+
+- Fixed type-checking issues in `EnhancedMotivationScreen.swift` by breaking complex expressions into smaller, more manageable components
+- Resolved duplicate struct declarations for `FloatingShapes` by ensuring only one implementation exists
+- Fixed ambiguous init() in `DashboardView.swift` by using fully qualified type paths
+- Fixed property references in `EnhancedBreathingExerciseView.swift` and `EnhancedOnboardingView.swift` to properly use UserDefaults for missing properties
+- Implemented proper animations in `ProfileView.swift` using ViewModifiers pattern
+
+## Architecture
+
+### Design Tokens
+
+The app uses a comprehensive design token system defined in `BFDesignTokens.swift` that includes:
+
+- Colors
+- Typography
+- Spacing
+- Border Radius
+- Shadows
+- Animations
+
+### App State Management
+
+The app uses:
+- `EnhancedAppState` as the main state container
+- UserDefaults for persistence of user settings
+- Environment Objects for state sharing across the view hierarchy
+
+### Components
+
+Key reusable components include:
+- `FloatingShapes` - Visual background elements
+- `ConfettiView` - Celebration animations
+- Various card views and buttons with consistent styling
+
+## Development
+
+### Building the Project
+
+```bash
+cd /path/to/BetFreeApp
+swift build
+```
+
+### Common Issues
+
+- If experiencing type-checking timeout errors, break complex SwiftUI views into smaller components
+- When adding new visual components, check for potential naming conflicts with existing views 
